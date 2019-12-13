@@ -1,0 +1,34 @@
+{
+  "slug": "Ariasalvatrice",
+  "name": "Aria Salvatrice",
+  "version": "1.0.0",
+  "license": "WTFPL",
+  "brand": "Aria Salvatrice",
+  "author": "Aria Salvatrice",
+  "authorEmail": "woof@aria.dog",
+  "authorUrl": "https://aria.dog/",
+  "pluginUrl": "https://aria.dog/vcv/",
+  "manualUrl": "\u001b[A\u001b[Bhttps://aria.dog/vcv/",
+  "sourceUrl": "https://aria.dog/vcv/",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "MyModule",
+      "name": "My Tutorial Module Thing",
+      "description": "Does thangs",
+      "tags": [
+        "VCO"
+      ]
+    },
+    {
+      "slug": "Splirge",
+      "name": "Splirge",
+      "description": "",
+      "tags": [
+        "Polyphonic",
+        "Utility"
+	  ]
+    }
+  ]
+}
