@@ -16,16 +16,12 @@ Contact
 -------
 Send me questions and dog gifs to <woof@aria.dog>. 
 
-  
+
 Lawyer's corner
 ---------------
-The Aria Salvatrice VCV Rack Plugins modules are licensed under the Do What The Fuck You Want To Public License version 2. It comes without any warranty, the usual.
+The Aria Salvatrice VCV Rack Plugins modules are distributed under the Do What The Fuck You Want To Public License version 2. It comes without any warranty, the usual.
 
 If you fork my modules for some reason, remove my signature from the faceplates. [FIXME] You can easily do it by...
-
-
-
-
 
 
   [VCV Rack]: https://vcvrack.com/
