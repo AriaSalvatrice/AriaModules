@@ -46,27 +46,29 @@ struct SplirgeWidget : ModuleWidget {
 	SplirgeWidget(Splirge* module) {
 		setModule(module);
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Splirge.svg")));
-
-		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
-		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62, 23.5)), module, Splirge::POLY_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62, 73.5)), module, Splirge::MERGE_INPUT + 0));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62, 81.5)), module, Splirge::MERGE_INPUT + 1));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62, 89.5)), module, Splirge::MERGE_INPUT + 2));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62, 97.5)), module, Splirge::MERGE_INPUT + 3));
-
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(7.62, 107.5)), module, Splirge::POLY_OUTPUT));
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(7.62, 33.5)), module, Splirge::SPLIT_OUTPUT + 0));
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(7.62, 41.5)), module, Splirge::SPLIT_OUTPUT + 1));
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(7.62, 49.5)), module, Splirge::SPLIT_OUTPUT + 2));
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(7.62, 57.5)), module, Splirge::SPLIT_OUTPUT + 3));
-
+		
 		// Signature 
-		// addChild(createWidget<Widget>(mm2px(Vec(1.0, 114.538))));
+		addChild(createWidget<AriaSignature>(mm2px(Vec(1.0, 114.538))));
 
+		// Screws
+		addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
+		addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+		addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+		addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+
+		// Inputs
+		addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 23.5)), module, Splirge::POLY_INPUT));
+		addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 73.5)), module, Splirge::MERGE_INPUT + 0));
+		addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 81.5)), module, Splirge::MERGE_INPUT + 1));
+		addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 89.5)), module, Splirge::MERGE_INPUT + 2));
+		addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 97.5)), module, Splirge::MERGE_INPUT + 3));
+
+		// Outputs
+		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 107.5)), module, Splirge::POLY_OUTPUT));
+		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 33.5)), module, Splirge::SPLIT_OUTPUT + 0));
+		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 41.5)), module, Splirge::SPLIT_OUTPUT + 1));
+		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 49.5)), module, Splirge::SPLIT_OUTPUT + 2));
+		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 57.5)), module, Splirge::SPLIT_OUTPUT + 3));
 	}
 };
 
