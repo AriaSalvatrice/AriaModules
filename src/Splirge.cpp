@@ -6,19 +6,13 @@ struct Splirge : Module {
 		NUM_PARAMS
 	};
 	enum InputIds {
-		POLYIN_INPUT,
-		MERGE0_INPUT,
-		MERGE1_INPUT,
-		MERGE2_INPUT,
-		MERGE3_INPUT,
+		POLY_INPUT,
+		ENUMS(MERGE_INPUT, 4),
 		NUM_INPUTS
 	};
 	enum OutputIds {
-		SPLIT0_OUTPUT,
-		SPLIT1_OUTPUT,
-		SPLIT2_OUTPUT,
-		SPLIT3_OUTPUT,
-		POLYOUT_OUTPUT,
+		POLY_OUTPUT,
+		ENUMS(SPLIT_OUTPUT, 4),
 		NUM_OUTPUTS
 	};
 	enum LightIds {
@@ -30,35 +24,20 @@ struct Splirge : Module {
 	}
 
 	void process(const ProcessArgs& args) override {
-		// Haven't learned yet how to do this enum stuff that Fundamental 
-		// uses in its split and merge code, so for now I'm gonna do it
-		// the hard way rather than risk doing it the correct way.
-		
 		// Splitting
-		outputs[SPLIT0_OUTPUT].setVoltage(inputs[POLYIN_INPUT].getVoltage(0));
-		outputs[SPLIT1_OUTPUT].setVoltage(inputs[POLYIN_INPUT].getVoltage(1));
-		outputs[SPLIT2_OUTPUT].setVoltage(inputs[POLYIN_INPUT].getVoltage(2));
-		outputs[SPLIT3_OUTPUT].setVoltage(inputs[POLYIN_INPUT].getVoltage(3));
+		for (int i = 0; i < 4; i++) {
+			outputs[SPLIT_OUTPUT + i].setVoltage(inputs[POLY_INPUT].getVoltage(i));
+		}
 		
 		// Merging
 		int lastMergeChannel = 0;
-		if (inputs[MERGE0_INPUT].isConnected()) {
-			outputs[POLYOUT_OUTPUT].setVoltage(inputs[MERGE0_INPUT].getVoltage(), 0);
-			lastMergeChannel = 1;
+		for (int i = 0; i < 4; i++) {
+			if (inputs[MERGE_INPUT + i].isConnected()) {
+				outputs[POLY_OUTPUT].setVoltage(inputs[MERGE_INPUT + i].getVoltage(), i);
+				lastMergeChannel = i+1;
+			}
 		}
-		if (inputs[MERGE1_INPUT].isConnected()) {
-			outputs[POLYOUT_OUTPUT].setVoltage(inputs[MERGE1_INPUT].getVoltage(), 1);
-			lastMergeChannel = 2;
-		}
-		if (inputs[MERGE2_INPUT].isConnected()) {
-			outputs[POLYOUT_OUTPUT].setVoltage(inputs[MERGE2_INPUT].getVoltage(), 2);
-			lastMergeChannel = 3;
-		}
-		if (inputs[MERGE3_INPUT].isConnected()) {
-			outputs[POLYOUT_OUTPUT].setVoltage(inputs[MERGE3_INPUT].getVoltage(), 3);
-			lastMergeChannel = 4;
-		}
-		outputs[POLYOUT_OUTPUT].setChannels(lastMergeChannel);
+		outputs[POLY_OUTPUT].setChannels(lastMergeChannel);
 	}
 };
 
@@ -73,17 +52,17 @@ struct SplirgeWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62, 20.5)), module, Splirge::POLYIN_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62, 69.5)), module, Splirge::MERGE0_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62, 78.5)), module, Splirge::MERGE1_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62, 87.5)), module, Splirge::MERGE2_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62, 96.5)), module, Splirge::MERGE3_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62, 23.5)), module, Splirge::POLY_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62, 73.5)), module, Splirge::MERGE_INPUT + 0));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62, 81.5)), module, Splirge::MERGE_INPUT + 1));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62, 89.5)), module, Splirge::MERGE_INPUT + 2));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62, 97.5)), module, Splirge::MERGE_INPUT + 3));
 
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(7.62, 31.5)), module, Splirge::SPLIT0_OUTPUT));
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(7.62, 40.5)), module, Splirge::SPLIT1_OUTPUT));
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(7.62, 49.5)), module, Splirge::SPLIT2_OUTPUT));
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(7.62, 58.5)), module, Splirge::SPLIT3_OUTPUT));
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(7.62, 107.5)), module, Splirge::POLYOUT_OUTPUT));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(7.62, 107.5)), module, Splirge::POLY_OUTPUT));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(7.62, 33.5)), module, Splirge::SPLIT_OUTPUT + 0));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(7.62, 41.5)), module, Splirge::SPLIT_OUTPUT + 1));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(7.62, 49.5)), module, Splirge::SPLIT_OUTPUT + 2));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(7.62, 57.5)), module, Splirge::SPLIT_OUTPUT + 3));
 	}
 };
 
