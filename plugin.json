@@ -16,7 +16,7 @@
     {
       "slug": "Splirge",
       "name": "Splirge",
-      "description": "",
+      "description": "Tiny 4-channel polyphonic split and merge",
       "tags": [
         "Polyphonic",
         "Utility"
