@@ -9,7 +9,7 @@ Modules (pluralized so I don't have to change the readme once I make more stuff)
 
 ### Splirge ###
 
-- ![Splirge](/doc/splirge.png)
+![Splirge](/doc/splirge.png)
 
 Splirge is cute little four channel polyphonic split and merge that slots anywhere you can spare 3hp. When you don't need all 16 channels, Splirge will save you 7hp over using VCV Fundamental's Split and Merge.
 
