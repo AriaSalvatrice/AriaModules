@@ -9,9 +9,10 @@ Stupid idiot check
 Widget
 [X] Make the widget work at all
 [X] Make the widget output something on debug
-[ ] Override the widget's position, spring back center
-[ ] Override only if user isn't moving it with MIDI (not CV)
-[ ] Override only if user isn't dragging it
+[X] Override the widget's position, spring back center
+[X] Override only if user isn't moving it with MIDI (not CV)
+[X] Override only if user isn't dragging it
+[ ] Add small pause before starting spring back (MIDI sampling rate)
 [ ] Add smoothing to springing back center
 
 Processing
@@ -31,6 +32,10 @@ Big Bend
 [ ] Figure out how to have 2 modules in a single .cpp file
 [ ] Provide all the right click options as UI options
 [ ] Provide CV input for every option that makes sense
+
+Other
+[X] Change PB to PW on the panel, to match MIDI-CV's terminology
+[ ] Figure out how to fix the module browser's thumbnail
 */
 
 
@@ -53,31 +58,50 @@ struct Bendlet : Module {
 	enum LightIds {
 		NUM_LIGHTS
 	};
+	
+	float bent, prevPb;
+	bool springingBack;
 
 	Bendlet() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-
-		// TODO: can I dynamically alter display in semitones?
-		configParam(PB_PARAM, -1.0, 1.0, 0.0, "Pitchbend", " semitones", 0.0, 12.0); 
+		configParam(PB_PARAM, -1.0, 1.0, 0.0, "Pitchbend", " V", 0.0, 5.0); 
 	}
 
 	void process(const ProcessArgs& args) override {
 		float pb = params[PB_PARAM].getValue();
 		outputs[DEBUG_OUTPUT].setVoltage(pb);
-		
 		// Bending up and down an octave for now - makes the math simple.
-		float bent = inputs[PITCH_INPUT].getVoltage();
+		bent = inputs[PITCH_INPUT].getVoltage();
 		bent += pb;
 		outputs[BENT_OUTPUT].setVoltage(bent);
 	}
 };
 
+
 struct AriaPbSlider : SvgSlider {
+	dsp::ClockDivider springDivider;
+	
 	AriaPbSlider() {
 		setBackgroundSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pb-bg.svg")));
 		setHandleSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pb-knob.svg")));
 		maxHandlePos = mm2px(Vec(1.9, 2.2));
 		minHandlePos = mm2px(Vec(1.9, 43.0));
+		springDivider.setDivision(5120);
+	}
+	
+	// Code suggested by Vortico: https://community.vcvrack.com/t/7228/5/
+	void step() override {
+		SvgSlider::step();
+		// This is NULL if not attached to a Module [TODO: I don't understand what it means]
+		if (!paramQuantity)
+			return;
+		if (APP->event->getDraggedWidget() == this)
+			return;
+		float value = paramQuantity->getSmoothValue();
+		float newValue = value + (0.0f - value) * 0.3f;
+		if (value == newValue)
+			return;
+		paramQuantity->setSmoothValue(newValue);
 	}
 };
 

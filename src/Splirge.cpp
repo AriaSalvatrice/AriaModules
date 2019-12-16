@@ -13,6 +13,7 @@ struct Splirge : Module {
 	enum OutputIds {
 		POLY_OUTPUT,
 		ENUMS(SPLIT_OUTPUT, 4),
+		DEBUG_OUTPUT,
 		NUM_OUTPUTS
 	};
 	enum LightIds {
@@ -23,13 +24,15 @@ struct Splirge : Module {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 	}
 
-	void process(const ProcessArgs& args) override {
-		// Splitting
-		for (int i = 0; i < 4; i++) {
+	
+	// No sorting, faster
+	void split(const ProcessArgs& args) {
+		for (int i = 0; i < 4; i++) 
 			outputs[SPLIT_OUTPUT + i].setVoltage(inputs[POLY_INPUT].getVoltage(i));
-		}
-		
-		// Merging
+	}
+
+	// No sorting, faster
+	void merge(const ProcessArgs& args) {
 		int lastMergeChannel = 0;
 		for (int i = 0; i < 4; i++) {
 			if (inputs[MERGE_INPUT + i].isConnected()) {
@@ -38,6 +41,51 @@ struct Splirge : Module {
 			}
 		}
 		outputs[POLY_OUTPUT].setChannels(lastMergeChannel);
+	}
+
+	void splitSort(const ProcessArgs& args) {
+		std::array<float, 4> splitVoltages;	
+		int connected = inputs[POLY_INPUT].getChannels();
+		
+		for (int i = 0; i < 4; i++) {
+			if (i < connected) {
+				splitVoltages[i] = inputs[POLY_INPUT].getVoltage(i);
+			} else {
+				splitVoltages[i] = 0.0;
+			}
+		}
+		std::sort(splitVoltages.begin(), splitVoltages.begin() + connected);
+		for (int i = 0; i < 4; i++) {
+			outputs[SPLIT_OUTPUT + i].setVoltage(splitVoltages[i]);	
+		}
+	}
+
+	void mergeSort(const ProcessArgs& args) {
+		std::array<float, 4> mergedVoltages;
+		int connected = 0;
+		for (int i = 0; i < 4; i++) {
+			if (inputs[MERGE_INPUT + i].isConnected()) {
+				mergedVoltages[connected] = inputs[MERGE_INPUT + i].getVoltage();
+				connected++;
+			}
+		}
+		std::sort(mergedVoltages.begin(), mergedVoltages.begin() + connected);		
+		for (int i = 0; i < connected; i++) {
+			outputs[POLY_OUTPUT].setVoltage(mergedVoltages[i], i);
+		}
+		outputs[POLY_OUTPUT].setChannels(connected);
+	}
+
+
+	void process(const ProcessArgs& args) override {
+		//outputs[DEBUG_OUTPUT].setVoltage(4);
+		
+		split(args);
+		merge(args);
+		
+		// TODO: Select algorithm
+		//splitSort(args);
+		//mergeSort(args);
 	}
 };
 
@@ -68,9 +116,29 @@ struct SplirgeWidget : ModuleWidget {
 		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 33.5)), module, Splirge::SPLIT_OUTPUT + 0));
 		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 41.5)), module, Splirge::SPLIT_OUTPUT + 1));
 		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 49.5)), module, Splirge::SPLIT_OUTPUT + 2));
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 57.5)), module, Splirge::SPLIT_OUTPUT + 3));
+		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 57.5)), module, Splirge::SPLIT_OUTPUT + 3));	
+		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 117.0)), module, Splirge::DEBUG_OUTPUT));
+		
 	}
+	
+	struct SortModeItem : MenuItem {
+		Splirge *splirge;
+		void onAction(const event::Action &e) override {
+			// Enable sort mode here
+		}
+		void step() override {
+			rightText = "✔";
+			MenuItem::step();
+		}
+	};
+	
+	void appendContextMenu(Menu* menu) override {
+		Splirge* splirge = dynamic_cast<Splirge*>(module);
+		
+		menu->addChild(construct<MenuSeparator>());
+		menu->addChild(construct<SortModeItem>(&MenuItem::text, "Sort channels by voltage", &SortModeItem::splirge, splirge));
+	}
+	
 };
-
 
 Model* modelSplirge = createModel<Splirge, SplirgeWidget>("Splirge");
