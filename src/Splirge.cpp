@@ -1,5 +1,4 @@
-#include "plugin.hpp"
-
+#include "split.hpp"
 
 struct Splirge : Module {
 	enum ParamIds {
@@ -117,7 +116,7 @@ struct SplirgeWidget : ModuleWidget {
 		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 41.5)), module, Splirge::SPLIT_OUTPUT + 1));
 		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 49.5)), module, Splirge::SPLIT_OUTPUT + 2));
 		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 57.5)), module, Splirge::SPLIT_OUTPUT + 3));	
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 117.0)), module, Splirge::DEBUG_OUTPUT));
+		//addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 117.0)), module, Splirge::DEBUG_OUTPUT));
 		
 	}
 	

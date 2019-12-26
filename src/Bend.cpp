@@ -1,4 +1,8 @@
 #include "plugin.hpp"
+
+// Required on OSX
+#include <array> 
+
 // This will contain both Bendlet and Big Bend.
 
 /* TODO
@@ -98,7 +102,9 @@ struct AriaPbSlider : SvgSlider {
 		if (APP->event->getDraggedWidget() == this)
 			return;
 		float value = paramQuantity->getSmoothValue();
-		float newValue = value + (0.0f - value) * 0.3f;
+		float newValue = value + (0.0f - value) * 0.3f; // last is elasticity
+		if (-0.0001 < newValue && newValue < 0.0001) // Avoids springing back forever to absurd precision
+			newValue = 0.0;
 		if (value == newValue)
 			return;
 		paramQuantity->setSmoothValue(newValue);
@@ -126,7 +132,7 @@ struct BendletWidget : ModuleWidget {
 
 		// Output
 		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 105.0)), module, Bendlet::BENT_OUTPUT));
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 117.0)), module, Bendlet::DEBUG_OUTPUT));
+		//addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 117.0)), module, Bendlet::DEBUG_OUTPUT));
 
 		// PB Wheel
 		addParam(createParam<AriaPbSlider>(mm2px(Vec(2.12, 18.0)), module, Bendlet::PB_PARAM));

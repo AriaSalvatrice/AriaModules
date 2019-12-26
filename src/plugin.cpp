@@ -9,6 +9,8 @@ void init(Plugin* p) {
 
 	// Add modules here
 	p->addModel(modelSplirge);
+	p->addModel(modelSplort);
+	p->addModel(modelSmerge);
 	p->addModel(modelBendlet);
 
 	// Any other plugin initialization may go here.

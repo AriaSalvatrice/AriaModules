@@ -27,6 +27,18 @@
       "name": "Bendlet",
       "description": "Pitchbend helper",
       "tags": []
+    },
+    {
+      "slug": "Smerge",
+      "name": "Smerge",
+      "description": "",
+      "tags": []
+    },
+    {
+      "slug": "Splort",
+      "name": "Splort",
+      "description": "",
+      "tags": []
     }
   ]
 }
