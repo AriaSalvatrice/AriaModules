@@ -1,8 +1,8 @@
 #include "plugin.hpp"
 
-
 struct Splort : Module {
 	enum ParamIds {
+		SORT_PARAM,
 		NUM_PARAMS
 	};
 	enum InputIds {
@@ -11,34 +11,100 @@ struct Splort : Module {
 		NUM_INPUTS
 	};
 	enum OutputIds {
-		SPLIT0_OUTPUT,
-		SPLIT8_OUTPUT,
-		SPLIT1_OUTPUT,
-		SPLIT9_OUTPUT,
-		SPLIT2_OUTPUT,
-		SPLIT10_OUTPUT,
-		SPLIT3_OUTPUT,
-		SPLIT11_OUTPUT,
-		SPLIT4_OUTPUT,
-		SPLIT12_OUTPUT,
-		SPLIT5_OUTPUT,
-		SPLIT13_OUTPUT,
-		SPLIT6_OUTPUT,
-		SPLIT14_OUTPUT,
-		SPLIT7_OUTPUT,
-		SPLIT15_OUTPUT,
+		ENUMS(SPLIT_OUTPUT, 16),
 		LINK_OUTPUT,
+		DEBUG_OUTPUT,
 		NUM_OUTPUTS
 	};
 	enum LightIds {
+		ENUMS(SPLIT_LIGHT, 16),
+		LINK_IN_LIGHT,
+		LINK_OUT_LIGHT,
 		NUM_LIGHTS
 	};
+	
+	dsp::ClockDivider ledDivider;
 
 	Splort() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+		ledDivider.setDivision(4096);
+		configParam(SORT_PARAM, 0.f, 1.f, 0.f, "Sort voltages");
 	}
+	
+	// Split without sorting, faster
+	void split(const ProcessArgs& args) {
+		for (int i = 0; i < 16; i++)
+			outputs[SPLIT_OUTPUT + i].setVoltage(inputs[POLY_INPUT].getVoltage(i));
+	}
+	
+	// Split with sorting, and send Link output
+	void splitSortLink(const ProcessArgs& args) {
+		std::array<std::array<float, 2>, 16> splitVoltages;	
+		int connected = 0;
 
+		// How many connected inputs?
+		connected = inputs[POLY_INPUT].getChannels();
+		if (! inputs[LINK_INPUT].isConnected())
+			outputs[LINK_OUTPUT].setChannels(connected);
+
+		// Fill array
+		for (int i = 0; i < 16; i++) {
+			if (i < connected) {
+				splitVoltages[i][0] = inputs[POLY_INPUT].getVoltage(i);
+				splitVoltages[i][1] = (inputs[LINK_INPUT].isConnected()) ? inputs[LINK_INPUT].getVoltage(i) : (i + 1.f) * 0.1f;
+			} else {
+				splitVoltages[i][0] = 0.0f;
+				splitVoltages[i][1] = (inputs[LINK_INPUT].isConnected()) ? inputs[LINK_INPUT].getVoltage(i) : 0.f;
+			}
+		}
+		
+		// Sort
+		if (inputs[LINK_INPUT].isConnected()) { // Sort by 2nd member of array.
+			std::sort(splitVoltages.begin(), splitVoltages.begin() + connected, [](const std::array<float, 2> &left, const std::array<float, 2> &right) {
+				if (left[1] == 0.f)
+					return false;
+				return left[1] < right[1];
+			});	
+		} else { // Sort by 1st member
+			std::sort(splitVoltages.begin(), splitVoltages.begin() + connected);
+		}
+		
+		// Output
+		for (int i = 0; i < 16; i++) {
+			outputs[SPLIT_OUTPUT + i].setVoltage(splitVoltages[i][0]);
+			if (! inputs[LINK_INPUT].isConnected())
+				outputs[LINK_OUTPUT].setVoltage(splitVoltages[i][1], i);
+		}
+	}
+	
+	void chainLink(const ProcessArgs& args) {
+		if (inputs[LINK_INPUT].isConnected()) {
+			outputs[LINK_OUTPUT].setChannels(inputs[LINK_INPUT].getChannels());
+			for (int i = 0; i < 16; i++)
+				outputs[LINK_OUTPUT].setVoltage(inputs[LINK_INPUT].getVoltage(i), i);
+		} else {
+			if (! params[SORT_PARAM].getValue())
+				outputs[LINK_OUTPUT].setChannels(0);
+		}
+	}
+	
+	void updateLeds(const ProcessArgs& args) {
+		if ( (params[SORT_PARAM].getValue()) or (inputs[LINK_INPUT].isConnected()) ) {
+			lights[LINK_IN_LIGHT].setBrightness(1.f);
+			lights[LINK_OUT_LIGHT].setBrightness(1.f);
+		} else {
+			lights[LINK_IN_LIGHT].setBrightness(0.f);
+			lights[LINK_OUT_LIGHT].setBrightness(0.f);
+		}	
+		for (int i = 0; i < 16; i++)
+			lights[SPLIT_LIGHT + i].setBrightness( (inputs[POLY_INPUT].getChannels() > i) ? 1.f : 0.f);
+	}
+	
 	void process(const ProcessArgs& args) override {
+		(params[SORT_PARAM].getValue()) ? splitSortLink(args) : split(args);
+		chainLink(args); // Chain link inputs, whether sorting or not
+		if (ledDivider.process())
+			updateLeds(args);
 	}
 };
 
@@ -57,30 +123,59 @@ struct SplortWidget : ModuleWidget {
 		addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		// Input
-		addInput(createInputCentered<AriaJackIn>(mm2px(Vec(12.7, 21.5)), module, Splort::POLY_INPUT));
-		addInput(createInputCentered<AriaJackIn>(mm2px(Vec(5.62, 107.5)), module, Splort::LINK_INPUT));
+		// Split input
+		addInput(createInputCentered<AriaJackIn>(mm2px(Vec(12.7, 20.0)), module, Splort::POLY_INPUT));
 
-		// Output
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 33.5)), module, Splort::SPLIT0_OUTPUT));
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 41.5)), module, Splort::SPLIT1_OUTPUT));
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 49.5)), module, Splort::SPLIT2_OUTPUT));
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 57.5)), module, Splort::SPLIT3_OUTPUT));
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 65.5)), module, Splort::SPLIT4_OUTPUT));
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 73.5)), module, Splort::SPLIT5_OUTPUT));
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 81.5)), module, Splort::SPLIT6_OUTPUT));
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 89.5)), module, Splort::SPLIT7_OUTPUT));
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(17.78, 33.5)), module, Splort::SPLIT8_OUTPUT));
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(17.78, 41.5)), module, Splort::SPLIT9_OUTPUT));
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(17.78, 49.5)), module, Splort::SPLIT10_OUTPUT));
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(17.78, 57.5)), module, Splort::SPLIT11_OUTPUT));
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(17.78, 65.5)), module, Splort::SPLIT12_OUTPUT));
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(17.78, 73.5)), module, Splort::SPLIT13_OUTPUT));
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(17.78, 81.5)), module, Splort::SPLIT14_OUTPUT));
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(17.78, 89.5)), module, Splort::SPLIT15_OUTPUT));
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(19.78, 107.5)), module, Splort::LINK_OUTPUT));
+		// Split outputs with lights
+		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(7.62, 29.5)),  module, Splort::SPLIT_LIGHT + 0));
+		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(7.62, 37.5)),  module, Splort::SPLIT_LIGHT + 1));
+		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(7.62, 45.5)),  module, Splort::SPLIT_LIGHT + 2));
+		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(7.62, 53.5)),  module, Splort::SPLIT_LIGHT + 3));
+		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(7.62, 61.5)),  module, Splort::SPLIT_LIGHT + 4));
+		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(7.62, 69.5)),  module, Splort::SPLIT_LIGHT + 5));
+		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(7.62, 77.5)),  module, Splort::SPLIT_LIGHT + 6));
+		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(7.62, 85.5)),  module, Splort::SPLIT_LIGHT + 7));
+		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(17.78, 29.5)), module, Splort::SPLIT_LIGHT + 8));
+		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(17.78, 37.5)), module, Splort::SPLIT_LIGHT + 9));
+		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(17.78, 45.5)), module, Splort::SPLIT_LIGHT + 10));
+		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(17.78, 53.5)), module, Splort::SPLIT_LIGHT + 11));
+		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(17.78, 61.5)), module, Splort::SPLIT_LIGHT + 12));
+		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(17.78, 69.5)), module, Splort::SPLIT_LIGHT + 13));
+		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(17.78, 77.5)), module, Splort::SPLIT_LIGHT + 14));
+		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(17.78, 85.5)), module, Splort::SPLIT_LIGHT + 15));
+		
+		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 29.5)),  module, Splort::SPLIT_OUTPUT + 0));
+		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 37.5)),  module, Splort::SPLIT_OUTPUT + 1));
+		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 45.5)),  module, Splort::SPLIT_OUTPUT + 2));
+		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 53.5)),  module, Splort::SPLIT_OUTPUT + 3));
+		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 61.5)),  module, Splort::SPLIT_OUTPUT + 4));
+		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 69.5)),  module, Splort::SPLIT_OUTPUT + 5));
+		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 77.5)),  module, Splort::SPLIT_OUTPUT + 6));
+		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 85.5)),  module, Splort::SPLIT_OUTPUT + 7));
+		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(17.78, 29.5)), module, Splort::SPLIT_OUTPUT + 8));
+		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(17.78, 37.5)), module, Splort::SPLIT_OUTPUT + 9));
+		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(17.78, 45.5)), module, Splort::SPLIT_OUTPUT + 10));
+		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(17.78, 53.5)), module, Splort::SPLIT_OUTPUT + 11));
+		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(17.78, 61.5)), module, Splort::SPLIT_OUTPUT + 12));
+		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(17.78, 69.5)), module, Splort::SPLIT_OUTPUT + 13));
+		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(17.78, 77.5)), module, Splort::SPLIT_OUTPUT + 14));
+		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(17.78, 85.5)), module, Splort::SPLIT_OUTPUT + 15));
+		
+		// Sort button
+		addParam(createParamCentered<AriaPushButton_700>(mm2px(Vec(12.7, 95.0)), module, Splort::SORT_PARAM));
+
+		// Link jacks with lights
+		addChild(createLightCentered<AriaJackLight<InputLight>>(mm2px(Vec(5.62, 109.0)), module, Splort::LINK_IN_LIGHT));
+		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(19.78, 109.0)), module, Splort::LINK_OUT_LIGHT));
+		
+		addInput(createInputCentered<AriaJackTransparent>(mm2px(Vec(5.62, 109.0)), module, Splort::LINK_INPUT));
+		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(19.78, 109.0)), module, Splort::LINK_OUTPUT));
+		
+		// Debug Output
+		#ifdef ARIA_DEBUG
+		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 119.0)), module, Splort::DEBUG_OUTPUT));
+		#endif
 	}
 };
-
 
 Model* modelSplort = createModel<Splort, SplortWidget>("Splort");

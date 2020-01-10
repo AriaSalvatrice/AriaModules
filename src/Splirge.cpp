@@ -1,7 +1,8 @@
-#include "split.hpp"
+#include "plugin.hpp"
 
 struct Splirge : Module {
 	enum ParamIds {
+		SORT_PARAM,
 		NUM_PARAMS
 	};
 	enum InputIds {
@@ -16,75 +17,120 @@ struct Splirge : Module {
 		NUM_OUTPUTS
 	};
 	enum LightIds {
+		POLY_LIGHT,
+		ENUMS(SPLIT_LIGHT, 4),
+		CHAIN_LIGHT,
 		NUM_LIGHTS
 	};
+	
+	dsp::ClockDivider ledDivider;
 
 	Splirge() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+		ledDivider.setDivision(4096);
+		configParam(SORT_PARAM, 0.f, 1.f, 0.f, "Sort voltages on both banks");
 	}
-
 	
-	// No sorting, faster
-	void split(const ProcessArgs& args) {
-		for (int i = 0; i < 4; i++) 
-			outputs[SPLIT_OUTPUT + i].setVoltage(inputs[POLY_INPUT].getVoltage(i));
-	}
-
-	// No sorting, faster
+	// Merge without sorting, faster
 	void merge(const ProcessArgs& args) {
 		int lastMergeChannel = 0;
 		for (int i = 0; i < 4; i++) {
 			if (inputs[MERGE_INPUT + i].isConnected()) {
 				outputs[POLY_OUTPUT].setVoltage(inputs[MERGE_INPUT + i].getVoltage(), i);
 				lastMergeChannel = i+1;
+			} else {
+				outputs[POLY_OUTPUT].setVoltage(0, i);
 			}
 		}
 		outputs[POLY_OUTPUT].setChannels(lastMergeChannel);
 	}
 
-	void splitSort(const ProcessArgs& args) {
-		std::array<float, 4> splitVoltages;	
-		int connected = inputs[POLY_INPUT].getChannels();
-		
-		for (int i = 0; i < 4; i++) {
-			if (i < connected) {
-				splitVoltages[i] = inputs[POLY_INPUT].getVoltage(i);
-			} else {
-				splitVoltages[i] = 0.0;
-			}
-		}
-		std::sort(splitVoltages.begin(), splitVoltages.begin() + connected);
-		for (int i = 0; i < 4; i++) {
-			outputs[SPLIT_OUTPUT + i].setVoltage(splitVoltages[i]);	
-		}
+	// Split without sorting, faster
+	void split(const ProcessArgs& args) {
+		for (int i = 0; i < 4; i++)
+			outputs[SPLIT_OUTPUT + i].setVoltage( (inputs[POLY_INPUT].isConnected()) ? inputs[POLY_INPUT].getVoltage(i) : inputs[MERGE_INPUT + i].getVoltage());
 	}
 
+	// Merge with sorting
 	void mergeSort(const ProcessArgs& args) {
 		std::array<float, 4> mergedVoltages;
 		int connected = 0;
 		for (int i = 0; i < 4; i++) {
 			if (inputs[MERGE_INPUT + i].isConnected()) {
-				mergedVoltages[connected] = inputs[MERGE_INPUT + i].getVoltage();
-				connected++;
+				mergedVoltages[i] = inputs[MERGE_INPUT + i].getVoltage();
+				connected = i + 1;
+			} else {
+				mergedVoltages[i] = 0.f;
 			}
 		}
 		std::sort(mergedVoltages.begin(), mergedVoltages.begin() + connected);		
-		for (int i = 0; i < connected; i++) {
+		for (int i = 0; i < connected; i++)
 			outputs[POLY_OUTPUT].setVoltage(mergedVoltages[i], i);
-		}
 		outputs[POLY_OUTPUT].setChannels(connected);
 	}
 
+	// Split with sorting
+	void splitSort(const ProcessArgs& args) {
+		std::array<float, 4> splitVoltages;	
+		int connected = 0;
+
+		// How many connected inputs?
+		if (inputs[POLY_INPUT].isConnected()) {
+			connected = inputs[POLY_INPUT].getChannels();
+		} else { // Internal default wiring
+			for (int i = 0; i < 4; i++)
+				connected = (inputs[MERGE_INPUT + i].isConnected()) ? i + 1 : connected;
+		}
+		
+		// Fill array
+		for (int i = 0; i < 4; i++)
+			if (i < connected)
+				splitVoltages[i] = (inputs[POLY_INPUT].isConnected()) ? inputs[POLY_INPUT].getVoltage(i) : inputs[MERGE_INPUT + i].getVoltage();
+		
+		// Sort and output
+		std::sort(splitVoltages.begin(), splitVoltages.begin() + connected);
+		for (int i = 0; i < 4; i++)
+			outputs[SPLIT_OUTPUT + i].setVoltage(splitVoltages[i]);	
+	}
+	
+	void updateLeds(const ProcessArgs& args) {
+		// Chain light
+		lights[CHAIN_LIGHT].setBrightness( (inputs[POLY_INPUT].isConnected())? 0.f : 1.f);
+
+		// Merge output
+		int mergeInputCount = 0;
+		int lastInput = 0;
+		for (int i = 0; i < 4; i++)
+			if (inputs[MERGE_INPUT + i].isConnected()){
+				mergeInputCount++;
+				lastInput = i;
+			}
+		lights[POLY_LIGHT].setBrightness( (mergeInputCount > 0) ? 1.f : 0.f);
+		
+		// Split outputs
+		for (int i = 0; i < 4; i++) {
+			if (inputs[POLY_INPUT].isConnected()) { // External wiring 
+				lights[SPLIT_LIGHT + i].setBrightness( (inputs[POLY_INPUT].getChannels() > i) ? 1.f : 0.f);
+			} else {  // Internal wiring
+				if (params[SORT_PARAM].getValue()){ // Sorted mode
+					lights[SPLIT_LIGHT + i].setBrightness( (i <= lastInput) ? 1.f : 0.f);
+				} else { // Unsorted mode
+					lights[SPLIT_LIGHT + i].setBrightness( (inputs[MERGE_INPUT + i].isConnected()) ? 1.f : 0.f);
+				}
+			}
+		}
+	}
 
 	void process(const ProcessArgs& args) override {
-		//outputs[DEBUG_OUTPUT].setVoltage(4);
-		
-		split(args);
-		merge(args);
-		
-		// TODO: Select algorithm
-		//splitSort(args);
-		//mergeSort(args);
+		if (params[SORT_PARAM].getValue()) {
+			mergeSort(args);
+			splitSort(args);
+		} else {
+			merge(args);
+			split(args);
+		}	
+		if (ledDivider.process())
+			updateLeds(args);
 	}
 };
 
@@ -102,42 +148,39 @@ struct SplirgeWidget : ModuleWidget {
 		addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-
-		// Inputs
-		addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 23.5)), module, Splirge::POLY_INPUT));
-		addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 73.5)), module, Splirge::MERGE_INPUT + 0));
-		addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 81.5)), module, Splirge::MERGE_INPUT + 1));
-		addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 89.5)), module, Splirge::MERGE_INPUT + 2));
-		addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 97.5)), module, Splirge::MERGE_INPUT + 3));
-
-		// Outputs
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 107.5)), module, Splirge::POLY_OUTPUT));
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 33.5)), module, Splirge::SPLIT_OUTPUT + 0));
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 41.5)), module, Splirge::SPLIT_OUTPUT + 1));
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 49.5)), module, Splirge::SPLIT_OUTPUT + 2));
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 57.5)), module, Splirge::SPLIT_OUTPUT + 3));	
-		//addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 117.0)), module, Splirge::DEBUG_OUTPUT));
 		
-	}
-	
-	struct SortModeItem : MenuItem {
-		Splirge *splirge;
-		void onAction(const event::Action &e) override {
-			// Enable sort mode here
-		}
-		void step() override {
-			rightText = "✔";
-			MenuItem::step();
-		}
-	};
-	
-	void appendContextMenu(Menu* menu) override {
-		Splirge* splirge = dynamic_cast<Splirge*>(module);
+		// Pushbutton
+		addParam(createParam<AriaPushButton_500>(mm2px(Vec(1.0, 62.8)), module, Splirge::SORT_PARAM));
+
+		// Jacks, top to bottom.
+		addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 20.0)), module, Splirge::MERGE_INPUT + 0));
+		addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 28.0)), module, Splirge::MERGE_INPUT + 1));
+		addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 36.0)), module, Splirge::MERGE_INPUT + 2));
+		addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 44.0)), module, Splirge::MERGE_INPUT + 3));
 		
-		menu->addChild(construct<MenuSeparator>());
-		menu->addChild(construct<SortModeItem>(&MenuItem::text, "Sort channels by voltage", &SortModeItem::splirge, splirge));
+		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(7.62, 54.0)), module, Splirge::POLY_LIGHT));
+		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 54.0)), module, Splirge::POLY_OUTPUT));
+		
+		addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 72.5)), module, Splirge::POLY_INPUT));
+		
+		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(7.62, 85.0)), module, Splirge::SPLIT_LIGHT  + 0));
+		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(7.62, 93.0)), module, Splirge::SPLIT_LIGHT  + 1));
+		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(7.62, 101.0)), module, Splirge::SPLIT_LIGHT + 2));
+		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(7.62, 109.0)), module, Splirge::SPLIT_LIGHT + 3));
+		
+		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62,  85.0)), module, Splirge::SPLIT_OUTPUT   + 0));
+		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62,  93.0)), module, Splirge::SPLIT_OUTPUT   + 1));
+		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 101.0)), module, Splirge::SPLIT_OUTPUT   + 2));
+		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 109.0)), module, Splirge::SPLIT_OUTPUT   + 3));
+		
+		// Chain light
+		addChild(createLightCentered<SmallLight<InputLight>>(mm2px(Vec(13.7, 58.0)), module, Splirge::CHAIN_LIGHT));
+
+		// Debug Output
+		#ifdef ARIA_DEBUG
+		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 119.0)), module, Splirge::DEBUG_OUTPUT));
+		#endif
 	}
-	
 };
 
 Model* modelSplirge = createModel<Splirge, SplirgeWidget>("Splirge");

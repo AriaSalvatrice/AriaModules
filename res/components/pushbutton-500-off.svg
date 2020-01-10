@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:osb="http://www.openswatchbook.org/uri/2009/osb"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="5mm"
+   height="5mm"
+   viewBox="0 0 5.0000005 5.0000008"
+   version="1.1"
+   id="svg1620"
+   sodipodi:docname="pushbutton-500-off.svg"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)">
+  <metadata
+     id="metadata1624">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1019"
+     id="namedview1622"
+     showgrid="false"
+     inkscape:zoom="19.212821"
+     inkscape:cx="-2.3161615"
+     inkscape:cy="6.1417323"
+     inkscape:window-x="-4"
+     inkscape:window-y="387"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1620"
+     inkscape:document-units="mm" />
+  <defs
+     id="defs1602">
+    <linearGradient
+       id="a">
+      <stop
+         offset="0"
+         stop-color="#fff"
+         stop-opacity=".42424244"
+         id="stop1592" />
+      <stop
+         offset="1"
+         stop-color="#fff"
+         stop-opacity="0"
+         id="stop1594" />
+    </linearGradient>
+    <linearGradient
+       id="b"
+       osb:paint="solid"
+       gradientTransform="matrix(1,0,0,0.8,2e-7,31.699973)">
+      <stop
+         offset="0"
+         stop-color="#fcaebb"
+         id="stop1597" />
+    </linearGradient>
+    <linearGradient
+       xlink:href="#a"
+       id="d"
+       x1="2.474134"
+       y1="16.287979"
+       x2="2.4603302"
+       y2="19.024151"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.4444799,0,0,1.4444799,-1.0132248,-23.020928)" />
+    <linearGradient
+       xlink:href="#b"
+       id="c"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.70423075,0,0,0.71429229,-2.8661968,-32.142848)" />
+  </defs>
+  <flowRoot
+     xml:space="preserve"
+     style="font-style:normal;font-variant:normal;font-weight:400;font-stretch:normal;font-size:40px;line-height:1.25;font-family:'Segoe UI Historic';-inkscape-font-specification:'Segoe UI Historic';letter-spacing:0;word-spacing:0;fill:#000000;fill-opacity:1;stroke:none"
+     font-style="normal"
+     font-variant="normal"
+     font-weight="400"
+     font-stretch="normal"
+     font-size="40"
+     letter-spacing="0"
+     word-spacing="0"
+     transform="translate(-147.43359,-129.91299)"
+     id="flowRoot1610">
+    <flowRegion
+   id="flowRegion1606">
+      <path
+   d="M 100.71429,71.383568 H 457.14285 V 342.09786 H 100.71429 Z"
+   id="path1604"
+   inkscape:connector-curvature="0" />
+    </flowRegion>
+    <flowPara
+   id="flowPara1608" />
+  </flowRoot>  <circle
+     style="fill:url(#c);stroke-width:0.99999994;paint-order:markers fill stroke"
+     id="circle1612"
+     r="2.5"
+     cx="2.5"
+     cy="2.5" />
+  <circle
+     style="fill:#151515;stroke-width:1;paint-order:markers fill stroke"
+     id="circle1614"
+     r="2.25"
+     cx="2.5"
+     cy="2.5" />
+  <circle
+     style="fill:url(#d);stroke-width:0.99999988;paint-order:markers fill stroke"
+     id="circle1616"
+     cy="2.5"
+     cx="2.5"
+     r="2" />
+</svg>
