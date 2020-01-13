@@ -9,7 +9,7 @@ Split and Merge: Splort, Smerge, Spleet, Swerge, and Splirge
 
 ![Splirge](/doc/split.png)
 
-A colection of tiny cute polyphonic splits and merges, with a neato trick: they can sort channels by voltage! It's meant for neat freaks who want their values in order, and for the advancement of science in general. I did not make them because a use case exists. I made them because I want to see what kinds of use cases you will come up with. 
+A collection of tiny cute polyphonic splits and merges, with a neato trick: they can sort channels by voltage! It's meant for neat freaks who want their values in order, and for the advancement of science in general. I did not make them because a use case exists. I made them because I want to see what kinds of use cases you will come up with. 
 
 - **Splort**: _16 channels polyphonic split with optional chainable sort mode._ 5hp.
 - **Smerge**: _16 channels polyphonic merge with optional chainable sort mode._ 5hp.
