@@ -29,7 +29,7 @@ The word "Splirge" seems to have been coined by the late Håkan Müller as part 
 Signature Series Blank Plate
 ----------------------------
 
-![Big Bend and Bendlet](/doc/blank.png)
+![Blank Plate](/doc/blank.png)
 
 A complimentary 8hp blank plate and ♥-head screwdriver are provided with every Signature Series module purchase.
 
