@@ -9,7 +9,7 @@ Split and Merge: Splort, Smerge, Spleet, Swerge, and Splirge
 
 ![Splirge](/doc/split.png)
 
-A colection of tiny cute polyphonic splits and merges, with a neato trick: they can sort channels by voltage! It's meant for neat freaks who want their values in order, and for the advancement of science in general. I did not make them because a use case exists. I made them because I want too see what kinds of use cases you will come up with. 
+A colection of tiny cute polyphonic splits and merges, with a neato trick: they can sort channels by voltage! It's meant for neat freaks who want their values in order, and for the advancement of science in general. I did not make them because a use case exists. I made them because I want to see what kinds of use cases you will come up with. 
 
 - **Splort**: _16 channels polyphonic split with optional chainable sort mode._ 5hp.
 - **Smerge**: _16 channels polyphonic merge with optional chainable sort mode._ 5hp.
@@ -26,30 +26,10 @@ The word "Splirge" seems to have been coined by the late Håkan Müller as part 
 **Protip for cool kids only:** here's how the link feature works internally: it's a polyphonic cable, each channel is set to either 0V (means the channel isn't connected), or to a multiple of 0.1V to specify its order (so the first channel in sort order is 0.1V, the 12th one is 1.2V, etc). It doesn't expect specific values, just for them to be in the correct order. Try out a polyphonic sample and hold on the Link cable! 
 
 
-
-Pitch Bend: Bendlet
--------------------
-
-![Big Bend and Bendlet](/doc/bend.png)
-
-**Polyphonic pitchbend helper**. Add it between your MIDI keyboard and your oscillator to get some dope portamenti (it's polyphonic, so I get to use the fancy Italian plural, deal) or play it with your mouse: the knob quickly springs back in place, like on real hardware. 
-
-This module provides a zero setup building block of a keyboard synth, and I hope you will also find horrific ways to misuse it for unintended purposes.
-
-Bendlet conceals a few tricks in its right click menu, all of them self-explanatory.
-
-The big knob only springs back if you control it with your mouse. To use this module with a physical pitchbend wheel, plug in a cable from a MIDI-CV's PW output to the module's PW input.    
-Controlling the knob with MIDI automation in not recommennded.
-
-The module is polyphonic, and applies the same settings to every note received. 
-
-This is the first module in the pitch bend suite - a version with advanced quantizing features is in development.
-
-
 Signature Series Blank Plate
 ----------------------------
 
-![Big Bend and Bendlet](/doc/bend.png)
+![Big Bend and Bendlet](/doc/blank.png)
 
 A complimentary 8hp blank plate and ♥-head screwdriver are provided with every Signature Series module purchase.
 
@@ -75,7 +55,7 @@ Lawyer's corner
 
 The code and graphics Aria Salvatrice VCV Rack modules are distributed under the Do What The Fuck You Want To Public License version 2. They come without any warranty and might recklessly endanger life and limb, the usual.
 
-Reegarding my signature/logo, there is no legal requirement, but a simple matter of courtesy: if you edit my code to use my modules as a base for your own altered modules, remove my signature from the faceplates, even if you think your changes are trivial: I don't want to take credit for something I didn't get a chance to vet.    
+Regarding my signature/logo, there is no legal requirement, but a simple matter of courtesy: if you edit my code to use my modules as a base for your own altered modules, remove my signature from the faceplates, even if you think your changes are trivial, I don't want to take credit for something I didn't get a chance to vet.    
 The easiest way to remove my signature is by blanking or replacing the graphic in the `res/components/signature.svg` file.
 
 
@@ -127,6 +107,26 @@ Neato party tricks you simply must attempt with these modules:
 If you don't plug in anything to the V/Oct input, it centers on zero, letting you use the module purely as a knob that springs back in place. 
 
 The quantizer employs sacred "Twelve tone equal temperament" mathematics.
+
+
+
+Pitch Bend: Bendlet
+-------------------
+
+![Big Bend and Bendlet](/doc/bend.png)
+
+**Polyphonic pitchbend helper**. Add it between your MIDI keyboard and your oscillator to get some dope portamenti (it's polyphonic, so I get to use the fancy Italian plural, deal) or play it with your mouse: the knob quickly springs back in place, like on real hardware. 
+
+This module provides a zero setup building block of a keyboard synth, and I hope you will also find horrific ways to misuse it for unintended purposes.
+
+Bendlet conceals a few tricks in its right click menu, all of them self-explanatory.
+
+The big knob only springs back if you control it with your mouse. To use this module with a physical pitchbend wheel, plug in a cable from a MIDI-CV's PW output to the module's PW input.    
+Controlling the knob with MIDI automation in not recommennded.
+
+The module is polyphonic, and applies the same settings to every note received. 
+
+This is the first module in the pitch bend suite - a version with advanced quantizing features is in development.
 
 
 -->
