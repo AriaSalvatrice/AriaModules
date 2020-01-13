@@ -46,4 +46,4 @@ Labels are never hand painted. Arrows are always hand painted. Illustrations sho
 1. Rough design and component placement in Inkscape. 
 2. Only edit placements in code from now on - the SVG placement is just for drafting. Because frankly, having to write in values by hand and recompile things is much less of a pain than having to deal with Inkscape more than necessary.
 3. Inkscape will crash a few times because haha stop complaining it's open-source.
-4. Hand paint the background and arrows in Krita, trace it in Inkscape.
+4. Hand paint the background and arrows in Krita. Place notches in the corners of the frame for easy alignment. Trace it in Inkscape on default settings and resize it.
