@@ -6,6 +6,11 @@
 // This will contain both Bendlet and Big Bend.
 
 /* TODO
+
+
+Completely changed my mind on architecture. 
+Going for a super simple Bendlet + expander architecture.
+
 Stupid idiot check
 [X] Verify that pitchbend is indeed a -5~+5v signal centered on 0
     > Yup, but it doesn't go all the way up to 5. (4.99939)
@@ -137,7 +142,7 @@ struct BendletWidget : ModuleWidget {
 		
 		// Debug Output
 		#ifdef ARIA_DEBUG
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 119.0)), module, Bendlet::DEBUG_OUTPUT));
+		// addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 119.0)), module, Bendlet::DEBUG_OUTPUT));
 		#endif
 	}
 };

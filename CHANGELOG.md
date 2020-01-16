@@ -1,7 +1,8 @@
 Changelog
 =========
 
-
+## UNRELEASED
+- [NEW MODULE] Darius
 
 
 ## [1.1.0] - 2020-01-13
@@ -27,5 +28,5 @@ Changelog
 
 ### Added
 
-- [NOTE] First public release, just a to get started making modules
+- [NOTE] First public release, just a simple module to get started making them
 - [NEW MODULE] Splirge - 3hp 4 channels split and merge

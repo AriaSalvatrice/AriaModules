@@ -162,7 +162,7 @@ struct SplortWidget : ModuleWidget {
 		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(17.78, 85.5)), module, Splort::SPLIT_OUTPUT + 15));
 		
 		// Sort button
-		addParam(createParamCentered<AriaPushButton_700>(mm2px(Vec(12.7, 95.0)), module, Splort::SORT_PARAM));
+		addParam(createParamCentered<AriaPushButton700>(mm2px(Vec(12.7, 95.0)), module, Splort::SORT_PARAM));
 
 		// Link jacks with lights
 		addChild(createLightCentered<AriaJackLight<InputLight>>(mm2px(Vec(5.62, 109.0)), module, Splort::LINK_IN_LIGHT));

@@ -41,9 +41,17 @@ Jacks are spaced by at least 8mm. 10mm for a small logical separation. They are 
 
 Labels are never hand painted. Arrows are always hand painted. Illustrations should be simple line art. 
 
-## Process
+## Design process in 12 easy steps
 
-1. Rough design and component placement in Inkscape. 
-2. Only edit placements in code from now on - the SVG placement is just for drafting. Because frankly, having to write in values by hand and recompile things is much less of a pain than having to deal with Inkscape more than necessary.
-3. Inkscape will crash a few times because haha stop complaining it's open-source.
-4. Hand paint the background and arrows in Krita, trace it in Inkscape.
+1. Rough design and component placement on paper. 
+2. Just do the background and title in Inkscape.
+3. Do all the widget placement in code. Frankly, having to write in values by hand and recompile things is much less of a pain than having to deal with Inkscape more than necessary.
+4. Inkscape will crash because stop complaining and being entitled it's open-source.
+5. Once the widget placement is finalized, take a screencap and overlay it in Inkscape as a guide.
+6. Place the labels and roundrects in Inkscape.
+7. Inkscape will crash (this is normal).
+8. Hand paint the background and arrows in Krita, export layers separately as PNG.
+9. Don't forget to remove the guide layer to avoid bloating the file size.
+10. Import the layers in Inkscape and trace them at default settings.
+11. Inkscape will crash (this is normal).
+12. Try <https://jakearchibald.github.io/svgomg/> if things break for no apparent reason. Sometimes it fixes them. Sometimes it makes them worse. 

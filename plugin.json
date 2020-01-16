@@ -1,7 +1,7 @@
 {
   "slug": "AriaSalvatrice",
   "name": "Aria Salvatrice",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "license": "WTFPL",
   "brand": "Aria Salvatrice",
   "author": "Aria Salvatrice",
@@ -20,7 +20,7 @@
       "tags": [
         "Polyphonic",
         "Utility",
-		"Logic"
+        "Logic"
       ]
     },
     {
@@ -30,7 +30,7 @@
       "tags": [
         "Polyphonic",
         "Utility",
-		"Logic"
+        "Logic"
       ]
     },
     {
@@ -40,8 +40,8 @@
       "tags": [
         "Polyphonic",
         "Utility",
-		"Logic",
-		"Dual"
+        "Logic",
+        "Dual"
       ]
     },
     {
@@ -51,8 +51,8 @@
       "tags": [
         "Polyphonic",
         "Utility",
-		"Logic",
-		"Dual"
+        "Logic",
+        "Dual"
       ]
     },
     {
@@ -62,13 +62,33 @@
       "tags": [
         "Polyphonic",
         "Utility",
-		"Logic"
+        "Logic"
+      ]
+    },
+    {
+      "slug": "Darius",
+      "name": "Signature Series Darius",
+      "description": "Branching 8-step sequencer taking a random path through its nodes",
+      "tags": [
+        "Sequencer",
+        "Random"
+      ]
+    },
+    {
+      "slug": "Bendlet",
+      "name": "Signature Series Bendlet",
+      "description": "Pitchbend helper",
+      "tags": [
+        "Controller",
+        "Polyphonic",
+        "Utility",
+        "Tuner"
       ]
     },
     {
       "slug": "Blank",
       "name": "Signature Series 8hp Blank Plate",
-      "description": "A complimentary blank plate and ♥-head screwdriver are provided with every Signature Series module purchase",
+      "description": "A complimentary blank plate and \u7b19\uff65-head screwdriver are provided with every Signature Series module purchase",
       "tags": [
         "Blank"
       ]

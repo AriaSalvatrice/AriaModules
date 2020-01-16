@@ -1,0 +1,16 @@
+<svg xmlns:osb="http://www.openswatchbook.org/uri/2009/osb" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="8.1999998mm" height="8.1999998mm" viewBox="0 0 8.2000006 8.2000011">
+  <defs>
+    <linearGradient id="a">
+      <stop offset="0" stop-color="#fff" stop-opacity=".42424244"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="b" osb:paint="solid" gradientTransform="matrix(1 0 0 .8 2e-7 31.699973)">
+      <stop offset="0" stop-color="#fcaebb"/>
+    </linearGradient>
+    <linearGradient xlink:href="#a" id="d" x1="2.474134" y1="16.287979" x2="2.4603302" y2="19.024151" gradientUnits="userSpaceOnUse" gradientTransform="matrix(2.53816 0 0 2.53816 -2.0732378 -40.74392)"/>
+    <linearGradient xlink:href="#b" id="c" gradientUnits="userSpaceOnUse" gradientTransform="matrix(1.15494 0 0 1.17144 -4.700563 -52.714275)"/>
+  </defs>
+  <circle cx="4.0999999" cy="4.0999999" r="4.0999999" fill="url(#c)" paint-order="markers fill stroke"/>
+  <circle cx="4.0999999" cy="4.0999999" r="3.807143" fill="#151515" paint-order="markers fill stroke"/>
+  <circle cy="4.0999999" cx="4.0999999" r="3.5142858" fill="url(#d)" paint-order="markers fill stroke"/>
+</svg>

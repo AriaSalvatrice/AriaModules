@@ -134,7 +134,7 @@ struct SpleetWidget : ModuleWidget {
 		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 101.0)), module, Spleet::SPLIT_OUTPUT + 7));
 		
 		// Pushbutton
-		addParam(createParam<AriaPushButton_500>(mm2px(Vec(1.0, 107)), module, Spleet::SORT_PARAM));
+		addParam(createParam<AriaPushButton500>(mm2px(Vec(1.0, 107)), module, Spleet::SORT_PARAM));
 		
 		// Chain light
 		addChild(createLightCentered<SmallLight<InputLight>>(mm2px(Vec(13.7, 63.6)), module, Spleet::CHAIN_LIGHT));

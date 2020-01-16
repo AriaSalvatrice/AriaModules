@@ -16,6 +16,9 @@ void init(Plugin* p) {
 #ifdef ARIA_DEV_MODULES
 	// Bend series
 	p->addModel(modelBendlet);
+	
+	// Sequencer
+	p->addModel(modelDarius);
 #endif
 
 	// Blank plate
