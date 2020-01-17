@@ -41,6 +41,7 @@ Jacks are spaced by at least 8mm. 10mm for a small logical separation. They are 
 
 Labels are never hand painted. Arrows are always hand painted. Illustrations should be simple line art. 
 
+
 ## Design process in 12 easy steps
 
 1. Rough design and component placement on paper. 

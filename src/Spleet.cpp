@@ -137,7 +137,7 @@ struct SpleetWidget : ModuleWidget {
 		addParam(createParam<AriaPushButton500>(mm2px(Vec(1.0, 107)), module, Spleet::SORT_PARAM));
 		
 		// Chain light
-		addChild(createLightCentered<SmallLight<InputLight>>(mm2px(Vec(13.7, 63.6)), module, Spleet::CHAIN_LIGHT));
+		addChild(createLightCentered<SmallLight<InputLight>>(mm2px(Vec(13.6, 63.6)), module, Spleet::CHAIN_LIGHT));
 
 		// Debug Output
 		#ifdef ARIA_DEBUG

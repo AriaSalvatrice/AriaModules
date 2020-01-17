@@ -183,7 +183,7 @@ struct SwergeWidget : ModuleWidget {
 		addParam(createParam<AriaPushButton500>(mm2px(Vec(1.0, 107)), module, Swerge::SORT_PARAM));
 		
 		// Chain light
-		addChild(createLightCentered<SmallLight<InputLight>>(mm2px(Vec(13.7, 58.0)), module, Swerge::CHAIN_LIGHT));
+		addChild(createLightCentered<SmallLight<InputLight>>(mm2px(Vec(13.6, 58.0)), module, Swerge::CHAIN_LIGHT));
 
 		// Debug Output
 		#ifdef ARIA_DEBUG

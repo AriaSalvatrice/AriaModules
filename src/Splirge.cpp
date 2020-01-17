@@ -174,7 +174,7 @@ struct SplirgeWidget : ModuleWidget {
 		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 109.0)), module, Splirge::SPLIT_OUTPUT   + 3));
 		
 		// Chain light
-		addChild(createLightCentered<SmallLight<InputLight>>(mm2px(Vec(13.7, 58.0)), module, Splirge::CHAIN_LIGHT));
+		addChild(createLightCentered<SmallLight<InputLight>>(mm2px(Vec(13.6, 69.0)), module, Splirge::CHAIN_LIGHT));
 
 		// Debug Output
 		#ifdef ARIA_DEBUG
