@@ -5,11 +5,11 @@
 #include <array> 
 
 // Adds unlabeled debug jacks (that do nothing but can be wired as needed during development) to the bottom of modules
-#define ARIA_DEBUG
+// #define ARIA_DEBUG
 
 // Builds modules still under development and not ready for general use.
 // Remember to add them to the plugin.json to see them in the browser!
-#define ARIA_DEV_MODULES
+// #define ARIA_DEV_MODULES
 
 using namespace rack;
 
@@ -25,13 +25,29 @@ extern Model *modelSpleet;
 extern Model *modelSwerge;
 extern Model *modelSplirge;
 
+// Sequencer
+extern Model *modelDarius;
+
+// Blank plate
+extern Model *modelBlank;
+
 #ifdef ARIA_DEV_MODULES
 // Bend series
 extern Model *modelBendlet;
 
-// Sequencer
-extern Model *modelDarius;
-#endif
+/*
 
-// Blank plate
-extern Model *modelBlank;
+    {
+      "slug": "Bendlet",
+      "name": "Signature Series Bendlet",
+      "description": "Pitchbend helper",
+      "tags": [
+        "Controller",
+        "Polyphonic",
+        "Utility",
+        "Tuner"
+      ]
+    },
+	
+*/
+#endif

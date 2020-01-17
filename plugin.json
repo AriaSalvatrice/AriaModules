@@ -75,20 +75,9 @@
       ]
     },
     {
-      "slug": "Bendlet",
-      "name": "Signature Series Bendlet",
-      "description": "Pitchbend helper",
-      "tags": [
-        "Controller",
-        "Polyphonic",
-        "Utility",
-        "Tuner"
-      ]
-    },
-    {
       "slug": "Blank",
       "name": "Signature Series 8hp Blank Plate",
-      "description": "A complimentary blank plate and \u7b19\uff65-head screwdriver are provided with every Signature Series module purchase",
+      "description": "A complimentary blank plate and ♥-head screwdriver are provided with every Signature Series module purchase",
       "tags": [
         "Blank"
       ]

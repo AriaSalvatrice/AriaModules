@@ -1,8 +1,12 @@
 Changelog
 =========
 
-## UNRELEASED
-- [NEW MODULE] Darius
+## [1.2.0] - 2020-01-17
+
+### Added
+
+- [NEW MODULE] Darius - Branching 8-step sequencer taking a random path through its nodes
+
 
 
 ## [1.1.0] - 2020-01-13

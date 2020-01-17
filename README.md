@@ -40,7 +40,7 @@ Sucks.
 
 Here comes yet another gimmick module challenging you to integrate its bizarre ideas to your song instead.
 
-**Darius** is a 8-step sequencer where each node branches into two possible paths, creating repeating patterns that start similarly and resolve differently. 
+**Darius** is a 8-step sequencer where each node branches into two possible paths, creating repeating patterns that start similarly and resolve differently. Takes a whole 32hp of space to fit all its knobs. 
 
 To get started, patch in a clock, randomize the CV, and patch the main output.
 
@@ -52,9 +52,9 @@ On each node:
 
 You can randomize the CV and the routes separately. If you leave all the **Random route** knobs to the default, the pattern will naturally end up towards the center most of the time. Use this information wisely, or don't. 
 
-![Darius Gaiden](/doc/darius-gaiden-map.png)
-
 Darius is named after the eponymous arcade shoot-em-up game series, known for its surreal visuals, its fish-themed enemies, its [unique soundtracks](https://www.youtube.com/watch?v=6FEdlAL3bX0), its multi-display arcade cabinets, and for allowing the player to select their route through the game via a branching map. For the most authentic experience possible, set the pattern length to 7 and write your song in 7/8 time.
+
+![Darius Gaiden](/doc/darius-gaiden-map.png)
 
 I guess the module is also technically named after some dead Persian guy who did some King stuff, I heard on Wikipedia, the free encyclopedia.
 

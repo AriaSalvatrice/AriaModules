@@ -15,7 +15,7 @@ struct AriaScrew : SvgScrew {
 
 // My personal brand, featuring the Cool S.
 // FIXME - Using a SVGWidget causes graphical issues I don't understand.
-// Reverting to a SvgScrew for now, since it works.
+// SvgScrew still causes a few problems with dark patches on the preview.
 struct AriaSignature : SvgScrew {
 	AriaSignature() {
 		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/signature.svg")));
