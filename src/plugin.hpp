@@ -25,26 +25,29 @@ extern Model *modelSpleet;
 extern Model *modelSwerge;
 extern Model *modelSplirge;
 
+// Sequencer
+extern Model *modelDarius;
+
+// Blank plate
+extern Model *modelBlank;
+
 #ifdef ARIA_DEV_MODULES
 // Bend series
 extern Model *modelBendlet;
-#endif
 
-/* JSON to enable Bendlet:
+/*
 
     {
       "slug": "Bendlet",
-      "name": "Bendlet",
+      "name": "Signature Series Bendlet",
       "description": "Pitchbend helper",
       "tags": [
-		"Controller",
+        "Controller",
         "Polyphonic",
         "Utility",
-		"Tuner"
+        "Tuner"
       ]
     },
 	
 */
-
-// Blank plate
-extern Model *modelBlank;
+#endif

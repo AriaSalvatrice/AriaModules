@@ -4,10 +4,11 @@ Aria Salvatrice's Signature Series VCV Rack Modules
 Hiya hello hey hi. These here are a few cool and nice modules what for [VCV Rack](https://vcvrack.com/). I hope you like them.
 
 
+
 Split and Merge: Splort, Smerge, Spleet, Swerge, and Splirge
 ------------------------------------------------------------
 
-![Splirge](/doc/split.png)
+![Split and merge](/doc/split.png)
 
 A collection of tiny cute polyphonic splits and merges, with a neato trick: they can sort channels by voltage! It's meant for neat freaks who want their values in order, and for the advancement of science in general. I did not make them because a use case exists. I made them because I want to see what kinds of use cases you will come up with. 
 
@@ -26,12 +27,48 @@ The word "Splirge" seems to have been coined by the late Håkan Müller as part 
 **Protip for cool kids only:** here's how the link feature works internally: it's a polyphonic cable, each channel is set to either 0V (means the channel isn't connected), or to a multiple of 0.1V to specify its order (so the first channel in sort order is 0.1V, the 12th one is 1.2V, etc). It doesn't expect specific values, just for them to be in the correct order. Try out a polyphonic sample and hold on the Link cable! 
 
 
+
+
+Darius Branching Step Sequencer
+-------------------------------
+
+![Darius](/doc/darius.gif)
+
+Are you still looking for the perfect sequencer, the one that allows you to effortlessly express any musical idea? 
+
+Sucks. 
+
+Here comes yet another gimmick module challenging you to integrate its bizarre ideas to your song instead.
+
+**Darius** is a 8-step sequencer where each node branches into two possible paths, creating repeating patterns that start similarly and resolve differently. Takes a whole 32hp of space to fit all its knobs. 
+
+To get started, patch in a clock, randomize the CV, and patch the main output.
+
+On each node:
+
+- **CV Knob** (left): sets the CV for that step (0V~10V)
+- **Random route knob** (right): alters the probability to pick the top or the bottom node on the next step. Arrow pointing to the right means 50/50. 
+- **Output**: when active, passes through the clock input (both gates and trigs work), or sends 10V continuously if no step input is plugged in.
+
+You can randomize the CV and the routes separately. If you leave all the **Random route** knobs to the default, the pattern will naturally end up towards the center most of the time. Use this information wisely, or don't. 
+
+Darius is named after the eponymous arcade shoot-em-up game series, known for its surreal visuals, its fish-themed enemies, its [unique soundtracks](https://www.youtube.com/watch?v=6FEdlAL3bX0), its multi-display arcade cabinets, and for allowing the player to select their route through the game via a branching map. For the most authentic experience possible, set the pattern length to 7 and write your song in 7/8 time.
+
+![Darius Gaiden](/doc/darius-gaiden-map.png)
+
+I guess the module is also technically named after some dead Persian guy who did some King stuff, I heard on Wikipedia, the free encyclopedia.
+
+
+
+
 Signature Series Blank Plate
 ----------------------------
 
 ![Blank Plate](/doc/blank.png)
 
 A complimentary 8hp blank plate and ♥-head screwdriver are provided with every Signature Series module purchase.
+
+
 
 
 Installation

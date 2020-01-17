@@ -1,6 +1,11 @@
 Changelog
 =========
 
+## [1.2.0] - 2020-01-17
+
+### Added
+
+- [NEW MODULE] Darius - Branching 8-step sequencer taking a random path through its nodes
 
 
 
@@ -27,5 +32,5 @@ Changelog
 
 ### Added
 
-- [NOTE] First public release, just a to get started making modules
+- [NOTE] First public release, just a simple module to get started making them
 - [NEW MODULE] Splirge - 3hp 4 channels split and merge

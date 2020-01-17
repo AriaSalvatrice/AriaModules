@@ -180,7 +180,7 @@ struct SwergeWidget : ModuleWidget {
 		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 101.0)), module, Swerge::POLY_OUTPUT + 1));
 		
 		// Pushbutton
-		addParam(createParam<AriaPushButton_500>(mm2px(Vec(1.0, 107)), module, Swerge::SORT_PARAM));
+		addParam(createParam<AriaPushButton500>(mm2px(Vec(1.0, 107)), module, Swerge::SORT_PARAM));
 		
 		// Chain light
 		addChild(createLightCentered<SmallLight<InputLight>>(mm2px(Vec(13.6, 58.0)), module, Swerge::CHAIN_LIGHT));

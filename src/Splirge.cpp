@@ -150,7 +150,7 @@ struct SplirgeWidget : ModuleWidget {
 		addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		
 		// Pushbutton
-		addParam(createParam<AriaPushButton_500>(mm2px(Vec(1.0, 62.8)), module, Splirge::SORT_PARAM));
+		addParam(createParam<AriaPushButton500>(mm2px(Vec(1.0, 62.8)), module, Splirge::SORT_PARAM));
 
 		// Jacks, top to bottom.
 		addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 20.0)), module, Splirge::MERGE_INPUT + 0));
