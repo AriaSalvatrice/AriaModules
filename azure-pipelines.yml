@@ -136,7 +136,7 @@ stages:
         - task: GitHubRelease@0
           displayName: "Update Github Release"
           inputs:
-            gitHubConnection: AriaSalvatrice
+            gitHubConnection: github.com_AriaSalvatrice
             repositoryName: AriaSalvatrice/AriaVCVModules
             action: edit
             tag: Nightly
