@@ -139,7 +139,7 @@ stages:
             gitHubConnection: github.com_AriaSalvatrice
             repositoryName: AriaSalvatrice/AriaVCVModules
             action: edit
-            tag: Nightly
+            tag: AzureCI
             target: '$(Build.SourceVersion)'
             addChangeLog: false
             releaseNotesFile: $(Build.ArtifactStagingDirectory)/ReleaseNotes.md
