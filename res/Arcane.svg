@@ -123,10 +123,10 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="7.919596"
-     inkscape:cx="296.87693"
-     inkscape:cy="349.86421"
+     inkscape:cx="451.91979"
+     inkscape:cy="5.8101766"
      inkscape:document-units="mm"
-     inkscape:current-layer="layer3"
+     inkscape:current-layer="layer5"
      showgrid="false"
      inkscape:window-width="1920"
      inkscape:window-height="1019"
@@ -761,6 +761,15 @@
        id="path949"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cccccccccccccccccccc" />
+    <rect
+       style="fill:#0e6977;fill-opacity:1;stroke:none;stroke-width:0.29243967;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect5039"
+       width="8"
+       height="3.1738257"
+       x="118"
+       y="124.72617"
+       rx="2"
+       ry="2" />
   </g>
   <g
      inkscape:groupmode="layer"

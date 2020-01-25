@@ -83,9 +83,9 @@ struct ArcaneBase : Module {
 	
 	// FIXME - figure out how to use a timer instead
 	dsp::ClockDivider readJsonDivider; 
-	
 	// Absurdly huge performance gain not to send all static values each tick. Will do that unless people yell it breaks something.
 	dsp::ClockDivider refreshDivider; 
+	dsp::ClockDivider expanderChannelDivider;
 
 
 	bool readTodaysFortune() {		
@@ -174,6 +174,7 @@ struct ArcaneBase : Module {
 	ArcaneBase() {
 		readJsonDivider.setDivision(100000);
 		refreshDivider.setDivision(128);
+		expanderChannelDivider.setDivision(128);
 				
 		// First created claims the singleton
 		if (! ariaSalvatriceArcaneSingletonOwned) {
@@ -246,6 +247,7 @@ struct Arcane : ArcaneBase {
 		NUM_OUTPUTS
 	};
 	enum LightIds {
+		EXPANDER_LIGHT,
 		NUM_LIGHTS
 	};
 
@@ -428,6 +430,22 @@ struct Arcane : ArcaneBase {
 				outputs[QNT_OUTPUT].setVoltage(inputs[QNT_INPUT].getVoltage(i), i);
 			outputs[QNT_OUTPUT].setChannels(inputs[QNT_INPUT].getChannels());
 		}
+		
+		if (rightExpander.module and rightExpander.module->model == modelAleister) {
+			lights[EXPANDER_LIGHT].setBrightness(1.f);
+			
+			// Get message from right expander
+			float *message = (float*) rightExpander.module->leftExpander.producerMessage;
+			// Write message
+			for (int i = 0; i < 8; i++) {
+				message[i] = 10.f;
+			}
+			// Flip messages at the end of the timestep
+			rightExpander.module->leftExpander.messageFlipRequested = true;
+			
+		} else {
+			lights[EXPANDER_LIGHT].setBrightness(0.f);
+		}
 	}
 };
 
@@ -454,8 +472,24 @@ struct Aleister : ArcaneBase {
 		ENUMS(PATTERN_C_LIGHT, 16),
 		ENUMS(PATTERN_D_LIGHT, 16),
 		ENUMS(PATTERN_E_LIGHT, 16),
+		ENUMS(PATTERN_B_STEP_LIGHT, 16),
+		ENUMS(PATTERN_C_STEP_LIGHT, 16),
+		ENUMS(PATTERN_D_STEP_LIGHT, 16),
+		ENUMS(PATTERN_E_STEP_LIGHT, 16),
+		EXPANDER_LIGHT,
 		NUM_LIGHTS
 	};
+	
+	// TEST
+	float leftMessages[2][8] = {};
+	
+	/*
+	Expander() {
+		leftExpander.producerMessage = leftMessages[0];
+		leftExpander.consumerMessage = leftMessages[1];
+	}
+	*/
+	
 	
 	void sendVoltage(const ProcessArgs& args) {
 		for (int i = 0; i < 16; i++) {
@@ -477,6 +511,11 @@ struct Aleister : ArcaneBase {
 	
 	Aleister() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+
+		leftExpander.producerMessage = leftMessages[0];
+		leftExpander.consumerMessage = leftMessages[1];
+
+		
 	}
 	
 	void process(const ProcessArgs& args) override {
@@ -490,6 +529,29 @@ struct Aleister : ArcaneBase {
 				processLights(args);
 			}
 		}
+		
+		
+		if (leftExpander.module and ( leftExpander.module->model == modelArcane or leftExpander.module->model == modelAtout ) ) {
+			lights[EXPANDER_LIGHT].setBrightness(1.f);
+			
+			// Get consumer message
+			float *message = (float*) leftExpander.consumerMessage;
+			for (int i = 0; i < 8; i++) {
+				lights[PATTERN_C_STEP_LIGHT + i].setBrightness(message[i]);
+			}
+			
+		} else {
+			lights[EXPANDER_LIGHT].setBrightness(0.f);
+		}
+		
+		/*
+		// TEST!! 
+		lights[PATTERN_B_STEP_LIGHT + 3].setBrightness(1.f);
+		lights[PATTERN_C_STEP_LIGHT + 3].setBrightness(1.f);
+		lights[PATTERN_D_STEP_LIGHT + 3].setBrightness(1.f);
+		lights[PATTERN_E_STEP_LIGHT + 3].setBrightness(1.f);
+		*/
+		
 	}
 };
 
@@ -567,6 +629,9 @@ struct ArcaneWidget : ModuleWidget {
 		
 		// Pulse width
 		addParam(createParam<AriaKnob820>(mm2px(Vec(x + 3.8, y + 98.0)), module, Arcane::PULSE_WIDTH_PARAM));	
+		
+		// Expander light
+		addChild(createLight<SmallLight<OutputLight>>(mm2px(Vec(x + 38.1, 125.2)), module, Arcane::EXPANDER_LIGHT));
 		
 		// Debug Output
 		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(35.0, 119.0)), module, Arcane::DEBUG_1_OUTPUT));
@@ -653,6 +718,9 @@ struct AtoutWidget : ModuleWidget {
 		// FIXME - It has an ugly shadow!
 		addParam(createParam<AriaRockerSwitchHorizontal800>(mm2px(Vec(x + 3.8, y + 105.5)), module, Arcane::PULSE_RAMP_PARAM));
 		
+		// Expander light
+		addChild(createLight<SmallLight<OutputLight>>(mm2px(Vec(x + 39.0, 125.2)), module, Arcane::EXPANDER_LIGHT));
+		
 		// Debug Output
 		// addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(25.0, 119.0)), module, Arcane::DEBUG_1_OUTPUT));
 		// addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(35.0, 119.0)), module, Arcane::DEBUG_2_OUTPUT));
@@ -660,8 +728,20 @@ struct AtoutWidget : ModuleWidget {
 };
 
 
+
+
 // Aleister expresses the four binary patterns as gates instead of rhythms.
 struct AleisterWidget : ModuleWidget {
+	
+	
+	// No BG, so I can overlay it on top of the normal light.
+	struct AriaStepLight : AriaNewJackLight {
+		AriaStepLight() {
+			this->addBaseColor(nvgRGB(0xff, 0xcc, 0x03));
+			this->bgColor = nvgRGBA(0xff, 0xff, 0xff, 0x00);
+		}
+	};
+
 	
 	AleisterWidget(Aleister* module) { // FIXME it's its own struct!
 		setModule(module);
@@ -681,14 +761,23 @@ struct AleisterWidget : ModuleWidget {
 		float startY = 18.0;
 		
 		for (int i = 0; i < 8; i++) {
-			addChild(createLight<AriaJackLight<OutputLight>>(mm2px(Vec(startX + 0.2 + (i * 8.0), startY + 00.2)), module, Aleister::PATTERN_B_LIGHT + i + 0));
-			addChild(createLight<AriaJackLight<OutputLight>>(mm2px(Vec(startX + 0.2 + (i * 8.0), startY + 08.2)), module, Aleister::PATTERN_B_LIGHT + i + 8));
-			addChild(createLight<AriaJackLight<OutputLight>>(mm2px(Vec(startX + 0.2 + (i * 8.0), startY + 24.2)), module, Aleister::PATTERN_C_LIGHT + i + 0));
-			addChild(createLight<AriaJackLight<OutputLight>>(mm2px(Vec(startX + 0.2 + (i * 8.0), startY + 32.2)), module, Aleister::PATTERN_C_LIGHT + i + 8));
-			addChild(createLight<AriaJackLight<OutputLight>>(mm2px(Vec(startX + 0.2 + (i * 8.0), startY + 48.2)), module, Aleister::PATTERN_D_LIGHT + i + 0));
-			addChild(createLight<AriaJackLight<OutputLight>>(mm2px(Vec(startX + 0.2 + (i * 8.0), startY + 56.2)), module, Aleister::PATTERN_D_LIGHT + i + 8));
-			addChild(createLight<AriaJackLight<OutputLight>>(mm2px(Vec(startX + 0.2 + (i * 8.0), startY + 72.2)), module, Aleister::PATTERN_E_LIGHT + i + 0));
-			addChild(createLight<AriaJackLight<OutputLight>>(mm2px(Vec(startX + 0.2 + (i * 8.0), startY + 80.2)), module, Aleister::PATTERN_E_LIGHT + i + 8));
+			addChild(createLight<AriaNewOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 00.f)), module, Aleister::PATTERN_B_LIGHT + i + 0));
+			addChild(createLight<AriaNewOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 08.f)), module, Aleister::PATTERN_B_LIGHT + i + 8));
+			addChild(createLight<AriaNewOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 24.f)), module, Aleister::PATTERN_C_LIGHT + i + 0));
+			addChild(createLight<AriaNewOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 32.f)), module, Aleister::PATTERN_C_LIGHT + i + 8));
+			addChild(createLight<AriaNewOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 48.f)), module, Aleister::PATTERN_D_LIGHT + i + 0));
+			addChild(createLight<AriaNewOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 56.f)), module, Aleister::PATTERN_D_LIGHT + i + 8));
+			addChild(createLight<AriaNewOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 72.f)), module, Aleister::PATTERN_E_LIGHT + i + 0));
+			addChild(createLight<AriaNewOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 80.f)), module, Aleister::PATTERN_E_LIGHT + i + 8));
+			
+			addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.0), startY + 00.f)), module, Aleister::PATTERN_B_STEP_LIGHT + i + 0));
+			addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.0), startY + 08.f)), module, Aleister::PATTERN_B_STEP_LIGHT + i + 8));
+			addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.0), startY + 24.f)), module, Aleister::PATTERN_C_STEP_LIGHT + i + 0));
+			addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.0), startY + 32.f)), module, Aleister::PATTERN_C_STEP_LIGHT + i + 8));
+			addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.0), startY + 48.f)), module, Aleister::PATTERN_D_STEP_LIGHT + i + 0));
+			addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.0), startY + 56.f)), module, Aleister::PATTERN_D_STEP_LIGHT + i + 8));
+			addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.0), startY + 72.f)), module, Aleister::PATTERN_E_STEP_LIGHT + i + 0));
+			addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.0), startY + 80.f)), module, Aleister::PATTERN_E_STEP_LIGHT + i + 8));
 						
 			addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(startX + (i * 8.0), startY + 00.0)), module, Aleister::PATTERN_B_OUTPUT + i + 0));
 			addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(startX + (i * 8.0), startY + 08.0)), module, Aleister::PATTERN_B_OUTPUT + i + 8));
@@ -700,9 +789,12 @@ struct AleisterWidget : ModuleWidget {
 			addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(startX + (i * 8.0), startY + 80.0)), module, Aleister::PATTERN_E_OUTPUT + i + 8));
 		}
 		
+		// Expander light
+		addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(1.4, 125.2)), module, Aleister::EXPANDER_LIGHT));
+		
 		// Debug Output
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(5.0, 119.0)), module, Aleister::DEBUG_1_OUTPUT));
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(15.0, 119.0)), module, Aleister::DEBUG_2_OUTPUT));
+		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(25.0, 119.0)), module, Aleister::DEBUG_1_OUTPUT));
+		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(35.0, 119.0)), module, Aleister::DEBUG_2_OUTPUT));
 	}
 };
 

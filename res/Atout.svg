@@ -99,11 +99,11 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.8"
-     inkscape:cx="75.148754"
-     inkscape:cy="90.627257"
+     inkscape:zoom="15.839192"
+     inkscape:cx="153.49908"
+     inkscape:cy="15.497763"
      inkscape:document-units="mm"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="layer5"
      showgrid="false"
      inkscape:window-width="1920"
      inkscape:window-height="1019"
@@ -680,6 +680,15 @@
          id="path1327"
          inkscape:connector-curvature="0" />
     </g>
+    <rect
+       style="display:inline;fill:#0e6977;fill-opacity:1;stroke:none;stroke-width:0.2924397;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect5039"
+       width="8"
+       height="3.1738257"
+       x="41.754002"
+       y="124.72617"
+       rx="2"
+       ry="2" />
   </g>
   <g
      inkscape:groupmode="layer"

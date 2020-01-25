@@ -15,6 +15,7 @@ Changelog
 - [NEW FEATURE FIXME!! NOT CHANGED YET!!!!!!!!!] Darius: trigger inputs now accept polyphonic input. **Existing patches could potentially be broken by this new feature, and can be fixed by splitting any polyphonic trigger input before sending it.**
 - [NEW FEATURE FIXME!! NOT CHANGED YET!!!!!!!!!] Darius: added a "Step Back" CV input, and moved the inputs a bit around the faceplate. Existing patches are **not** expected to be broken by this new feature.
 - [CHANGE FIXME!! NOT CHANGED YET!!!!!!!!!] Darius: added a CV polarity selector: unipolar (0V~10V) or bipolar (-5V~5V). CV Knobs now default to the center on new instances. Existing patches are **not** expected to be broken by this change.
+- [FIX IN PROGRESSSSSSSSSSSS!!!] Unlit jacks are now blue instead of gray, following the color scheme better. 
 - [FIX] Splort, Smerge, Spleet, Swerge, Splirge: increased the refresh rate of lights, as they were optimized too aggressively.
 
 
