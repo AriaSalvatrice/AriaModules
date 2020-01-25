@@ -1,7 +1,7 @@
 {
   "slug": "AriaSalvatrice",
   "name": "Aria Salvatrice",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "license": "WTFPL",
   "brand": "Aria Salvatrice",
   "author": "Aria Salvatrice",
@@ -71,6 +71,57 @@
       "description": "Branching 8-step sequencer taking a random path through its nodes",
       "tags": [
         "Sequencer",
+        "Random"
+      ]
+    },
+    {
+      "slug": "Bendlet",
+      "name": "Signature Series Bendlet",
+      "description": "Pitchbend helper",
+      "tags": [
+        "Controller",
+        "Polyphonic",
+        "Utility",
+        "Tuner"
+      ]
+    },
+    {
+      "slug": "Undular",
+      "name": "Signature Series UnDuLaR",
+      "description": "Scroll and zoom the rack via CV input",
+      "tags": [
+        "Utility"
+      ]
+    },
+    {
+      "slug": "Arcane",
+      "name": "Signature Series Arcane",
+      "description": "Today's fortune ★",
+      "tags": [
+        "Random"
+      ]
+    },
+    {
+      "slug": "Atout",
+      "name": "Signature Series Atout",
+      "description": "Today's fortune ★",
+      "tags": [
+        "Random"
+      ]
+    },
+    {
+      "slug": "Aleister",
+      "name": "Signature Series Aleister",
+      "description": "Today's fortune ★",
+      "tags": [
+        "Random"
+      ]
+    },
+    {
+      "slug": "Test",
+      "name": "Test",
+      "description": "Test!!!!",
+      "tags": [
         "Random"
       ]
     },

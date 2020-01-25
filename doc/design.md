@@ -10,8 +10,8 @@ This documents what I've done so far, mostly for my own reference. It's not a se
 
 ## Fonts
 
-- Francois One 13pt for titles
-- Nova Flat 9pt with -0.50px letterspacing for labels
+- [Francois One](https://fonts.google.com/specimen/Francois+One) 13pt for titles
+- [Nova](https://fontlibrary.org/en/font/nova) Flat 9pt with -0.50px letterspacing for labels
 
 Font sizes expressed in however the hell Inkscape chooses to interpret pt and px by default. 
 
@@ -22,7 +22,7 @@ Align the baselines first, then use Path > Object to Path to convert them ASAP -
 - Yellow: 					    #ffcc03ff
 - Pink: 					    #fcaebbff
 - Blues, from light to dark:
-  - Lightest (not used yet):    #c1f0f2ff
+  - Lightest (Highlight, LCD):  #c1f0f2ff
   - Light (backgrounds):        #76bfbeff
   - Neutral (panel decoration): #61aeb0ff
   - Shade (bg gradient):        #469ca9ff
@@ -31,16 +31,17 @@ Align the baselines first, then use Path > Object to Path to convert them ASAP -
 
 ## Alignment
 
-Things are aligned to a 0.5mm grid when possible.
+Things are aligned to a 0.5mm grid when possible. Don't sweat precision too much. Go for something that looks good rather than mathematical accuracy.
+
+My signature SVG is 13.60mm wide.
 
 ## Jacks
 
-Jacks are spaced by at least 8mm. 10mm for a small logical separation. They are preferably aligned to integer values. Inputs have a yellow rim, outputs a pink one, and are framed in a dark roundrect (3mm rounding radius).
+Jacks are spaced by at least 8mm. 10mm for a small logical separation. They are preferably aligned to integer values. Inputs have a yellow rim, outputs a pink one, and are framed in a dark roundrect if it improves readability (3mm rounding radius).
 
 ## Hand painting
 
-Labels are never hand painted. Arrows are always hand painted. Illustrations should be simple line art. 
-
+Labels are never hand painted. Arrows showing the signal path are hand painted. Illustrations should be simple line art or silhouettes. The background patterns should be subtle and not look too busy when zoomed out.  
 
 ## Design process in 12 easy steps
 
@@ -51,8 +52,8 @@ Labels are never hand painted. Arrows are always hand painted. Illustrations sho
 5. Once the widget placement is finalized, take a screencap and overlay it in Inkscape as a guide.
 6. Place the labels and roundrects in Inkscape.
 7. Inkscape will crash (this is normal).
-8. Hand paint the background and arrows in Krita, export layers separately as PNG.
-9. Don't forget to remove the guide layer to avoid bloating the file size.
-10. Import the layers in Inkscape and trace them at default settings.
+8. Hand paint the background and arrows in Krita. Place a cropping mark in the top-left and bottom-right to simplify placement in Inkscape. Export layers separately as PNG.
+9. Import the layers in Inkscape and trace them at default settings. Remove the cropping marks.
+10. Don't forget to remove the bitmap layers to avoid bloating the file size.
 11. Inkscape will crash (this is normal).
 12. Try <https://jakearchibald.github.io/svgomg/> if things break for no apparent reason. Sometimes it fixes them. Sometimes it makes them worse. 

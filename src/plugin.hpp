@@ -9,7 +9,7 @@
 
 // Builds modules still under development and not ready for general use.
 // Remember to add them to the plugin.json to see them in the browser!
-// #define ARIA_DEV_MODULES
+#define ARIA_DEV_MODULES
 
 using namespace rack;
 
@@ -32,22 +32,10 @@ extern Model *modelDarius;
 extern Model *modelBlank;
 
 #ifdef ARIA_DEV_MODULES
-// Bend series
 extern Model *modelBendlet;
-
-/*
-
-    {
-      "slug": "Bendlet",
-      "name": "Signature Series Bendlet",
-      "description": "Pitchbend helper",
-      "tags": [
-        "Controller",
-        "Polyphonic",
-        "Utility",
-        "Tuner"
-      ]
-    },
-	
-*/
+extern Model *modelUndular;
+extern Model *modelArcane;
+extern Model *modelAtout;
+extern Model *modelAleister;
+extern Model *modelTest;
 #endif

@@ -19,8 +19,12 @@ void init(Plugin* p) {
 	p->addModel(modelBlank);
 
 #ifdef ARIA_DEV_MODULES
-	// Bend series
 	p->addModel(modelBendlet);
+	p->addModel(modelUndular);
+	p->addModel(modelArcane);
+	p->addModel(modelAtout);
+	p->addModel(modelAleister);
+	p->addModel(modelTest);
 #endif
 
 }

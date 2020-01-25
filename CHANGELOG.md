@@ -1,6 +1,23 @@
 Changelog
 =========
 
+
+## Unreleased 1.3.0
+
+### Added
+- [NEW MODULE] Arcane - Today's fortune ★
+- [NEW MODULE] Atout - Today's fortune ★
+- [NEW MODULE] Aleister - Today's fortune ★
+- [FIXME NOT READY - NEW MODULE] UnDuLaR - Scroll and zoom the rack via CV input
+
+
+### Changed
+
+- [CHANGE FIXME!! NOT CHANGED YET!!!!!!!!!] Darius: added a CV polarity selector: unipolar (0V~10V) or bipolar (-5V~5V). CV Knobs now default to the center on new instances. Existing patches are not affected.
+- [FIX] Splort, Smerge, Spleet, Swerge, Splirge: increased the refresh rate of lights, as they were optimized too aggressively.
+
+
+
 ## [1.2.0] - 2020-01-17
 
 ### Added
@@ -24,7 +41,7 @@ Changelog
 
 - [NEW FEATURE] Splirge: Sort mode added.
 - [CHANGE] Splirge: New panel layout. The merge and split sections are swapped around to make it easier to understand the internal wiring. Existing patches will still work as before. 
-- [FIXED] Splirge: Fixed merging non-contiguous channels not resetting unplugged channels to 0v.
+- [FIX] Splirge: Fixed merging non-contiguous channels not resetting unplugged channels to 0v.
 
 
 

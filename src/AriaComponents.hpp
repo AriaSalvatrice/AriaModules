@@ -1,8 +1,9 @@
 #pragma once
 
 using namespace rack;
-
 extern Plugin* pluginInstance;
+
+
 
 //////////////////////////////// Decorative
 
@@ -14,9 +15,7 @@ struct AriaScrew : SvgScrew {
 };
 
 // My personal brand, featuring the Cool S.
-// FIXME - Using a SVGWidget causes graphical issues I don't understand.
-// SvgScrew still causes a few problems with dark patches on the preview.
-struct AriaSignature : SvgScrew {
+struct AriaSignature : SvgWidget {
 	AriaSignature() {
 		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/signature.svg")));
 	}
@@ -77,10 +76,7 @@ struct AriaJackLight : TBase {
 
 
 
-
-
 //////////////////////////////// Switches
-// FIXME: Remove the underscores for style.
 
 // 5.00mm switch. Yellow when lit.
 struct AriaPushButton500 : SvgSwitch {
@@ -114,6 +110,20 @@ struct AriaPushButton820Momentary : SvgSwitch {
 	}
 };
 
+// Rocker siwtch, horizontal. Left is default
+struct AriaRockerSwitchHorizontal800 : SvgSwitch {
+	AriaRockerSwitchHorizontal800() {
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-l.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-r.svg")));
+	}
+};
+
+struct AriaRockerSwitchVertical800 : SvgSwitch {
+	AriaRockerSwitchVertical800() {
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-u.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-d.svg")));
+	}
+};
 
 
 //////////////////////////////// Knobs
