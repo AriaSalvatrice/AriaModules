@@ -86,11 +86,27 @@ struct AriaPushButton500 : SvgSwitch {
 	}
 };
 
+struct AriaPushButton500Momentary : SvgSwitch {
+	AriaPushButton500Momentary() {
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-500-off.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-500-on.svg")));
+		momentary = true;
+	}
+};
+
 // 7.00mm switch. Samesies.
 struct AriaPushButton700 : SvgSwitch {
 	AriaPushButton700() {
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-700-off.svg")));
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-700-on.svg")));
+	}
+};
+
+struct AriaPushButton700Momentary : SvgSwitch {
+	AriaPushButton700Momentary() {
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-700-off.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-700-on.svg")));
+		momentary = true;
 	}
 };
 

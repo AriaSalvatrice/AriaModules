@@ -37,7 +37,6 @@ struct Test : Module {
 		phase += bpm / 60.f * 512.f / args.sampleRate; // High resolution to get a smooth ramp
 		if (phase >= 1.0) {
 			phase -= 1.0;
-			// phaseCounter = ( phaseCounter == 512 ) ? 0 : phaseCounter + 1;
 			if (phaseCounter > 0 ) {
 				if ( phaseCounter % 512 == 0 ) {
 					pluseQuarterGenerator.trigger(1e-3f); 
@@ -62,9 +61,7 @@ struct Test : Module {
 					thirtySecondCounter = ( thirtySecondCounter == 15 ? 0 : thirtySecondCounter + 1 );
 				}
 			}
-			
 			phaseCounter = ( phaseCounter == 512 ) ? 0 : phaseCounter + 1;
-			
 		}
 		pluseQuarter = pluseQuarterGenerator.process(args.sampleTime);
 		pulseEighth = pulseEighthGenerator.process(args.sampleTime);

@@ -25,7 +25,7 @@ struct Darius : Module {
 	enum InputIds {
 		RUN_INPUT,
 		RESET_INPUT,
-		STEP_INPUT,
+		STEP_INPUT, // 1.2.0
 		NUM_INPUTS
 	};
 	enum OutputIds {
@@ -54,7 +54,6 @@ struct Darius : Module {
 	dsp::SchmittTrigger stepCvTrigger;
 	dsp::SchmittTrigger stepButtonTrigger;
 	dsp::SchmittTrigger runCvTrigger;
-	dsp::SchmittTrigger runButtonTrigger;
 	dsp::SchmittTrigger resetCvTrigger;
 	dsp::SchmittTrigger resetButtonTrigger;
 	dsp::SchmittTrigger randomizeCvTrigger;

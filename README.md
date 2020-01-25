@@ -42,7 +42,7 @@ Here comes yet another gimmick module challenging you to integrate its bizarre i
 
 **Darius** is a 8-step sequencer where each node branches into two possible paths, creating repeating patterns that start similarly and resolve differently. Takes a whole 32hp of space to fit all its knobs. 
 
-To get started, patch in a clock, randomize the CV, and patch the main output.
+To get started immediately, patch in a clock to the step forward input, randomize the CV, patch the main output to an oscillator, and listen what happens.
 
 On each node:
 
@@ -52,7 +52,7 @@ On each node:
 
 You can randomize the CV and the routes separately. If you leave all the **Random route** knobs to the default, the pattern will naturally end up towards the center most of the time. Use this information wisely, or don't. 
 
-Darius is simple and limited, by design. It is meant to be easy to learn. Many of its apparent limitations can be bypassed with a bit of creative patching.
+Darius is simple and limited, by design. It is meant to be easy to learn and to use. Many of its apparent limitations can be bypassed with a bit of creative patching.
 
 Darius is named after the eponymous arcade shoot-em-up game series, known for its surreal visuals, its fish-themed enemies, its [unique soundtracks](https://www.youtube.com/watch?v=6FEdlAL3bX0), its multi-display arcade cabinets, and for allowing the player to select their route through the game via a branching map. For the most authentic experience possible, set the pattern length to 7 and write your song in 7/8 time.
 
@@ -95,12 +95,12 @@ Thus, _The Fool_ is 0V, _The Magician_ is 0.1V, and so on up to 2.1V for _The Wo
 You can multiply this signal by 4.76 with an offsetter such as [Bogaudio's](https://github.com/bogaudio/BogaudioModules#offset) to obtain a 0V~9.99V signal, if you wish.
 - **BPM** - Follows the [VCV Standard](https://vcvrack.com/manual/VoltageStandards#pitch-and-frequencies) for clocks and LFOs where 0V stands for 120BPM.    
 You can send that signal to a compatible clock module such as [Impromptu Modular's Clocked](https://marcboule.github.io/ImpromptuModular/#clocked) if you require a clock (for example, for swing, or other time signatures than 4/4).
-- **Reset** and **Run** - They control all the outputs below them. Operate them via CV or using a button.
-- **Trigger/Ramp** on the **32nd note**, **16th note**, **8th note**, **4th note**, **Bar** - Sends, depending on the position of the switch, either a trigger synchronized to the BPM at the corresponding interval in 4/4 time, or a 0V-10V ramp corresponding to that phase.    
+- **Reset** and **Run** - They control all the outputs below them. Operate them manually using the button, or synchornize multiple devices by sending them a trigger from a single source, for example the [Little Utils Button](https://github.com/mgunyho/Little-Utils#button).
+- **Gate/Ramp** on the **32nd note**, **16th note**, **8th note**, **4th note**, **Bar** - Sends, depending on the position of the **Gate/Ramp** switch, either a gate synchronized to the BPM at the corresponding interval in 4/4 time, or a 0V-10V ramp corresponding to that phase.    
 While **Arcane** can serve as a master clock, the ramp can be used to drive the [ZZC Clock](https://zzc.github.io/en/clock-manipulation/clock/), if you'd prefer to use it.
-- **_Bâtons_**, **_Coupes_**, **_Deniers_**, **_Épées_**. The four patterns, sent as triggers on each 32nd note, 16th note, 8th note, 4th note, or bar.     
-The module only sends short triggers, but there are many ways to turn them into longer gates, such as the [Submarine Pulse Generators](https://github.com/david-c14/SubmarineFree/blob/master/manual/PG.md).     
+- **_Bâtons_**, **_Coupes_**, **_Deniers_**, **_Épées_**. The four patterns, sent as gates on each 32nd note, 16th note, 8th note, 4th note, or bar.    
 Don't limit yourself to drums, you can use them in many different ways! Want to visualize the patterns, or to use them as something different than a rhythm? Try out the **Aleister** expander.
+- The **Pulse Width** knob lets you select how long the gates are, proportionally to their note length. It affects every gate output. Need more granular control over pulse widths? An external clock or a pulse generator such as [Submarine's](https://github.com/david-c14/SubmarineFree/blob/master/manual/PG.md) will help.
 
 The module's **LCD** will show you the date of the fortune, the BPM, the name of the arcana, and the notes of the scale. However, it cannot unambiguously name the scale, since your fortune doesn't stipulate on which note the scale starts.
 
@@ -109,7 +109,7 @@ The **LCD** will also tell you whether today I am wishing you luck, love, health
 There are two available form factors of the same module:
 
 - **Arcane**: the full 24hp version displays today's arcana, traced from Jean Dodal's 18th century Tarot of Marseilles.
-- **Atout**: the smaller 9hp version doesn't display the arcana, but includes all the functionality and every jack from **Arcane**. To conserve space, the Trigger/Ramp switch is at the bottom.
+- **Atout**: the smaller 9hp version doesn't display the arcana, but includes all the functionality and every jack from **Arcane**. To conserve space, the **Gate/Ramp** switch is at the bottom.
 
 The third module, **Aleister**, gives you access to the **_Bâtons_**, **_Coupes_**, **_Deniers_**, and **_Épées_** binary patterns as series of 16 outputs sending continuously either 0V or 10V, rather than as a rhythmic pattern of gates. If you connect only the first output of a group, it will instead be a polyphonic cable outputting the entire group. **Aleister** takes 14hp of space. You can employ **Aleister**'s services as a standalone module, but when you placed directely the right of either **Arcane** or **Atout**, the module will act as an expander, lighting up the jacks in sync with the rightmost connected output of the corresponding pattern on the parent module. Try it out, you'll get what it does immediately.
 
@@ -155,7 +155,7 @@ Signature Series Blank Plate
 
 ![Blank Plate](/doc/blank.png)
 
-A complimentary 8hp blank plate and ♥-head screwdriver are provided with every Signature Series module purchase.
+A complimentary 8hp blank plate and ♥-head screwdriver are included with every Signature Series module purchase.
 
 
 

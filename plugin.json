@@ -98,7 +98,11 @@
       "name": "Signature Series Arcane",
       "description": "Today's fortune ★",
       "tags": [
-        "Random"
+        "Random",
+		"Clock generator",
+		"Polyphonic",
+		"Quantizer",
+		"Sequencer"
       ]
     },
     {
@@ -106,7 +110,11 @@
       "name": "Signature Series Atout",
       "description": "Today's fortune ★",
       "tags": [
-        "Random"
+        "Random",
+		"Clock generator",
+		"Polyphonic",
+		"Quantizer",
+		"Sequencer"
       ]
     },
     {
@@ -114,7 +122,12 @@
       "name": "Signature Series Aleister",
       "description": "Today's fortune ★",
       "tags": [
-        "Random"
+        "Random",
+		"Clock generator",
+		"Polyphonic",
+		"Quantizer",
+		"Sequencer",
+		"Expander"
       ]
     },
     {
@@ -128,7 +141,7 @@
     {
       "slug": "Blank",
       "name": "Signature Series 8hp Blank Plate",
-      "description": "A complimentary blank plate and ♥-head screwdriver are provided with every Signature Series module purchase",
+      "description": "A complimentary blank plate and ♥-head screwdriver are included with every Signature Series module purchase",
       "tags": [
         "Blank"
       ]
