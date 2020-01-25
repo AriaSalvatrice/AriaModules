@@ -434,12 +434,46 @@ struct Arcane : ArcaneBase {
 		if (rightExpander.module and rightExpander.module->model == modelAleister) {
 			lights[EXPANDER_LIGHT].setBrightness(1.f);
 			
-			// Get message from right expander
-			float *message = (float*) rightExpander.module->leftExpander.producerMessage;
-			// Write message
-			for (int i = 0; i < 8; i++) {
-				message[i] = 10.f;
-			}
+			int *message = (int*) rightExpander.module->leftExpander.producerMessage;			
+			/*  Message structure
+				0..3: 0 = disconnected, 1 = bar, 2 = 1/4, 3 = 1/8, 4 = 1/16, 5 = 1/32
+				4..8: Bar, 1/4, 1/8, 1/16, 1/32 step
+			*/
+			message[0] = 0;
+			message[1] = 0;
+			message[2] = 0;
+			message[3] = 0;
+			
+			if ( outputs[PATTERN_B_1_OUTPUT].isConnected() )  message[0] = 1;
+			if ( outputs[PATTERN_B_4_OUTPUT].isConnected() )  message[0] = 2;
+			if ( outputs[PATTERN_B_8_OUTPUT].isConnected() )  message[0] = 3;
+			if ( outputs[PATTERN_B_16_OUTPUT].isConnected() ) message[0] = 4;
+			if ( outputs[PATTERN_B_32_OUTPUT].isConnected() ) message[0] = 5;
+
+			if ( outputs[PATTERN_C_1_OUTPUT].isConnected() )  message[1] = 1;
+			if ( outputs[PATTERN_C_4_OUTPUT].isConnected() )  message[1] = 2;
+			if ( outputs[PATTERN_C_8_OUTPUT].isConnected() )  message[1] = 3;
+			if ( outputs[PATTERN_C_16_OUTPUT].isConnected() ) message[1] = 4;
+			if ( outputs[PATTERN_C_32_OUTPUT].isConnected() ) message[1] = 5;
+
+			if ( outputs[PATTERN_D_1_OUTPUT].isConnected() )  message[2] = 1;
+			if ( outputs[PATTERN_D_4_OUTPUT].isConnected() )  message[2] = 2;
+			if ( outputs[PATTERN_D_8_OUTPUT].isConnected() )  message[2] = 3;
+			if ( outputs[PATTERN_D_16_OUTPUT].isConnected() ) message[2] = 4;
+			if ( outputs[PATTERN_D_32_OUTPUT].isConnected() ) message[2] = 5;
+
+			if ( outputs[PATTERN_E_1_OUTPUT].isConnected() )  message[3] = 1;
+			if ( outputs[PATTERN_E_4_OUTPUT].isConnected() )  message[3] = 2;
+			if ( outputs[PATTERN_E_8_OUTPUT].isConnected() )  message[3] = 3;
+			if ( outputs[PATTERN_E_16_OUTPUT].isConnected() ) message[3] = 4;
+			if ( outputs[PATTERN_E_32_OUTPUT].isConnected() ) message[3] = 5;
+			
+			message[4] = barCounter;
+			message[5] = quarterCounter;
+			message[6] = eighthCounter;
+			message[7] = sixteenthCounter;
+			message[8] = thirtySecondCounter;
+			
 			// Flip messages at the end of the timestep
 			rightExpander.module->leftExpander.messageFlipRequested = true;
 			
@@ -480,16 +514,7 @@ struct Aleister : ArcaneBase {
 		NUM_LIGHTS
 	};
 	
-	// TEST
-	float leftMessages[2][8] = {};
-	
-	/*
-	Expander() {
-		leftExpander.producerMessage = leftMessages[0];
-		leftExpander.consumerMessage = leftMessages[1];
-	}
-	*/
-	
+	int leftMessages[2][9] = {};
 	
 	void sendVoltage(const ProcessArgs& args) {
 		for (int i = 0; i < 16; i++) {
@@ -515,7 +540,19 @@ struct Aleister : ArcaneBase {
 		leftExpander.producerMessage = leftMessages[0];
 		leftExpander.consumerMessage = leftMessages[1];
 
-		
+	}
+	
+	// Turn on a step and turn off the others
+	void turnOnPatternLight(int light, int step, const ProcessArgs& args) {
+		for (int i = 0; i < 16; i++) {
+			lights[light + i ].setBrightness( (i == step) ? 1.f : 0.f);
+		}
+	}
+	
+	void turnOffPatternLight(int light, const ProcessArgs& args) {
+		for (int i = 0; i < 16; i++) {
+			lights[light + i].setBrightness(0.f);
+		}
 	}
 	
 	void process(const ProcessArgs& args) override {
@@ -523,34 +560,46 @@ struct Aleister : ArcaneBase {
 			jsonParsed = readTodaysFortune();
 		}
 		if (jsonParsed) {
-			// sendVoltage(args);
 			if (refreshDivider.process()){
 				sendVoltage(args);
 				processLights(args);
 			}
 		}
-		
-		
+				
 		if (leftExpander.module and ( leftExpander.module->model == modelArcane or leftExpander.module->model == modelAtout ) ) {
 			lights[EXPANDER_LIGHT].setBrightness(1.f);
-			
-			// Get consumer message
-			float *message = (float*) leftExpander.consumerMessage;
-			for (int i = 0; i < 8; i++) {
-				lights[PATTERN_C_STEP_LIGHT + i].setBrightness(message[i]);
+			int *message = (int*) leftExpander.consumerMessage;
+			/*  Message structure
+				0..3: 0 = disconnected, 1 = bar, 2 = 1/4, 3 = 1/8, 4 = 1/16, 5 = 1/32
+				4..8: Bar, 1/4, 1/8, 1/16, 1/32 step
+			*/		
+			if (message[0]) {
+				turnOnPatternLight(PATTERN_B_STEP_LIGHT, message[ message[0] + 3 ], args );
+			} else {
+				turnOffPatternLight(PATTERN_B_STEP_LIGHT, args );
 			}
-			
+			if (message[1]) {
+				turnOnPatternLight(PATTERN_C_STEP_LIGHT, message[ message[1] + 3 ], args );
+			} else {
+				turnOffPatternLight(PATTERN_C_STEP_LIGHT, args );
+			}
+			if (message[2]) {
+				turnOnPatternLight(PATTERN_D_STEP_LIGHT, message[ message[2] + 3 ], args );
+			} else {
+				turnOffPatternLight(PATTERN_D_STEP_LIGHT, args );
+			}
+			if (message[3]) {
+				turnOnPatternLight(PATTERN_E_STEP_LIGHT, message[ message[3] + 3 ], args );
+			} else {
+				turnOffPatternLight(PATTERN_E_STEP_LIGHT, args );
+			}
 		} else {
 			lights[EXPANDER_LIGHT].setBrightness(0.f);
+			turnOffPatternLight(PATTERN_B_STEP_LIGHT, args );
+			turnOffPatternLight(PATTERN_C_STEP_LIGHT, args );
+			turnOffPatternLight(PATTERN_D_STEP_LIGHT, args );
+			turnOffPatternLight(PATTERN_E_STEP_LIGHT, args );
 		}
-		
-		/*
-		// TEST!! 
-		lights[PATTERN_B_STEP_LIGHT + 3].setBrightness(1.f);
-		lights[PATTERN_C_STEP_LIGHT + 3].setBrightness(1.f);
-		lights[PATTERN_D_STEP_LIGHT + 3].setBrightness(1.f);
-		lights[PATTERN_E_STEP_LIGHT + 3].setBrightness(1.f);
-		*/
 		
 	}
 };
