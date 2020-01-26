@@ -115,7 +115,8 @@ The third module, **Aleister**, gives you access to the **_Bâtons_**, **_Coupes
 
 If the module is active at the time a new fortune is drawn, the values will not change, but a notification a new fortune is available will appear on the **LCD**. Using the right-click menu, you can _Initialize_ the module to download the newest fortune. Remember to also reinitialize **Aleister** if in use. // FIXME - Reinit should force a download!
 
-**The tarot deck used is the Conver – Ben-Dov (CBD) version**. The CBD deck was restored in 2008-2011 from the original 18th century deck by tarot expert [Dr. Yoav Ben-Dov's](https://www.cbdtarot.com/). In traditional Tarot of Marseilles imagery (not just in this specific deck), some figures are frequently depicted naked. While the style is neither graphic nor intended to titillate, I took the liberty to alter a few cards to remove details, to ensure it does not offend people who download my plugin and try it out without being forewarned about its contents. I hope you will understand this choice.
+**The tarot deck used is the Conver – Ben-Dov (CBD) version**. The CBD deck was restored in 2008-2011 from the original 18th century deck by tarot expert [Dr. Yoav Ben-Dov's](https://www.cbdtarot.com/).    
+In traditional Tarot of Marseilles imagery (not just in this specific deck), some figures are frequently depicted nude. While the style of the CBD deck is neither graphic nor intended to titillate, I took the liberty to slightly alter a few cards to remove details, as most users will download my plugin without being forewarned about contents a small minority would object to. I hope you will understand this decision.
 
 **Upon activation, this module will connect to the internet**, and fetch today's numbers on a GitHub repository via HTTP. The fortunes are not generated locally to make it possible for all users to share the same numbers every day, while also making it impossible to cheat fate and predict the next oracle (which a local deterministic implementation would necessarily entail).
 
@@ -125,7 +126,7 @@ If the repository is unreachable, the module will will output 0V on all ports, e
 (Quick tech remark about JSON API cache spoofing: such self-deception will never alter your true destiny, and it is unwise to cling to the past instead of living for a future you can yet change.)
 
 Using this series of modules to their full extent requires a bit of creative patching, a bit of lateral thinking, but most importantly, friends to share your different interpretations of the same fortune with.    
-If you treat my oracles as a mere random number generator, you will never gain any wisdom from them. 
+If you treat my oracles as a mere random number generator, you will never gain any wisdom from them.
 
 
 

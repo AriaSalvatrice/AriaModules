@@ -85,6 +85,8 @@ struct ArcaneBase : Module {
 	dsp::ClockDivider readJsonDivider; 
 	// Absurdly huge performance gain not to send all static values each tick. Will do that unless people yell it breaks something.
 	dsp::ClockDivider refreshDivider; 
+	
+	dsp::ClockDivider expanderDivider; 
 
 	bool readTodaysFortune() {		
 		// Craft the filename
@@ -172,6 +174,10 @@ struct ArcaneBase : Module {
 	ArcaneBase() {
 		readJsonDivider.setDivision(100000);
 		refreshDivider.setDivision(128);
+		
+		// 64 lights aren't cheap, can we get away with this divider?
+		// Seems fine @ 180 BPM 44Khz
+		expanderDivider.setDivision(512);
 				
 		// First created claims the singleton
 		if (! ariaSalvatriceArcaneSingletonOwned) {
@@ -269,7 +275,6 @@ struct Arcane : ArcaneBase {
 		int notesInScale = 0;
 		for (int i = 0; i < 12; i++)
 			if (scale[i]) notesInScale++;
-		outputs[DEBUG_2_OUTPUT].setVoltage( notesInScale );
 		for (int i = 0; i < 8; i++) { // FIXME - not converted to voltage!
 			outputs[SCALE_OUTPUT].setVoltage( (notePattern[i] / 12.f), i);
 			float paddedOutput = i < notesInScale ? (notePattern[i] / 12.f) : (notePattern[i] / 12.f + 1.f);
@@ -479,7 +484,9 @@ struct Arcane : ArcaneBase {
 				outputs[QNT_OUTPUT].setVoltage(inputs[QNT_INPUT].getVoltage(i), i);
 			outputs[QNT_OUTPUT].setChannels(inputs[QNT_INPUT].getChannels());
 		}
-		processExpander(args);
+		if (expanderDivider.process()) {
+			processExpander(args);
+		}
 	}
 };
 
@@ -555,17 +562,7 @@ struct Aleister : ArcaneBase {
 		}
 	}
 	
-	void process(const ProcessArgs& args) override {
-		if (!jsonParsed and readJsonDivider.process()) {
-			jsonParsed = readTodaysFortune();
-		}
-		if (jsonParsed) {
-			if (refreshDivider.process()){
-				sendVoltage(args);
-				processLights(args);
-			}
-		}
-				
+	void processExpander(const ProcessArgs& args) {
 		if (leftExpander.module and ( leftExpander.module->model == modelArcane or leftExpander.module->model == modelAtout ) ) {
 			lights[EXPANDER_LIGHT].setBrightness(1.f);
 			int *message = (int*) leftExpander.consumerMessage;
@@ -600,6 +597,24 @@ struct Aleister : ArcaneBase {
 			turnOffPatternLight(PATTERN_D_STEP_LIGHT, args );
 			turnOffPatternLight(PATTERN_E_STEP_LIGHT, args );
 		}
+	}
+	
+	void process(const ProcessArgs& args) override {
+		if (!jsonParsed and readJsonDivider.process()) {
+			jsonParsed = readTodaysFortune();
+		}
+		if (jsonParsed) {
+			if (refreshDivider.process()){
+				sendVoltage(args);
+				processLights(args);
+			}
+		}
+		
+		if (expanderDivider.process()) {
+			processExpander(args);
+		}
+		
+
 		
 	}
 };
@@ -612,7 +627,7 @@ struct ArcaneWidget : ModuleWidget {
 		
 	ArcaneWidget(Arcane* module) {
 		setModule(module);
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Arcane.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Arcane/Arcane.svg")));
 		
 		// Signature
 		addChild(createWidget<AriaSignature>(mm2px(Vec(101.0, 114.5))));
@@ -697,7 +712,7 @@ struct AtoutWidget : ModuleWidget {
 	
 	AtoutWidget(Arcane* module) {
 		setModule(module);
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Atout.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Arcane/Atout.svg")));
 		
 		// Signature
 		addChild(createWidget<AriaSignature>(mm2px(Vec(31.06, 114.5))));
@@ -795,7 +810,7 @@ struct AleisterWidget : ModuleWidget {
 	
 	AleisterWidget(Aleister* module) { // FIXME it's its own struct!
 		setModule(module);
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Aleister.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Arcane/Aleister.svg")));
 		
 		// Signature
 		addChild(createWidget<AriaSignature>(mm2px(Vec(28.76, 114.5))));
