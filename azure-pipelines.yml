@@ -3,6 +3,7 @@ trigger:
 - candidate*
 - release*
 - development*
+- arcane_dev*
 
 pr:
 - master
@@ -35,7 +36,7 @@ stages:
     strategy:
       matrix:
         mac:
-          imageName: 'macos-10.13'
+          imageName: 'macos-10.14'
           isMac: true
         windows:
           imageName: 'vs2017-win2016'
@@ -64,7 +65,7 @@ stages:
     - bash: |
         export RACK_DIR=$AGENT_TEMPDIRECTORY/Rack-SDK
         export CC=gcc
-        make azure-win-dist
+        make dist
         mkdir artifacts_win/
         cp dist/*zip artifacts_win/
       displayName: Build Windows Plugin
