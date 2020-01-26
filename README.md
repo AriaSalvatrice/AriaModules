@@ -108,12 +108,14 @@ The **LCD** will also tell you whether today I am wishing you luck, love, health
 
 There are two available form factors of the same module:
 
-- **Arcane**: the full 24hp version displays today's arcana, traced from Jean Dodal's 18th century Tarot of Marseilles.
+- **Arcane**: the full 24hp version displays today's arcana, from Nicolas Conver's 1760 century Tarot of Marseilles.
 - **Atout**: the smaller 9hp version doesn't display the arcana, but includes all the functionality and every jack from **Arcane**. To conserve space, the **Gate/Ramp** switch is at the bottom.
 
 The third module, **Aleister**, gives you access to the **_Bâtons_**, **_Coupes_**, **_Deniers_**, and **_Épées_** binary patterns as series of 16 outputs sending continuously either 0V or 10V, rather than as a rhythmic pattern of gates. If you connect only the first output of a group, it will instead be a polyphonic cable outputting the entire group. **Aleister** takes 14hp of space. You can employ **Aleister**'s services as a standalone module, but when you placed directely the right of either **Arcane** or **Atout**, the module will act as an expander, lighting up the jacks in sync with the rightmost connected output of the corresponding pattern on the parent module. Try it out, you'll get what it does immediately.
 
 If the module is active at the time a new fortune is drawn, the values will not change, but a notification a new fortune is available will appear on the **LCD**. Using the right-click menu, you can _Initialize_ the module to download the newest fortune. Remember to also reinitialize **Aleister** if in use. // FIXME - Reinit should force a download!
+
+**The tarot deck used is the Conver – Ben-Dov (CBD) version**. The CBD deck was restored in 2008-2011 from the original 18th century deck by tarot expert [Dr. Yoav Ben-Dov's](https://www.cbdtarot.com/). In traditional Tarot of Marseilles imagery (not just in this specific deck), some figures are frequently depicted naked. While the style is neither graphic nor intended to titillate, I took the liberty to alter a few cards to remove details, to ensure it does not offend people who download my plugin and try it out without being forewarned about its contents. I hope you will understand this choice.
 
 **Upon activation, this module will connect to the internet**, and fetch today's numbers on a GitHub repository via HTTP. The fortunes are not generated locally to make it possible for all users to share the same numbers every day, while also making it impossible to cheat fate and predict the next oracle (which a local deterministic implementation would necessarily entail).
 
@@ -178,19 +180,25 @@ The modules use the following fonts:
 - [Nova](https://fontlibrary.org/en/font/nova) by [Wojciech Kalinowski](https://fontlibrary.org/en/member/wmk69) 
 - [Fixed_v01](http://www.orgdot.com/aliasfonts/index.htm) by [Orgdot](http://www.orgdot.com/aliasfonts/index.htm)
 
-Fixed_v01 is included as part of the distribution, it uses a [permissive MIT-style custom license](FIXME) included with the plugin.
+The **Arcane** module uses Tarot cards from [Yoav Ben-Dov's CBD Tarot](https://www.cbdtarot.com/).
 
 
 
 Lawyer's corner
 ---------------
 
-The code and graphics of the Aria Salvatrice VCV Rack modules are distributed under the Do What The Fuck You Want To Public License version 2. They come without any warranty and might recklessly endanger life and limb, the usual.
+The code of the Aria Salvatrice VCV Rack modules is distributed under the Do What The Fuck You Want To Public License version 2. They come without any warranty and might recklessly endanger life and limb, the usual.
 
-Regarding my signature/logo, there is a simple matter of courtesy: if you edit my code to use my modules as a base for your own altered modules, remove my signature from the faceplates, even if you think your changes are trivial. I don't want to endorse and take credit for something I didn't vet or personally participate in.    
-The easiest way to remove my signature from every module is by blanking or replacing the graphic in the [`res/components/signature.svg`](res/components/signature.svg) file, and removing it from the blank plate: [`res/Blank.svg`](res/Blank.svg).
+The graphics are also distributed under the WTFPL, save for the following exceptions:
 
-You may freely distribute alternate graphics for my modules. Alternate faceplates without offensive themes may retain my signature and alter its color. You will find information about my design language and design process in [`doc/design.md`](doc/design.md).
+- My signature/logo remains copyrighted.
+  - If you edit my code to use my modules as a base for your own altered modules, remove my signature from your faceplates, even if you think your changes are trivial: I don't want to endorse and take credit for something I didn't vet or personally participate in.
+  - If you are faithfully porting my code to a fork of VCV Rack, are compiling binaries for another platform, or are otherwise faitfully distributing my modules as I designed them, you can leave in the signature. If unsure, just ask.
+  - The easiest way to remove my signature from every module is by blanking or replacing the graphic in the [`res/components/signature.svg`](res/components/signature.svg) file, and removing it from the blank plate: [`res/Blank.svg`](res/Blank.svg).
+- The files in `res/Arcane` are all distributed under the [CC-BY-NC-SA](https://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_US) license, as they are a derivative work of the [CBD Tarot](https://www.cbdtarot.com/) released under that license.
+- The font Fixed_v01 in `res/Fixed_v01` is distributed under a [custom permissive MIT-style custom license](FIXME). The license file is included with the distributed plugin to comply with its terms.
+
+You may freely distribute alternate faceplates for my modules. You will find information about my design language and design process in [`doc/design.md`](doc/design.md).
 
 
 

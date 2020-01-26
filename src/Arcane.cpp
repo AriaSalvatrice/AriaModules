@@ -14,7 +14,7 @@ PATTERNS: They seem to work OK.
 FACEPLATES: Illustration PNGs cleaned up, cropped, and aligned. Gotta auto-trace them, make the faceplaates, and do the code to change them.
 LCD: That one is scary. Let's see if I can get away with fonts first. 
 HANDLE LOAD/SAVE/RESET GRACEFULLY: Let's just see what breaks.
-EXPANDER SYNC: Prolly not that hard, it's just a kinda r/w socket thing I think.
+EXPANDER SYNC: It works!! Can I make it faster?
 SERVER: That one is the trivial part.
 
 */
@@ -85,8 +85,6 @@ struct ArcaneBase : Module {
 	dsp::ClockDivider readJsonDivider; 
 	// Absurdly huge performance gain not to send all static values each tick. Will do that unless people yell it breaks something.
 	dsp::ClockDivider refreshDivider; 
-	dsp::ClockDivider expanderChannelDivider;
-
 
 	bool readTodaysFortune() {		
 		// Craft the filename
@@ -174,7 +172,6 @@ struct ArcaneBase : Module {
 	ArcaneBase() {
 		readJsonDivider.setDivision(100000);
 		refreshDivider.setDivision(128);
-		expanderChannelDivider.setDivision(128);
 				
 		// First created claims the singleton
 		if (! ariaSalvatriceArcaneSingletonOwned) {
@@ -402,35 +399,7 @@ struct Arcane : ArcaneBase {
 		outputs[PATTERN_E_1_OUTPUT].setVoltage(  (pulseBar          and patternE[barCounter])          ? 10.f : 0.f );		
 	}
 	
-	Arcane() {
-		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-		configParam(RUN_PARAM, 0.f, 1.f, 1.f, "Run");
-		configParam(RESET_PARAM, 0.f, 1.f, 0.f, "Reset");
-		configParam(PULSE_WIDTH_PARAM, 1.f, 99.f, 1.f, "Pulse Width");
-	}
-	
-	void process(const ProcessArgs& args) override {
-		if (!jsonParsed and readJsonDivider.process()) jsonParsed = readTodaysFortune();
-		if (jsonParsed) {
-			if (refreshDivider.process()) sendStaticVoltage(args);
-			
-			processReset(args);
-			processRunStatus(args);
-			if (running) updateClock(args);
-			sendClock(args); // Send even if not running
-			
-			sendPatterns(args);
-			
-			// Quantize
-			for (int i = 0; i < inputs[QNT_INPUT].getChannels(); i++)
-				outputs[QNT_OUTPUT].setVoltage(quantize(inputs[QNT_INPUT].getVoltage(i), scale), i);
-			outputs[QNT_OUTPUT].setChannels(inputs[QNT_INPUT].getChannels());
-		} else { // JSON not parsed, pass quantizer input as-is.
-			for (int i = 0; i < inputs[QNT_INPUT].getChannels(); i++)
-				outputs[QNT_OUTPUT].setVoltage(inputs[QNT_INPUT].getVoltage(i), i);
-			outputs[QNT_OUTPUT].setChannels(inputs[QNT_INPUT].getChannels());
-		}
-		
+	void processExpander(const ProcessArgs& args) {
 		if (rightExpander.module and rightExpander.module->model == modelAleister) {
 			lights[EXPANDER_LIGHT].setBrightness(1.f);
 			
@@ -480,6 +449,37 @@ struct Arcane : ArcaneBase {
 		} else {
 			lights[EXPANDER_LIGHT].setBrightness(0.f);
 		}
+	}
+	
+	Arcane() {
+		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+		configParam(RUN_PARAM, 0.f, 1.f, 1.f, "Run");
+		configParam(RESET_PARAM, 0.f, 1.f, 0.f, "Reset");
+		configParam(PULSE_WIDTH_PARAM, 1.f, 99.f, 1.f, "Pulse Width");
+	}
+	
+	void process(const ProcessArgs& args) override {
+		if (!jsonParsed and readJsonDivider.process()) jsonParsed = readTodaysFortune();
+		if (jsonParsed) {
+			if (refreshDivider.process()) sendStaticVoltage(args);
+			
+			processReset(args);
+			processRunStatus(args);
+			if (running) updateClock(args);
+			sendClock(args); // Send even if not running
+			
+			sendPatterns(args);
+			
+			// Quantize
+			for (int i = 0; i < inputs[QNT_INPUT].getChannels(); i++)
+				outputs[QNT_OUTPUT].setVoltage(quantize(inputs[QNT_INPUT].getVoltage(i), scale), i);
+			outputs[QNT_OUTPUT].setChannels(inputs[QNT_INPUT].getChannels());
+		} else { // JSON not parsed, pass quantizer input as-is.
+			for (int i = 0; i < inputs[QNT_INPUT].getChannels(); i++)
+				outputs[QNT_OUTPUT].setVoltage(inputs[QNT_INPUT].getVoltage(i), i);
+			outputs[QNT_OUTPUT].setChannels(inputs[QNT_INPUT].getChannels());
+		}
+		processExpander(args);
 	}
 };
 
@@ -683,8 +683,8 @@ struct ArcaneWidget : ModuleWidget {
 		addChild(createLight<SmallLight<OutputLight>>(mm2px(Vec(x + 38.1, 125.2)), module, Arcane::EXPANDER_LIGHT));
 		
 		// Debug Output
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(35.0, 119.0)), module, Arcane::DEBUG_1_OUTPUT));
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(45.0, 119.0)), module, Arcane::DEBUG_2_OUTPUT));
+		// addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(35.0, 119.0)), module, Arcane::DEBUG_1_OUTPUT));
+		// addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(45.0, 119.0)), module, Arcane::DEBUG_2_OUTPUT));
 	}
 };
 
@@ -784,6 +784,7 @@ struct AleisterWidget : ModuleWidget {
 	
 	
 	// No BG, so I can overlay it on top of the normal light.
+	// Would have preferred to go light blue, but yellow is the only color that feels readable but not jarring.
 	struct AriaStepLight : AriaNewJackLight {
 		AriaStepLight() {
 			this->addBaseColor(nvgRGB(0xff, 0xcc, 0x03));
@@ -842,8 +843,8 @@ struct AleisterWidget : ModuleWidget {
 		addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(1.4, 125.2)), module, Aleister::EXPANDER_LIGHT));
 		
 		// Debug Output
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(25.0, 119.0)), module, Aleister::DEBUG_1_OUTPUT));
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(35.0, 119.0)), module, Aleister::DEBUG_2_OUTPUT));
+		// addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(25.0, 119.0)), module, Aleister::DEBUG_1_OUTPUT));
+		// addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(35.0, 119.0)), module, Aleister::DEBUG_2_OUTPUT));
 	}
 };
 
