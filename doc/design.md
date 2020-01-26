@@ -37,11 +37,21 @@ My signature SVG is 13.60mm wide.
 
 ## Jacks
 
-Jacks are spaced by at least 8mm. 10mm for a small logical separation. They are preferably aligned to integer values. Inputs have a yellow rim, outputs a pink one, and are framed in a dark roundrect if it improves readability (3mm rounding radius).
+Jacks are spaced by at least 8mm. 10mm for a small logical separation. They are preferably aligned to integer values. Inputs have a yellow rim, outputs a pink one. Outputs are framed in a dark roundrect iff it improves readability (3mm rounding radius).
 
 ## Hand painting
 
 Labels are never hand painted. Arrows showing the signal path are hand painted. Illustrations should be simple line art or silhouettes. The background patterns should be subtle and not look too busy when zoomed out.  
+
+## Tracing
+
+Auto-tracing paths in inkscape with default settings on "Trace Bitmap" never looks right in NanoVG - lots of broken shapes. For the tarot cards, I generally set the settings as follows: 
+
+- Mode: Multiple scans: Brightness steps, 2 scans, smooth, Stack scans, Remove background
+- Options: Suppress speckles 5, smooth corners 0.2, optimize paths 0.05
+
+Optimize paths is the important one here. It's what tends to break things once imported in VCV.
+
 
 ## Design process in 12 easy steps
 

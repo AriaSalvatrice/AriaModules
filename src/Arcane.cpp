@@ -13,30 +13,32 @@ CLOCK: It works! Or so I think.
 PATTERNS: They seem to work OK. 
 FACEPLATES: Illustration PNGs cleaned up, cropped, and aligned. Gotta auto-trace them, make the faceplaates, and do the code to change them.
 LCD: Getting there!
-HANDLE LOAD/SAVE/RESET GRACEFULLY: Let's just see what breaks.
-EXPANDER SYNC: It works!! Can I make it faster?
+HANDLE LOAD/SAVE/RESET GRACEFULLY: I think we're good.
+EXPANDER SYNC: It works!! 
 SERVER: That one is the trivial part.
-
 */
-
 
 // The singleton owner downloads the the fortune from the repository.
 // Other modules look for the cached file.
 // Long name to avoid shared namespace collisions.
 static bool ariaSalvatriceArcaneSingletonOwned = false;
 
-
-// FIXME - It'd be better to move it within the struct, but I couldn't figure out how to make threading work if I do that.
-void downloadTodaysFortune() {
-	// Get the date in UTC
-	char todayUtc[11];
+// Fortunes are generated 10mn in advance to account for desync'd clocks. 
+std::string getCurrentFortuneDate() {	
+	char todaysFortuneDate[11];
 	time_t localTime = time(0);
-	localTime = localTime - 60 * 60 * 12; // Offset by -12 hours, fortunes are up at 12:00 AM UTC
+	localTime = localTime - 60 * 60 * 12; // Offset by -12 hours, since fortunes are up at 12:00 AM UTC
 	tm *utcTime = gmtime(&localTime);
-	strftime(todayUtc, 11, "%Y-%m-%d", utcTime);
+	strftime(todaysFortuneDate, 11, "%Y-%m-%d", utcTime);
+	return todaysFortuneDate;
+}
+
+
+// TODO - It'd be cleaner to move it within the struct, but I couldn't figure out how to make threading work if I do that.
+void downloadTodaysFortune() {
 	// Craft the URL and the filename. The URL is rate-limited, but users should never run into it.
-	std::string url = "https://raw.githubusercontent.com/AriaSalvatrice/Arcane/master/v1/" + std::string(todayUtc) + ".json";
-	std::string filename = asset::user("AriaSalvatrice/Arcane/").c_str() + std::string(todayUtc) + ".json";
+	std::string url = "https://raw.githubusercontent.com/AriaSalvatrice/Arcane/master/v1/" + getCurrentFortuneDate() + ".json";
+	std::string filename = asset::user("AriaSalvatrice/Arcane/").c_str() + getCurrentFortuneDate() + ".json";
 	// Request it the url and save it
 	float progress = 0.f;
 	network::requestDownload(url, filename, &progress);
@@ -47,13 +49,15 @@ void downloadTodaysFortune() {
 struct ArcaneBase : Module {
 	bool owningSingleton = false;
 	bool jsonParsed = false;
-	bool staticValuesSent = false;
+	
+	// Used to display on the LCD: once set it doesn't change.
+	std::string todaysFortuneDate = getCurrentFortuneDate();
 	
 	// These are read from JSON
 	int arcana, bpm, wish;
 	std::array<int, 8> notePattern;
 	bool patternB[16], patternC[16], patternD[16], patternE[16], scale[12]; // There is no pattern A
-	
+		
 	// FIXME - figure out how to use a timer instead!
 	dsp::ClockDivider readJsonDivider;
 	// Huge performance gain not to send all static values each tick. Will do that unless people yell it breaks something.
@@ -61,13 +65,7 @@ struct ArcaneBase : Module {
 	dsp::ClockDivider expanderDivider; 
 
 	bool readTodaysFortune() {		
-		// Craft the filename
-		char todayUtc[11];
-		time_t localTime = time(0);
-		localTime = localTime - 60 * 60 * 12; // Offset by -12 hours, fortunes are always ready by 12:00 AM UTC
-		tm *utcTime = gmtime(&localTime);
-		strftime(todayUtc, 11, "%Y-%m-%d", utcTime);
-		std::string filename = asset::user("AriaSalvatrice/Arcane/").c_str() + std::string(todayUtc) + ".json";
+		std::string filename = asset::user("AriaSalvatrice/Arcane/").c_str() + todaysFortuneDate + ".json";
 		// Open the file
 		FILE* jsonFile = fopen(filename.c_str(), "r");
 		if (!jsonFile) {
@@ -133,15 +131,22 @@ struct ArcaneBase : Module {
 		
 		return true;
 	}
-
-		
+	
+	void onReset() override {
+		jsonParsed = readTodaysFortune();
+		// On manual reset, we download if necessary, whether we own the singleton or not.
+		if (!jsonParsed) {
+			std::thread t(downloadTodaysFortune);
+			t.detach();
+		}
+	}
+	
 	~ArcaneBase() { 
 		// On destruction, release the singleton. 
 		if (owningSingleton) { 
 			ariaSalvatriceArcaneSingletonOwned = false;
 		}
 	}
-
 	
 	ArcaneBase() {
 		readJsonDivider.setDivision(100000);
@@ -243,7 +248,12 @@ struct Arcane : ArcaneBase {
 	std::string lcdText = "";
 	bool lcdDirty = false;
 	dsp::ClockDivider lcdDivider; 
-	
+	int lcdPage = 0;
+
+	// Only for Arcane
+	bool cardDirty = true;
+	int cardDelayCounter = 0;
+		
 	void sendStaticVoltage(const ProcessArgs& args) {
 		outputs[ARCANA_OUTPUT].setVoltage( arcana * 0.1f );
 		outputs[BPM_NUM_OUTPUT].setVoltage (log2f(1.0f / (120.f / bpm)));
@@ -258,7 +268,6 @@ struct Arcane : ArcaneBase {
 		}
 		outputs[SCALE_OUTPUT].setChannels(notesInScale);
 		outputs[SCALE_PADDED_OUTPUT].setChannels(8);
-		staticValuesSent = true;
 	}
 	
 	
@@ -432,11 +441,106 @@ struct Arcane : ArcaneBase {
 		}
 	}
 	
+	// The screen is too small for descenders, and enlarging it would make things cramped, so labels are all uppercase.
+	void processLcdText(const ProcessArgs& args) {
+		lcdDivider.setDivision(args.sampleRate * 2); // 2 seconds. Any way to set it up from the constructor instead?
+		if (jsonParsed) {
+			switch (lcdPage) {
+				case 0:
+					lcdText = todaysFortuneDate;
+					lcdPage++;
+					break;
+				case 1:
+					if (arcana == 0 ) lcdText = "   FOOL    ";
+					if (arcana == 1 ) lcdText = " MAGICIAL  ";
+					if (arcana == 2 ) lcdText = "H.PRIESTESS";
+					if (arcana == 3 ) lcdText = "  EMPRESS  ";
+					if (arcana == 4 ) lcdText = "  EMPEROR  ";
+					if (arcana == 5 ) lcdText = "HIEROPHANT ";
+					if (arcana == 6 ) lcdText = "  LOVERS   ";
+					if (arcana == 7 ) lcdText = "  CHARIOT  ";
+					if (arcana == 8 ) lcdText = "  JUSTICE  ";
+					if (arcana == 9 ) lcdText = "  HERMIT   ";
+					if (arcana == 10) lcdText = "W. FORTUNE ";
+					if (arcana == 11) lcdText = "  STRENGTH ";
+					if (arcana == 12) lcdText = "HANGED MAN ";
+					if (arcana == 13) lcdText = "           "; // Intentional
+					if (arcana == 14) lcdText = "TEMPERANCE ";
+					if (arcana == 15) lcdText = "   DEVIL   ";
+					if (arcana == 16) lcdText = "   TOWER   ";
+					if (arcana == 17) lcdText = "   STAR    ";
+					if (arcana == 18) lcdText = "   MOON    ";
+					if (arcana == 19) lcdText = "    SUN    ";
+					if (arcana == 20) lcdText = " JUDGEMENT ";
+					if (arcana == 21) lcdText = "   WORLD   ";
+					lcdPage++;
+					break;
+				case 2:
+					lcdText = "  " + std::to_string(bpm) + " BPM";
+					lcdPage++;
+					break;
+				case 3:
+					if (wish == 0) lcdText = "WISH:LUCK";
+					if (wish == 1) lcdText = "WISH:LOVE";
+					if (wish == 2) lcdText = "WISH:HEALTH";
+					if (wish == 3) lcdText = "WISH:MONEY";
+					if (todaysFortuneDate != getCurrentFortuneDate()) {
+						lcdPage = 4;
+					} else {
+						lcdPage = 0;
+					}
+					break;
+				case 4: 
+					lcdText = "NEW ORACLE!"; // FIXME - Check it actually works!
+					lcdPage = 0;
+					break;
+			}
+		} else { // JSON not parsed
+			lcdText = "DOWNLOADING"; 
+		}
+	}
+	
+	void onReset() override {
+		phase = 0.f;
+		phaseCounter = 0;
+		thirtySecondCounter = 0;
+		sixteenthCounter = 0;
+		eighthCounter = 0;
+		quarterCounter = 0;
+		quarterInBarCounter = 0;
+		barCounter = 0;
+		pulseThirtySecond = false;
+		pulseSixteenth = false;
+		pulseEighth = false;
+		pulseQuarter = false;
+		pulseBar = false;
+		running = true;
+		lcdPage = 0;
+		lcdDirty = true;
+		cardDirty = true;
+		ArcaneBase::onReset();
+	}
+	
+	// Since there's no guarantee the patterns will be the same when the user
+	// reloads the file, it makes no sense to save detailed status. All we
+	// save is whether the clock is running or not. 
+	json_t* dataToJson() override {
+		json_t* rootJ = json_object();
+		json_object_set_new(rootJ, "running", json_boolean(running));
+		return rootJ;
+	}
+	
+	void dataFromJson(json_t* rootJ) override {
+		json_t* runningJ = json_object_get(rootJ, "running");
+		if (runningJ) running = json_is_true(runningJ);
+	}
+	
 	Arcane() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		configParam(RUN_PARAM, 0.f, 1.f, 1.f, "Run");
 		configParam(RESET_PARAM, 0.f, 1.f, 0.f, "Reset");
-		configParam(PULSE_WIDTH_PARAM, 1.f, 99.f, 1.f, "Pulse Width");
+		configParam(PULSE_WIDTH_PARAM, 1.f, 99.f, 1.f, "Pulse width for all outputs", "%");
+		configParam(PULSE_RAMP_PARAM, 0.f, 1.f, 0.f, "Clock Pulse/Ramp output");
 		lcdDivider.setDivision(1000); // Gets changed on first tick
 	}
 	
@@ -466,15 +570,23 @@ struct Arcane : ArcaneBase {
 		}
 		
 		if (lcdDivider.process()) {
-			lcdDivider.setDivision(args.sampleRate * 2); // Any better way to set it up from the constructor?
-			lcdText = (lcdText == "woof") ? "w-woof!!" : "woof";
-			lcdDirty = false;
+			processLcdText(args);
+			lcdDirty = true;
+			if (jsonParsed) {
+				// Slow down loading the card, to simulate the user placing it manually themself
+				// When zooming in we lose the FB sometimes it seems, so a periodic refresh is in order
+				cardDelayCounter = (cardDelayCounter == 3) ? 3 : cardDelayCounter + 1;
+				cardDirty = true;
+			}
 		}
+		
+		// cardDirty = true; // FIXME TEST AAAA why
+		
 	}
 }; // Arcane
 
 
-
+// FIXME - Readme says it has polyphonic outputs, but it doesn't!!
 // Aleister is an expander, but it also works stand-alone.
 struct Aleister : ArcaneBase {
 	enum ParamIds {
@@ -601,9 +713,25 @@ struct Aleister : ArcaneBase {
 }; // Aleister
 
 
+// The LCD. Framebuffer + draw widget.
+struct LCDFramebufferWidget : FramebufferWidget{
+	Arcane *module;
+	LCDFramebufferWidget(Arcane *m){
+		module = m;
+	}
+
+	void step() override{
+		if (module) { // Required to avoid crashing module browser
+			if(module->lcdDirty){
+				FramebufferWidget::dirty = true;
+				module->lcdDirty = false;
+			}
+			FramebufferWidget::step();
+		}
+	}
+};
 
 
-// FIXME - I need a framebuffer! It worked in my tests, but it no longer works once imported. IDK why.
 struct LCDDrawWidget : TransparentWidget {
 	Arcane *module;
 	std::array<std::shared_ptr<Svg>, 95> asciiSvg; // 32 to 126, the printable range
@@ -636,10 +764,44 @@ struct LCDDrawWidget : TransparentWidget {
 		}
 		nvgRestore(args.vg);
 	}
+}; // LCDDrawWidget
+
+
+// The magnetic cards. You really feel the performance hit without a framebuffer here. 
+struct CardFramebufferWidget : FramebufferWidget{
+	Arcane *module;
+	CardFramebufferWidget(Arcane *m){
+		module = m;
+	}
+
+	void step() override{
+		if (module) { // Required to avoid crashing module browser
+			if(module->cardDirty){
+				DEBUG("DIRTY!@!!!!");
+				FramebufferWidget::dirty = true;
+				module->cardDirty = false;
+			}
+			FramebufferWidget::step();
+		}
+	}
 };
 
-
-
+struct CardDrawWidget : TransparentWidget {
+	Arcane *module;
+	std::shared_ptr<Svg> cardSvg;
+	
+	CardDrawWidget(Arcane* module) {
+		this->module = module;
+		box.size = mm2px(Vec(69.5, 128.5));
+	}
+	
+	void draw(const DrawArgs &args) override {
+		if (module) {
+			cardSvg = APP->window->loadSvg(asset::plugin(pluginInstance, "res/Arcane/7.svg"));
+			if (module->cardDelayCounter == 3) svgDraw(args.vg, cardSvg->handle);
+		}
+	}
+};
 
 
 
@@ -655,10 +817,19 @@ struct ArcaneWidget : ModuleWidget {
 		// Signature
 		addChild(createWidget<AriaSignature>(mm2px(Vec(101.0, 114.5))));
 		
-		// LCD
-		LCDDrawWidget *lcd = new LCDDrawWidget(module);
-		lcd->box.pos = mm2px(Vec(83.6, 41.4));
-		addChild(lcd);
+		// The card
+		CardFramebufferWidget *cfb = new CardFramebufferWidget(module);
+		CardDrawWidget *cdw = new CardDrawWidget(module);
+		cfb->box.pos = mm2px(Vec(0.0, 0.0));
+		cfb->addChild(cdw);
+		addChild(cfb);
+		
+		// LCD		
+		LCDFramebufferWidget *lfb = new LCDFramebufferWidget(module);
+		LCDDrawWidget *ldw = new LCDDrawWidget(module);
+		lfb->box.pos = mm2px(Vec(83.6, 41.4));
+		lfb->addChild(ldw);
+		addChild(lfb);
 		
 		// Screws - I want to give the impression there's 3 x 2 screens, the arcana hiding the left ones.
 		addChild(createWidget<AriaScrew>(Vec(box.size.x - 10 * RACK_GRID_WIDTH, 0)));
@@ -731,7 +902,8 @@ struct ArcaneWidget : ModuleWidget {
 		// addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(35.0, 119.0)), module, Arcane::DEBUG_1_OUTPUT));
 		// addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(45.0, 119.0)), module, Arcane::DEBUG_2_OUTPUT));
 	}
-};
+}; // ArcaneWidget
+
 
 
 // Atout is a smaller version of Arcane, otherwise identical.
@@ -747,10 +919,16 @@ struct AtoutWidget : ModuleWidget {
 		// Signature
 		addChild(createWidget<AriaSignature>(mm2px(Vec(31.06, 114.5))));
 		
+		// LCD	
+		LCDFramebufferWidget *fb = new LCDFramebufferWidget(module);
+		LCDDrawWidget *dw = new LCDDrawWidget(module);
+		fb->box.pos = mm2px(Vec(6.44, 41.4));
+		fb->addChild(dw);
+		addChild(fb);
+		
 		// Screws
 		addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-		// addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<AriaScrew>(Vec(box.size.x - 5 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 	
 		// Quantizer
@@ -819,14 +997,13 @@ struct AtoutWidget : ModuleWidget {
 		// addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(25.0, 119.0)), module, Arcane::DEBUG_1_OUTPUT));
 		// addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(35.0, 119.0)), module, Arcane::DEBUG_2_OUTPUT));
 	}
-};
+}; // AtoutWidget
 
 
 
 
 // Aleister expresses the four binary patterns as gates instead of rhythms.
 struct AleisterWidget : ModuleWidget {
-	
 	
 	// No BG, so I can overlay it on top of the normal light.
 	// Would have preferred to go light blue, but yellow is the only color that feels readable but not jarring.
@@ -836,7 +1013,6 @@ struct AleisterWidget : ModuleWidget {
 			this->bgColor = nvgRGBA(0xff, 0xff, 0xff, 0x00);
 		}
 	};
-
 	
 	AleisterWidget(Aleister* module) {
 		setModule(module);
@@ -891,7 +1067,7 @@ struct AleisterWidget : ModuleWidget {
 		// addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(25.0, 119.0)), module, Aleister::DEBUG_1_OUTPUT));
 		// addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(35.0, 119.0)), module, Aleister::DEBUG_2_OUTPUT));
 	}
-};
+}; // AleisterWidget
 
 
 Model* modelArcane   = createModel<Arcane, ArcaneWidget>("Arcane");
