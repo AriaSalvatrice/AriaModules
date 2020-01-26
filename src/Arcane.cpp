@@ -12,45 +12,19 @@ QUANTIZER: Works well. Good CPU usage (pay only for performance you use) but onl
 CLOCK: It works! Or so I think.
 PATTERNS: They seem to work OK. 
 FACEPLATES: Illustration PNGs cleaned up, cropped, and aligned. Gotta auto-trace them, make the faceplaates, and do the code to change them.
-LCD: That one is scary. Let's see if I can get away with fonts first. 
+LCD: Getting there!
 HANDLE LOAD/SAVE/RESET GRACEFULLY: Let's just see what breaks.
 EXPANDER SYNC: It works!! Can I make it faster?
 SERVER: That one is the trivial part.
 
 */
 
+
 // The singleton owner downloads the the fortune from the repository.
 // Other modules look for the cached file.
 // Long name to avoid shared namespace collisions.
 static bool ariaSalvatriceArcaneSingletonOwned = false;
 
-// The Fool having no number, Death having no name, and additive roman numerals
-// being used are all intentional. Translations are chosen to match closely the
-// Marseilles naming, including the unusual "House of God" name for the Tower.
-const std::array<std::string, 22> arcanaNames = {{
-	"The Fool",
-	"I. The Magician",
-	"II. The Popess",
-	"III. The Empress",
-	"IIII. The Emperor",
-	"V. The Pope",
-	"VI. The Lover",
-	"VII. The Chariot",
-	"VIII. Justice",
-	"VIIII. The Hermit",
-	"X. The Wheel of Fortune",
-	"XI. Strength",
-	"XII. The Hanged Man",
-	"XIII.",
-	"XIIII. Temperance",
-	"XV. The Devil",
-	"XVI. The House of God",
-	"XVII. The Star",
-	"XVIII. The Moon",
-	"XVIIII. The Sun",
-	"XX. Judgement",
-	"XXI. The World"	
-}};
 
 // FIXME - It'd be better to move it within the struct, but I couldn't figure out how to make threading work if I do that.
 void downloadTodaysFortune() {
@@ -81,17 +55,16 @@ struct ArcaneBase : Module {
 	bool patternB[16], patternC[16], patternD[16], patternE[16], scale[12]; // There is no pattern A
 	
 	// FIXME - figure out how to use a timer instead!
-	dsp::ClockDivider readJsonDivider; 
-	// Absurdly huge performance gain not to send all static values each tick. Will do that unless people yell it breaks something.
-	dsp::ClockDivider refreshDivider; 
-	
+	dsp::ClockDivider readJsonDivider;
+	// Huge performance gain not to send all static values each tick. Will do that unless people yell it breaks something.
+	dsp::ClockDivider refreshDivider; 	
 	dsp::ClockDivider expanderDivider; 
 
 	bool readTodaysFortune() {		
 		// Craft the filename
 		char todayUtc[11];
 		time_t localTime = time(0);
-		localTime = localTime - 60 * 60 * 12; // Offset by -12 hours, fortunes are up at 12:00 AM UTC
+		localTime = localTime - 60 * 60 * 12; // Offset by -12 hours, fortunes are always ready by 12:00 AM UTC
 		tm *utcTime = gmtime(&localTime);
 		strftime(todayUtc, 11, "%Y-%m-%d", utcTime);
 		std::string filename = asset::user("AriaSalvatrice/Arcane/").c_str() + std::string(todayUtc) + ".json";
