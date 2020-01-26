@@ -52,7 +52,7 @@ const std::array<std::string, 22> arcanaNames = {{
 	"XXI. The World"	
 }};
 
-// FIXME: It'd be better to move it within the struct, but I couldn't figure out how to make threading work if I do that.
+// FIXME - It'd be better to move it within the struct, but I couldn't figure out how to make threading work if I do that.
 void downloadTodaysFortune() {
 	// Get the date in UTC
 	char todayUtc[11];
@@ -61,8 +61,7 @@ void downloadTodaysFortune() {
 	tm *utcTime = gmtime(&localTime);
 	strftime(todayUtc, 11, "%Y-%m-%d", utcTime);
 	// Craft the URL and the filename. The URL is rate-limited, but users should never run into it.
-	// std::string url = "https://raw.githubusercontent.com/AriaSalvatrice/Arcane/master/v1/" + std::string(todayUtc) + ".json"; // < FIXME
-	std::string url = "https://aria.dog/upload/2020/01/" + std::string(todayUtc) + ".json"; // < FIXME
+	std::string url = "https://raw.githubusercontent.com/AriaSalvatrice/Arcane/master/v1/" + std::string(todayUtc) + ".json";
 	std::string filename = asset::user("AriaSalvatrice/Arcane/").c_str() + std::string(todayUtc) + ".json";
 	// Request it the url and save it
 	float progress = 0.f;
@@ -81,7 +80,7 @@ struct ArcaneBase : Module {
 	std::array<int, 8> notePattern;
 	bool patternB[16], patternC[16], patternD[16], patternE[16], scale[12]; // There is no pattern A
 	
-	// FIXME - figure out how to use a timer instead
+	// FIXME - figure out how to use a timer instead!
 	dsp::ClockDivider readJsonDivider; 
 	// Absurdly huge performance gain not to send all static values each tick. Will do that unless people yell it breaks something.
 	dsp::ClockDivider refreshDivider; 
@@ -275,7 +274,7 @@ struct Arcane : ArcaneBase {
 		int notesInScale = 0;
 		for (int i = 0; i < 12; i++)
 			if (scale[i]) notesInScale++;
-		for (int i = 0; i < 8; i++) { // FIXME - not converted to voltage!
+		for (int i = 0; i < 8; i++) {
 			outputs[SCALE_OUTPUT].setVoltage( (notePattern[i] / 12.f), i);
 			float paddedOutput = i < notesInScale ? (notePattern[i] / 12.f) : (notePattern[i] / 12.f + 1.f);
 			outputs[SCALE_PADDED_OUTPUT].setVoltage(paddedOutput, i);
@@ -328,7 +327,7 @@ struct Arcane : ArcaneBase {
 			if (phaseCounter > 0 ) {
 				if ( phaseCounter % 512 == 0 ) {
 					pulseQuarterGenerator.trigger(quarterPulseWidth); 
-					quarterCounter = ( quarterCounter == 15 ? 0 : quarterCounter + 1 ); // FIXME - CRASHES FOR A REASON!!
+					quarterCounter = ( quarterCounter == 15 ? 0 : quarterCounter + 1 );
 					if ( quarterInBarCounter == 3 ) {
 						quarterInBarCounter = 0;
 						barCounter = ( barCounter == 15 ? 0 : barCounter + 1 );
@@ -808,7 +807,7 @@ struct AleisterWidget : ModuleWidget {
 	};
 
 	
-	AleisterWidget(Aleister* module) { // FIXME it's its own struct!
+	AleisterWidget(Aleister* module) {
 		setModule(module);
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Arcane/Aleister.svg")));
 		

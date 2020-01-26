@@ -113,7 +113,7 @@ There are two available form factors of the same module:
 
 The third module, **Aleister**, gives you access to the **_Bâtons_**, **_Coupes_**, **_Deniers_**, and **_Épées_** binary patterns as series of 16 outputs sending continuously either 0V or 10V, rather than as a rhythmic pattern of gates. If you connect only the first output of a group, it will instead be a polyphonic cable outputting the entire group. **Aleister** takes 14hp of space. You can employ **Aleister**'s services as a standalone module, but when you placed directely the right of either **Arcane** or **Atout**, the module will act as an expander, lighting up the jacks in sync with the rightmost connected output of the corresponding pattern on the parent module. Try it out, you'll get what it does immediately.
 
-If the module is active at the time a new fortune is drawn, the values will not change, but a notification a new fortune is available will appear on the **LCD**. Using the right-click menu, you can _Initialize_ the module to download the newest fortune. Remember to also reinitialize **Aleister** if in use. // FIXME - Reinit should force a download!
+If the module is active at the time a new fortune is drawn, the values will not change, but a notification a new fortune is available will appear on the **LCD**. Using the right-click menu, you can _Initialize_ the module to download the newest fortune. Remember to also reinitialize **Aleister** if in use.
 
 **The tarot deck used is the Conver – Ben-Dov (CBD) version**. The CBD deck was restored in 2008-2011 from the original 18th century deck by tarot expert [Dr. Yoav Ben-Dov's](https://www.cbdtarot.com/).    
 In traditional Tarot of Marseilles imagery (not just in this specific deck), some figures are frequently depicted nude. While the style of the CBD deck is neither graphic nor intended to titillate, I took the liberty to slightly alter a few cards to remove details, as most users will download my plugin without being forewarned about contents a small minority would object to. I hope you will understand this decision.
@@ -130,7 +130,7 @@ If you treat my oracles as a mere random number generator, you will never gain a
 
 
 
-
+<!-- UNDER DEVELOPMENT 
 UnDuLaR Rack Scroller
 ---------------------
 
@@ -149,7 +149,7 @@ You can still scroll around normally when using the module. If you want the modu
 Be sure to attempts all sorts of idiotic party tricks you will regret such as connecting an oscillator to the controls, forcing you to use `Engine > Sample Rate > Pause` before the onset of the seizure.
 
 Thanks to [Frank Buss' Shaker](https://github.com/FrankBuss/FrankBussRackPlugin) for demonstrating it's possible to scroll the rack via a module.
-
+-->
 
 
 
@@ -181,7 +181,7 @@ The modules use the following fonts:
 - [Nova](https://fontlibrary.org/en/font/nova) by [Wojciech Kalinowski](https://fontlibrary.org/en/member/wmk69) 
 - [Fixed_v01](http://www.orgdot.com/aliasfonts/index.htm) by [Orgdot](http://www.orgdot.com/aliasfonts/index.htm)
 
-The **Arcane** module uses Tarot cards from [Yoav Ben-Dov's CBD Tarot](https://www.cbdtarot.com/).
+The **Arcane** module uses Tarot cards altered from [Yoav Ben-Dov's CBD Tarot](https://www.cbdtarot.com/).
 
 
 
@@ -197,7 +197,7 @@ The graphics are also distributed under the WTFPL, save for the following except
   - If you are faithfully porting my code to a fork of VCV Rack, are compiling binaries for another platform, or are otherwise faitfully distributing my modules as I designed them, you can leave in the signature. If unsure, just ask.
   - The easiest way to remove my signature from every module is by blanking or replacing the graphic in the [`res/components/signature.svg`](res/components/signature.svg) file, and removing it from the blank plate: [`res/Blank.svg`](res/Blank.svg).
 - The files in `res/Arcane` are all distributed under the [CC-BY-NC-SA](https://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_US) license, as they are a derivative work of the [CBD Tarot](https://www.cbdtarot.com/) released under that license.
-- The font Fixed_v01 in `res/Fixed_v01` is distributed under a [custom permissive MIT-style custom license](FIXME). The license file is included with the distributed plugin to comply with its terms.
+- The files in `res/components/lcd/Fixed_v01` were exported from the [Fixed_v01 font by Orgdot](http://www.orgdot.com/aliasfonts/index.htm), which is released under [a custom BSD-style license](res/components/lcd/Fixed_v01/LICENSE.txt), included in the source and in binary distributions.
 
 You may freely distribute alternate faceplates for my modules. You will find information about my design language and design process in [`doc/design.md`](doc/design.md).
 
