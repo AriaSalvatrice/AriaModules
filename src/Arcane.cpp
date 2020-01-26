@@ -167,7 +167,7 @@ struct ArcaneBase : Module {
 			t.detach();
 		}
 	}
-};
+}; // ArcaneBase
 
 
 
@@ -239,6 +239,10 @@ struct Arcane : ArcaneBase {
 	dsp::SchmittTrigger resetCvTrigger;
 	dsp::SchmittTrigger resetButtonTrigger;
 	
+	// LCD stuff
+	std::string lcdText = "";
+	bool lcdDirty = false;
+	dsp::ClockDivider lcdDivider; 
 	
 	void sendStaticVoltage(const ProcessArgs& args) {
 		outputs[ARCANA_OUTPUT].setVoltage( arcana * 0.1f );
@@ -433,6 +437,7 @@ struct Arcane : ArcaneBase {
 		configParam(RUN_PARAM, 0.f, 1.f, 1.f, "Run");
 		configParam(RESET_PARAM, 0.f, 1.f, 0.f, "Reset");
 		configParam(PULSE_WIDTH_PARAM, 1.f, 99.f, 1.f, "Pulse Width");
+		lcdDivider.setDivision(1000); // Gets changed on first tick
 	}
 	
 	void process(const ProcessArgs& args) override {
@@ -459,8 +464,15 @@ struct Arcane : ArcaneBase {
 		if (expanderDivider.process()) {
 			processExpander(args);
 		}
+		
+		if (lcdDivider.process()) {
+			lcdDivider.setDivision(args.sampleRate * 2); // Any better way to set it up from the constructor?
+			lcdText = (lcdText == "woof") ? "w-woof!!" : "woof";
+			lcdDirty = false;
+		}
 	}
-};
+}; // Arcane
+
 
 
 // Aleister is an expander, but it also works stand-alone.
@@ -585,11 +597,50 @@ struct Aleister : ArcaneBase {
 		if (expanderDivider.process()) {
 			processExpander(args);
 		}
-		
+	}
+}; // Aleister
 
-		
+
+
+
+// FIXME - I need a framebuffer! It worked in my tests, but it no longer works once imported. IDK why.
+struct LCDDrawWidget : TransparentWidget {
+	Arcane *module;
+	std::array<std::shared_ptr<Svg>, 95> asciiSvg; // 32 to 126, the printable range
+	std::array<std::shared_ptr<Svg>, 24> pianoSvg; // 0..11: off, 12..23 = on
+	std::shared_ptr<Svg> pianoTestSvg;
+	int testImage;
+
+	LCDDrawWidget(Arcane *module) {
+		this->module = module;
+		box.size = mm2px(Vec(36.0, 10.0));
+		pianoTestSvg = APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/lcd/piano/pianotest2.svg"));
+		for (int i = 0; i < 95; i++) {
+			asciiSvg[i] = APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/lcd/Fixed_v01/" + std::to_string(i + 32) + ".svg"));
+		}
+	}
+
+	void draw(const DrawArgs &args) override {	
+		nvgScale(args.vg, 1.5, 1.5);
+		nvgSave(args.vg);
+		// Piano
+		svgDraw(args.vg, pianoTestSvg->handle);
+		nvgTranslate(args.vg, 0, 11);
+		// 11 character display
+		std::string lcdText = module ? module->lcdText : "";
+		lcdText.append(11, ' '); // Ensure the string is long enough
+		for (int i = 0; i < 11; i++) {
+			char c = lcdText.at(i);
+			svgDraw(args.vg, asciiSvg[ c - 32 ]->handle);
+			nvgTranslate(args.vg, 6, 0);
+		}
+		nvgRestore(args.vg);
 	}
 };
+
+
+
+
 
 
 struct ArcaneWidget : ModuleWidget {
@@ -603,6 +654,11 @@ struct ArcaneWidget : ModuleWidget {
 		
 		// Signature
 		addChild(createWidget<AriaSignature>(mm2px(Vec(101.0, 114.5))));
+		
+		// LCD
+		LCDDrawWidget *lcd = new LCDDrawWidget(module);
+		lcd->box.pos = mm2px(Vec(83.6, 41.4));
+		addChild(lcd);
 		
 		// Screws - I want to give the impression there's 3 x 2 screens, the arcana hiding the left ones.
 		addChild(createWidget<AriaScrew>(Vec(box.size.x - 10 * RACK_GRID_WIDTH, 0)));
@@ -668,6 +724,8 @@ struct ArcaneWidget : ModuleWidget {
 		
 		// Expander light
 		addChild(createLight<SmallLight<OutputLight>>(mm2px(Vec(x + 38.1, 125.2)), module, Arcane::EXPANDER_LIGHT));
+		
+
 		
 		// Debug Output
 		// addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(35.0, 119.0)), module, Arcane::DEBUG_1_OUTPUT));

@@ -31,8 +31,8 @@ struct Test : Module {
 		NUM_LIGHTS
 	};
 	
-	std::string text;
-	bool dirty;
+	std::string lcdText;
+	bool lcdDirty;
 	bool scale[12];
 	dsp::ClockDivider lcdDivider; 
 	
@@ -71,9 +71,9 @@ struct Test : Module {
 		scale[11] = true;
 
 		if (lcdDivider.process()) {
-				lcdDivider.setDivision(args.sampleRate * 2); // Any better way to set it up from the constructor?
-				text = (text == "woof") ? "w-woof!!" : "woof";
-				dirty = true;
+				lcdDivider.setDivision(args.sampleRate * 2); // FIXME - Any better way to set it up from the constructor?
+				lcdText = (lcdText == "woof") ? "w-woof!!" : "woof";
+				lcdDirty = true;
 		}
 	}	
 };
@@ -104,10 +104,10 @@ struct LCDWidget : FramebufferWidget {
 			svgDraw(args.vg, pianoTestSvg->handle);
 			nvgTranslate(args.vg, 0, 11);
 			// 11 character display
-			std::string text = module ? module->text : "";
-			text.append(11, ' '); // Ensure the string is long enough
+			std::string lcdText = module ? module->lcdText : "";
+			lcdText.append(11, ' '); // Ensure the string is long enough
 			for (int i = 0; i < 11; i++) {
-				char c = text.at(i);
+				char c = lcdText.at(i);
 				svgDraw(args.vg, asciiSvg[ c - 32 ]->handle);
 				nvgTranslate(args.vg, 6, 0);
 			}
@@ -125,9 +125,9 @@ struct LCDWidget : FramebufferWidget {
 	}
 	
 	void step() override {
-		if (module && module->dirty) {
+		if (module && module->lcdDirty) {
 			FramebufferWidget::dirty = true;
-			module->dirty = false;
+			module->lcdDirty = false;
 		}
 		FramebufferWidget::step();
 	}
