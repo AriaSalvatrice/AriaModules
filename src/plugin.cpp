@@ -14,6 +14,11 @@ void init(Plugin* p) {
 
 	// Sequencer
 	p->addModel(modelDarius);
+	
+	// Arcane
+	p->addModel(modelArcane);
+	p->addModel(modelAtout);
+	p->addModel(modelAleister);
 
 	// Blank plate
 	p->addModel(modelBlank);
@@ -21,9 +26,6 @@ void init(Plugin* p) {
 #ifdef ARIA_DEV_MODULES
 	p->addModel(modelBendlet);
 	p->addModel(modelUndular);
-	p->addModel(modelArcane);
-	p->addModel(modelAtout);
-	p->addModel(modelAleister);
 	p->addModel(modelTest);
 #endif
 

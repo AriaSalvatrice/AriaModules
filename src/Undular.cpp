@@ -1,5 +1,7 @@
 #include "plugin.hpp"
 
+// For now, just a proof of concept with hardcoded values.
+
 struct Undular : Module {
 	enum ParamIds {
 		NUM_PARAMS

@@ -4,19 +4,8 @@
 #include <ctime>
 #include <thread>
 
-/* TODO
+// This contains Arcane, Atout, and Aleister.
 
-DOWNLOAD: Done, works reliably, Github is rate-limited but users will never run into it.
-PARSE JSON API: Works. Everything trnasformed into useful data structure. 
-QUANTIZER: Works well. Good CPU usage (pay only for performance you use) but only half the performance the official module.
-CLOCK: It works! Or so I think.
-PATTERNS: They seem to work OK. 
-FACEPLATES: Illustration PNGs cleaned up, cropped, and aligned. Gotta auto-trace them, make the faceplaates, and do the code to change them.
-LCD: Getting there!
-HANDLE LOAD/SAVE/RESET GRACEFULLY: I think we're good.
-EXPANDER SYNC: It works!! 
-SERVER: That one is the trivial part.
-*/
 
 // The singleton owner downloads the the fortune from the repository.
 // Other modules look for the cached file.
@@ -133,10 +122,11 @@ struct ArcaneBase : Module {
 	}
 	
 	void onReset() override {
+		jsonParsed = false;
 		jsonParsed = readTodaysFortune();
 		// On manual reset, we download if necessary, whether we own the singleton or not.
 		if (!jsonParsed) {
-			std::thread t(downloadTodaysFortune);
+			std::thread t(downloadTodaysFortune); // FIXME - doesn't seem to trigger?
 			t.detach();
 		}
 	}
@@ -491,7 +481,7 @@ struct Arcane : ArcaneBase {
 					}
 					break;
 				case 4: 
-					lcdText = "NEW ORACLE!"; // FIXME - Check it actually works!
+					lcdText = "NEW ORACLE!";
 					lcdPage = 0;
 					break;
 			}
@@ -516,6 +506,7 @@ struct Arcane : ArcaneBase {
 		pulseBar = false;
 		running = true;
 		lcdPage = 0;
+		cardDelayCounter = 0;
 		lcdDirty = true;
 		cardDirty = true;
 		ArcaneBase::onReset();
@@ -573,20 +564,18 @@ struct Arcane : ArcaneBase {
 			processLcdText(args);
 			lcdDirty = true;
 			if (jsonParsed) {
-				// Slow down loading the card, to simulate the user placing it manually themself
+				// Slow down loading the card by 8 secs, to simulate the user placing it manually themself
+				// and give them time to read the message on the faceplate, conveying better the theme
+				// of the module to new users.
 				// When zooming in we lose the FB sometimes it seems, so a periodic refresh is in order
-				cardDelayCounter = (cardDelayCounter == 3) ? 3 : cardDelayCounter + 1;
+				cardDelayCounter = (cardDelayCounter == 4) ? 4 : cardDelayCounter + 1;
 				cardDirty = true;
 			}
 		}
-		
-		// cardDirty = true; // FIXME TEST AAAA why
-		
 	}
 }; // Arcane
 
 
-// FIXME - Readme says it has polyphonic outputs, but it doesn't!!
 // Aleister is an expander, but it also works stand-alone.
 struct Aleister : ArcaneBase {
 	enum ParamIds {
@@ -620,12 +609,47 @@ struct Aleister : ArcaneBase {
 	int leftMessages[2][9] = {};
 	
 	void sendVoltage(const ProcessArgs& args) {
-		for (int i = 0; i < 16; i++) {
-			outputs[PATTERN_B_OUTPUT + i].setVoltage(patternB[i] ? 10.f : 0.f);
-			outputs[PATTERN_C_OUTPUT + i].setVoltage(patternC[i] ? 10.f : 0.f);
-			outputs[PATTERN_D_OUTPUT + i].setVoltage(patternD[i] ? 10.f : 0.f);
-			outputs[PATTERN_E_OUTPUT + i].setVoltage(patternE[i] ? 10.f : 0.f);
+		// If the user connects only the first cable, assume they want it polyphonic
+		bool polyBRequested = true, polyCRequested = true, polyDRequested = true, polyERequested = true;
+		for (int i = 1; i < 16; i++) {
+			if ( outputs[PATTERN_B_OUTPUT + i].isConnected() ) polyBRequested = false;
+			if ( outputs[PATTERN_C_OUTPUT + i].isConnected() ) polyCRequested = false;
+			if ( outputs[PATTERN_D_OUTPUT + i].isConnected() ) polyDRequested = false;
+			if ( outputs[PATTERN_E_OUTPUT + i].isConnected() ) polyERequested = false;
 		}
+		
+		// FIXME - setChannels(16) throws warnings. I don't understand why.
+		// See also: https://github.com/VCVRack/Rack/issues/1524 - possible compiler bug?
+		// Keeping code as is to keep the warnings until I understand what's going on.
+		if (polyBRequested) {
+			for (int i = 0; i < 16; i++) outputs[PATTERN_B_OUTPUT].setVoltage(patternB[i] ? 10.f : 0.f, i);
+			outputs[PATTERN_B_OUTPUT + 0].setChannels(16);
+		} else {
+			for (int i = 0; i < 16; i++) outputs[PATTERN_B_OUTPUT + i].setVoltage(patternB[i] ? 10.f : 0.f);
+			outputs[PATTERN_B_OUTPUT + 0].setChannels(0);
+		}
+		if (polyCRequested) {
+			for (int i = 0; i < 16; i++) outputs[PATTERN_C_OUTPUT].setVoltage(patternC[i] ? 10.f : 0.f, i);
+			outputs[PATTERN_C_OUTPUT + 0].setChannels(16);
+		} else {
+			for (int i = 0; i < 16; i++) outputs[PATTERN_C_OUTPUT + i].setVoltage(patternC[i] ? 10.f : 0.f);
+			outputs[PATTERN_C_OUTPUT + 0].setChannels(0);
+		}
+		if (polyDRequested) {
+			for (int i = 0; i < 16; i++) outputs[PATTERN_D_OUTPUT].setVoltage(patternD[i] ? 10.f : 0.f, i);
+			outputs[PATTERN_D_OUTPUT + 0].setChannels(16);
+		} else {
+			for (int i = 0; i < 16; i++) outputs[PATTERN_D_OUTPUT + i].setVoltage(patternD[i] ? 10.f : 0.f);
+			outputs[PATTERN_D_OUTPUT + 0].setChannels(0);
+		}
+		if (polyERequested) {
+			for (int i = 0; i < 16; i++) outputs[PATTERN_E_OUTPUT].setVoltage(patternE[i] ? 10.f : 0.f, i);
+			outputs[PATTERN_E_OUTPUT + 0].setChannels(16);
+		} else {
+			for (int i = 0; i < 16; i++) outputs[PATTERN_E_OUTPUT + i].setVoltage(patternE[i] ? 10.f : 0.f);
+			outputs[PATTERN_E_OUTPUT + 0].setChannels(0);
+		}
+		
 	}
 
 	void processLights(const ProcessArgs& args) {
@@ -665,7 +689,7 @@ struct Aleister : ArcaneBase {
 			/*  Message structure
 				0..3: 0 = disconnected, 1 = bar, 2 = 1/4, 3 = 1/8, 4 = 1/16, 5 = 1/32
 				4..8: Bar, 1/4, 1/8, 1/16, 1/32 step
-			*/		
+			*/
 			if (message[0]) {
 				turnOnPatternLight(PATTERN_B_STEP_LIGHT, message[ message[0] + 3 ], args );
 			} else {
@@ -735,26 +759,53 @@ struct LCDFramebufferWidget : FramebufferWidget{
 struct LCDDrawWidget : TransparentWidget {
 	Arcane *module;
 	std::array<std::shared_ptr<Svg>, 95> asciiSvg; // 32 to 126, the printable range
-	std::array<std::shared_ptr<Svg>, 24> pianoSvg; // 0..11: off, 12..23 = on
-	std::shared_ptr<Svg> pianoTestSvg;
+	std::array<std::shared_ptr<Svg>, 24> pianoSvg; // 0..11: Unlit, 12..23 = Lit
 	int testImage;
 
 	LCDDrawWidget(Arcane *module) {
 		this->module = module;
 		box.size = mm2px(Vec(36.0, 10.0));
-		pianoTestSvg = APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/lcd/piano/pianotest2.svg"));
-		for (int i = 0; i < 95; i++) {
+		for (int i = 0; i < 12; i++) // Unlit
+			pianoSvg[i] = APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/lcd/piano/u" + std::to_string(i) + ".svg"));
+		for (int i = 0; i < 12; i++) // Lit
+			pianoSvg[i + 12] = APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/lcd/piano/l" + std::to_string(i) + ".svg"));
+		for (int i = 0; i < 95; i++)
 			asciiSvg[i] = APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/lcd/Fixed_v01/" + std::to_string(i + 32) + ".svg"));
-		}
 	}
 
 	void draw(const DrawArgs &args) override {	
 		nvgScale(args.vg, 1.5, 1.5);
 		nvgSave(args.vg);
+		
 		// Piano
-		svgDraw(args.vg, pianoTestSvg->handle);
-		nvgTranslate(args.vg, 0, 11);
+		svgDraw(args.vg, pianoSvg[(module->scale[0])  ?  0 : 12]->handle);
+		nvgTranslate(args.vg, 6, 0);                     
+		svgDraw(args.vg, pianoSvg[(module->scale[1])  ?  1 : 13]->handle);
+		nvgTranslate(args.vg, 5, 0);                     
+		svgDraw(args.vg, pianoSvg[(module->scale[2])  ?  2 : 14]->handle);
+		nvgTranslate(args.vg, 5, 0);                     
+		svgDraw(args.vg, pianoSvg[(module->scale[3])  ?  3 : 15]->handle);
+		nvgTranslate(args.vg, 5, 0);                     
+		svgDraw(args.vg, pianoSvg[(module->scale[4])  ?  4 : 16]->handle);
+		nvgTranslate(args.vg, 7, 0);                     
+		svgDraw(args.vg, pianoSvg[(module->scale[5])  ?  5 : 17]->handle);
+		nvgTranslate(args.vg, 6, 0);                     
+		svgDraw(args.vg, pianoSvg[(module->scale[6])  ?  6 : 18]->handle);
+		nvgTranslate(args.vg, 5, 0);                     
+		svgDraw(args.vg, pianoSvg[(module->scale[7])  ?  7 : 19]->handle);
+		nvgTranslate(args.vg, 5, 0);                     
+		svgDraw(args.vg, pianoSvg[(module->scale[8])  ?  8 : 20]->handle);
+		nvgTranslate(args.vg, 5, 0);                     
+		svgDraw(args.vg, pianoSvg[(module->scale[9])  ?  9 : 21]->handle);
+		nvgTranslate(args.vg, 5, 0);
+		svgDraw(args.vg, pianoSvg[(module->scale[10]) ? 10 : 22]->handle);
+		nvgTranslate(args.vg, 5, 0);
+		svgDraw(args.vg, pianoSvg[(module->scale[11]) ? 11 : 23]->handle);
+		nvgRestore(args.vg);
+		
 		// 11 character display
+		nvgSave(args.vg);
+		nvgTranslate(args.vg, 0, 11);
 		std::string lcdText = module ? module->lcdText : "";
 		lcdText.append(11, ' '); // Ensure the string is long enough
 		for (int i = 0; i < 11; i++) {
@@ -777,7 +828,6 @@ struct CardFramebufferWidget : FramebufferWidget{
 	void step() override{
 		if (module) { // Required to avoid crashing module browser
 			if(module->cardDirty){
-				DEBUG("DIRTY!@!!!!");
 				FramebufferWidget::dirty = true;
 				module->cardDirty = false;
 			}
@@ -797,8 +847,8 @@ struct CardDrawWidget : TransparentWidget {
 	
 	void draw(const DrawArgs &args) override {
 		if (module) {
-			cardSvg = APP->window->loadSvg(asset::plugin(pluginInstance, "res/Arcane/7.svg"));
-			if (module->cardDelayCounter == 3) svgDraw(args.vg, cardSvg->handle);
+			cardSvg = APP->window->loadSvg(asset::plugin(pluginInstance, "res/Arcane/" + std::to_string(module->arcana) + ".svg"));
+			if (module->cardDelayCounter == 4) svgDraw(args.vg, cardSvg->handle);
 		}
 	}
 };
@@ -895,12 +945,6 @@ struct ArcaneWidget : ModuleWidget {
 		
 		// Expander light
 		addChild(createLight<SmallLight<OutputLight>>(mm2px(Vec(x + 38.1, 125.2)), module, Arcane::EXPANDER_LIGHT));
-		
-
-		
-		// Debug Output
-		// addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(35.0, 119.0)), module, Arcane::DEBUG_1_OUTPUT));
-		// addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(45.0, 119.0)), module, Arcane::DEBUG_2_OUTPUT));
 	}
 }; // ArcaneWidget
 
@@ -992,10 +1036,6 @@ struct AtoutWidget : ModuleWidget {
 		
 		// Expander light
 		addChild(createLight<SmallLight<OutputLight>>(mm2px(Vec(x + 39.0, 125.2)), module, Arcane::EXPANDER_LIGHT));
-		
-		// Debug Output
-		// addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(25.0, 119.0)), module, Arcane::DEBUG_1_OUTPUT));
-		// addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(35.0, 119.0)), module, Arcane::DEBUG_2_OUTPUT));
 	}
 }; // AtoutWidget
 
@@ -1061,11 +1101,7 @@ struct AleisterWidget : ModuleWidget {
 		}
 		
 		// Expander light
-		addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(1.4, 125.2)), module, Aleister::EXPANDER_LIGHT));
-		
-		// Debug Output
-		// addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(25.0, 119.0)), module, Aleister::DEBUG_1_OUTPUT));
-		// addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(35.0, 119.0)), module, Aleister::DEBUG_2_OUTPUT));
+		addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(1.4, 125.2)), module, Aleister::EXPANDER_LIGHT));		
 	}
 }; // AleisterWidget
 

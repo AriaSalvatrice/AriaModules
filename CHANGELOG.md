@@ -1,21 +1,29 @@
 Changelog
 =========
 
+## Planned for 1.3.0 or later and not implemented yet
+
+- [PLANNED - NEW MODULE] UnDuLaR - Scroll and zoom the rack via CV input
+- [PLANNED - NEW FEATURE] Darius: trigger inputs now accept polyphonic input. **Existing patches are very unlikely to be broken by this new feature. If they are, they can be fixed by splitting any polyphonic trigger input then sending only the first channel.**
+- [PLANNED - NEW FEATURE] Darius: added a "Step Back" CV input, and moved the inputs a bit around the faceplate. 
+- [PLANNED - NEW FEATURE] Darius: using the "Randomize" buttons is now stored in Undo history. 
+- [PLANNED - NEW FEATURE] Darius: added a CV polarity selector: unipolar (0V~10V) or bipolar (-5V~5V). CV Knobs now default to the center on new instances. 
+- [PLANNED - CHANGE] All existing modules: Unlit jacks are now blue instead of gray, following the established design language better.
+- [PLANNED - FIX] Darius: Initializing the device now resets it to the first node.
+
+
+
+
 ## Unreleased 1.3.0
 
 ### Added
+
 - [NEW MODULE] Arcane - Today's fortune ★
 - [NEW MODULE] Atout - Today's fortune ★
 - [NEW MODULE] Aleister - Today's fortune ★
-- [FIXME NOT READY - NEW MODULE] UnDuLaR - Scroll and zoom the rack via CV input
 
 ### Changed
 
-- [NEW FEATURE FIXME!! NOT CHANGED YET!!!!!!!!!] Darius: trigger inputs now accept polyphonic input. **Existing patches are very unlikely to be broken by this new feature. If they are, they can be fixed by splitting any polyphonic trigger input then sending only the first channel.**
-- [NEW FEATURE FIXME!! NOT CHANGED YET!!!!!!!!!] Darius: added a "Step Back" CV input, and moved the inputs a bit around the faceplate. 
-- [FIX IN PROGRESSSSSSSSSSSS!!!] Darius: Initializing the device now resets it to the first node.
-- [CHANGE FIXME!! NOT CHANGED YET!!!!!!!!!] Darius: added a CV polarity selector: unipolar (0V~10V) or bipolar (-5V~5V). CV Knobs now default to the center on new instances. 
-- [FIX IN PROGRESSSSSSSSSSSS!!!] All existing modules: Unlit jacks are now blue instead of gray, following the established color scheme better. 
 - [FIX] Splort, Smerge, Spleet, Swerge, Splirge: increased the refresh rate of lights, as they were optimized too aggressively.
 
 

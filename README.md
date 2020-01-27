@@ -70,7 +70,7 @@ Arcane, Atout & Aleister - Today's Fortune ★
 
 I hope luck is on your side. Every day, you will share together the fortune I shall grant you. It is your task to interpret what my augury means to you.
 
-Modules in the Arcane series are comprised almost only of output jacks, sending today's fortune as CV. **Those values are the same for every VCV Rack user**, no matter their platform, and you can't predict or influence them. I pronounce a new oracle every day at 12:00 AM UTC without fail.
+Modules in the Arcane series are comprised almost only of output jacks, sending today's fortune as CV. **Those values are the same for every Arcane user**, and nobody can predict or influence them. I pronounce a new oracle every day at 12:00 AM UTC without fail.
 
 I will draw the following cards, and impart the following knowledge:
 
@@ -95,7 +95,7 @@ Thus, _The Fool_ is 0V, _The Magician_ is 0.1V, and so on up to 2.1V for _The Wo
 You can multiply this signal by 4.76 with an offsetter such as [Bogaudio's](https://github.com/bogaudio/BogaudioModules#offset) to obtain a 0V~9.99V signal, if you wish.
 - **BPM** - Follows the [VCV Standard](https://vcvrack.com/manual/VoltageStandards#pitch-and-frequencies) for clocks and LFOs where 0V stands for 120BPM.    
 You can send that signal to a compatible clock module such as [Impromptu Modular's Clocked](https://marcboule.github.io/ImpromptuModular/#clocked) if you require a clock (for example, for swing, or other time signatures than 4/4).
-- **Reset** and **Run** - They control all the outputs below them. Operate them manually using the button, or synchornize multiple devices by sending them a trigger from a single source, for example the [Little Utils Button](https://github.com/mgunyho/Little-Utils#button).
+- **Reset** and **Run** - They control all the outputs below them. Operate them manually using the button, or synchronize multiple devices by sending them a trigger from a single source, for example the [Little Utils Button](https://github.com/mgunyho/Little-Utils#button).
 - **Gate/Ramp** on the **32nd note**, **16th note**, **8th note**, **4th note**, **Bar** - Sends, depending on the position of the **Gate/Ramp** switch, either a gate synchronized to the BPM at the corresponding interval in 4/4 time, or a 0V-10V ramp corresponding to that phase.    
 While **Arcane** can serve as a master clock, the ramp can be used to drive the [ZZC Clock](https://zzc.github.io/en/clock-manipulation/clock/), if you'd prefer to use it.
 - **_Bâtons_**, **_Coupes_**, **_Deniers_**, **_Épées_**. The four patterns, sent as gates on each 32nd note, 16th note, 8th note, 4th note, or bar.    
@@ -113,20 +113,20 @@ There are two available form factors of the same module:
 
 The third module, **Aleister**, gives you access to the **_Bâtons_**, **_Coupes_**, **_Deniers_**, and **_Épées_** binary patterns as series of 16 outputs sending continuously either 0V or 10V, rather than as a rhythmic pattern of gates. If you connect only the first output of a group, it will instead be a polyphonic cable outputting the entire group. **Aleister** takes 14hp of space. You can employ **Aleister**'s services as a standalone module, but when placed directely the right of either **Arcane** or **Atout**, the module will act as an expander, lighting up the jacks in sync with the rightmost connected output of the corresponding pattern on the parent module. Try it out, you'll understand what it does immediately.
 
-If the module is active at the time a new fortune is drawn, the values will not change, but a notification a new fortune is available will appear on the **LCD**. Using the right-click menu, you can _Initialize_ the module to download the newest fortune. Remember to also initialize **Aleister** if in use.
+If the module is active at the time a new fortune is drawn, the values will not change, but a notification a new fortune is available will appear on the **LCD**. Using the right-click menu, you can _Initialize_ the module to download the newest fortune. Remember to also initialize **Aleister** if in use (whether standalone or in expander mode).
 
-**The tarot deck used is the Conver – Ben-Dov (CBD) version**. The CBD deck was restored in 2008-2011 from the original 18th century deck by tarot expert [Dr. Yoav Ben-Dov's](https://www.cbdtarot.com/).    
-In traditional Tarot of Marseilles imagery (not just in this specific deck), some figures are frequently depicted nude. While the style of the CBD deck is neither graphic nor intended to titillate, I took the liberty to slightly alter a few cards to remove details, as most users will download my plugin without being forewarned about contents a small minority would object to. I hope you will understand this decision.
+**The tarot deck used is the Conver – Ben-Dov (CBD) version**. The CBD deck was restored in 2008-2011 from the original 18th century deck by tarot expert [Dr. Yoav Ben-Dov's](https://www.cbdtarot.com/). It was chosen for its traditional significance, the quality of its imagery, and the simplicity of its broad lines being well suited to VCV's limited vector rendering engine.    
+While there is great variety in decks across many different Tarot traditions, Tarot of Marseilles imagery does not vary significantly across decks. The exact same subjects are drawn from the same angle, leaving very little room for the artist to re-interpret the themes. A few figures are generally depicted nude, and while the style of the CBD deck is obviously neither graphic nor intended to titillate, I took the liberty to slightly alter a few cards to remove details, in particular the Devil's codpiece, as most users will download my plugin without being forewarned about contents a small minority would find upsetting. I hope you will understand my decision. 
 
 **Upon activation, this module will connect to the internet**, and fetch today's numbers on a GitHub repository via HTTP. The fortunes are not generated locally to make it possible for all users to share the same numbers every day, while also making it impossible to cheat fate and predict the next oracle (which a local deterministic implementation would necessarily entail).
 
 If the repository is unreachable, the module will will output 0V on all ports, except the quantizer, which will forward input as-is. [You can find more information about Arcane server and API, and their source code, on their GitHub repository](https://github.com/AriaSalvatrice/Arcane).
 
-**There is no offline mode, and no way to load older fortunes, by design.** These are multiplayer-only oracles. But I won't prevent you from editing the .json files in the `AriaSalvatrice/Arcane/` directory of your VCV Rack user directory, if you really must. Every downloaded fortune is archived, and if a local file exists for today, it will not be checked against the server.     
+**There is no offline mode, and no built-in way to load older fortunes, by design.** These are multiplayer-only oracles. But I won't prevent you from editing the .json files in the `AriaSalvatrice/Arcane/` directory of your VCV Rack user directory, if you really must. Every downloaded fortune is archived locally, a full archive is available from GitHub, and if a local file exists for today, it will not be checked against the server.     
 (Quick tech remark about JSON API cache spoofing: such self-deception will never alter your true destiny, and it is unwise to cling to the past instead of living for a future you can yet change.)
 
 Using this series of modules to their full extent requires a bit of creative patching, a bit of lateral thinking, but most importantly, friends to share your different interpretations of the same fortune with.    
-If you treat my oracles as a mere random number generator, you will never gain any wisdom from them.
+**If you treat my oracles as a mere random number generator, you will never gain any wisdom from them.**
 
 
 
