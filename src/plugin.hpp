@@ -4,12 +4,9 @@
 // Explicit <array> include required on OS X
 #include <array> 
 
-// Adds unlabeled debug jacks (that do nothing but can be wired as needed during development) to the bottom of modules
-// #define ARIA_DEBUG
-
 // Builds modules still under development and not ready for general use.
 // Remember to add them to the plugin.json to see them in the browser!
-// #define ARIA_DEV_MODULES
+#define ARIA_DEV_MODULES
 
 using namespace rack;
 
@@ -28,26 +25,16 @@ extern Model *modelSplirge;
 // Sequencer
 extern Model *modelDarius;
 
+// Arcane
+extern Model *modelArcane;
+extern Model *modelAtout;
+extern Model *modelAleister;
+
 // Blank plate
 extern Model *modelBlank;
 
 #ifdef ARIA_DEV_MODULES
-// Bend series
 extern Model *modelBendlet;
-
-/*
-
-    {
-      "slug": "Bendlet",
-      "name": "Signature Series Bendlet",
-      "description": "Pitchbend helper",
-      "tags": [
-        "Controller",
-        "Polyphonic",
-        "Utility",
-        "Tuner"
-      ]
-    },
-	
-*/
+extern Model *modelUndular;
+extern Model *modelTest;
 #endif

@@ -27,7 +27,7 @@ struct Splort : Module {
 
 	Splort() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-		ledDivider.setDivision(4096);
+		ledDivider.setDivision(256);
 		configParam(SORT_PARAM, 0.f, 1.f, 0.f, "Sort voltages");
 	}
 	
