@@ -65,7 +65,7 @@ stages:
     - bash: |
         export RACK_DIR=$AGENT_TEMPDIRECTORY/Rack-SDK
         export CC=gcc
-        make dist
+        make azure-win-dist
         mkdir artifacts_win/
         cp dist/*zip artifacts_win/
       displayName: Build Windows Plugin
