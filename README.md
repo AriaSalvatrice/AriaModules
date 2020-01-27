@@ -66,6 +66,8 @@ I guess the module is also technically named after some dead Persian guy who did
 Arcane, Atout & Aleister - Today's Fortune ★
 --------------------------------------------
 
+**THIS MODULE IS IN BETA. IT'S NOT AVAILABLE FROM THE VCV LIBRARY YET! PLEASE REFER TO THE [VCV RACK FORUMS](https://community.vcvrack.com/t/aria-salvatrice-signature-series-1-2-0-darius-branching-step-sequencer/7734/) FOR TEST BINARIES.**
+
 ![Arcane](/doc/arcane.png)
 
 I hope luck is on your side. Every day, you will share together the fortune I shall grant you. It is your task to interpret what my augury means to you.
