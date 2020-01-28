@@ -57,10 +57,8 @@ struct ArcaneBase : Module {
 		std::string filename = asset::user("AriaSalvatrice/Arcane/").c_str() + todaysFortuneDate + ".json";
 		// Open the file
 		FILE* jsonFile = fopen(filename.c_str(), "r");
-		if (!jsonFile) {
-			fclose(jsonFile);
-			return false;
-		}
+		if (!jsonFile) return false;
+
 		// Read the JSON
 		json_error_t error;
 		json_t* rootJ = json_loadf(jsonFile, 0, &error);
@@ -442,7 +440,7 @@ struct Arcane : ArcaneBase {
 					break;
 				case 1:
 					if (arcana == 0 ) lcdText = "   FOOL    ";
-					if (arcana == 1 ) lcdText = " MAGICIAL  ";
+					if (arcana == 1 ) lcdText = " MAGICIAN  ";
 					if (arcana == 2 ) lcdText = "H.PRIESTESS";
 					if (arcana == 3 ) lcdText = "  EMPRESS  ";
 					if (arcana == 4 ) lcdText = "  EMPEROR  ";
