@@ -127,22 +127,22 @@ struct SplortWidget : ModuleWidget {
 		addInput(createInputCentered<AriaJackIn>(mm2px(Vec(12.7, 20.0)), module, Splort::POLY_INPUT));
 
 		// Split outputs with lights
-		addChild(createLightCentered<AriaNewOutputLight>(mm2px(Vec(7.62, 29.5)),  module, Splort::SPLIT_LIGHT + 0));
-		addChild(createLightCentered<AriaNewOutputLight>(mm2px(Vec(7.62, 37.5)),  module, Splort::SPLIT_LIGHT + 1));
-		addChild(createLightCentered<AriaNewOutputLight>(mm2px(Vec(7.62, 45.5)),  module, Splort::SPLIT_LIGHT + 2));
-		addChild(createLightCentered<AriaNewOutputLight>(mm2px(Vec(7.62, 53.5)),  module, Splort::SPLIT_LIGHT + 3));
-		addChild(createLightCentered<AriaNewOutputLight>(mm2px(Vec(7.62, 61.5)),  module, Splort::SPLIT_LIGHT + 4));
-		addChild(createLightCentered<AriaNewOutputLight>(mm2px(Vec(7.62, 69.5)),  module, Splort::SPLIT_LIGHT + 5));
-		addChild(createLightCentered<AriaNewOutputLight>(mm2px(Vec(7.62, 77.5)),  module, Splort::SPLIT_LIGHT + 6));
-		addChild(createLightCentered<AriaNewOutputLight>(mm2px(Vec(7.62, 85.5)),  module, Splort::SPLIT_LIGHT + 7));
-		addChild(createLightCentered<AriaNewOutputLight>(mm2px(Vec(17.78, 29.5)), module, Splort::SPLIT_LIGHT + 8));
-		addChild(createLightCentered<AriaNewOutputLight>(mm2px(Vec(17.78, 37.5)), module, Splort::SPLIT_LIGHT + 9));
-		addChild(createLightCentered<AriaNewOutputLight>(mm2px(Vec(17.78, 45.5)), module, Splort::SPLIT_LIGHT + 10));
-		addChild(createLightCentered<AriaNewOutputLight>(mm2px(Vec(17.78, 53.5)), module, Splort::SPLIT_LIGHT + 11));
-		addChild(createLightCentered<AriaNewOutputLight>(mm2px(Vec(17.78, 61.5)), module, Splort::SPLIT_LIGHT + 12));
-		addChild(createLightCentered<AriaNewOutputLight>(mm2px(Vec(17.78, 69.5)), module, Splort::SPLIT_LIGHT + 13));
-		addChild(createLightCentered<AriaNewOutputLight>(mm2px(Vec(17.78, 77.5)), module, Splort::SPLIT_LIGHT + 14));
-		addChild(createLightCentered<AriaNewOutputLight>(mm2px(Vec(17.78, 85.5)), module, Splort::SPLIT_LIGHT + 15));
+		addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 29.5)),  module, Splort::SPLIT_LIGHT + 0));
+		addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 37.5)),  module, Splort::SPLIT_LIGHT + 1));
+		addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 45.5)),  module, Splort::SPLIT_LIGHT + 2));
+		addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 53.5)),  module, Splort::SPLIT_LIGHT + 3));
+		addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 61.5)),  module, Splort::SPLIT_LIGHT + 4));
+		addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 69.5)),  module, Splort::SPLIT_LIGHT + 5));
+		addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 77.5)),  module, Splort::SPLIT_LIGHT + 6));
+		addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 85.5)),  module, Splort::SPLIT_LIGHT + 7));
+		addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(17.78, 29.5)), module, Splort::SPLIT_LIGHT + 8));
+		addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(17.78, 37.5)), module, Splort::SPLIT_LIGHT + 9));
+		addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(17.78, 45.5)), module, Splort::SPLIT_LIGHT + 10));
+		addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(17.78, 53.5)), module, Splort::SPLIT_LIGHT + 11));
+		addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(17.78, 61.5)), module, Splort::SPLIT_LIGHT + 12));
+		addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(17.78, 69.5)), module, Splort::SPLIT_LIGHT + 13));
+		addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(17.78, 77.5)), module, Splort::SPLIT_LIGHT + 14));
+		addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(17.78, 85.5)), module, Splort::SPLIT_LIGHT + 15));
 		
 		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 29.5)),  module, Splort::SPLIT_OUTPUT + 0));
 		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 37.5)),  module, Splort::SPLIT_OUTPUT + 1));
@@ -165,8 +165,8 @@ struct SplortWidget : ModuleWidget {
 		addParam(createParamCentered<AriaPushButton700>(mm2px(Vec(12.7, 95.0)), module, Splort::SORT_PARAM));
 
 		// Link jacks with lights
-		addChild(createLightCentered<AriaNewInputLight>(mm2px(Vec(5.62, 109.0)), module, Splort::LINK_IN_LIGHT));
-		addChild(createLightCentered<AriaNewOutputLight>(mm2px(Vec(19.78, 109.0)), module, Splort::LINK_OUT_LIGHT));
+		addChild(createLightCentered<AriaInputLight>(mm2px(Vec(5.62, 109.0)), module, Splort::LINK_IN_LIGHT));
+		addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(19.78, 109.0)), module, Splort::LINK_OUT_LIGHT));
 		
 		addInput(createInputCentered<AriaJackTransparent>(mm2px(Vec(5.62, 109.0)), module, Splort::LINK_INPUT));
 		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(19.78, 109.0)), module, Splort::LINK_OUTPUT));

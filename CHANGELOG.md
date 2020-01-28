@@ -4,11 +4,11 @@ Changelog
 ## Planned for 1.3.0 or later, not implemented at all yet
 
 - [PLANNED - NEW MODULE] UnDuLaR - Scroll and zoom the rack via CV input
-- [PLANNED - NEW FEATURE] Darius: trigger inputs now accept polyphonic input. **Existing patches are very unlikely to be broken by this new feature. If they are, they can be fixed by splitting any polyphonic trigger input then sending only the first channel.**
-- [PLANNED - NEW FEATURE] Darius: added a "Step Back" CV input, and moved the inputs a bit around the faceplate. 
-- [PLANNED - NEW FEATURE] Darius: using the "Randomize" buttons is now stored in Undo history. 
-- [PLANNED - NEW FEATURE] Darius: added a CV polarity selector: unipolar (0V~10V) or bipolar (-5V~5V). CV Knobs now default to the center on new instances. 
-- [PLANNED - FIX] Darius: Initializing the device now resets it to the first node.
+- [PLANNED - CHANGE] Darius: Moved jacks and buttons around a little to accomodate new features.
+- [PLANNED - NEW FEATURE] Darius: Added a "Step Back" CV input. 
+- [PLANNED - NEW FEATURE] Darius: Using the "Randomize" buttons is now stored in Undo history. 
+- [PLANNED - NEW FEATURE] Darius: Added a CV polarity selector: unipolar (0V~10V) or bipolar (-5V~5V). CV Knobs now default to the center on new instances. 
+- [PLANNED - NEW FEATURE] Darius: Added a "Seed" CV input, to force a specific random seed to be used.
 
 
 ## Unreleased 1.3.0
@@ -18,11 +18,17 @@ Changelog
 - [NEW MODULE] Arcane - Today's fortune ★
 - [NEW MODULE] Atout - Today's fortune ★
 - [NEW MODULE] Aleister - Today's fortune ★
+- [NEW FEATURE] Darius: All trigger inputs now accept polyphonic input. Existing patches are very unlikely to be broken by this new feature. If they are, they can be fixed by splitting any polyphonic trigger input then sending only the first channel.
 
 ### Changed
 
 - [CHANGE] All existing modules: Unlit jacks and knobs are now blue instead of gray, following the established design language better.
-- [FIX] Splort, Smerge, Spleet, Swerge, Splirge: increased the refresh rate of lights, as they were optimized too aggressively.
+
+### Fixed
+
+- [FIX] Darius: Initializing the device now resets it to the first node.
+- [FIX] Splort, Smerge, Spleet, Swerge, Splirge: Increased the refresh rate of lights, as they were optimized too aggressively.
+
 
 
 
@@ -34,22 +40,26 @@ Changelog
 
 
 
+
 ## [1.1.0] - 2020-01-13
 
 ### Added
 
-- [NOTE] Now this collection is starting to have some useful modules! This plugin now provides a fully-featured Split and Merge series.
 - [NEW MODULE] Splort - 16 channels polyphonic split with optional chainable sort mode
 - [NEW MODULE] Smerge - 16 channels polyphonic merge with optional chainable sort mode
 - [NEW MODULE] Spleet - Dual 4 channels / single 8 channels polyphonic split with optional sort mode
 - [NEW MODULE] Swerge - Dual 4 channels / single 8 channels polyphonic merge with optional sort mode
 - [NEW MODULE] Blank Plate - A complimentary blank plate and ♥-head screwdriver are provided with every Signature Series module purchase
+- [NEW FEATURE] Splirge: Sort mode added.
 
 ### Changed
 
-- [NEW FEATURE] Splirge: Sort mode added.
 - [CHANGE] Splirge: New panel layout. The merge and split sections are swapped around to make it easier to understand the internal wiring. Existing patches will still work as before. 
+
+### Fixed
+
 - [FIX] Splirge: Fixed merging non-contiguous channels not resetting unplugged channels to 0v.
+
 
 
 

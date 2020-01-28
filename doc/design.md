@@ -12,7 +12,7 @@ This documents what I've done so far, mostly for my own reference. It's not a se
 ## Fonts
 
 - [Francois One](https://fonts.google.com/specimen/Francois+One) 13pt for titles
-- [Nova](https://fontlibrary.org/en/font/nova) Flat 9pt with -0.50px letterspacing for labels
+- [Nova](https://fontlibrary.org/en/font/nova) Flat 9pt, -0.50px letterspacing, 0.60 line-height for labels
 
 Font sizes expressed in however the hell Inkscape chooses to interpret pt and px by default. 
 

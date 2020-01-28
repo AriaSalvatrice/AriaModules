@@ -3,7 +3,7 @@
 using namespace rack;
 extern Plugin* pluginInstance;
 
-
+// - TODO: Remove every single dependency on the component library, since it is not open-source. 
 
 //////////////////////////////// Decorative
 
@@ -46,12 +46,8 @@ struct AriaJackTransparent : SVGPort {
 	}
 };
 
-/////////////// Old style jack lights (Split and Merge, Darius) - TODO: Rework them to use the new ones.
-
-// This is the light that goes behind transparent jacks. Add it before adding the jack.
-// Taken from the component library, I don't fully understand how it works.
-// TODO: clean this up to remove any dependency on the component library.
-// Also, I can most likely merge the light and the widget into one single component (cf. LEDButton)
+/////////////// Old style lights - TODO: Remove dependency on component library
+// Still used for a few things! 
 template <typename TBase = GrayModuleLightWidget>
 struct TOutputLight : TBase {
 	TOutputLight() {
@@ -68,18 +64,11 @@ struct TInputLight : TBase {
 };
 typedef TInputLight<> InputLight;
 
-// Set it 0.2mm to the bottom right of the 8.2mm component, or just all centered
-template <typename TBase>
-struct AriaJackLight : TBase {
+
+/////////////// Jack lights
+// Those lights should be added before transparent jacks, at the same position.
+struct AriaJackLight : app::ModuleLightWidget {
 	AriaJackLight() {
-		this->box.size = app::mm2px(math::Vec(7.8, 7.8));
-	}
-};
-
-
-// New style jack lights. Those don't need to be offset. TODO: replace the old ones and lose the "new" qualifier.
-struct AriaNewJackLight : app::ModuleLightWidget {
-	AriaNewJackLight() {
 		this->box.size = app::mm2px(math::Vec(8.0, 8.0));
 		this->bgColor = nvgRGB(0x0e, 0x69, 0x77);
 		this->borderColor = nvgRGB(0x0e, 0x69, 0x77);
@@ -111,14 +100,14 @@ struct AriaNewJackLight : app::ModuleLightWidget {
 	}
 };
 
-struct AriaNewInputLight : AriaNewJackLight {
-	AriaNewInputLight() {
+struct AriaInputLight : AriaJackLight {
+	AriaInputLight() {
 		this->addBaseColor(nvgRGB(0xff, 0xcc, 0x03));
 	}
 };
 
-struct AriaNewOutputLight : AriaNewJackLight {
-	AriaNewOutputLight() {
+struct AriaOutputLight : AriaJackLight {
+	AriaOutputLight() {
 		this->addBaseColor(nvgRGB(0xfc, 0xae, 0xbb));
 	}
 };

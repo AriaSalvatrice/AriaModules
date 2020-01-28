@@ -1052,7 +1052,7 @@ struct AleisterWidget : ModuleWidget {
 	
 	// No BG, so I can overlay it on top of the normal light.
 	// Would have preferred to go light blue, but yellow is the only color that feels readable but not jarring.
-	struct AriaStepLight : AriaNewJackLight {
+	struct AriaStepLight : AriaJackLight {
 		AriaStepLight() {
 			this->addBaseColor(nvgRGB(0xff, 0xcc, 0x03));
 			this->bgColor = nvgRGBA(0xff, 0xff, 0xff, 0x00);
@@ -1077,14 +1077,14 @@ struct AleisterWidget : ModuleWidget {
 		float startY = 18.0;
 		
 		for (int i = 0; i < 8; i++) {
-			addChild(createLight<AriaNewOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 00.f)), module, Aleister::PATTERN_B_LIGHT + i + 0));
-			addChild(createLight<AriaNewOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 08.f)), module, Aleister::PATTERN_B_LIGHT + i + 8));
-			addChild(createLight<AriaNewOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 24.f)), module, Aleister::PATTERN_C_LIGHT + i + 0));
-			addChild(createLight<AriaNewOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 32.f)), module, Aleister::PATTERN_C_LIGHT + i + 8));
-			addChild(createLight<AriaNewOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 48.f)), module, Aleister::PATTERN_D_LIGHT + i + 0));
-			addChild(createLight<AriaNewOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 56.f)), module, Aleister::PATTERN_D_LIGHT + i + 8));
-			addChild(createLight<AriaNewOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 72.f)), module, Aleister::PATTERN_E_LIGHT + i + 0));
-			addChild(createLight<AriaNewOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 80.f)), module, Aleister::PATTERN_E_LIGHT + i + 8));
+			addChild(createLight<AriaOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 00.f)), module, Aleister::PATTERN_B_LIGHT + i + 0));
+			addChild(createLight<AriaOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 08.f)), module, Aleister::PATTERN_B_LIGHT + i + 8));
+			addChild(createLight<AriaOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 24.f)), module, Aleister::PATTERN_C_LIGHT + i + 0));
+			addChild(createLight<AriaOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 32.f)), module, Aleister::PATTERN_C_LIGHT + i + 8));
+			addChild(createLight<AriaOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 48.f)), module, Aleister::PATTERN_D_LIGHT + i + 0));
+			addChild(createLight<AriaOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 56.f)), module, Aleister::PATTERN_D_LIGHT + i + 8));
+			addChild(createLight<AriaOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 72.f)), module, Aleister::PATTERN_E_LIGHT + i + 0));
+			addChild(createLight<AriaOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 80.f)), module, Aleister::PATTERN_E_LIGHT + i + 8));
 			
 			addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.0), startY + 00.f)), module, Aleister::PATTERN_B_STEP_LIGHT + i + 0));
 			addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.0), startY + 08.f)), module, Aleister::PATTERN_B_STEP_LIGHT + i + 8));
