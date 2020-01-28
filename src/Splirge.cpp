@@ -158,15 +158,15 @@ struct SplirgeWidget : ModuleWidget {
 		addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 36.0)), module, Splirge::MERGE_INPUT + 2));
 		addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 44.0)), module, Splirge::MERGE_INPUT + 3));
 		
-		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(7.62, 54.0)), module, Splirge::POLY_LIGHT));
+		addChild(createLightCentered<AriaNewOutputLight>(mm2px(Vec(7.62, 54.0)), module, Splirge::POLY_LIGHT));
 		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 54.0)), module, Splirge::POLY_OUTPUT));
 		
 		addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 72.5)), module, Splirge::POLY_INPUT));
 		
-		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(7.62, 85.0)), module, Splirge::SPLIT_LIGHT  + 0));
-		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(7.62, 93.0)), module, Splirge::SPLIT_LIGHT  + 1));
-		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(7.62, 101.0)), module, Splirge::SPLIT_LIGHT + 2));
-		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(7.62, 109.0)), module, Splirge::SPLIT_LIGHT + 3));
+		addChild(createLightCentered<AriaNewOutputLight>(mm2px(Vec(7.62, 85.0)), module, Splirge::SPLIT_LIGHT  + 0));
+		addChild(createLightCentered<AriaNewOutputLight>(mm2px(Vec(7.62, 93.0)), module, Splirge::SPLIT_LIGHT  + 1));
+		addChild(createLightCentered<AriaNewOutputLight>(mm2px(Vec(7.62, 101.0)), module, Splirge::SPLIT_LIGHT + 2));
+		addChild(createLightCentered<AriaNewOutputLight>(mm2px(Vec(7.62, 109.0)), module, Splirge::SPLIT_LIGHT + 3));
 		
 		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62,  85.0)), module, Splirge::SPLIT_OUTPUT   + 0));
 		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62,  93.0)), module, Splirge::SPLIT_OUTPUT   + 1));

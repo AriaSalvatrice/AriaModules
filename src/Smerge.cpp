@@ -168,8 +168,8 @@ struct SmergeWidget : ModuleWidget {
 		addParam(createParamCentered<AriaPushButton700>(mm2px(Vec(12.7, 95.0)), module, Smerge::SORT_PARAM));
 
 		// Link jacks with lights
-		addChild(createLightCentered<AriaJackLight<InputLight>>(mm2px(Vec(5.62, 109.0)), module, Smerge::LINK_IN_LIGHT));
-		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(19.78, 109.0)), module, Smerge::LINK_OUT_LIGHT));
+		addChild(createLightCentered<AriaNewInputLight>(mm2px(Vec(5.62, 109.0)), module, Smerge::LINK_IN_LIGHT));
+		addChild(createLightCentered<AriaNewOutputLight>(mm2px(Vec(19.78, 109.0)), module, Smerge::LINK_OUT_LIGHT));
 		
 		addInput(createInputCentered<AriaJackTransparent>(mm2px(Vec(5.62, 109.0)), module, Smerge::LINK_INPUT));
 		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(19.78, 109.0)), module, Smerge::LINK_OUTPUT));

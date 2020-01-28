@@ -168,7 +168,7 @@ struct SwergeWidget : ModuleWidget {
 		addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 36.0)), module, Swerge::MERGE_INPUT + 2));
 		addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 44.0)), module, Swerge::MERGE_INPUT + 3));
 		
-		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(7.62, 54.0)), module, Swerge::POLY_LIGHT + 0));
+		addChild(createLightCentered<AriaNewOutputLight>(mm2px(Vec(7.62, 54.0)), module, Swerge::POLY_LIGHT + 0));
 		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 54.0)), module, Swerge::POLY_OUTPUT + 0));
 		
 		addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 67.0)), module, Swerge::MERGE_INPUT + 4));
@@ -176,7 +176,7 @@ struct SwergeWidget : ModuleWidget {
 		addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 83.0)), module, Swerge::MERGE_INPUT + 6));
 		addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 91.0)), module, Swerge::MERGE_INPUT + 7));
 		
-		addChild(createLightCentered<AriaJackLight<OutputLight>>(mm2px(Vec(7.62, 101.0)), module, Swerge::POLY_LIGHT + 1));
+		addChild(createLightCentered<AriaNewOutputLight>(mm2px(Vec(7.62, 101.0)), module, Swerge::POLY_LIGHT + 1));
 		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 101.0)), module, Swerge::POLY_OUTPUT + 1));
 		
 		// Pushbutton

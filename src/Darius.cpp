@@ -256,59 +256,59 @@ struct DariusWidget : ModuleWidget {
 
 		// The main area - lights, knobs and trigger outputs.
 		for (int i = 0; i < 1; i++) {
-			addChild(createLight<AriaJackLight<InputLight>>( mm2px(Vec( 4.7, (16.2 + (6.5 * 7) + i * 13.0))), module, Darius::CV_LIGHT +    i));
-			addParam(createParam<AriaKnob820Transparent>(    mm2px(Vec( 4.5, (16.0 + (6.5 * 7) + i * 13.0))), module, Darius::CV_PARAM +    i));
-			addParam(createParam<AriaKnob820Random>(         mm2px(Vec(14.5, (16.0 + (6.5 * 7) + i * 13.0))), module, Darius::ROUTE_PARAM + i));
-			addChild(createLight<AriaJackLight<OutputLight>>(mm2px(Vec( 9.7, (22.7 + (6.5 * 7) + i * 13.0))), module, Darius::GATE_LIGHT +  i));
-			addOutput(createOutput<AriaJackTransparent>(     mm2px(Vec( 9.5, (22.5 + (6.5 * 7) + i * 13.0))), module, Darius::GATE_OUTPUT + i));
+			addChild(createLight<AriaNewInputLight>(     mm2px(Vec( 4.5, (16.0 + (6.5 * 7) + i * 13.0))), module, Darius::CV_LIGHT +    i));
+			addParam(createParam<AriaKnob820Transparent>(mm2px(Vec( 4.5, (16.0 + (6.5 * 7) + i * 13.0))), module, Darius::CV_PARAM +    i));
+			addParam(createParam<AriaKnob820Random>(     mm2px(Vec(14.5, (16.0 + (6.5 * 7) + i * 13.0))), module, Darius::ROUTE_PARAM + i));
+			addChild(createLight<AriaNewOutputLight>(    mm2px(Vec( 9.5, (22.5 + (6.5 * 7) + i * 13.0))), module, Darius::GATE_LIGHT +  i));
+			addOutput(createOutput<AriaJackTransparent>( mm2px(Vec( 9.5, (22.5 + (6.5 * 7) + i * 13.0))), module, Darius::GATE_OUTPUT + i));
 		}
 		for (int i = 0; i < 2; i++) {
-			addChild(createLight<AriaJackLight<InputLight>>( mm2px(Vec(24.7, (16.2 + (6.5 * 6) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP2START));
-			addParam(createParam<AriaKnob820Transparent>(    mm2px(Vec(24.5, (16.0 + (6.5 * 6) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP2START));
-			addParam(createParam<AriaKnob820Random>(         mm2px(Vec(34.5, (16.0 + (6.5 * 6) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP2START));
-			addChild(createLight<AriaJackLight<OutputLight>>(mm2px(Vec(29.7, (22.7 + (6.5 * 6) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP2START));
-			addOutput(createOutput<AriaJackTransparent>(     mm2px(Vec(29.5, (22.5 + (6.5 * 6) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP2START));
+			addChild(createLight<AriaNewInputLight>(     mm2px(Vec(24.5, (16.0 + (6.5 * 6) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP2START));
+			addParam(createParam<AriaKnob820Transparent>(mm2px(Vec(24.5, (16.0 + (6.5 * 6) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP2START));
+			addParam(createParam<AriaKnob820Random>(     mm2px(Vec(34.5, (16.0 + (6.5 * 6) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP2START));
+			addChild(createLight<AriaNewOutputLight>(    mm2px(Vec(29.5, (22.5 + (6.5 * 6) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP2START));
+			addOutput(createOutput<AriaJackTransparent>( mm2px(Vec(29.5, (22.5 + (6.5 * 6) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP2START));
 		}
 		for (int i = 0; i < 3; i++) {
-			addChild(createLight<AriaJackLight<InputLight>>( mm2px(Vec(44.7, (16.2 + (6.5 * 5) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP3START));
-			addParam(createParam<AriaKnob820Transparent>(    mm2px(Vec(44.5, (16.0 + (6.5 * 5) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP3START));
-			addParam(createParam<AriaKnob820Random>(         mm2px(Vec(54.5, (16.0 + (6.5 * 5) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP3START));
-			addChild(createLight<AriaJackLight<OutputLight>>(mm2px(Vec(49.7, (22.7 + (6.5 * 5) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP3START));
-			addOutput(createOutput<AriaJackTransparent>(     mm2px(Vec(49.5, (22.5 + (6.5 * 5) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP3START));
+			addChild(createLight<AriaNewInputLight>(     mm2px(Vec(44.5, (16.0 + (6.5 * 5) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP3START));
+			addParam(createParam<AriaKnob820Transparent>(mm2px(Vec(44.5, (16.0 + (6.5 * 5) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP3START));
+			addParam(createParam<AriaKnob820Random>(     mm2px(Vec(54.5, (16.0 + (6.5 * 5) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP3START));
+			addChild(createLight<AriaNewOutputLight>(    mm2px(Vec(49.5, (22.5 + (6.5 * 5) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP3START));
+			addOutput(createOutput<AriaJackTransparent>( mm2px(Vec(49.5, (22.5 + (6.5 * 5) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP3START));
 		}
 		for (int i = 0; i < 4; i++) {
-			addChild(createLight<AriaJackLight<InputLight>>( mm2px(Vec(64.7, (16.2 + (6.5 * 4) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP4START));
-			addParam(createParam<AriaKnob820Transparent>(    mm2px(Vec(64.5, (16.0 + (6.5 * 4) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP4START));
-			addParam(createParam<AriaKnob820Random>(         mm2px(Vec(74.5, (16.0 + (6.5 * 4) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP4START));
-			addChild(createLight<AriaJackLight<OutputLight>>(mm2px(Vec(69.7, (22.7 + (6.5 * 4) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP4START));
-			addOutput(createOutput<AriaJackTransparent>(     mm2px(Vec(69.5, (22.5 + (6.5 * 4) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP4START));
+			addChild(createLight<AriaNewInputLight>(     mm2px(Vec(64.5, (16.0 + (6.5 * 4) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP4START));
+			addParam(createParam<AriaKnob820Transparent>(mm2px(Vec(64.5, (16.0 + (6.5 * 4) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP4START));
+			addParam(createParam<AriaKnob820Random>(     mm2px(Vec(74.5, (16.0 + (6.5 * 4) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP4START));
+			addChild(createLight<AriaNewOutputLight>(    mm2px(Vec(69.5, (22.5 + (6.5 * 4) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP4START));
+			addOutput(createOutput<AriaJackTransparent>( mm2px(Vec(69.5, (22.5 + (6.5 * 4) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP4START));
 		}
 		for (int i = 0; i < 5; i++) {
-			addChild(createLight<AriaJackLight<InputLight>>( mm2px(Vec(84.7, (16.2 + (6.5 * 3) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP5START));
-			addParam(createParam<AriaKnob820Transparent>(    mm2px(Vec(84.5, (16.0 + (6.5 * 3) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP5START));
-			addParam(createParam<AriaKnob820Random>(         mm2px(Vec(94.5, (16.0 + (6.5 * 3) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP5START));
-			addChild(createLight<AriaJackLight<OutputLight>>(mm2px(Vec(89.7, (22.7 + (6.5 * 3) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP5START));
-			addOutput(createOutput<AriaJackTransparent>(     mm2px(Vec(89.5, (22.5 + (6.5 * 3) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP5START));
+			addChild(createLight<AriaNewInputLight>(     mm2px(Vec(84.5, (16.0 + (6.5 * 3) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP5START));
+			addParam(createParam<AriaKnob820Transparent>(mm2px(Vec(84.5, (16.0 + (6.5 * 3) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP5START));
+			addParam(createParam<AriaKnob820Random>(     mm2px(Vec(94.5, (16.0 + (6.5 * 3) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP5START));
+			addChild(createLight<AriaNewOutputLight>(    mm2px(Vec(89.5, (22.5 + (6.5 * 3) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP5START));
+			addOutput(createOutput<AriaJackTransparent>( mm2px(Vec(89.5, (22.5 + (6.5 * 3) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP5START));
 		}
 		for (int i = 0; i < 6; i++) {
-			addChild(createLight<AriaJackLight<InputLight>>( mm2px(Vec(104.7, (16.2 + (6.5 * 2) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP6START));
-			addParam(createParam<AriaKnob820Transparent>(    mm2px(Vec(104.5, (16.0 + (6.5 * 2) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP6START));
-			addParam(createParam<AriaKnob820Random>(         mm2px(Vec(114.5, (16.0 + (6.5 * 2) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP6START));
-			addChild(createLight<AriaJackLight<OutputLight>>(mm2px(Vec(109.7, (22.7 + (6.5 * 2) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP6START));
-			addOutput(createOutput<AriaJackTransparent>(     mm2px(Vec(109.5, (22.5 + (6.5 * 2) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP6START));
+			addChild(createLight<AriaNewInputLight>(     mm2px(Vec(104.5, (16.0 + (6.5 * 2) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP6START));
+			addParam(createParam<AriaKnob820Transparent>(mm2px(Vec(104.5, (16.0 + (6.5 * 2) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP6START));
+			addParam(createParam<AriaKnob820Random>(     mm2px(Vec(114.5, (16.0 + (6.5 * 2) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP6START));
+			addChild(createLight<AriaNewOutputLight>(    mm2px(Vec(109.5, (22.5 + (6.5 * 2) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP6START));
+			addOutput(createOutput<AriaJackTransparent>( mm2px(Vec(109.5, (22.5 + (6.5 * 2) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP6START));
 		}
 		for (int i = 0; i < 7; i++) {
-			addChild(createLight<AriaJackLight<InputLight>>( mm2px(Vec(124.7, (16.2 + (6.5 * 1) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP7START));
-			addParam(createParam<AriaKnob820Transparent>(    mm2px(Vec(124.5, (16.0 + (6.5 * 1) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP7START));
-			addParam(createParam<AriaKnob820Random>(         mm2px(Vec(134.5, (16.0 + (6.5 * 1) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP7START));
-			addChild(createLight<AriaJackLight<OutputLight>>(mm2px(Vec(129.7, (22.7 + (6.5 * 1) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP7START));
-			addOutput(createOutput<AriaJackTransparent>(     mm2px(Vec(129.5, (22.5 + (6.5 * 1) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP7START));
+			addChild(createLight<AriaNewInputLight>(     mm2px(Vec(124.5, (16.0 + (6.5 * 1) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP7START));
+			addParam(createParam<AriaKnob820Transparent>(mm2px(Vec(124.5, (16.0 + (6.5 * 1) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP7START));
+			addParam(createParam<AriaKnob820Random>(     mm2px(Vec(134.5, (16.0 + (6.5 * 1) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP7START));
+			addChild(createLight<AriaNewOutputLight>(    mm2px(Vec(129.5, (22.5 + (6.5 * 1) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP7START));
+			addOutput(createOutput<AriaJackTransparent>( mm2px(Vec(129.5, (22.5 + (6.5 * 1) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP7START));
 		}
 		for (int i = 0; i < 8; i++) {
-			addChild(createLight<AriaJackLight<InputLight>>( mm2px(Vec(144.7, (16.2 + (6.5 * 0) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP8START));
-			addParam(createParam<AriaKnob820Transparent>(    mm2px(Vec(144.5, (16.0 + (6.5 * 0) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP8START));
-			addChild(createLight<AriaJackLight<OutputLight>>(mm2px(Vec(149.7, (22.7 + (6.5 * 0) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP8START));
-			addOutput(createOutput<AriaJackTransparent>(     mm2px(Vec(149.5, (22.5 + (6.5 * 0) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP8START));
+			addChild(createLight<AriaNewInputLight>(     mm2px(Vec(144.5, (16.0 + (6.5 * 0) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP8START));
+			addParam(createParam<AriaKnob820Transparent>(mm2px(Vec(144.5, (16.0 + (6.5 * 0) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP8START));
+			addChild(createLight<AriaNewOutputLight>(    mm2px(Vec(149.5, (22.5 + (6.5 * 0) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP8START));
+			addOutput(createOutput<AriaJackTransparent>( mm2px(Vec(149.5, (22.5 + (6.5 * 0) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP8START));
 		}
 		
 		// Step, Run, Reset

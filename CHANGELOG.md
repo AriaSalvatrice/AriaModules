@@ -9,8 +9,6 @@ Changelog
 - [PLANNED - NEW FEATURE] Darius: using the "Randomize" buttons is now stored in Undo history. 
 - [PLANNED - NEW FEATURE] Darius: added a CV polarity selector: unipolar (0V~10V) or bipolar (-5V~5V). CV Knobs now default to the center on new instances. 
 - [PLANNED - FIX] Darius: Initializing the device now resets it to the first node.
-- [PLANNED - CHANGE] All existing modules: Unlit jacks are now blue instead of gray, following the established design language better.
-
 
 
 ## Unreleased 1.3.0
@@ -23,6 +21,7 @@ Changelog
 
 ### Changed
 
+- [CHANGE] All existing modules: Unlit jacks and knobs are now blue instead of gray, following the established design language better.
 - [FIX] Splort, Smerge, Spleet, Swerge, Splirge: increased the refresh rate of lights, as they were optimized too aggressively.
 
 
