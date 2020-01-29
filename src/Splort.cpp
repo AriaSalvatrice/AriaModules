@@ -13,7 +13,6 @@ struct Splort : Module {
 	enum OutputIds {
 		ENUMS(SPLIT_OUTPUT, 16),
 		LINK_OUTPUT,
-		DEBUG_OUTPUT,
 		NUM_OUTPUTS
 	};
 	enum LightIds {
@@ -171,10 +170,6 @@ struct SplortWidget : ModuleWidget {
 		addInput(createInputCentered<AriaJackTransparent>(mm2px(Vec(5.62, 109.0)), module, Splort::LINK_INPUT));
 		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(19.78, 109.0)), module, Splort::LINK_OUTPUT));
 		
-		// Debug Output
-		#ifdef ARIA_DEBUG
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 119.0)), module, Splort::DEBUG_OUTPUT));
-		#endif
 	}
 };
 

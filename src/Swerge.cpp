@@ -11,7 +11,6 @@ struct Swerge : Module {
 	};
 	enum OutputIds {
 		ENUMS(POLY_OUTPUT, 2),
-		DEBUG_OUTPUT,
 		NUM_OUTPUTS
 	};
 	enum LightIds {
@@ -184,11 +183,6 @@ struct SwergeWidget : ModuleWidget {
 		
 		// Chain light
 		addChild(createLightCentered<SmallLight<InputLight>>(mm2px(Vec(13.6, 58.0)), module, Swerge::CHAIN_LIGHT));
-
-		// Debug Output
-		#ifdef ARIA_DEBUG
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 119.0)), module, Swerge::DEBUG_OUTPUT));
-		#endif
 	}
 };
 

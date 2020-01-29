@@ -210,8 +210,6 @@ struct Arcane : ArcaneBase {
 		PATTERN_E_8_OUTPUT,
 		PATTERN_E_4_OUTPUT,
 		PATTERN_E_1_OUTPUT,
-		DEBUG_1_OUTPUT,
-		DEBUG_2_OUTPUT,
 		NUM_OUTPUTS
 	};
 	enum LightIds {
@@ -587,8 +585,6 @@ struct Aleister : ArcaneBase {
 		ENUMS(PATTERN_C_OUTPUT, 16),
 		ENUMS(PATTERN_D_OUTPUT, 16),
 		ENUMS(PATTERN_E_OUTPUT, 16),
-		DEBUG_1_OUTPUT,
-		DEBUG_2_OUTPUT,
 		NUM_OUTPUTS
 	};
 	enum LightIds {

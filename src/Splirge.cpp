@@ -13,7 +13,6 @@ struct Splirge : Module {
 	enum OutputIds {
 		POLY_OUTPUT,
 		ENUMS(SPLIT_OUTPUT, 4),
-		DEBUG_OUTPUT,
 		NUM_OUTPUTS
 	};
 	enum LightIds {
@@ -176,10 +175,6 @@ struct SplirgeWidget : ModuleWidget {
 		// Chain light
 		addChild(createLightCentered<SmallLight<InputLight>>(mm2px(Vec(13.6, 69.0)), module, Splirge::CHAIN_LIGHT));
 
-		// Debug Output
-		#ifdef ARIA_DEBUG
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 119.0)), module, Splirge::DEBUG_OUTPUT));
-		#endif
 	}
 };
 

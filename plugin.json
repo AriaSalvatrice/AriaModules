@@ -1,7 +1,7 @@
 {
   "slug": "AriaSalvatrice",
   "name": "Aria Salvatrice",
-  "version": "1.2.2",
+  "version": "1.3.0",
   "license": "WTFPL",
   "brand": "Aria Salvatrice",
   "author": "Aria Salvatrice",
@@ -109,14 +109,6 @@
 		"Quantizer",
 		"Sequencer",
 		"Expander"
-      ]
-    },
-	{
-      "slug": "Test",
-      "name": "Signature Series TEST!",
-      "description": "A complimentary blank plate and ♥-head screwdriver are included with every Signature Series module purchase",
-      "tags": [
-        "Blank"
       ]
     },
     {

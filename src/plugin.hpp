@@ -6,7 +6,7 @@
 
 // Builds modules still under development and not ready for general use.
 // Remember to add them to the plugin.json to see them in the browser!
-#define ARIA_DEV_MODULES
+// #define ARIA_DEV_MODULES
 
 using namespace rack;
 

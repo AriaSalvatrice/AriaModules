@@ -11,7 +11,6 @@ struct Spleet : Module {
 	};
 	enum OutputIds {
 		ENUMS(SPLIT_OUTPUT, 8),
-		DEBUG_OUTPUT,
 		NUM_OUTPUTS
 	};
 	enum LightIds {
@@ -139,10 +138,6 @@ struct SpleetWidget : ModuleWidget {
 		// Chain light
 		addChild(createLightCentered<SmallLight<InputLight>>(mm2px(Vec(13.6, 63.6)), module, Spleet::CHAIN_LIGHT));
 
-		// Debug Output
-		#ifdef ARIA_DEBUG
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 119.0)), module, Spleet::DEBUG_OUTPUT));
-		#endif
 	}
 };
 

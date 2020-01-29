@@ -70,10 +70,10 @@ On the bottom-left:
 
 The last two are an advanced feature - just ignore them if you don't understand what they do:
 
-- **1st/All**: Decides whether to store the random seed and plan out the route when on the first node, or whether to use a fresh random seed and flip the coin at the last moment possible. In **1st** mode, going back and forth repeatedly results in the same path, until the first node is reached again (from either direction). In effect, it acts as a sample and hold for the **Random** input at the exact moment the first node is _left_.
+- **1st/All**: Decides whether to store the random seed and plan out the route when on the first node, or whether to use a fresh random seed and flip the coin at the last moment possible. In **1st** mode, going back and forth repeatedly results in the same path, until the first node is reached from step 8 (it won't refresh it if you reach the first node from stepping back). In effect, it acts as a sample and hold for the **Random** input at the exact moment the first node is _left_.
 - **Random**: Use this to fix the random seed! When the input is not patched, or when it's receiving 0V, **Darius** flips the coin randomly. But when it's receiving a seed, the coin flips become deterministic - it will take the same route every time. Try out alternating, every bar, sending it an arbitrary fixed voltage such as 4.58V then 0V, to create call-and-response phrases where the first part is always the same.
 
-Darius has a simple panel, few advanced features, and it is impossible to fully tame - by design. It is meant to be easy to learn, suprising to use, and fun to master. Many of its apparent limitations can be overcome with a bit of creative patching. It works wonderfully with [stoermelder PackOne](https://github.com/stoermelder/vcvrack-packone)'s [CV-MAP](https://github.com/stoermelder/vcvrack-packone/blob/v1/docs/CVMap.md) and [8FACE](https://github.com/stoermelder/vcvrack-packone/blob/v1/docs/EightFace.md) to give you CV control over the knobs and add multiple preset banks.
+Darius has a simple panel, few advanced features, and is impossible to truly tame - by design. It is meant to be easy to learn, suprising to use, and fun to master. Many of its apparent limitations can be overcome with a bit of creative patching. It works wonderfully with [stoermelder PackOne](https://github.com/stoermelder/vcvrack-packone)'s [CV-MAP](https://github.com/stoermelder/vcvrack-packone/blob/v1/docs/CVMap.md) and [8FACE](https://github.com/stoermelder/vcvrack-packone/blob/v1/docs/EightFace.md) to give you CV control over the knobs and add multiple preset banks.
 
 Darius is named after the eponymous arcade shoot-em-up game series, known for its surreal visuals, its fish-themed enemies, its [unique soundtracks](https://www.youtube.com/watch?v=6FEdlAL3bX0), its multi-display arcade cabinets, and for allowing the player to select their route through the game via a branching map.
 
@@ -81,7 +81,7 @@ Darius is named after the eponymous arcade shoot-em-up game series, known for it
 
 I guess the module is also technically named after some dead Persian guy who did some King stuff, I heard on Wikipedia, the free encyclopedia.
 
-**Protip for cool kids only:** if you leave all the **Random route** knobs to the default, the pattern will naturally end up towards the center most of the time. Use this information wisely, or don't.
+**Protip for cool kids only:** if you leave all the **Random route** knobs to the default, the pattern is about 30 times more likely to end up towards the center than one of the two extremes. Use this information wisely, or don't.
 
 
 
@@ -154,28 +154,6 @@ If the repository is unreachable, the module will will output 0V on all ports, e
 
 **Protip for cool kids only:** If you treat my oracles as a mere random number generator, you will never gain any wisdom from them.
 
-
-
-<!-- UNDER DEVELOPMENT 
-UnDuLaR Rack Scroller
----------------------
-
-![UnDuLaR](/doc/undular.png)
-
-Scroll your rack via CV! This is particularly useful for live performance: build a rack that is no wider (or no taller) than your screen at your preferred zoom level, and connect only the X or the Y control to a MIDI knob. 
-
-- **UP/DOWN**: This pair of inputs take trigs, and scroll the rack up or down by 3U - the height of one module.
-- **LEFT/RIGHT**: This pair of inputs take trigs, and scroll the rack up or down by 32hp - the width of one module, assuming the module of question happens to be exactly 32hp. 
-- **X**: This input takes 0V~10V, and scrolls your rack horizontally, adapting to its current dimensions.
-- **Y**: This input takes 0V~10V, and scrolls your rack vertically, adapting to its current dimensions.
-- **Zoom**: This input takes 0V~10V, and zooms your rack in and out from 25% to 400%. Zooming in and out via CV may or may not be fast enough to be usable for you. You try it out. 
-
-You can still scroll around normally when using the module. If you want the module to fully take over scrolling, there's a few dangerous right-click options that do that. It's useful to avoid auto-scrolling when you drag a cable to the edge of the screen. 
-
-Be sure to attempts all sorts of idiotic party tricks you will regret such as connecting an oscillator to the controls, forcing you to use `Engine > Sample Rate > Pause` before the onset of the seizure.
-
-Thanks to [Frank Buss' Shaker](https://github.com/FrankBuss/FrankBussRackPlugin) for demonstrating it's possible to scroll the rack via a module.
--->
 
 
 

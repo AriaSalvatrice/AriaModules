@@ -1,6 +1,5 @@
 #include "plugin.hpp"
-
-#include <string> // Temp
+#include <random>
 
 const int STEP1START = 0;  //               00        
 const int STEP2START = 1;  //             02  01            
@@ -11,6 +10,45 @@ const int STEP6START = 15; //     20  19  18  17  16  15
 const int STEP7START = 21; //   27  26  25  24  23  22  21  
 const int STEP8START = 28; // 35  34  33  32  31  30  29  28
 const int STEP9START = 36; // (Panel is rotated 90 degrees counter-clockwise compared to this diagram)
+
+// FIXME - Lights flicker a lot
+
+// PRNG
+// Using xoroshiro128+ like VCV does - gives me a better distribution than mersenne twister.
+// http://prng.di.unimi.it/
+// https://community.vcvrack.com/t/controlling-the-random-seed/8005
+namespace prng {
+
+	static inline uint64_t rotl(const uint64_t x, int k) {
+		return (x << k) | (x >> (64 - k));
+	}
+
+	static uint64_t s[2];
+
+	uint64_t next(void) {
+		const uint64_t s0 = s[0];
+		uint64_t s1 = s[1];
+		const uint64_t result = s0 + s1;
+
+		s1 ^= s0;
+		s[0] = rotl(s0, 24) ^ s1 ^ (s1 << 16); // a, b
+		s[1] = rotl(s1, 37); // c
+
+		return result;
+	}
+	
+	void init(float seed1, float seed2){
+		s[0] = seed1 * 52852712; // Keyboard smash
+		s[1] = seed2 * 60348921;
+		for (int i = 0; i < 10; i++) next();
+	}
+
+	float uniform() {
+		return (next() >> (64 - 24)) / std::pow(2.f, 24);
+	}
+
+}
+
 
 struct Darius : Module {
 	enum ParamIds {
@@ -23,7 +61,7 @@ struct Darius : Module {
 		RANDCV_PARAM,
 		RANDROUTE_PARAM, // 1.2.0 release
 		RANGE_PARAM,
-		SEED_MODE_PARAM,
+		SEED_MODE_PARAM, // 1.3.0 release
 		NUM_PARAMS
 	};
 	enum InputIds {
@@ -33,19 +71,19 @@ struct Darius : Module {
 		STEP_BACK_INPUT,
 		STEP_UP_INPUT,
 		STEP_DOWN_INPUT,
-		SEED_INPUT,
+		SEED_INPUT, // 1.3.0 release
 		NUM_INPUTS
 	};
 	enum OutputIds {
 		ENUMS(GATE_OUTPUT, 36),
-		CV_OUTPUT,
-		DEBUG_OUTPUT,	
-		DEBUG2_OUTPUT, // 1.2.0 release
+		CV_OUTPUT, // 1.2.0 release
+		DEBUG_OUTPUT,
+		DEBUG2_OUTPUT,
 		NUM_OUTPUTS
 	};
 	enum LightIds {
 		ENUMS(CV_LIGHT, 36),
-		ENUMS(GATE_LIGHT, 36),
+		ENUMS(GATE_LIGHT, 36), // 1.2.0 release
 		NUM_LIGHTS
 	};
 	
@@ -54,12 +92,13 @@ struct Darius : Module {
 	bool steppedBack = false;
 	bool forceUp = false;
 	bool forceDown = false;
-	bool lightsReset = false; // FIXME - Will no longer be necessary soon!
+	bool lightsReset = false;
+	bool shSeedNextFirst = false;
 	int stepCount = 8;
 	int step = 0;
 	int node = 0;
-	int lastNode = 0; // FIXME - Will no longer be necessary soon!
-	int lastGate = 0; // FIXME - Will no longer be necessary soon!
+	int lastNode = 0;
+	int lastGate = 0;
 	int pathTraveled[8] = { 0, -1, -1, -1, -1, -1, -1, -1}; // -1 = not gone there yet
 	float randomSeed = 0.f;
 	dsp::SchmittTrigger stepUpCvTrigger;
@@ -129,6 +168,7 @@ struct Darius : Module {
 				}
 			}
 		}
+		lightsReset = true;
 	}
 		
 	void randomizeCv(const ProcessArgs& args){
@@ -145,7 +185,11 @@ struct Darius : Module {
 	}
 	
 	void refreshSeed(const ProcessArgs& args){
-		randomSeed = ( inputs[SEED_INPUT].isConnected() ) ? inputs[SEED_INPUT].getVoltage() : random::uniform();
+		if (inputs[SEED_INPUT].isConnected() and (inputs[SEED_INPUT].getVoltage() != 0.f) ) {
+			randomSeed = inputs[SEED_INPUT].getVoltage();
+		} else {
+			randomSeed = random::uniform();
+		}
 	}
 	
 	void processReset(const ProcessArgs& args){
@@ -154,6 +198,7 @@ struct Darius : Module {
 			node = 0;
 			lastNode = 0;
 			lightsReset = true;
+			shSeedNextFirst = true;
 			resetPathTraveled(args);
 			for (int i = 0; i < 36; i++)
 				outputs[GATE_OUTPUT + i].setVoltage(0.f);
@@ -167,27 +212,31 @@ struct Darius : Module {
 		}
 		running = params[RUN_PARAM].getValue();
 	}
-	
+		
 	void processStepNumber(const ProcessArgs& args){
 		stepCount = std::round(params[STEPCOUNT_PARAM].getValue());
 		if (running) {
+			bool triggerAccepted = false; // Accept only one trigger!
 			if (stepForwardCvTrigger.process(inputs[STEP_INPUT].getVoltageSum())){
 				step++;
 				steppedForward = true;
+				triggerAccepted = true;
 			}
-			if (stepBackCvTrigger.process(inputs[STEP_BACK_INPUT].getVoltageSum()) and step > 0 ){
-				step--;
-				steppedBack = true;
-			}
-			if (stepUpCvTrigger.process(inputs[STEP_UP_INPUT].getVoltageSum())){
+			if (stepUpCvTrigger.process(inputs[STEP_UP_INPUT].getVoltageSum()) and !triggerAccepted){
 				step++;
 				forceUp = true;
 				steppedForward = true;
+				triggerAccepted = true;
 			}
-			if (stepDownCvTrigger.process(inputs[STEP_DOWN_INPUT].getVoltageSum())){
+			if (stepDownCvTrigger.process(inputs[STEP_DOWN_INPUT].getVoltageSum()) and !triggerAccepted){
 				step++;
 				forceDown = true;
 				steppedForward = true;
+				triggerAccepted = true;
+			}
+			if (stepBackCvTrigger.process(inputs[STEP_BACK_INPUT].getVoltageSum()) and step > 0 and !triggerAccepted){
+				step--;
+				steppedBack = true;
 			}
 		}
 		if (stepForwardButtonTrigger.process(params[STEP_PARAM].getValue())){
@@ -196,6 +245,7 @@ struct Darius : Module {
 		}
 		lastGate = node;
 		if (step >= stepCount) {
+			shSeedNextFirst = true;
 			step = 0;
 			node = 0;
 			lastNode = 0;
@@ -208,8 +258,12 @@ struct Darius : Module {
 		steppedForward = false;
 		
 		// Refresh seed as lazily as possible
-		if (step == 1) refreshSeed(args);
-		if (step >= 2 and params[SEED_MODE_PARAM].getValue() == 1.0f) refreshSeed(args);
+		if (step == 1 and shSeedNextFirst){
+			refreshSeed(args);
+			shSeedNextFirst = false;
+		} else {
+			if (params[SEED_MODE_PARAM].getValue() == 1.0f) refreshSeed(args);
+		}
 		
 		if (step == 0){ // Step 1 starting
 			node = 0;
@@ -225,11 +279,14 @@ struct Darius : Module {
 					forceDown = false;
 				}
 			} else {
-				if (params[ROUTE_PARAM + lastNode].getValue() < random::uniform()) {
-					node = node + step;
-				} else {
+				prng::init(randomSeed, step);
+				outputs[DEBUG_OUTPUT].setVoltage(prng::uniform());
+				if (prng::uniform() < params[ROUTE_PARAM + lastNode].getValue()) {
 					node = node + step + 1;
+				} else {
+					node = node + step;
 				}
+				
 			}
 		}
 		pathTraveled[step] = node;
@@ -265,12 +322,12 @@ struct Darius : Module {
 		// Clean up by request only
 		if (lightsReset) {
 			for (int i = 0; i < 36; i++) lights[CV_LIGHT + i].setBrightness( 0.f );
+			for (int i = 0; i < 8; i++) {
+				if (pathTraveled[i] >= 0) lights[CV_LIGHT + pathTraveled[i]].setBrightness( 1.f );
+			}
 			lightsReset = false;
 		}
-		// Light the current path
-		for (int i = 0; i < 8; i++) {
-			if (pathTraveled[i] >= 0) lights[CV_LIGHT + pathTraveled[i]].setBrightness( 1.f );
-		}
+		lights[CV_LIGHT + pathTraveled[step]].setBrightness( 1.f );
 		// Light the outputs depending on amount of steps enabled
 		lights[GATE_LIGHT].setBrightness( (stepCount >= 1 ) ? 1.f : 0.f );
 		for (int i = STEP2START; i < STEP3START; i++)
@@ -310,8 +367,6 @@ struct Darius : Module {
 		processGateOutput(args);
 		processVoltageOutput(args);
 		processLights(args);
-		outputs[DEBUG_OUTPUT].setVoltage(step);
-		outputs[DEBUG2_OUTPUT].setVoltage(randomSeed);
 	}
 };
 
@@ -338,6 +393,8 @@ struct DariusWidget : ModuleWidget {
 		
 		// Signature.
 		addChild(createWidget<AriaSignature>(mm2px(Vec(117.5, 114.538))));
+		addOutput(createOutput<AriaJackOut>(mm2px(Vec(117.5, 112.5)), module, Darius::DEBUG_OUTPUT));
+		addOutput(createOutput<AriaJackOut>(mm2px(Vec(125.5, 112.5)), module, Darius::DEBUG2_OUTPUT));
 
 		// Screws
 		addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
@@ -432,10 +489,6 @@ struct DariusWidget : ModuleWidget {
 		addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(3.0, 110.0)), module, Darius::SEED_MODE_PARAM));
 		addInput(createInput<AriaJackIn>(mm2px(Vec(9.5, 110.0)), module, Darius::SEED_INPUT));
 
-		// Debug Outputs
-		// FIXME remove them elsewhere
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(32.5, 119.0)), module, Darius::DEBUG_OUTPUT));
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(42.5, 119.0)), module, Darius::DEBUG2_OUTPUT));
 	}
 };
 

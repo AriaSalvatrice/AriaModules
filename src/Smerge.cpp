@@ -13,7 +13,6 @@ struct Smerge : Module {
 	enum OutputIds {
 		POLY_OUTPUT,
 		LINK_OUTPUT,
-		DEBUG_OUTPUT,
 		NUM_OUTPUTS
 	};
 	enum LightIds {
@@ -174,11 +173,6 @@ struct SmergeWidget : ModuleWidget {
 		addInput(createInputCentered<AriaJackTransparent>(mm2px(Vec(5.62, 109.0)), module, Smerge::LINK_INPUT));
 		addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(19.78, 109.0)), module, Smerge::LINK_OUTPUT));
 		
-		// Debug Output
-		#ifdef ARIA_DEBUG
-		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 119.0)), module, Smerge::DEBUG_OUTPUT));
-		#endif
-
 	}
 };
 

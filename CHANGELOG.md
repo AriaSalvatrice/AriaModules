@@ -1,22 +1,17 @@
 Changelog
 =========
 
-## Planned for 1.3.0 or later, not implemented at all yet
-
-- [PLANNED - NEW FEATURE] Darius: You can now undo pressing the two "Randomize" buttons. 
-- [PLANNED - NEW FEATURE] Darius: Added a "Seed" CV input, to force a specific random seed to be used.
-
-
-## Unreleased 1.3.0
+## [1.3.0] - 2020-01-29
 
 ### Added
 
 - [NEW MODULE] Arcane - Today's fortune ★
 - [NEW MODULE] Atout - Today's fortune ★
 - [NEW MODULE] Aleister - Today's fortune ★
-- [NEW FEATURE] Darius: Added a CV polarity selector: 0V~10V or -5V~5V. CV Knobs now default to the center on new instances for ease of use in bipolar mode.
-- [NEW FEATURE] Darius: Added new trigger controls: Back, Up, and Down. The "Step" CV input is now called "Forward" for consistency.
 - [NEW FEATURE] Darius: All trigger inputs now accept polyphonic input. Existing patches are very unlikely to be broken by this new feature. If they are, they can be fixed by splitting any polyphonic trigger input then sending only the first channel.
+- [NEW FEATURE] Darius: Added a "RND" seed CV input, and a switch to decide to refresh it on "1st/all" step(s), to force a specific random seed to be used.
+- [NEW FEATURE] Darius: Added a CV range selector: 0V~10V or -5V~5V. CV Knobs now default to the center on new instances for ease of use in -5V~5V mode.
+- [NEW FEATURE] Darius: Added new trigger controls: Back, Up, and Down. The "Step" CV input is now called "Forward" for consistency.
 
 ### Changed
 
