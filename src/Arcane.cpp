@@ -50,8 +50,8 @@ struct ArcaneBase : Module {
 	// FIXME - figure out how to use a timer instead!
 	dsp::ClockDivider readJsonDivider;
 	// Huge performance gain not to send all static values each tick. Will do that unless people yell it breaks something.
-	dsp::ClockDivider refreshDivider; 	
-	dsp::ClockDivider expanderDivider; 
+	dsp::ClockDivider refreshDivider;	
+	dsp::ClockDivider expanderDivider;
 
 	bool readTodaysFortune() {		
 		std::string filename = asset::user("AriaSalvatrice/Arcane/").c_str() + todaysFortuneDate + ".json";

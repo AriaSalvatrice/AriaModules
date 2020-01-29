@@ -38,7 +38,7 @@ Are you still looking for the perfect sequencer, the one that allows you to effo
 
 Sucks. 
 
-Here comes yet another gimmick module challenging you to integrate its bizarre ideas to your song instead.
+Here comes yet another gimmick module challenging you to integrate its way of thinking to your song instead.
 
 **Darius** is a 8-step sequencer where each node branches into two possible paths, creating repeating patterns that start similarly and resolve differently. Takes a whole 32hp of space to fit all its knobs. 
 
@@ -46,19 +46,42 @@ To get started immediately, patch in a clock to the step forward input, randomiz
 
 On each node:
 
-- **CV Knob** (left): sets the CV for that step, (0V~10V, or -5V~5V, depending on the position of the **Unipolar/Bipolar** rocker switch).
-- **Random route knob** (right): alters the probability to pick the top or the bottom node on the next step. Arrow pointing to the right means 50/50. 
+- **CV Knob** (left): sets the CV for that step.
+- **Random route knob** (right): alters the probability to pick the top or the bottom node on the next step when stepping **Forward⯈**. Arrow pointing to the right means 50/50. 
 - **Output**: when active, passes through the clock input (both gates and trigs work), or sends 10V continuously if no step input is plugged in.
 
-You can randomize the CV and the routes separately. If you leave all the **Random route** knobs to the default, the pattern will naturally end up towards the center most of the time. Use this information wisely, or don't. 
+On the top-left of the module:
 
-Darius is simple and limited, by design. It is meant to be easy to learn and to use. Many of its apparent limitations can be bypassed with a bit of creative patching.
+- **⯇Back**, **Up⯅**, **Down⯆**, **Forward⯈**: Takes a step in the corresponding direction when it receives a gate or a trigger. Stepping **Up⯅** or **Down⯆** advances a step in the corresponding direction, it's used to force the module to take a certain route. Going **⯇Back** remembers the path you've taken, and does nothing if you're already on the first step. You can also step **Forward⯈** manually, by using the button, which works even if the module isn't running. 
+- **Run**: Starts and stops the module.
+- **Reset**: Go back to the first node. 
 
-Darius is named after the eponymous arcade shoot-em-up game series, known for its surreal visuals, its fish-themed enemies, its [unique soundtracks](https://www.youtube.com/watch?v=6FEdlAL3bX0), its multi-display arcade cabinets, and for allowing the player to select their route through the game via a branching map. For the most authentic experience possible, set the pattern length to 7 and write your song in 7/8 time.
+Those inputs are generally connected to the corresponding output of a clock, but anything that sends gates or triggers will work. Triggers are accepted on any polyphonic channel, which is useful for creative self-patching via a poly merge module.
+
+On the top of the module:
+
+- **Steps**: lets you choose the duration of the pattern, from 1 to 8 steps.
+- **Randomize**: those two buttons operate on the CV and the routes separately. If you don't like the results, you can use **Edit > Undo**. 
+
+On the bottom-left:
+
+- **Range selection**: Select if the knobs output voltage from 0V to 10V, or -5V to 5V. You can use an attenuator for more precise control of the output range.
+- **CV**: The main output. The most common way to use it is to patch it to an attenuator, going into a quantizer, going into an oscillator. 
+
+The last two are an advanced feature - just ignore them if you don't understand what they do:
+
+- **1st/All**: Decides whether to store the random seed and plan out the route when on the first node, or whether to use a fresh random seed and flip the coin at the last moment possible. In **1st** mode, going back and forth repeatedly results in the same path, until the first node is reached again (from either direction). In effect, it acts as a sample and hold for the **Random** input at the moment the first node is entered. 
+- **Random**: Use this to fix the random seed! When the input is not patched, or when it's receiving 0V, **Darius** flips the coin randomly. But when it's receiving a seed, the coin flips become deterministic - it will take the same route every time. Try out alternating, every bar, sending it an arbitrary fixed voltage such as 4.58V then 0V, to create call-and-response phrases where the first part is always the same.
+
+Darius has a simple panel, few advanced features, and it is impossible to fully tame - by design. It is meant to be easy to learn, suprising to use, and fun to master. Many of its apparent limitations can be overcome with a bit of creative patching. It works wonderfully with [stoermelder PackOne](https://github.com/stoermelder/vcvrack-packone)'s [CV-MAP](https://github.com/stoermelder/vcvrack-packone/blob/v1/docs/CVMap.md) and [8FACE](https://github.com/stoermelder/vcvrack-packone/blob/v1/docs/EightFace.md) to give you CV control over the knobs and add multiple preset banks.
+
+Darius is named after the eponymous arcade shoot-em-up game series, known for its surreal visuals, its fish-themed enemies, its [unique soundtracks](https://www.youtube.com/watch?v=6FEdlAL3bX0), its multi-display arcade cabinets, and for allowing the player to select their route through the game via a branching map.
 
 ![Darius Gaiden](/doc/darius-gaiden-map.png)
 
 I guess the module is also technically named after some dead Persian guy who did some King stuff, I heard on Wikipedia, the free encyclopedia.
+
+**Protip for cool kids only:** if you leave all the **Random route** knobs to the default, the pattern will naturally end up towards the center most of the time. Use this information wisely, or don't.
 
 
 
@@ -117,6 +140,8 @@ The third module, **Aleister**, gives you access to the **_Bâtons_**, **_Coupes
 
 If the module is active at the time a new fortune is drawn, the values will not change, but a notification a new fortune is available will appear on the **LCD**. Using the right-click menu, you can _Initialize_ the module to download the newest fortune. Remember to also initialize **Aleister** if in use (whether standalone or in expander mode).
 
+Using this series of modules to their full extent requires a bit of creative patching, a bit of lateral thinking, but most importantly, friends to share your different interpretations of the same fortune with.
+
 **The tarot deck used is the Conver – Ben-Dov (CBD) version**. The CBD deck was restored in 2008-2011 from the original 18th century deck by tarot expert [Dr. Yoav Ben-Dov's](https://www.cbdtarot.com/). It was chosen for its traditional significance, the quality of its imagery, and the simplicity of its broad lines being well suited to VCV's limited vector rendering engine.    
 While there is great variety in decks across many different Tarot traditions, Tarot of Marseilles imagery does not vary significantly across decks. The exact same subjects are drawn from the same angle, leaving very little room for the artist to re-interpret the themes. A few figures are generally depicted nude, and while the style of the CBD deck is obviously neither graphic nor intended to titillate, I took the liberty to slightly alter a few cards to remove details, in particular the Devil's codpiece, as most users will download my plugin without being forewarned about contents a small minority would find upsetting. I hope you will understand my decision. 
 
@@ -127,8 +152,7 @@ If the repository is unreachable, the module will will output 0V on all ports, e
 **There is no offline mode, and no built-in way to load older fortunes, by design.** These are multiplayer-only oracles. But I won't prevent you from editing the .json files in the `AriaSalvatrice/Arcane/` directory of your VCV Rack user directory, if you really must. Every downloaded fortune is archived locally, a full archive is available from GitHub, and if a local file exists for today, it will not be checked against the server.     
 (Quick tech remark about JSON API cache spoofing: such self-deception will never alter your true destiny, and it is unwise to cling to the past instead of living for a future you can yet change.)
 
-Using this series of modules to their full extent requires a bit of creative patching, a bit of lateral thinking, but most importantly, friends to share your different interpretations of the same fortune with.    
-**If you treat my oracles as a mere random number generator, you will never gain any wisdom from them.**
+**Protip for cool kids only:** If you treat my oracles as a mere random number generator, you will never gain any wisdom from them.
 
 
 

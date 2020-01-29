@@ -111,6 +111,14 @@
 		"Expander"
       ]
     },
+	{
+      "slug": "Test",
+      "name": "Signature Series TEST!",
+      "description": "A complimentary blank plate and ♥-head screwdriver are included with every Signature Series module purchase",
+      "tags": [
+        "Blank"
+      ]
+    },
     {
       "slug": "Blank",
       "name": "Signature Series 8hp Blank Plate",

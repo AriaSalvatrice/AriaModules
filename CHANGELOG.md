@@ -3,12 +3,11 @@ Changelog
 
 ## Planned for 1.3.0 or later, not implemented at all yet
 
-- [PLANNED - NEW MODULE] UnDuLaR - Scroll and zoom the rack via CV input
-- [PLANNED - CHANGE] Darius: Moved jacks and buttons around a little to accomodate new features.
 - [PLANNED - NEW FEATURE] Darius: Added a "Step Back" CV input. 
-- [PLANNED - NEW FEATURE] Darius: Using the "Randomize" buttons is now stored in Undo history. 
-- [PLANNED - NEW FEATURE] Darius: Added a CV polarity selector: unipolar (0V~10V) or bipolar (-5V~5V). CV Knobs now default to the center on new instances. 
+- [PLANNED - NEW FEATURE] Darius: You can now undo using the two "Randomize" buttons. 
+- [PLANNED - NEW FEATURE] Darius: Added a CV polarity selector: 0V~10V or -5V~5V. CV Knobs now default to the center. 
 - [PLANNED - NEW FEATURE] Darius: Added a "Seed" CV input, to force a specific random seed to be used.
+- [PLANNED - FIX] Darius: Loading a patch saved in the middle of a sequence shows the full path traveled, instead of just the current step.
 
 
 ## Unreleased 1.3.0
@@ -22,6 +21,7 @@ Changelog
 
 ### Changed
 
+- [CHANGE] Darius: Moved jacks and buttons around a little to accomodate new features.
 - [CHANGE] All existing modules: Unlit jacks and knobs are now blue instead of gray, following the established design language better.
 
 ### Fixed

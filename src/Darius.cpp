@@ -21,6 +21,7 @@ struct Darius : Module {
 		RANDCV_PARAM,
 		RANDROUTE_PARAM, // 1.2.0 release
 		RANGE_PARAM,
+		SEED_MODE_PARAM,
 		NUM_PARAMS
 	};
 	enum InputIds {
@@ -48,16 +49,20 @@ struct Darius : Module {
 	};
 	
 	bool running = true;
-	int step_count = 8;
+	int stepCount = 8;
 	int step = 0;
-	bool process_node = false;
+	bool nodeChanged = false;
 	int node = 0;
-	int last_node = 0;
-	int last_gate = 0;
-	bool reset_lights = false;
-	std::array<int, 8> pathTraveled;
-	dsp::SchmittTrigger stepCvTrigger;
-	dsp::SchmittTrigger stepButtonTrigger;
+	int lastNode = 0; // FIXME - Will no longer be necessary soon!
+	int lastGate = 0; // FIXME - Will no longer be necessary soon!
+	int pathTraveled[8] = { 0, -1, -1, -1, -1, -1, -1, -1}; // -1 = not gone there yet
+	float randomSeed = 0.f;
+	bool lightsChanged = false; // FIXME - Will no longer be necessary soon!
+	dsp::SchmittTrigger stepUpCvTrigger;
+	dsp::SchmittTrigger stepDownCvTrigger;
+	dsp::SchmittTrigger stepBackCvTrigger;
+	dsp::SchmittTrigger stepForwardCvTrigger;
+	dsp::SchmittTrigger stepForwardButtonTrigger;
 	dsp::SchmittTrigger runCvTrigger;
 	dsp::SchmittTrigger resetCvTrigger;
 	dsp::SchmittTrigger resetButtonTrigger;
@@ -72,8 +77,10 @@ struct Darius : Module {
 		configParam(STEPCOUNT_PARAM, 1.f, 8.f, 8.f, "Steps");
 		configParam(RANDCV_PARAM, 0.f, 1.f, 0.f, "Randomize CV knobs");
 		configParam(RANDROUTE_PARAM, 0.f, 1.f, 0.f, "Meta-randomize random route knobs");
+		configParam(SEED_MODE_PARAM, 0.f, 1.f, 0.f, "Randomize on 1st or all nodes");
+		configParam(RANGE_PARAM, 0.f, 1.f, 0.f, "Voltage output range");
 		for (int i = 0; i < STEP9START; i++)
-			configParam(CV_PARAM + i, 0.f, 10.f, 0.f, "CV");
+			configParam(CV_PARAM + i, 0.f, 10.f, 5.f, "CV");
 		for (int i = 0; i < STEP8START; i++)
 			configParam(ROUTE_PARAM + i, 0.f, 1.f, 0.5f, "Random route");
 	}
@@ -82,8 +89,8 @@ struct Darius : Module {
 		json_t *rootJ = json_object();
 		json_object_set_new(rootJ, "step", json_integer(step));
 		json_object_set_new(rootJ, "node", json_integer(node));
-		json_object_set_new(rootJ, "last_node", json_integer(last_node));
-		json_object_set_new(rootJ, "last_gate", json_integer(last_gate));
+		json_object_set_new(rootJ, "lastNode", json_integer(lastNode));
+		json_object_set_new(rootJ, "lastGate", json_integer(lastGate));
 		return rootJ;
 	}
 	
@@ -96,35 +103,33 @@ struct Darius : Module {
 		if (nodeJ){
 			node = json_integer_value(nodeJ);
 		}
-		json_t* last_nodeJ = json_object_get(rootJ, "last_node");
-		if (last_nodeJ){
-			last_node = json_integer_value(last_nodeJ);
+		json_t* lastNodeJ = json_object_get(rootJ, "lastNode");
+		if (lastNodeJ){
+			lastNode = json_integer_value(lastNodeJ);
 		}
-		json_t* last_gateJ = json_object_get(rootJ, "last_gate");
-		if (last_gateJ){
-			last_gate = json_integer_value(last_gateJ);
+		json_t* lastGateJ = json_object_get(rootJ, "lastGate");
+		if (lastGateJ){
+			lastGate = json_integer_value(lastGateJ);
 		}
 	}
 		
 	void randomizeCv(const ProcessArgs& args){
-		for (int i = 0; i < 36; i++)
-			params[CV_PARAM + i].setValue(random::uniform() * 10.f);
+		for (int i = 0; i < 36; i++) params[CV_PARAM + i].setValue(random::uniform() * 10.f);
 	}
 	
 	void randomizeRoute(const ProcessArgs& args){
-		for (int i = 0; i < 36; i++)
-			params[ROUTE_PARAM + i].setValue(random::uniform());		
+		for (int i = 0; i < 36; i++) params[ROUTE_PARAM + i].setValue(random::uniform());		
 	}
 	
 	void processReset(const ProcessArgs& args){
 		if (resetCvTrigger.process(inputs[RESET_INPUT].getVoltageSum()) or resetButtonTrigger.process(params[RESET_PARAM].getValue())){
 			step = 0;
 			node = 0;
-			last_node = 0;
-			reset_lights = true;
+			lastNode = 0;
+			lightsChanged = true;
 			for (int i = 0; i < 36; i++)
 				outputs[GATE_OUTPUT + i].setVoltage(0.f);
-		}		
+		}
 	}
 	
 	void processRunStatus(const ProcessArgs& args){
@@ -136,99 +141,97 @@ struct Darius : Module {
 	}
 	
 	void processStepNumber(const ProcessArgs& args){
-		step_count = std::round(params[STEPCOUNT_PARAM].getValue());
+		stepCount = std::round(params[STEPCOUNT_PARAM].getValue());
 		if (running) {
-			if (stepCvTrigger.process(inputs[STEP_INPUT].getVoltageSum())){
+			if (stepForwardCvTrigger.process(inputs[STEP_INPUT].getVoltageSum())){
 				step++;
-				process_node = true;
+				nodeChanged = true;
 			}
 		}
-		if (stepButtonTrigger.process(params[STEP_PARAM].getValue())){
+		if (stepForwardButtonTrigger.process(params[STEP_PARAM].getValue())){
 			step++; // You can still advance manually if module isn't running
-			process_node = true;
+			nodeChanged = true;
 		}
-		last_gate = node;
-		if (step >= step_count) {
+		lastGate = node;
+		if (step >= stepCount) {
 			step = 0;
 			node = 0;
-			last_node = 0;
-			reset_lights = true;
+			lastNode = 0;
+			pathTraveled[0] = 0;
+			for (int i = 1; i < 8; i++) pathTraveled[i] = -1;
+			lightsChanged = true;
 		}
 	}
 	
 	void processNode(const ProcessArgs& args){
-		process_node = false;
+		nodeChanged = false;
 		if (step == 0){ // Step 1 started
 			node = 0;
-			reset_lights = true;
+			lightsChanged = true;
 		} else { // Step 2~8 started
-			if (params[ROUTE_PARAM + last_node].getValue() < random::uniform()) {
+			if (params[ROUTE_PARAM + lastNode].getValue() < random::uniform()) {
 				node = node + step;
 			} else {
 				node = node + step + 1;
 			}
 		}
-		last_node = node;
+		lastNode = node;
 	}
 	
 	void processGateOutput(const ProcessArgs& args){
 		if (inputs[STEP_INPUT].isConnected()){
 			outputs[GATE_OUTPUT + node].setVoltage(inputs[STEP_INPUT].getVoltage());
 		} else {
-			outputs[GATE_OUTPUT + last_gate].setVoltage(0.f);
+			outputs[GATE_OUTPUT + lastGate].setVoltage(0.f);
 			outputs[GATE_OUTPUT + node].setVoltage(10.f);
 		}
 	}
 	
 	void processLights(const ProcessArgs& args){
 		// Light the current node
-		if (reset_lights) {
+		if (lightsChanged) {
 			for (int i = 0; i < 36; i++)
 				lights[CV_LIGHT + i].setBrightness( 0.f );
-			reset_lights = false;
+			lightsChanged = false;
 		}
 		lights[CV_LIGHT + node].setBrightness( 1.f );
 		
 		// Light the outputs depending on amount of steps enabled
-		lights[GATE_LIGHT].setBrightness( (step_count >= 1 ) ? 1.f : 0.f );
+		lights[GATE_LIGHT].setBrightness( (stepCount >= 1 ) ? 1.f : 0.f );
 		for (int i = STEP2START; i < STEP3START; i++)
-			lights[GATE_LIGHT + i].setBrightness( (step_count >= 2 ) ? 1.f : 0.f );
+			lights[GATE_LIGHT + i].setBrightness( (stepCount >= 2 ) ? 1.f : 0.f );
 		for (int i = STEP3START; i < STEP4START; i++)
-			lights[GATE_LIGHT + i].setBrightness( (step_count >= 3 ) ? 1.f : 0.f );
+			lights[GATE_LIGHT + i].setBrightness( (stepCount >= 3 ) ? 1.f : 0.f );
 		for (int i = STEP4START; i < STEP5START; i++)
-			lights[GATE_LIGHT + i].setBrightness( (step_count >= 4 ) ? 1.f : 0.f );
+			lights[GATE_LIGHT + i].setBrightness( (stepCount >= 4 ) ? 1.f : 0.f );
 		for (int i = STEP5START; i < STEP6START; i++)
-			lights[GATE_LIGHT + i].setBrightness( (step_count >= 5 ) ? 1.f : 0.f );
+			lights[GATE_LIGHT + i].setBrightness( (stepCount >= 5 ) ? 1.f : 0.f );
 		for (int i = STEP6START; i < STEP7START; i++)
-			lights[GATE_LIGHT + i].setBrightness( (step_count >= 6 ) ? 1.f : 0.f );
+			lights[GATE_LIGHT + i].setBrightness( (stepCount >= 6 ) ? 1.f : 0.f );
 		for (int i = STEP7START; i < STEP8START; i++)
-			lights[GATE_LIGHT + i].setBrightness( (step_count >= 7 ) ? 1.f : 0.f );
+			lights[GATE_LIGHT + i].setBrightness( (stepCount >= 7 ) ? 1.f : 0.f );
 		for (int i = STEP8START; i < STEP9START; i++){
-			lights[GATE_LIGHT + i].setBrightness( (step_count >= 8 ) ? 1.f : 0.f );
-			lights[EOC_LIGHT + i - STEP8START].setBrightness( (step_count >= 8 ) ? 1.f : 0.f );
+			lights[GATE_LIGHT + i].setBrightness( (stepCount >= 8 ) ? 1.f : 0.f );
+			lights[EOC_LIGHT + i - STEP8START].setBrightness( (stepCount >= 8 ) ? 1.f : 0.f );
 		}
 	}
 
 	void onReset() override {
 		step = 0;
 		node = 0;
-		last_node = 0;
-		reset_lights = true;
+		lastNode = 0;
+		pathTraveled[0] = 0;
+		for (int i = 1; i < 8; i++) pathTraveled[i] = -1;
+		lightsChanged = true;
 	}
 
 	void process(const ProcessArgs& args) override {
-		if (randomizeCvTrigger.process(params[RANDCV_PARAM].getValue())){
-			randomizeCv(args);
-		}
-		if (randomizeRouteTrigger.process(params[RANDROUTE_PARAM].getValue())){
-			randomizeRoute(args);
-		}
+		if (randomizeCvTrigger.process(params[RANDCV_PARAM].getValue())) randomizeCv(args);
+		if (randomizeRouteTrigger.process(params[RANDROUTE_PARAM].getValue())) randomizeRoute(args);
 		processReset(args);
 		processRunStatus(args);
 		processStepNumber(args);
-		if (process_node){
-			processNode(args);
-		}
+		if (nodeChanged) processNode(args);
 		processGateOutput(args);
 		outputs[CV_OUTPUT].setVoltage(params [CV_PARAM + node].getValue());
 		processLights(args);
@@ -327,7 +330,6 @@ struct DariusWidget : ModuleWidget {
 		addInput(createInput<AriaJackIn>(mm2px(Vec(14.5, 18.0)), module, Darius::STEP_UP_INPUT));
 		addInput(createInput<AriaJackIn>(mm2px(Vec(14.5, 27.0)), module, Darius::STEP_DOWN_INPUT));
 		addInput(createInput<AriaJackIn>(mm2px(Vec(24.5, 22.5)), module, Darius::STEP_INPUT));
-		// addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(34.5, 22.5)), module, Darius::STEP_PARAM));
 		addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(24.5, 32.5)), module, Darius::STEP_PARAM));
 		
 		// Run
@@ -345,20 +347,18 @@ struct DariusWidget : ModuleWidget {
 		addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(64.5, 22.5)), module, Darius::RANDCV_PARAM));
 		addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(74.5, 22.5)), module, Darius::RANDROUTE_PARAM));
 		
-		// Range selection
-		addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(3.0, 87.5)), module, Darius::RANGE_PARAM));
-		
 		// Output
+		addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(3.0, 87.5)), module, Darius::RANGE_PARAM));
 		addOutput(createOutput<AriaJackOut>(mm2px(Vec(9.5, 87.5)), module, Darius::CV_OUTPUT));
 		
 		// Seed
-		addInput(createInput<AriaJackIn>(mm2px(Vec(9.5, 113.5)), module, Darius::SEED_INPUT));
+		addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(3.0, 110.0)), module, Darius::SEED_MODE_PARAM));
+		addInput(createInput<AriaJackIn>(mm2px(Vec(9.5, 110.0)), module, Darius::SEED_INPUT));
 
 		// Debug Outputs
-		#ifdef ARIA_DEBUG
+		// FIXME remove them elsewhere
 		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(32.5, 119.0)), module, Darius::DEBUG_OUTPUT));
 		addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(42.5, 119.0)), module, Darius::DEBUG2_OUTPUT));
-		#endif
 	}
 };
 
