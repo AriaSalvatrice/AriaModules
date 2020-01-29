@@ -80,7 +80,6 @@ struct Darius : Module {
 	enum OutputIds {
 		ENUMS(GATE_OUTPUT, 36),
 		CV_OUTPUT, // 1.2.0 release
-		ENUMS(DEBUG_OUTPUT, 10),
 		NUM_OUTPUTS
 	};
 	enum LightIds {
@@ -375,11 +374,7 @@ struct Darius : Module {
 		if (steppedBack) processNodeBack(args);
 		processGateOutput(args);
 		processVoltageOutput(args);
-		processLights(args);
-		
-		outputs[DEBUG_OUTPUT + 0].setVoltage(pathTraveled[0]);
-		outputs[DEBUG_OUTPUT + 1].setVoltage(pathTraveled[1]);
-		outputs[DEBUG_OUTPUT + 2].setVoltage(pathTraveled[7]);
+		processLights(args);	
 	}
 };
 
@@ -407,11 +402,6 @@ struct DariusWidget : ModuleWidget {
 		// Signature.
 		addChild(createWidget<AriaSignature>(mm2px(Vec(117.5, 114.538))));
 		
-		// FIXME
-		addOutput(createOutput<AriaJackTransparent>( mm2px(Vec(100.0, 114.538)), module, Darius::DEBUG_OUTPUT + 0));
-		addOutput(createOutput<AriaJackTransparent>( mm2px(Vec(110.0, 114.538)), module, Darius::DEBUG_OUTPUT + 1));
-		addOutput(createOutput<AriaJackTransparent>( mm2px(Vec(120.0, 114.538)), module, Darius::DEBUG_OUTPUT + 2));
-
 		// Screws
 		addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
