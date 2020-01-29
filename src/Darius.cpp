@@ -77,8 +77,6 @@ struct Darius : Module {
 	enum OutputIds {
 		ENUMS(GATE_OUTPUT, 36),
 		CV_OUTPUT, // 1.2.0 release
-		DEBUG_OUTPUT,
-		DEBUG2_OUTPUT,
 		NUM_OUTPUTS
 	};
 	enum LightIds {
@@ -280,7 +278,6 @@ struct Darius : Module {
 				}
 			} else {
 				prng::init(randomSeed, step);
-				outputs[DEBUG_OUTPUT].setVoltage(prng::uniform());
 				if (prng::uniform() < params[ROUTE_PARAM + lastNode].getValue()) {
 					node = node + step + 1;
 				} else {
@@ -393,8 +390,6 @@ struct DariusWidget : ModuleWidget {
 		
 		// Signature.
 		addChild(createWidget<AriaSignature>(mm2px(Vec(117.5, 114.538))));
-		addOutput(createOutput<AriaJackOut>(mm2px(Vec(117.5, 112.5)), module, Darius::DEBUG_OUTPUT));
-		addOutput(createOutput<AriaJackOut>(mm2px(Vec(125.5, 112.5)), module, Darius::DEBUG2_OUTPUT));
 
 		// Screws
 		addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
