@@ -14,12 +14,12 @@ static bool ariaSalvatriceArcaneSingletonOwned = false;
 
 // Fortunes are generated 10mn in advance to account for desync'd clocks. 
 std::string getCurrentFortuneDate() {	
-	char todaysFortuneDate[11];
+	char currentFortuneDate[11];
 	time_t localTime = time(0);
 	localTime = localTime - 60 * 60 * 12; // Offset by -12 hours, since fortunes are up at 12:00 AM UTC
 	tm *utcTime = gmtime(&localTime);
-	strftime(todaysFortuneDate, 11, "%Y-%m-%d", utcTime);
-	return todaysFortuneDate;
+	strftime(currentFortuneDate, 11, "%Y-%m-%d", utcTime);
+	return currentFortuneDate;
 }
 
 
@@ -39,7 +39,7 @@ struct ArcaneBase : Module {
 	bool owningSingleton = false;
 	bool jsonParsed = false;
 	
-	// Used to display on the LCD: once set it doesn't change.
+	// Used to display on the LCD: once set it change only on reset.
 	std::string todaysFortuneDate = getCurrentFortuneDate();
 	
 	// These are read from JSON
@@ -120,6 +120,7 @@ struct ArcaneBase : Module {
 	}
 	
 	void onReset() override {
+		todaysFortuneDate = getCurrentFortuneDate();
 		jsonParsed = false;
 		jsonParsed = readTodaysFortune();
 		// On manual reset, we download if necessary, whether we own the singleton or not.
