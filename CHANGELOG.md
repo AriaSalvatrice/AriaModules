@@ -3,11 +3,8 @@ Changelog
 
 ## Planned for 1.3.0 or later, not implemented at all yet
 
-- [PLANNED - NEW FEATURE] Darius: Added a "Step Back" CV input. 
-- [PLANNED - NEW FEATURE] Darius: You can now undo using the two "Randomize" buttons. 
-- [PLANNED - NEW FEATURE] Darius: Added a CV polarity selector: 0V~10V or -5V~5V. CV Knobs now default to the center. 
+- [PLANNED - NEW FEATURE] Darius: You can now undo pressing the two "Randomize" buttons. 
 - [PLANNED - NEW FEATURE] Darius: Added a "Seed" CV input, to force a specific random seed to be used.
-- [PLANNED - FIX] Darius: Loading a patch saved in the middle of a sequence shows the full path traveled, instead of just the current step.
 
 
 ## Unreleased 1.3.0
@@ -17,6 +14,8 @@ Changelog
 - [NEW MODULE] Arcane - Today's fortune ★
 - [NEW MODULE] Atout - Today's fortune ★
 - [NEW MODULE] Aleister - Today's fortune ★
+- [NEW FEATURE] Darius: Added a CV polarity selector: 0V~10V or -5V~5V. CV Knobs now default to the center on new instances for ease of use in bipolar mode.
+- [NEW FEATURE] Darius: Added new trigger controls: Back, Up, and Down. The "Step" CV input is now called "Forward" for consistency.
 - [NEW FEATURE] Darius: All trigger inputs now accept polyphonic input. Existing patches are very unlikely to be broken by this new feature. If they are, they can be fixed by splitting any polyphonic trigger input then sending only the first channel.
 
 ### Changed
@@ -26,6 +25,7 @@ Changelog
 
 ### Fixed
 
+- [FIX] Darius: Loading a patch saved in the middle of a sequence shows the full path traveled, instead of just the current step.
 - [FIX] Darius: Initializing the device now resets it to the first node.
 - [FIX] Splort, Smerge, Spleet, Swerge, Splirge: Increased the refresh rate of lights, as they were optimized too aggressively.
 

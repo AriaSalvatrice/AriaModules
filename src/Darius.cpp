@@ -1,5 +1,7 @@
 #include "plugin.hpp"
 
+#include <string> // Temp
+
 const int STEP1START = 0;  //               00        
 const int STEP2START = 1;  //             02  01            
 const int STEP3START = 3;  //           05  04  03          
@@ -44,20 +46,22 @@ struct Darius : Module {
 	enum LightIds {
 		ENUMS(CV_LIGHT, 36),
 		ENUMS(GATE_LIGHT, 36),
-		ENUMS(EOC_LIGHT, 8),
 		NUM_LIGHTS
 	};
 	
 	bool running = true;
+	bool steppedForward = false;
+	bool steppedBack = false;
+	bool forceUp = false;
+	bool forceDown = false;
+	bool lightsReset = false; // FIXME - Will no longer be necessary soon!
 	int stepCount = 8;
 	int step = 0;
-	bool nodeChanged = false;
 	int node = 0;
 	int lastNode = 0; // FIXME - Will no longer be necessary soon!
 	int lastGate = 0; // FIXME - Will no longer be necessary soon!
 	int pathTraveled[8] = { 0, -1, -1, -1, -1, -1, -1, -1}; // -1 = not gone there yet
 	float randomSeed = 0.f;
-	bool lightsChanged = false; // FIXME - Will no longer be necessary soon!
 	dsp::SchmittTrigger stepUpCvTrigger;
 	dsp::SchmittTrigger stepDownCvTrigger;
 	dsp::SchmittTrigger stepBackCvTrigger;
@@ -77,7 +81,7 @@ struct Darius : Module {
 		configParam(STEPCOUNT_PARAM, 1.f, 8.f, 8.f, "Steps");
 		configParam(RANDCV_PARAM, 0.f, 1.f, 0.f, "Randomize CV knobs");
 		configParam(RANDROUTE_PARAM, 0.f, 1.f, 0.f, "Meta-randomize random route knobs");
-		configParam(SEED_MODE_PARAM, 0.f, 1.f, 0.f, "Randomize on 1st or all nodes");
+		configParam(SEED_MODE_PARAM, 0.f, 1.f, 0.f, "New random seed on first or all nodes");
 		configParam(RANGE_PARAM, 0.f, 1.f, 0.f, "Voltage output range");
 		for (int i = 0; i < STEP9START; i++)
 			configParam(CV_PARAM + i, 0.f, 10.f, 5.f, "CV");
@@ -91,6 +95,11 @@ struct Darius : Module {
 		json_object_set_new(rootJ, "node", json_integer(node));
 		json_object_set_new(rootJ, "lastNode", json_integer(lastNode));
 		json_object_set_new(rootJ, "lastGate", json_integer(lastGate));
+		json_t *pathTraveledJ = json_array();
+		for (int i = 0; i < 8; i++) {
+			json_array_insert_new(pathTraveledJ, i, json_integer(pathTraveled[i]));
+		} 
+		json_object_set_new(rootJ, "pathTraveled", pathTraveledJ);
 		return rootJ;
 	}
 	
@@ -111,6 +120,15 @@ struct Darius : Module {
 		if (lastGateJ){
 			lastGate = json_integer_value(lastGateJ);
 		}
+		json_t *pathTraveledJ = json_object_get(rootJ, "pathTraveled");
+		if (pathTraveledJ) {
+			for (int i = 0; i < 8; i++) {
+				json_t *pathTraveledNodeJ = json_array_get(pathTraveledJ, i);
+				if (pathTraveledNodeJ) {
+					pathTraveled[i] = json_integer_value(pathTraveledNodeJ);
+				}
+			}
+		}
 	}
 		
 	void randomizeCv(const ProcessArgs& args){
@@ -121,12 +139,22 @@ struct Darius : Module {
 		for (int i = 0; i < 36; i++) params[ROUTE_PARAM + i].setValue(random::uniform());		
 	}
 	
+	void resetPathTraveled(const ProcessArgs& args){
+		pathTraveled[0] = 0;
+		for (int i = 1; i < 8; i++) pathTraveled[i] = -1;
+	}
+	
+	void refreshSeed(const ProcessArgs& args){
+		randomSeed = ( inputs[SEED_INPUT].isConnected() ) ? inputs[SEED_INPUT].getVoltage() : random::uniform();
+	}
+	
 	void processReset(const ProcessArgs& args){
 		if (resetCvTrigger.process(inputs[RESET_INPUT].getVoltageSum()) or resetButtonTrigger.process(params[RESET_PARAM].getValue())){
 			step = 0;
 			node = 0;
 			lastNode = 0;
-			lightsChanged = true;
+			lightsReset = true;
+			resetPathTraveled(args);
 			for (int i = 0; i < 36; i++)
 				outputs[GATE_OUTPUT + i].setVoltage(0.f);
 		}
@@ -145,36 +173,74 @@ struct Darius : Module {
 		if (running) {
 			if (stepForwardCvTrigger.process(inputs[STEP_INPUT].getVoltageSum())){
 				step++;
-				nodeChanged = true;
+				steppedForward = true;
+			}
+			if (stepBackCvTrigger.process(inputs[STEP_BACK_INPUT].getVoltageSum()) and step > 0 ){
+				step--;
+				steppedBack = true;
+			}
+			if (stepUpCvTrigger.process(inputs[STEP_UP_INPUT].getVoltageSum())){
+				step++;
+				forceUp = true;
+				steppedForward = true;
+			}
+			if (stepDownCvTrigger.process(inputs[STEP_DOWN_INPUT].getVoltageSum())){
+				step++;
+				forceDown = true;
+				steppedForward = true;
 			}
 		}
 		if (stepForwardButtonTrigger.process(params[STEP_PARAM].getValue())){
 			step++; // You can still advance manually if module isn't running
-			nodeChanged = true;
+			steppedForward = true;
 		}
 		lastGate = node;
 		if (step >= stepCount) {
 			step = 0;
 			node = 0;
 			lastNode = 0;
-			pathTraveled[0] = 0;
-			for (int i = 1; i < 8; i++) pathTraveled[i] = -1;
-			lightsChanged = true;
+			resetPathTraveled(args);
+			lightsReset = true;
 		}
 	}
 	
-	void processNode(const ProcessArgs& args){
-		nodeChanged = false;
-		if (step == 0){ // Step 1 started
+	void processNodeForward(const ProcessArgs& args){
+		steppedForward = false;
+		
+		// Refresh seed as lazily as possible
+		if (step == 1) refreshSeed(args);
+		if (step >= 2 and params[SEED_MODE_PARAM].getValue() == 1.0f) refreshSeed(args);
+		
+		if (step == 0){ // Step 1 starting
 			node = 0;
-			lightsChanged = true;
-		} else { // Step 2~8 started
-			if (params[ROUTE_PARAM + lastNode].getValue() < random::uniform()) {
-				node = node + step;
+			lightsReset = true;
+		} else { // Step 2~8 starting
+			if (forceUp or forceDown) {
+				if (forceUp) {
+					node = node + step;
+					forceUp = false;
+				}
+				if (forceDown) {
+					node = node + step + 1;
+					forceDown = false;
+				}
 			} else {
-				node = node + step + 1;
+				if (params[ROUTE_PARAM + lastNode].getValue() < random::uniform()) {
+					node = node + step;
+				} else {
+					node = node + step + 1;
+				}
 			}
 		}
+		pathTraveled[step] = node;
+		lastNode = node;
+	}
+	
+	void processNodeBack(const ProcessArgs& args){
+		lightsReset = true;
+		node = pathTraveled[step];
+		// FIXME - This conditional avoids a bizarre problem where randomSeed goes NaN. Not sure what's exactly going on!!
+		if (step < 7) pathTraveled[step + 1] = -1; 
 		lastNode = node;
 	}
 	
@@ -187,15 +253,24 @@ struct Darius : Module {
 		}
 	}
 	
-	void processLights(const ProcessArgs& args){
-		// Light the current node
-		if (lightsChanged) {
-			for (int i = 0; i < 36; i++)
-				lights[CV_LIGHT + i].setBrightness( 0.f );
-			lightsChanged = false;
+	void processVoltageOutput(const ProcessArgs& args){
+		if (params[RANGE_PARAM].getValue() == 0.f ) {
+			outputs[CV_OUTPUT].setVoltage(params[CV_PARAM + node].getValue());
+		} else {
+			outputs[CV_OUTPUT].setVoltage(params[CV_PARAM + node].getValue() - 5.0);
 		}
-		lights[CV_LIGHT + node].setBrightness( 1.f );
-		
+	}
+	
+	void processLights(const ProcessArgs& args){
+		// Clean up by request only
+		if (lightsReset) {
+			for (int i = 0; i < 36; i++) lights[CV_LIGHT + i].setBrightness( 0.f );
+			lightsReset = false;
+		}
+		// Light the current path
+		for (int i = 0; i < 8; i++) {
+			if (pathTraveled[i] >= 0) lights[CV_LIGHT + pathTraveled[i]].setBrightness( 1.f );
+		}
 		// Light the outputs depending on amount of steps enabled
 		lights[GATE_LIGHT].setBrightness( (stepCount >= 1 ) ? 1.f : 0.f );
 		for (int i = STEP2START; i < STEP3START; i++)
@@ -212,7 +287,6 @@ struct Darius : Module {
 			lights[GATE_LIGHT + i].setBrightness( (stepCount >= 7 ) ? 1.f : 0.f );
 		for (int i = STEP8START; i < STEP9START; i++){
 			lights[GATE_LIGHT + i].setBrightness( (stepCount >= 8 ) ? 1.f : 0.f );
-			lights[EOC_LIGHT + i - STEP8START].setBrightness( (stepCount >= 8 ) ? 1.f : 0.f );
 		}
 	}
 
@@ -222,7 +296,7 @@ struct Darius : Module {
 		lastNode = 0;
 		pathTraveled[0] = 0;
 		for (int i = 1; i < 8; i++) pathTraveled[i] = -1;
-		lightsChanged = true;
+		lightsReset = true;
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -231,10 +305,13 @@ struct Darius : Module {
 		processReset(args);
 		processRunStatus(args);
 		processStepNumber(args);
-		if (nodeChanged) processNode(args);
+		if (steppedForward) processNodeForward(args);
+		if (steppedBack) processNodeBack(args);
 		processGateOutput(args);
-		outputs[CV_OUTPUT].setVoltage(params [CV_PARAM + node].getValue());
+		processVoltageOutput(args);
 		processLights(args);
+		outputs[DEBUG_OUTPUT].setVoltage(step);
+		outputs[DEBUG2_OUTPUT].setVoltage(randomSeed);
 	}
 };
 
