@@ -17,6 +17,9 @@ const int STEP9START = 36; // (Panel is rotated 90 degrees counter-clockwise com
 // Using xoroshiro128+ like VCV does - gives me a better distribution than mersenne twister.
 // http://prng.di.unimi.it/
 // https://community.vcvrack.com/t/controlling-the-random-seed/8005
+//
+// Running an automated test, I'm obtaining a distribution of results that look sane, 
+// not skewed to either side, which was a problem with std's mersenne twister.
 namespace prng {
 
 	static inline uint64_t rotl(const uint64_t x, int k) {
@@ -40,7 +43,7 @@ namespace prng {
 	void init(float seed1, float seed2){
 		s[0] = seed1 * 52852712; // Keyboard smash
 		s[1] = seed2 * 60348921;
-		for (int i = 0; i < 10; i++) next();
+		for (int i = 0; i < 10; i++) next(); // Warm up for better results
 	}
 
 	float uniform() {
@@ -77,6 +80,7 @@ struct Darius : Module {
 	enum OutputIds {
 		ENUMS(GATE_OUTPUT, 36),
 		CV_OUTPUT, // 1.2.0 release
+		ENUMS(DEBUG_OUTPUT, 10),
 		NUM_OUTPUTS
 	};
 	enum LightIds {
@@ -91,7 +95,7 @@ struct Darius : Module {
 	bool forceUp = false;
 	bool forceDown = false;
 	bool lightsReset = false;
-	bool shSeedNextFirst = false;
+	bool shSeedNextFirst = false; // S & H the seed next 1st step
 	int stepCount = 8;
 	int step = 0;
 	int node = 0;
@@ -269,11 +273,19 @@ struct Darius : Module {
 		} else { // Step 2~8 starting
 			if (forceUp or forceDown) {
 				if (forceUp) {
-					node = node + step;
+					if (step == 1) {
+						node = 1; // FIXME: This check prevents issue #21 but I don't understand why
+					} else {
+						node = node + step;
+					}
 					forceUp = false;
 				}
 				if (forceDown) {
-					node = node + step + 1;
+					if (step == 1) {
+						node = 2;
+					} else {
+						node = node + step + 1;
+					}
 					forceDown = false;
 				}
 			} else {
@@ -364,6 +376,10 @@ struct Darius : Module {
 		processGateOutput(args);
 		processVoltageOutput(args);
 		processLights(args);
+		
+		outputs[DEBUG_OUTPUT + 0].setVoltage(pathTraveled[0]);
+		outputs[DEBUG_OUTPUT + 1].setVoltage(pathTraveled[1]);
+		outputs[DEBUG_OUTPUT + 2].setVoltage(pathTraveled[7]);
 	}
 };
 
@@ -390,6 +406,11 @@ struct DariusWidget : ModuleWidget {
 		
 		// Signature.
 		addChild(createWidget<AriaSignature>(mm2px(Vec(117.5, 114.538))));
+		
+		// FIXME
+		addOutput(createOutput<AriaJackTransparent>( mm2px(Vec(100.0, 114.538)), module, Darius::DEBUG_OUTPUT + 0));
+		addOutput(createOutput<AriaJackTransparent>( mm2px(Vec(110.0, 114.538)), module, Darius::DEBUG_OUTPUT + 1));
+		addOutput(createOutput<AriaJackTransparent>( mm2px(Vec(120.0, 114.538)), module, Darius::DEBUG_OUTPUT + 2));
 
 		// Screws
 		addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));

@@ -42,12 +42,12 @@ Here comes yet another gimmick module challenging you to integrate its way of th
 
 **Darius** is a 8-step sequencer where each node branches into two possible paths, creating repeating patterns that start similarly and resolve differently. Takes a whole 32hp of space to fit all its knobs. 
 
-To get started immediately, patch in a clock to the step forward input, randomize the CV, patch the main output to an oscillator, and listen what happens.
+To get started immediately, patch in a clock to the **Forward⯈** input, randomize the CV, patch the main output to an oscillator, and listen what happens.
 
 On each node:
 
 - **CV Knob** (left): sets the CV for that step.
-- **Random route knob** (right): alters the probability to pick the top or the bottom node on the next step when stepping **Forward⯈**. Arrow pointing to the right means 50/50. 
+- **Random route knob** (right): alters the probability to pick the top or the bottom node on the next step when stepping **Forward⯈**. If the knob's arrow points to the right, that means 50/50. 
 - **Output**: when active, passes through the clock input (both gates and trigs work), or sends 10V continuously if no step input is plugged in.
 
 On the top-left of the module:
@@ -70,7 +70,7 @@ On the bottom-left:
 
 The last two are an advanced feature - just ignore them if you don't understand what they do:
 
-- **1st/All**: Decides whether to store the random seed and plan out the route when on the first node, or whether to use a fresh random seed and flip the coin at the last moment possible. In **1st** mode, going back and forth repeatedly results in the same path, until the first node is reached from step 8 (it won't refresh it if you reach the first node from stepping back). In effect, it acts as a sample and hold for the **Random** input at the exact moment the first node is _left_.
+- **1st/All**: Decides whether to store the random seed and plan out the route when on the first node, or whether to use a fresh random seed and flip the coin at moment to decide the node forward. In **1st** mode, going back and forth repeatedly results in the same path, until the first node is reached from step 8 (it won't refresh it if you reach the first node from stepping back). In effect, it acts as a sample and hold for the **Random** input at the exact moment the first node is _left_.
 - **Random**: Use this to fix the random seed! When the input is not patched, or when it's receiving 0V, **Darius** flips the coin randomly. But when it's receiving a seed, the coin flips become deterministic - it will take the same route every time. Try out alternating, every bar, sending it an arbitrary fixed voltage such as 4.58V then 0V, to create call-and-response phrases where the first part is always the same.
 
 Darius has a simple panel, few advanced features, and is impossible to truly tame - by design. It is meant to be easy to learn, suprising to use, and fun to master. Many of its apparent limitations can be overcome with a bit of creative patching. It works wonderfully with [stoermelder PackOne](https://github.com/stoermelder/vcvrack-packone)'s [CV-MAP](https://github.com/stoermelder/vcvrack-packone/blob/v1/docs/CVMap.md) and [8FACE](https://github.com/stoermelder/vcvrack-packone/blob/v1/docs/EightFace.md) to give you CV control over the knobs and add multiple preset banks.
