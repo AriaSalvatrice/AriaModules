@@ -11,8 +11,6 @@ const int STEP7START = 21; //   27  26  25  24  23  22  21
 const int STEP8START = 28; // 35  34  33  32  31  30  29  28
 const int STEP9START = 36; // (Panel is rotated 90 degrees counter-clockwise compared to this diagram)
 
-// FIXME - Lights flicker a lot
-
 // PRNG
 // Using xoroshiro128+ like VCV does - gives me a better distribution than mersenne twister.
 // http://prng.di.unimi.it/

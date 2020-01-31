@@ -73,6 +73,9 @@ The last two are an advanced feature - just ignore them if you don't understand 
 - **1st/All**: Decides whether to store the random seed and plan out the route when on the first node, or whether to use a fresh random seed and flip the coin at moment to decide the node forward. In **1st** mode, going back and forth repeatedly results in the same path, until the first node is reached from step 8 (it won't refresh it if you reach the first node from stepping back). In effect, it acts as a sample and hold for the **Random** input at the exact moment the first node is _left_.
 - **Random**: Use this to fix the random seed! When the input is not patched, or when it's receiving 0V, **Darius** flips the coin randomly. But when it's receiving a seed, the coin flips become deterministic - it will take the same route every time. Try out alternating, every bar, sending it an arbitrary fixed voltage such as 4.58V then 0V, to create call-and-response phrases where the first part is always the same.
 
+If you send triggers to the directional inputs at the exact same time, only one will be accepted. The default priority is: 
+**Forward⯈**, **Up⯅**, **Down⯆**, **⯇Back**. If you want a different priority, you can patch logic gates with modules such as [Count Modula's](https://github.com/countmodula/VCVRackPlugins) to do that.
+
 Darius has a simple panel, few advanced features, and is impossible to truly tame - by design. It is meant to be easy to learn, suprising to use, and fun to master. Many of its apparent limitations can be overcome with a bit of creative patching. It works wonderfully with [stoermelder PackOne](https://github.com/stoermelder/vcvrack-packone)'s [CV-MAP](https://github.com/stoermelder/vcvrack-packone/blob/v1/docs/CVMap.md) and [8FACE](https://github.com/stoermelder/vcvrack-packone/blob/v1/docs/EightFace.md) to give you CV control over the knobs and add multiple preset banks.
 
 Darius is named after the eponymous arcade shoot-em-up game series, known for its surreal visuals, its fish-themed enemies, its [unique soundtracks](https://www.youtube.com/watch?v=6FEdlAL3bX0), its multi-display arcade cabinets, and for allowing the player to select their route through the game via a branching map.
@@ -81,15 +84,12 @@ Darius is named after the eponymous arcade shoot-em-up game series, known for it
 
 I guess the module is also technically named after some dead Persian guy who did some King stuff, I heard on Wikipedia, the free encyclopedia.
 
-**Protip for cool kids only:** if you leave all the **Random route** knobs to the default, the pattern is about 30 times more likely to end up towards the center than one of the two extremes. Use this information wisely, or don't.
-
+**Protip for cool kids only:** if you leave all the **Random route** knobs to the default, the pattern is more likely to end up towards the center than the two extremes. In my tests, on default settings, the distribution is 0.8%, 5.5%, 16.4%, 27.3%, 27.3%, 16.4%, 5.5%, 0.8%. Are you a big brain enough math nerd to dial in the perfect settings for a uniform 12.5% chance per output?
 
 
 
 Arcane, Atout & Aleister - Today's Fortune ★
 --------------------------------------------
-
-**THIS MODULE IS IN BETA. IT'S NOT AVAILABLE FROM THE VCV LIBRARY YET! PLEASE REFER TO THE [VCV RACK FORUMS](https://community.vcvrack.com/t/aria-salvatrice-signature-series-1-2-0-darius-branching-step-sequencer/7734/) FOR TEST BINARIES.**
 
 ![Arcane](/doc/arcane.png)
 
@@ -97,7 +97,12 @@ I hope luck is on your side. Every day, you will share together the fortune I sh
 
 Modules in the Arcane series are comprised almost only of output jacks, sending today's fortune as CV. **Those values are the same for every Arcane user**, and nobody can predict or influence them. I pronounce a new oracle every day at 12:00 AM UTC without fail.
 
-I will draw the following cards, and impart the following knowledge:
+Optional video introduction, showing a song made with Arcane:
+
+[![Arcane video](/doc/arcane-vdeio.png)](https://youtu.be/g66gyHkzz0E)
+
+
+Every day, I will draw the following cards, and impart the following knowledge:
 
 - **_Arcane Majeur_** - a major arcana of the Tarot of Marseilles.
 - **_Bâtons_** (Wands), **_Coupes_** (Cups), **_Deniers_** (Coins), **_Épées_** (Swords) - a different 16 step binary pattern for each suit of the Tarot.
@@ -152,6 +157,8 @@ If the repository is unreachable, the module will will output 0V on all ports, e
 **There is no offline mode, and no built-in way to load older fortunes, by design.** These are multiplayer-only oracles. But I won't prevent you from editing the .json files in the `AriaSalvatrice/Arcane/` directory of your VCV Rack user directory, if you really must. Every downloaded fortune is archived locally, a full archive is available from GitHub, and if a local file exists for today, it will not be checked against the server.     
 (Quick tech remark about JSON API cache spoofing: such self-deception will never alter your true destiny, and it is unwise to cling to the past instead of living for a future you can yet change.)
 
+It should go without saying that no sane courtroom would ever humor the idea the output of Arcane is original enough to be my copyright. Since courtooms are rarely sane, **I explicitly relinquish any claim of intellectual propery over the output of Arcane**, not that I believe I ever had any. Any song you make with it is yours alone.
+
 **Protip for cool kids only:** If you treat my oracles as a mere random number generator, you will never gain any wisdom from them.
 
 
@@ -178,7 +185,9 @@ Those modules are part of the [VCV plugin library](https://vcvrack.com/plugins.h
 Acknowledgements & Credits
 --------------------------
 
-Thanks to everyone who created open-source modules I could learn from. Thanks to Andrew Belt for creating VCV Rack and providing code suggestions. Thanks to my dog for no particular reason. Thanks to you for using my art.
+Thanks to everyone who created open-source modules I could learn from and make songs with. Thanks to Andrew Belt for creating VCV Rack and providing code suggestions. Thanks to my music-making LGBT internet shitposting gang for introducing me to VCV and modular synthesis as something that's not just for old guys with more disposable income than impetus to write fresh songs. Thanks to my dog for no particular reason. 
+
+**And most importantly, thanks to YOU for using my art.**
 
 The modules use the following fonts:
 - [Francois One](https://fonts.google.com/specimen/Francois+One) by [Vernon Adams](http://sansoxygen.com/) 
@@ -201,7 +210,7 @@ The graphics are also distributed under the WTFPL, save for the following except
   - If you are faithfully porting my code to a fork of VCV Rack, are compiling binaries for another platform, or are otherwise faitfully distributing my modules as I designed them, you can leave in the signature. If unsure, just ask.
   - The easiest way to remove my signature from every module is by blanking or replacing the graphic in the [`res/components/signature.svg`](res/components/signature.svg) file, and removing it from the blank plate: [`res/Blank.svg`](res/Blank.svg).
 - The files in `res/Arcane` are all distributed under the [CC-BY-NC-SA](https://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_US) license, as they are a derivative work of the [CBD Tarot](https://www.cbdtarot.com/) released under that license.
-- The files in `res/components/lcd/Fixed_v01` were exported from the [Fixed_v01 font by Orgdot](http://www.orgdot.com/aliasfonts/index.htm), which is released under [a custom BSD-style license](res/components/lcd/Fixed_v01/LICENSE.txt), included in the source and in binary distributions.
+- The files in `res/components/lcd/Fixed_v01` were exported from the [Fixed_v01 font by Orgdot](http://www.orgdot.com/aliasfonts/index.htm), which is released under [a custom MIT-style license](res/components/lcd/Fixed_v01/LICENSE.txt), included in the source and in binary distributions.
 
 You may freely distribute alternate faceplates for my modules. You will find information about my design language and design process in [`doc/design.md`](doc/design.md).
 
