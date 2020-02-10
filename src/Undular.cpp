@@ -238,13 +238,10 @@ struct Undular : Module {
 		
 		previousLockX = (params[X_LOCK_PARAM].getValue() == 1.f) ? true : false;
 		previousLockY = (params[Y_LOCK_PARAM].getValue() == 1.f) ? true : false;
-		
-		outputs[DEBUG_OUTPUT].setVoltage( (previousLockX) ? 7.f : 2.f , 0);
 	}
 	
 	void process(const ProcessArgs& args) override {
 		if (scrollDivider.process()){
-
 			if (owningSingleton) {
 				position = APP->scene->rackScroll->offset;
 				updateScrollOffsets(args);
@@ -254,12 +251,6 @@ struct Undular : Module {
 				processLocks(args);
 				initialized = true; // On load, memorize last input but do not act upon it
 			}
-			
-			if (inputs[Y_INPUT].isConnected() and inputs[Y_INPUT].getVoltage() > 0.f) {
-				outputs[DEBUG_OUTPUT].setVoltage( ( (scrollMaxY - scrollMinY) * inputs[Y_INPUT].getVoltage() / 10 )  , 7);
-			}
-			
-			outputs[DEBUG_OUTPUT].setChannels(10);
 		}
 	}
 };
@@ -316,7 +307,7 @@ struct UndularWidget : ModuleWidget {
 		addInput(createInput<AriaJackIn>(mm2px(Vec(8.5, 103.0)), module, Undular::TENSION_INPUT));
 
 		// Debug
-		addOutput(createOutput<AriaJackOut>(mm2px(Vec(8.5, 120.0)), module, Undular::DEBUG_OUTPUT));
+		// addOutput(createOutput<AriaJackOut>(mm2px(Vec(8.5, 120.0)), module, Undular::DEBUG_OUTPUT));
 	}
 };
 

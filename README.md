@@ -176,7 +176,7 @@ Scroll your rack via CV! UnDuLaR adjusts to the size of your rack without any se
 
 This is particularly useful for live performance with MIDI gear. While you can bind every control, **I recommend using only one movement input**. Build a rack that is no wider (or no taller) than your screen at your preferred zoom level, bind to MIDI either a trig input pair or a scroll input, then lock the unused axis with its button. You do not want the mental overhead of navigating two dimensions while performing.
 
-- **UP, **DOWN**, **LEFT**, **RIGHT**: Take trigs, and jump around the rack in the corresponding direction, wrapping around when it reaches the end.     
+- **UP**, **DOWN**, **LEFT**, **RIGHT**: Take trigs, and jump around the rack in the corresponding direction, wrapping around when it reaches the end.     
 The default vertical jump is 3U - the height of exactly one module.    
 The default horizontal jump is 32hp - the width of exactly one module, so long as the module in question happens to be exactly 32hp.
 - **Step X**, **Step Y**: Adjust the distance to jump on each trigger.
