@@ -112,6 +112,15 @@
       ]
     },
     {
+      "slug": "Undular",
+      "name": "Signature Series Undular",
+      "description": "Scroll the rack via CV for live performance. If locked by mistake: Engine > Sample Rate > Pause",
+      "tags": [
+        "Controller",
+		"Visual"
+      ]
+    },
+    {
       "slug": "Blank",
       "name": "Signature Series 8hp Blank Plate",
       "description": "A complimentary blank plate and ♥-head screwdriver are included with every Signature Series module purchase",

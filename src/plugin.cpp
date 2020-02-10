@@ -19,13 +19,15 @@ void init(Plugin* p) {
 	p->addModel(modelArcane);
 	p->addModel(modelAtout);
 	p->addModel(modelAleister);
+	
+	// Live performance
+	p->addModel(modelUndular);
 
 	// Blank plate
 	p->addModel(modelBlank);
 
 #ifdef ARIA_DEV_MODULES
 	p->addModel(modelBendlet);
-	p->addModel(modelUndular);
 	p->addModel(modelTest);
 #endif
 
