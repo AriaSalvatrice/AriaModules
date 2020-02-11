@@ -4,10 +4,6 @@
 // Explicit <array> include required on OS X
 #include <array> 
 
-// Builds modules still under development and not ready for general use.
-// Remember to add them to the plugin.json to see them in the browser!
-#define ARIA_DEV_MODULES
-
 using namespace rack;
 
 // Declare the Plugin, defined in plugin.cpp
@@ -34,7 +30,5 @@ extern Model *modelUndular;
 // Blank plate
 extern Model *modelBlank;
 
-#ifdef ARIA_DEV_MODULES
-extern Model *modelBendlet;
-extern Model *modelTest;
-#endif
+// extern Model *modelBendlet;
+// extern Model *modelTest;

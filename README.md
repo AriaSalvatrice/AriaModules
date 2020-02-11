@@ -3,6 +3,25 @@ Aria Salvatrice's Signature Series VCV Rack Modules
 
 Hiya hello hey hi. These here are a few cool and nice modules what for [VCV Rack](https://vcvrack.com/). I hope you like them.
 
+Module documentation:
+
+- [Split and Merge: Splort, Smerge, Spleet, Swerge, and Splirge](#split-and-merge-splort-smerge-spleet-swerge-and-splirge)
+- [Darius Branching Step Sequencer](#darius-branching-step-sequencer)
+- [Arcane, Atout & Aleister - Today's Fortune ★](#arcane-atout--aleister---todays-fortune-)
+- [UnDuLaR Rack Scroller](#undular-rack-scroller)
+- [Signature Series Blank Plate](#signature-series-blank-plate)
+
+Other thingies:
+
+- [Changelog](CHANGELOG.md)
+- [Installation](#installation)
+- [Acknowledgements & Credits](#acknowledgements--credits)
+- [Lawyer's corner](#lawyers-corner)
+- [Contact](#contact)
+- [How to contribute](CONTRIBUTING.md)
+- [Design language of the modules](doc/design.md)
+- [Beta / pre-release thread on VCV forums](https://community.vcvrack.com/t/arias-cool-and-nice-thread-of-barely-working-betas-and-bug-squashing/8208)
+
 
 
 Split and Merge: Splort, Smerge, Spleet, Swerge, and Splirge

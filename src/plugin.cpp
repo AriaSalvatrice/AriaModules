@@ -26,9 +26,7 @@ void init(Plugin* p) {
 	// Blank plate
 	p->addModel(modelBlank);
 
-#ifdef ARIA_DEV_MODULES
-	p->addModel(modelBendlet);
-	p->addModel(modelTest);
-#endif
+	// p->addModel(modelBendlet);
+	// p->addModel(modelTest);
 
 }

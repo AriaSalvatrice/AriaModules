@@ -1,6 +1,19 @@
 Changelog
 =========
 
+The versioning follows this standard: the first number corresponds to the VCV rack version used. The second number is increased any time a new module is added. The third number is increased when something is added or fixed without adding any new module.
+
+
+## UNRELEASED [1.4.0] - 2020-02-XX
+
+### Added
+- [NEW MODULE] UnDuLaR - Scroll the rack via CV for live performance.
+- [FIX] Arcane: The Fool card no longer crashes the rack. The oracle server will NOT draw the Fool for a week after release to give people time to upgrade.
+- [FIX] Arcane, Atout: LCD loading message changed from "DOWNLOADING" to "WAIT ON D/L" on secondary instances, as only the first added attempts a download. 
+
+
+
+
 ## [1.3.0] - 2020-01-29
 
 ### Added

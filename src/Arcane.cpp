@@ -483,7 +483,7 @@ struct Arcane : ArcaneBase {
 					break;
 			}
 		} else { // JSON not parsed
-			lcdText = "DOWNLOADING"; 
+			lcdText = (owningSingleton) ? "DOWNLOADING" : "WAIT ON D/L"; 
 		}
 	}
 	
