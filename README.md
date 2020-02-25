@@ -202,8 +202,8 @@ The default horizontal jump is 32hp - the width of exactly one module, so long a
 - **Scroll X**, **Scroll Y**: Take 0V~10V, and smoothly scrolls your rack horizontally or vertically. You might want to invert the input if it feels more natural for you to operate your MIDI controller in the reverse direction.
 - **Padding**: Overshoots the scrolling a little by the specified hp.
 - **Zoom**: Takes 0V~10V, and zooms your rack in and out from 25% to 400%. **Zooming in and out in VCV Rack is neither fast nor reliable enough to ever attempt during live performance.** Expect broken graphics, CPU usage spikes, and audio crackles. This is due to VCV's graphics engine, there is nothing I can do to improve the performance.
-- **Alpha** (Opacity): Takes 0V~10V, and scrolls your rack horizontally, adapting to its current dimensions.
-- **Tnsn.** (Tension): Takes 0V~10V, and scrolls your rack horizontally, adapting to its current dimensions.
+- **Alpha** (Opacity): Takes 0V~10V, and adjusts the opacity of cables.
+- **Tnsn.** (Tension): Takes 0V~10V, and adjust the tension of cables.
 - **Lock X/Lock Y**: By pressing those dangerous buttons, UnDuLaR fully takes over scrolling on that axis, preventing scrolling from the scrollbars, scrollwheels, arrow keys, middle click, or from dragging cables at the edges of the screen. It will be a little bit jittery, I can't help it. Those locks will only work if the three corresponding cable inputs for that axis are unplugged. If you find yourself unable to scroll back to UnDuLaR, use this menu option temporarily to re-enable scrolling: `Engine > Sample Rate > Pause`.
 
 Known issue: zooming in and out after locking X or Y won't bring you where you expect, and might allow you to get out of bounds.    
