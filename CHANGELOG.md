@@ -3,6 +3,15 @@ Changelog
 
 The versioning follows this standard: the first number corresponds to the VCV rack version used. The second number is increased any time a new module is added. The third number is increased when something is added or fixed without adding any new module.
 
+## [1.5.0] UNRELEASED
+
+### Planned
+- [NEW MODULE] Srto: Sort and rotate polyphonic cables.
+- [NEW FEATURE] Darius: Added support for portable sequences.
+
+### Changed
+- [NEW FEATURE] Darius: Undo support for the two "Randomize" buttons.
+
 
 ## [1.4.0] - 2020-02-11
 

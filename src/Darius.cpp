@@ -169,13 +169,78 @@ struct Darius : Module {
 		}
 		lightsReset = true;
 	}
-		
+
+	// Undo/Redo for Randomize CV Button. Thanks to David O'Rourke for the example implementation!
+	// https://github.com/AriaSalvatrice/AriaVCVModules/issues/14
+	struct RandomizeCvAction : history::ModuleAction {
+		std::array<float, 36> oldValues;
+		std::array<float, 36> newValues;
+
+		RandomizeCvAction(int moduleId, std::array<float, 36> oldValues, std::array<float, 36> newValues) {
+			name = "randomize Darius CV";
+			this->moduleId = moduleId;
+			this->oldValues = oldValues;
+			this->newValues = newValues;
+		}
+
+		void undo() override {
+			Darius *module = dynamic_cast<Darius*>(APP->engine->getModule(this->moduleId));
+			if (module) {
+				for (int i = 0; i < 36; i++) module->params[CV_PARAM + i].setValue(this->oldValues[i]);
+			}
+		}
+
+		void redo() override {
+			Darius *module = dynamic_cast<Darius*>(APP->engine->getModule(this->moduleId));
+			if (module) {
+				for (int i = 0; i < 36; i++) module->params[CV_PARAM + i].setValue(this->newValues[i]);
+			}
+		}
+	};
+
 	void randomizeCv(const ProcessArgs& args){
+		std::array<float, 36> oldValues;
+		std::array<float, 36> newValues;
+		for (int i = 0; i < 36; i++) oldValues[i] = params[CV_PARAM + i].getValue();
 		for (int i = 0; i < 36; i++) params[CV_PARAM + i].setValue(random::uniform() * 10.f);
+		for (int i = 0; i < 36; i++) newValues[i] = params[CV_PARAM + i].getValue();
+		APP->history->push(new RandomizeCvAction(this->id, oldValues, newValues));
 	}
 	
+	// Undo/Redo for Randomize Route Button.
+	struct RandomizeRouteAction : history::ModuleAction {
+		std::array<float, 36> oldValues;
+		std::array<float, 36> newValues;
+
+		RandomizeRouteAction(int moduleId, std::array<float, 36> oldValues, std::array<float, 36> newValues) {
+			name = "randomize Darius Route";
+			this->moduleId = moduleId;
+			this->oldValues = oldValues;
+			this->newValues = newValues;
+		}
+
+		void undo() override {
+			Darius *module = dynamic_cast<Darius*>(APP->engine->getModule(this->moduleId));
+			if (module) {
+				for (int i = 0; i < 36; i++) module->params[ROUTE_PARAM + i].setValue(this->oldValues[i]);
+			}
+		}
+
+		void redo() override {
+			Darius *module = dynamic_cast<Darius*>(APP->engine->getModule(this->moduleId));
+			if (module) {
+				for (int i = 0; i < 36; i++) module->params[ROUTE_PARAM + i].setValue(this->newValues[i]);
+			}
+		}
+	};
+
 	void randomizeRoute(const ProcessArgs& args){
-		for (int i = 0; i < 36; i++) params[ROUTE_PARAM + i].setValue(random::uniform());		
+		std::array<float, 36> oldValues;
+		std::array<float, 36> newValues;
+		for (int i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
+		for (int i = 0; i < 36; i++) params[ROUTE_PARAM + i].setValue(random::uniform());	
+		for (int i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
+		APP->history->push(new RandomizeRouteAction(this->id, oldValues, newValues));
 	}
 	
 	void resetPathTraveled(const ProcessArgs& args){
