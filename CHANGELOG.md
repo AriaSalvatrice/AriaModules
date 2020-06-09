@@ -6,7 +6,7 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 ## [1.5.0] UNRELEASED
 
 ### Planned
-- [NEW MODULE] Srto: Sort and rotate polyphonic cables.
+- [NEW MODULE] Srot: Sort and rotate polyphonic cables.
 - [NEW FEATURE] Darius: Added support for portable sequences.
 - [NEW FEATURE] Darius: Added an optional quantizer.
 
@@ -14,7 +14,7 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 - [NEW FEATURE] Darius: Added an attenuator to the CV output.
 - [NEW FEATURE] Darius: Can now start the sequence on any step. The "Steps" knob is now known as the "Last step" knob. Existing patches should not be broken by this change.
 - [NEW FEATURE] Darius: Added undo support for the two "Randomize" buttons.
-- [NEW FEATURE] Darius: Right-click options to reset CV and Routes separately.
+- [NEW FEATURE] Darius: Added right-click options to reset CV and Routes separately.
 
 
 
