@@ -14,7 +14,7 @@
    viewBox="0 0 8.0000003 4.0000004"
    version="1.1"
    id="svg6150"
-   sodipodi:docname="rocker-switch-800-r.svg"
+   sodipodi:docname="rocker-switch-io-800-r.svg"
    inkscape:version="0.92.4 (5da689c313, 2019-01-14)">
   <metadata
      id="metadata6154">
@@ -24,7 +24,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -42,7 +42,7 @@
      id="namedview6152"
      showgrid="false"
      inkscape:zoom="10.769007"
-     inkscape:cx="39.408069"
+     inkscape:cx="24.31847"
      inkscape:cy="1.3829961"
      inkscape:window-x="1076"
      inkscape:window-y="442"
@@ -304,4 +304,13 @@
      height="1.5000002"
      x="6.4289532"
      y="1.2208405" />
+  <g
+     aria-label="I"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.17500043px;line-height:1.25;font-family:'Nova Flat';-inkscape-font-specification:'Nova Flat';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#083d45;fill-opacity:1;stroke:none;stroke-width:0.26458335"
+     id="text9571">
+    <path
+       d="M 1.8520834,3.2062502 V 0.88081043 L 2.1466391,0.74128405 h 0.015503 V 3.0667238 L 1.8675864,3.2062502 Z"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.17500043px;font-family:'Nova Flat';-inkscape-font-specification:'Nova Flat';stroke-width:0.26458335;fill:#083d45;fill-opacity:1"
+       id="path9573" />
+  </g>
 </svg>

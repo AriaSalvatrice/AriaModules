@@ -24,7 +24,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -42,8 +42,8 @@
      id="namedview6152"
      showgrid="false"
      inkscape:zoom="10.769007"
-     inkscape:cx="-3.4783493"
-     inkscape:cy="0.06165868"
+     inkscape:cx="-19.502418"
+     inkscape:cy="2.0868307"
      inkscape:window-x="1076"
      inkscape:window-y="442"
      inkscape:window-maximized="1"
@@ -191,7 +191,7 @@
        x2="8.7262144"
        y2="120.22564"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(1.0714287,0,0,1.1666669,-9.0995174,-140.01328)" />
+       gradientTransform="matrix(1.0714287,0,0,1.1666669,-9.0995178,-140.01328)" />
     <linearGradient
        inkscape:collect="always"
        id="linearGradient5279">
@@ -237,7 +237,7 @@
      ry="0.87500018"
      rx="0.93750012"
      y="0.25"
-     x="0.25"
+     x="0.25000024"
      height="3.5000007"
      width="7.500001"
      id="rect5273"

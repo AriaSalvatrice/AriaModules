@@ -67,7 +67,10 @@ struct Darius : Module {
 		RANGE_PARAM,
 		SEED_MODE_PARAM, // 1.3.0 release
 		STEPFIRST_PARAM,
-		ATTENUATION_PARAM, // 1.5.0 release
+		ATTENUATION_PARAM,
+		QUANTIZE_TOGGLE_PARAM,
+		QUANTIZE_KEY_PARAM,
+		QUANTIZE_SCALE_PARAM, // 1.5.0 release
 		NUM_PARAMS
 	};
 	enum InputIds {
@@ -566,7 +569,7 @@ struct DariusWidget : ModuleWidget {
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Darius.svg")));
 		
 		// Signature.
-		addChild(createWidget<AriaSignature>(mm2px(Vec(117.5, 114.538))));
+		addChild(createWidget<AriaSignature>(mm2px(Vec(115.0, 114.538))));
 		
 		// Screws
 		addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
@@ -663,6 +666,10 @@ struct DariusWidget : ModuleWidget {
 		addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(3.0, 112.0)), module, Darius::SEED_MODE_PARAM));
 		addInput(createInput<AriaJackIn>(mm2px(Vec(9.5, 112.0)), module, Darius::SEED_INPUT));
 
+		// Quantize
+		addParam(createParam<AriaRockerSwitchHorizontalIO800>(mm2px(Vec(33.5, 106.0)), module, Darius::QUANTIZE_TOGGLE_PARAM));
+		addParam(createParam<AriaKnob820>(mm2px(Vec(24.5, 111.0)), module, Darius::QUANTIZE_KEY_PARAM));
+		addParam(createParam<AriaKnob820>(mm2px(Vec(74.5, 111.0)), module, Darius::QUANTIZE_SCALE_PARAM));
 	}
 
 

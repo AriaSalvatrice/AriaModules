@@ -173,6 +173,14 @@ struct AriaRockerSwitchHorizontal800 : SvgSwitch {
 	}
 };
 
+// Rocker siwtch, horizontal. I/O (On/Off). Left is default (Off).
+struct AriaRockerSwitchHorizontalIO800 : SvgSwitch {
+	AriaRockerSwitchHorizontalIO800() {
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-io-800-l.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-io-800-r.svg")));
+	}
+};
+
 struct AriaRockerSwitchVertical800 : SvgSwitch {
 	AriaRockerSwitchVertical800() {
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-u.svg")));
