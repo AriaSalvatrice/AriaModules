@@ -10,8 +10,10 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 - [NEW FEATURE] Darius: Added support for portable sequences.
 
 ### Changed
-- [NEW FEATURE] Darius: Undo support for the two "Randomize" buttons.
-
+- [NEW FEATURE] Darius: Added undo support for the two "Randomize" buttons.
+- [NEW FEATURE] Darius: Right-click options to reset CV and Routes separately.
+- [NEW FEATURE] Darius: Added an attenuator to the CV output.
+- [NEW FEATURE] Darius: Can now start the sequence on any step. The "Steps" knob is now known as the "Last step" knob. Existing patches should not be broken by this change.
 
 ## [1.4.0] - 2020-02-11
 

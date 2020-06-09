@@ -1,6 +1,9 @@
 #include "plugin.hpp"
 #include <random>
 
+// Warning - this module was created with very little C++ experience, and features were 
+// added to it later without regard for code quality. This is maintained exploratory code, not good design.
+
 const int STEP1START = 0;  //               00        
 const int STEP2START = 1;  //             02  01            
 const int STEP3START = 3;  //           05  04  03          
@@ -63,6 +66,8 @@ struct Darius : Module {
 		RANDROUTE_PARAM, // 1.2.0 release
 		RANGE_PARAM,
 		SEED_MODE_PARAM, // 1.3.0 release
+		STEPFIRST_PARAM,
+		ATTENUATION_PARAM, // 1.5.0 release
 		NUM_PARAMS
 	};
 	enum InputIds {
@@ -93,7 +98,11 @@ struct Darius : Module {
 	bool forceDown = false;
 	bool lightsReset = false;
 	bool shSeedNextFirst = false; // S & H the seed next 1st step
-	int stepCount = 8;
+	bool advanceToStart = false;
+	bool resetCV = false;
+	bool resetRoutes = false;
+	int stepFirst = 1;
+	int stepLast = 8;
 	int step = 0;
 	int node = 0;
 	int lastNode = 0;
@@ -116,11 +125,13 @@ struct Darius : Module {
 		configParam(STEP_PARAM, 0.f, 1.f, 0.f, "Step");
 		configParam(RUN_PARAM, 0.f, 1.f, 1.f, "Run");
 		configParam(RESET_PARAM, 0.f, 1.f, 0.f, "Reset");
-		configParam(STEPCOUNT_PARAM, 1.f, 8.f, 8.f, "Steps");
+		configParam(STEPFIRST_PARAM, 1.f, 8.f, 1.f, "First step");
+		configParam(STEPCOUNT_PARAM, 1.f, 8.f, 8.f, "Last step");
 		configParam(RANDCV_PARAM, 0.f, 1.f, 0.f, "Randomize CV knobs");
 		configParam(RANDROUTE_PARAM, 0.f, 1.f, 0.f, "Meta-randomize random route knobs");
 		configParam(SEED_MODE_PARAM, 0.f, 1.f, 0.f, "New random seed on first or all nodes");
 		configParam(RANGE_PARAM, 0.f, 1.f, 0.f, "Voltage output range");
+		configParam(ATTENUATION_PARAM, 0.f, 1.f, 1.f, "Attenuation");
 		for (int i = 0; i < STEP9START; i++)
 			configParam(CV_PARAM + i, 0.f, 10.f, 5.f, "CV");
 		for (int i = 0; i < STEP8START; i++)
@@ -172,6 +183,7 @@ struct Darius : Module {
 
 	// Undo/Redo for Randomize CV Button. Thanks to David O'Rourke for the example implementation!
 	// https://github.com/AriaSalvatrice/AriaVCVModules/issues/14
+	// FIXME - Use templates or something, this is copy-pasted 4 times lol
 	struct RandomizeCvAction : history::ModuleAction {
 		std::array<float, 36> oldValues;
 		std::array<float, 36> newValues;
@@ -213,7 +225,7 @@ struct Darius : Module {
 		std::array<float, 36> newValues;
 
 		RandomizeRouteAction(int moduleId, std::array<float, 36> oldValues, std::array<float, 36> newValues) {
-			name = "randomize Darius Route";
+			name = "randomize Darius Routes";
 			this->moduleId = moduleId;
 			this->oldValues = oldValues;
 			this->newValues = newValues;
@@ -243,6 +255,82 @@ struct Darius : Module {
 		APP->history->push(new RandomizeRouteAction(this->id, oldValues, newValues));
 	}
 	
+
+	// Undo/Redo for Reset CV.
+	struct ResetCVAction : history::ModuleAction {
+		std::array<float, 36> oldValues;
+		std::array<float, 36> newValues;
+
+		ResetCVAction(int moduleId, std::array<float, 36> oldValues, std::array<float, 36> newValues) {
+			name = "reset Darius CV";
+			this->moduleId = moduleId;
+			this->oldValues = oldValues;
+			this->newValues = newValues;
+		}
+
+		void undo() override {
+			Darius *module = dynamic_cast<Darius*>(APP->engine->getModule(this->moduleId));
+			if (module) {
+				for (int i = 0; i < 36; i++) module->params[CV_PARAM + i].setValue(this->oldValues[i]);
+			}
+		}
+
+		void redo() override {
+			Darius *module = dynamic_cast<Darius*>(APP->engine->getModule(this->moduleId));
+			if (module) {
+				for (int i = 0; i < 36; i++) module->params[CV_PARAM + i].setValue(this->newValues[i]);
+			}
+		}
+	};
+
+	void processResetCV(const ProcessArgs& args){
+		resetCV = false;
+		std::array<float, 36> oldValues;
+		std::array<float, 36> newValues;
+		for (int i = 0; i < 36; i++) oldValues[i] = params[CV_PARAM + i].getValue();
+		for (int i = 0; i < 36; i++) params[CV_PARAM + i].setValue(5.f);	
+		for (int i = 0; i < 36; i++) newValues[i] = params[CV_PARAM + i].getValue();
+		APP->history->push(new ResetCVAction(this->id, oldValues, newValues));
+	}
+
+
+	// Undo/Redo for Reset CV.
+	struct ResetRoutesAction : history::ModuleAction {
+		std::array<float, 36> oldValues;
+		std::array<float, 36> newValues;
+
+		ResetRoutesAction(int moduleId, std::array<float, 36> oldValues, std::array<float, 36> newValues) {
+			name = "reset Darius Routes";
+			this->moduleId = moduleId;
+			this->oldValues = oldValues;
+			this->newValues = newValues;
+		}
+
+		void undo() override {
+			Darius *module = dynamic_cast<Darius*>(APP->engine->getModule(this->moduleId));
+			if (module) {
+				for (int i = 0; i < 36; i++) module->params[ROUTE_PARAM + i].setValue(this->oldValues[i]);
+			}
+		}
+
+		void redo() override {
+			Darius *module = dynamic_cast<Darius*>(APP->engine->getModule(this->moduleId));
+			if (module) {
+				for (int i = 0; i < 36; i++) module->params[ROUTE_PARAM + i].setValue(this->newValues[i]);
+			}
+		}
+	};
+
+	void processResetRoutes(const ProcessArgs& args){
+		resetRoutes = false;
+		std::array<float, 36> oldValues;
+		std::array<float, 36> newValues;
+		for (int i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
+		for (int i = 0; i < 36; i++) params[ROUTE_PARAM + i].setValue(0.5f);	
+		for (int i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
+		APP->history->push(new ResetRoutesAction(this->id, oldValues, newValues));
+	}
+
 	void resetPathTraveled(const ProcessArgs& args){
 		pathTraveled[0] = 0;
 		for (int i = 1; i < 8; i++) pathTraveled[i] = -1;
@@ -278,7 +366,9 @@ struct Darius : Module {
 	}
 		
 	void processStepNumber(const ProcessArgs& args){
-		stepCount = std::round(params[STEPCOUNT_PARAM].getValue());
+		stepFirst = std::round(params[STEPFIRST_PARAM].getValue());
+		stepLast  = std::round(params[STEPCOUNT_PARAM].getValue());
+		if (stepFirst > stepLast) stepFirst = stepLast;
 		if (running) {
 			bool triggerAccepted = false; // Accept only one trigger!
 			if (stepForwardCvTrigger.process(inputs[STEP_INPUT].getVoltageSum())){
@@ -308,13 +398,23 @@ struct Darius : Module {
 			steppedForward = true;
 		}
 		lastGate = node;
-		if (step >= stepCount) {
+		if (step >= stepLast || step < stepFirst - 1) {
 			shSeedNextFirst = true;
+			advanceToStart = true;
 			step = 0;
 			node = 0;
 			lastNode = 0;
 			resetPathTraveled(args);
 			lightsReset = true;
+		}
+	}
+
+	// If we don't start on the 1st step, advance to the starting point
+	void processAdvanceToStart(const ProcessArgs& args){
+		advanceToStart = false;
+		for(int i = 0; i < stepFirst - 1; i++) {
+			step++;
+			processNodeForward(args);
 		}
 	}
 	
@@ -383,9 +483,9 @@ struct Darius : Module {
 	
 	void processVoltageOutput(const ProcessArgs& args){
 		if (params[RANGE_PARAM].getValue() == 0.f ) {
-			outputs[CV_OUTPUT].setVoltage(params[CV_PARAM + node].getValue());
+			outputs[CV_OUTPUT].setVoltage(params[CV_PARAM + node].getValue() * params[ATTENUATION_PARAM].getValue());
 		} else {
-			outputs[CV_OUTPUT].setVoltage(params[CV_PARAM + node].getValue() - 5.0);
+			outputs[CV_OUTPUT].setVoltage(params[CV_PARAM + node].getValue() * params[ATTENUATION_PARAM].getValue() - 5.0);
 		}
 	}
 	
@@ -400,21 +500,21 @@ struct Darius : Module {
 		}
 		lights[CV_LIGHT + pathTraveled[step]].setBrightness( 1.f );
 		// Light the outputs depending on amount of steps enabled
-		lights[GATE_LIGHT].setBrightness( (stepCount >= 1 ) ? 1.f : 0.f );
+		lights[GATE_LIGHT].setBrightness( (stepFirst <= 1 && stepLast >= 1 ) ? 1.f : 0.f );
 		for (int i = STEP2START; i < STEP3START; i++)
-			lights[GATE_LIGHT + i].setBrightness( (stepCount >= 2 ) ? 1.f : 0.f );
+			lights[GATE_LIGHT + i].setBrightness( (stepFirst <= 2 && stepLast >= 2 ) ? 1.f : 0.f );
 		for (int i = STEP3START; i < STEP4START; i++)
-			lights[GATE_LIGHT + i].setBrightness( (stepCount >= 3 ) ? 1.f : 0.f );
+			lights[GATE_LIGHT + i].setBrightness( (stepFirst <= 3 && stepLast >= 3 ) ? 1.f : 0.f );
 		for (int i = STEP4START; i < STEP5START; i++)
-			lights[GATE_LIGHT + i].setBrightness( (stepCount >= 4 ) ? 1.f : 0.f );
+			lights[GATE_LIGHT + i].setBrightness( (stepFirst <= 4 && stepLast >= 4 ) ? 1.f : 0.f );
 		for (int i = STEP5START; i < STEP6START; i++)
-			lights[GATE_LIGHT + i].setBrightness( (stepCount >= 5 ) ? 1.f : 0.f );
+			lights[GATE_LIGHT + i].setBrightness( (stepFirst <= 5 && stepLast >= 5 ) ? 1.f : 0.f );
 		for (int i = STEP6START; i < STEP7START; i++)
-			lights[GATE_LIGHT + i].setBrightness( (stepCount >= 6 ) ? 1.f : 0.f );
+			lights[GATE_LIGHT + i].setBrightness( (stepFirst <= 6 && stepLast >= 6 ) ? 1.f : 0.f );
 		for (int i = STEP7START; i < STEP8START; i++)
-			lights[GATE_LIGHT + i].setBrightness( (stepCount >= 7 ) ? 1.f : 0.f );
+			lights[GATE_LIGHT + i].setBrightness( (stepFirst <= 7 && stepLast >= 7 ) ? 1.f : 0.f );
 		for (int i = STEP8START; i < STEP9START; i++){
-			lights[GATE_LIGHT + i].setBrightness( (stepCount >= 8 ) ? 1.f : 0.f );
+			lights[GATE_LIGHT + i].setBrightness( (stepFirst <= 8 && stepLast >= 8 ) ? 1.f : 0.f );
 		}
 	}
 
@@ -432,7 +532,10 @@ struct Darius : Module {
 		if (randomizeRouteTrigger.process(params[RANDROUTE_PARAM].getValue())) randomizeRoute(args);
 		processReset(args);
 		processRunStatus(args);
+		if (resetCV) processResetCV(args);
+		if (resetRoutes) processResetRoutes(args);
 		processStepNumber(args);
+		if (advanceToStart) processAdvanceToStart(args);
 		if (steppedForward) processNodeForward(args);
 		if (steppedBack) processNodeBack(args);
 		processGateOutput(args);
@@ -543,7 +646,8 @@ struct DariusWidget : ModuleWidget {
 		addInput(createInput<AriaJackIn>(mm2px(Vec(24.5, 42.5)), module, Darius::RESET_INPUT));
 		addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(34.5, 42.5)), module, Darius::RESET_PARAM));
 		
-		// Step count
+		// Step count & First step
+		addParam(createParam<AriaKnob820Snap>(mm2px(Vec(44.5, 22.5)), module, Darius::STEPFIRST_PARAM));
 		addParam(createParam<AriaKnob820Snap>(mm2px(Vec(54.5, 22.5)), module, Darius::STEPCOUNT_PARAM));
 		
 		// Randomize
@@ -551,15 +655,47 @@ struct DariusWidget : ModuleWidget {
 		addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(74.5, 22.5)), module, Darius::RANDROUTE_PARAM));
 		
 		// Output
-		addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(3.0, 87.5)), module, Darius::RANGE_PARAM));
-		addOutput(createOutput<AriaJackOut>(mm2px(Vec(9.5, 87.5)), module, Darius::CV_OUTPUT));
+		addParam(createParam<AriaKnob820>(mm2px(Vec(9.5, 82.5)), module, Darius::ATTENUATION_PARAM));
+		addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(3.0, 88.6)), module, Darius::RANGE_PARAM));
+		addOutput(createOutput<AriaJackOut>(mm2px(Vec(9.5, 91.5)), module, Darius::CV_OUTPUT));
 		
 		// Seed
-		addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(3.0, 110.0)), module, Darius::SEED_MODE_PARAM));
-		addInput(createInput<AriaJackIn>(mm2px(Vec(9.5, 110.0)), module, Darius::SEED_INPUT));
+		addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(3.0, 112.0)), module, Darius::SEED_MODE_PARAM));
+		addInput(createInput<AriaJackIn>(mm2px(Vec(9.5, 112.0)), module, Darius::SEED_INPUT));
 
 	}
+
+
+	struct ResetCVItem : MenuItem {
+		Darius *module;
+		void onAction(const event::Action &e) override {
+			module->resetCV = true;
+		}
+	};
+
+	struct ResetRoutesItem : MenuItem {
+		Darius *module;
+		void onAction(const event::Action &e) override {
+			module->resetRoutes = true;
+		}
+	};
+
+	void appendContextMenu(ui::Menu *menu) override {	
+		Darius *module = dynamic_cast<Darius*>(this->module);
+		assert(module);
+
+		menu->addChild(new MenuLabel());
+		
+		ResetCVItem *resetCVItem = createMenuItem<ResetCVItem>("Reset CV");
+		resetCVItem->module = module;
+		menu->addChild(resetCVItem);
+
+		ResetRoutesItem *resetRoutesItem = createMenuItem<ResetRoutesItem>("Reset Routes");
+		resetRoutesItem->module = module;
+		menu->addChild(resetRoutesItem);
+	}
 };
+
 
 
 Model* modelDarius = createModel<Darius, DariusWidget>("Darius");
