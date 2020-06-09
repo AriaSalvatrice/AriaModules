@@ -732,91 +732,6 @@ struct Aleister : ArcaneBase {
 }; // Aleister
 
 
-// The LCD. Framebuffer + draw widget.
-struct LCDFramebufferWidget : FramebufferWidget{
-	Arcane *module;
-	LCDFramebufferWidget(Arcane *m){
-		module = m;
-	}
-
-	void step() override{
-		if (module) { // Required to avoid crashing module browser
-			if(module->lcdDirty){
-				FramebufferWidget::dirty = true;
-				module->lcdDirty = false;
-			}
-			FramebufferWidget::step();
-		}
-	}
-};
-
-
-struct LCDDrawWidget : TransparentWidget {
-	Arcane *module;
-	std::array<std::shared_ptr<Svg>, 95> asciiSvg; // 32 to 126, the printable range
-	std::array<std::shared_ptr<Svg>, 24> pianoSvg; // 0..11: Unlit, 12..23 = Lit
-	int testImage;
-
-	LCDDrawWidget(Arcane *module) {
-		this->module = module;
-		if (module) {
-			box.size = mm2px(Vec(36.0, 10.0));
-			for (int i = 0; i < 12; i++) // Unlit
-				pianoSvg[i] = APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/lcd/piano/u" + std::to_string(i) + ".svg"));
-			for (int i = 0; i < 12; i++) // Lit
-				pianoSvg[i + 12] = APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/lcd/piano/l" + std::to_string(i) + ".svg"));
-			for (int i = 0; i < 95; i++)
-				asciiSvg[i] = APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/lcd/Fixed_v01/" + std::to_string(i + 32) + ".svg"));
-		}
-	}
-
-	void draw(const DrawArgs &args) override {
-		if (module) {
-			nvgScale(args.vg, 1.5, 1.5);
-			nvgSave(args.vg);
-			
-			// Piano
-			svgDraw(args.vg, pianoSvg[(module->scale[0])  ? 12 :  0 ]->handle);
-			nvgTranslate(args.vg, 6, 0);
-			svgDraw(args.vg, pianoSvg[(module->scale[1])  ? 13 :  1 ]->handle);
-			nvgTranslate(args.vg, 5, 0);
-			svgDraw(args.vg, pianoSvg[(module->scale[2])  ? 14 :  2 ]->handle);
-			nvgTranslate(args.vg, 5, 0);
-			svgDraw(args.vg, pianoSvg[(module->scale[3])  ? 15 :  3 ]->handle);
-			nvgTranslate(args.vg, 5, 0);
-			svgDraw(args.vg, pianoSvg[(module->scale[4])  ? 16 :  4 ]->handle);
-			nvgTranslate(args.vg, 7, 0);
-			svgDraw(args.vg, pianoSvg[(module->scale[5])  ? 17 :  5 ]->handle);
-			nvgTranslate(args.vg, 6, 0);
-			svgDraw(args.vg, pianoSvg[(module->scale[6])  ? 18 :  6 ]->handle);
-			nvgTranslate(args.vg, 5, 0);
-			svgDraw(args.vg, pianoSvg[(module->scale[7])  ? 19 :  7 ]->handle);
-			nvgTranslate(args.vg, 5, 0);
-			svgDraw(args.vg, pianoSvg[(module->scale[8])  ? 20 :  8 ]->handle);
-			nvgTranslate(args.vg, 5, 0);
-			svgDraw(args.vg, pianoSvg[(module->scale[9])  ? 21 :  9 ]->handle);
-			nvgTranslate(args.vg, 5, 0);
-			svgDraw(args.vg, pianoSvg[(module->scale[10]) ? 22 : 10 ]->handle);
-			nvgTranslate(args.vg, 5, 0);
-			svgDraw(args.vg, pianoSvg[(module->scale[11]) ? 23 : 11 ]->handle);
-			nvgRestore(args.vg);
-		
-			// 11 character display
-			nvgSave(args.vg);
-			nvgTranslate(args.vg, 0, 11);
-			std::string lcdText = module->lcdText;
-			lcdText.append(11, ' '); // Ensure the string is long enough
-			for (int i = 0; i < 11; i++) {
-				char c = lcdText.at(i);
-				svgDraw(args.vg, asciiSvg[ c - 32 ]->handle);
-				nvgTranslate(args.vg, 6, 0);
-			}
-			nvgRestore(args.vg);
-		}
-	}
-}; // LCDDrawWidget
-
-
 // The magnetic cards. You really feel the performance hit without a framebuffer here. 
 struct CardFramebufferWidget : FramebufferWidget{
 	Arcane *module;
@@ -853,7 +768,6 @@ struct CardDrawWidget : TransparentWidget {
 };
 
 
-
 struct ArcaneWidget : ModuleWidget {
 	// Offset
 	float x = 80.32;
@@ -883,8 +797,8 @@ struct ArcaneWidget : ModuleWidget {
 		addChild(cfb);
 		
 		// LCD		
-		LCDFramebufferWidget *lfb = new LCDFramebufferWidget(module);
-		LCDDrawWidget *ldw = new LCDDrawWidget(module);
+		LCDFramebufferWidget<Arcane> *lfb = new LCDFramebufferWidget<Arcane>(module);
+		LCDDrawWidgetPiano<Arcane> *ldw = new LCDDrawWidgetPiano<Arcane>(module);
 		lfb->box.pos = mm2px(Vec(83.6, 41.4));
 		lfb->addChild(ldw);
 		addChild(lfb);
@@ -966,10 +880,10 @@ struct AtoutWidget : ModuleWidget {
 		addChild(createWidget<AriaSignature>(mm2px(Vec(31.06, 114.5))));
 		
 		// LCD	
-		LCDFramebufferWidget *fb = new LCDFramebufferWidget(module);
-		LCDDrawWidget *dw = new LCDDrawWidget(module);
+		LCDFramebufferWidget<Arcane> *fb = new LCDFramebufferWidget<Arcane>(module);
+		LCDDrawWidgetPiano<Arcane> *ldw = new LCDDrawWidgetPiano<Arcane>(module);
 		fb->box.pos = mm2px(Vec(6.44, 41.4));
-		fb->addChild(dw);
+		fb->addChild(ldw);
 		addChild(fb);
 		
 		// Screws
