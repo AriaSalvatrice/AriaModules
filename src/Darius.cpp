@@ -1,5 +1,5 @@
 #include "plugin.hpp"
-#include <random>
+#include "prng.hpp"
 
 // Warning - this module was created with very little C++ experience, and features were 
 // added to it later without regard for code quality. This is maintained exploratory code, not good design.
@@ -14,48 +14,11 @@ const int STEP7START = 21; //   27  26  25  24  23  22  21
 const int STEP8START = 28; // 35  34  33  32  31  30  29  28
 const int STEP9START = 36; // (Panel is rotated 90 degrees counter-clockwise compared to this diagram)
 
-// PRNG
-// Using xoroshiro128+ like VCV does - gives me a better distribution than mersenne twister.
-// http://prng.di.unimi.it/
-// https://community.vcvrack.com/t/controlling-the-random-seed/8005
-//
-// Running an automated test, I'm obtaining a distribution of results that look sane, 
-// not skewed to either side, which was a problem with std's mersenne twister.
-namespace prng {
-
-	static inline uint64_t rotl(const uint64_t x, int k) {
-		return (x << k) | (x >> (64 - k));
-	}
-
-	static uint64_t s[2];
-
-	uint64_t next(void) {
-		const uint64_t s0 = s[0];
-		uint64_t s1 = s[1];
-		const uint64_t result = s0 + s1;
-
-		s1 ^= s0;
-		s[0] = rotl(s0, 24) ^ s1 ^ (s1 << 16); // a, b
-		s[1] = rotl(s1, 37); // c
-
-		return result;
-	}
-	
-	void init(float seed1, float seed2){
-		s[0] = seed1 * 52852712; // Keyboard smash
-		s[1] = seed2 * 60348921;
-		for (int i = 0; i < 10; i++) next(); // Warm up for better results
-	}
-
-	float uniform() {
-		return (next() >> (64 - 24)) / std::pow(2.f, 24);
-	}
-
-}
-
 
 enum LCDModes {
-	SCALE_DISPLAY_MODE
+	SCALE_MODE,
+	NOTE_MODE,
+	MINMAX_MODE
 };
 
 
@@ -76,8 +39,8 @@ struct Darius : Module {
 		MAX_PARAM,
 		SLIDE_PARAM,
 		QUANTIZE_TOGGLE_PARAM,
-		QUANTIZE_KEY_PARAM,
-		QUANTIZE_SCALE_PARAM, // 1.5.0 release
+		KEY_PARAM,
+		SCALE_PARAM, // 1.5.0 release
 		NUM_PARAMS
 	};
 	enum InputIds {
@@ -88,6 +51,7 @@ struct Darius : Module {
 		STEP_UP_INPUT,
 		STEP_DOWN_INPUT,
 		SEED_INPUT, // 1.3.0 release
+		EXT_SCALE_INPUT, // 1.5.0 release
 		NUM_INPUTS
 	};
 	enum OutputIds {
@@ -108,12 +72,11 @@ struct Darius : Module {
 	bool forceDown = false;
 	bool lightsReset = false;
 	bool shSeedNextFirst = false; // S & H the seed next 1st step
-	bool advanceToStart = false;
 	bool resetCV = false;
 	bool resetRoutes = false;
 	bool pianoDisplay[12] = {true, false, false, false, false, false, false, true, true, false, false, false};
 	bool lcdDirty = false;
-	std::string lcdText = "";
+	std::string lcdText = "HULLO!!HIYA";
 	int stepFirst = 1;
 	int stepLast = 8;
 	int step = 0;
@@ -121,7 +84,7 @@ struct Darius : Module {
 	int lastNode = 0;
 	int lastGate = 0;
 	int pathTraveled[8] = { 0, -1, -1, -1, -1, -1, -1, -1}; // -1 = not gone there yet
-	int lcdMode = SCALE_DISPLAY_MODE;
+	int lcdMode = MINMAX_MODE;
 	float randomSeed = 0.f;
 	dsp::SchmittTrigger stepUpCvTrigger;
 	dsp::SchmittTrigger stepDownCvTrigger;
@@ -145,7 +108,11 @@ struct Darius : Module {
 		configParam(RANDROUTE_PARAM, 0.f, 1.f, 0.f, "Meta-randomize random route knobs");
 		configParam(SEED_MODE_PARAM, 0.f, 1.f, 0.f, "New random seed on first or all nodes");
 		configParam(RANGE_PARAM, 0.f, 1.f, 0.f, "Voltage output range");
-		configParam(MIN_PARAM, 0.f, 1.f, 1.f, "Minimum CV/Note");
+		configParam(MIN_PARAM, 0.f, 10.f, 0.f, "Minimum CV/Note");
+		configParam(MAX_PARAM, 0.f, 10.f, 10.f, "Maximum CV/Note");
+		configParam(KEY_PARAM, 0.f, 1.f, 0.f, "Key");
+		configParam(SCALE_PARAM, 0.f, 1.f, 0.f, "Scale");
+		configParam(SLIDE_PARAM, 0.f, 1.f, 0.f, "Slide");
 		for (int i = 0; i < STEP9START; i++)
 			configParam(CV_PARAM + i, 0.f, 10.f, 5.f, "CV");
 		for (int i = 0; i < STEP8START; i++)
@@ -278,20 +245,20 @@ struct Darius : Module {
 		}
 	}
 	
-	void processReset(const ProcessArgs& args){
-		if (resetCvTrigger.process(inputs[RESET_INPUT].getVoltageSum()) or resetButtonTrigger.process(params[RESET_PARAM].getValue())){
-			step = 0;
-			node = 0;
-			lastNode = 0;
-			lightsReset = true;
-			shSeedNextFirst = true;
-			resetPathTraveled(args);
-			for (int i = 0; i < 36; i++)
-				outputs[GATE_OUTPUT + i].setVoltage(0.f);
-		}
+	// Reset to the first step
+	void reset(const ProcessArgs& args){
+		step = 0;
+		node = 0;
+		lastNode = 0;
+		lightsReset = true;
+		shSeedNextFirst = true;
+		resetPathTraveled(args);
+		for (int i = 0; i < 36; i++)
+			outputs[GATE_OUTPUT + i].setVoltage(0.f);
 	}
 	
-	void processRunStatus(const ProcessArgs& args){
+	// Sets running to the current run status
+	void setRunStatus(const ProcessArgs& args){
 		if (runCvTrigger.process(inputs[RUN_INPUT].getVoltageSum())){
 			running = !running;
 			params[RUN_PARAM].setValue(running);
@@ -299,7 +266,7 @@ struct Darius : Module {
 		running = params[RUN_PARAM].getValue();
 	}
 		
-	void processStepNumber(const ProcessArgs& args){
+	void setStepStatus(const ProcessArgs& args){
 		stepFirst = std::round(params[STEPFIRST_PARAM].getValue());
 		stepLast  = std::round(params[STEPCOUNT_PARAM].getValue());
 		if (stepFirst > stepLast) stepFirst = stepLast;
@@ -334,25 +301,19 @@ struct Darius : Module {
 		lastGate = node;
 		if (step >= stepLast || step < stepFirst - 1) {
 			shSeedNextFirst = true;
-			advanceToStart = true;
 			step = 0;
 			node = 0;
 			lastNode = 0;
 			resetPathTraveled(args);
 			lightsReset = true;
-		}
-	}
-
-	// If we don't start on the 1st step, advance to the starting point
-	void processAdvanceToStart(const ProcessArgs& args){
-		advanceToStart = false;
-		for(int i = 0; i < stepFirst - 1; i++) {
-			step++;
-			processNodeForward(args);
+			for(int i = 0; i < stepFirst - 1; i++) {
+				step++;
+				nodeForward(args);
+			}
 		}
 	}
 	
-	void processNodeForward(const ProcessArgs& args){
+	void nodeForward(const ProcessArgs& args){
 		steppedForward = false;
 		
 		// Refresh seed as lazily as possible
@@ -398,7 +359,7 @@ struct Darius : Module {
 		lastNode = node;
 	}
 	
-	void processNodeBack(const ProcessArgs& args){
+	void nodeBack(const ProcessArgs& args){
 		lightsReset = true;
 		node = pathTraveled[step];
 		// FIXME - This conditional avoids a bizarre problem where randomSeed goes NaN. Not sure what's exactly going on!!
@@ -406,7 +367,7 @@ struct Darius : Module {
 		lastNode = node;
 	}
 	
-	void processGateOutput(const ProcessArgs& args){
+	void sendGateOutput(const ProcessArgs& args){
 		if (inputs[STEP_INPUT].isConnected()){
 			outputs[GATE_OUTPUT + node].setVoltage(inputs[STEP_INPUT].getVoltage());
 		} else {
@@ -416,15 +377,15 @@ struct Darius : Module {
 	}
 	
 	// FIXME - I changed how Min/Max work!
-	void processVoltageOutput(const ProcessArgs& args){
+	void setVoltageOutput(const ProcessArgs& args){
 		if (params[RANGE_PARAM].getValue() == 0.f ) {
-			outputs[CV_OUTPUT].setVoltage(params[CV_PARAM + node].getValue() * params[MIN_PARAM].getValue());
+			outputs[CV_OUTPUT].setVoltage(params[CV_PARAM + node].getValue());
 		} else {
-			outputs[CV_OUTPUT].setVoltage(params[CV_PARAM + node].getValue() * params[MIN_PARAM].getValue() - 5.0);
+			outputs[CV_OUTPUT].setVoltage(params[CV_PARAM + node].getValue() - 5.0);
 		}
 	}
 	
-	void processLights(const ProcessArgs& args){
+	void updateLights(const ProcessArgs& args){
 		// Clean up by request only
 		if (lightsReset) {
 			for (int i = 0; i < 36; i++) lights[CV_LIGHT + i].setBrightness( 0.f );
@@ -463,22 +424,30 @@ struct Darius : Module {
 	}
 
 	void process(const ProcessArgs& args) override {
-		if (randomizeCvTrigger.process(params[RANDCV_PARAM].getValue())) randomizeCv(args);
-		if (randomizeRouteTrigger.process(params[RANDROUTE_PARAM].getValue())) randomizeRoute(args);
-		processReset(args);
-		processRunStatus(args);
-		if (resetCV) processResetCV(args);
-		if (resetRoutes) processResetRoutes(args);
-		processStepNumber(args);
-		if (advanceToStart) processAdvanceToStart(args);
-		if (steppedForward) processNodeForward(args);
-		if (steppedBack) processNodeBack(args);
-		processGateOutput(args);
-		processVoltageOutput(args);
-		processLights(args);	
+		if (randomizeCvTrigger.process(params[RANDCV_PARAM].getValue()))
+			randomizeCv(args);
+		if (randomizeRouteTrigger.process(params[RANDROUTE_PARAM].getValue()))
+			randomizeRoute(args);
+		if (resetCvTrigger.process(inputs[RESET_INPUT].getVoltageSum()) or resetButtonTrigger.process(params[RESET_PARAM].getValue()))
+			reset(args);
+		if (resetCV)
+			processResetCV(args);
+		if (resetRoutes)
+			processResetRoutes(args);
+
+		setRunStatus(args);
+		setStepStatus(args);
+
+		if (steppedForward)
+			nodeForward(args);
+		if (steppedBack)
+			nodeBack(args);
+
+		sendGateOutput(args);
+		setVoltageOutput(args);
+		updateLights(args);	
 	}
 };
-
 
 struct AriaKnob820Random : AriaKnob820 {
 	AriaKnob820Random() {
@@ -491,6 +460,33 @@ struct AriaKnob820Random : AriaKnob820 {
 struct AriaKnob820Snap : AriaKnob820 {
 	AriaKnob820Snap() {
 		snap = true;
+	}
+};
+
+
+// Passes the module to the created knobs
+template <class TParamWidget>
+TParamWidget* createLCDParam(math::Vec pos, Darius* module, int paramId) {
+	TParamWidget* o = new TParamWidget(module);
+	o->box.pos = pos;
+	if (module) {
+		o->paramQuantity = module->paramQuantities[paramId];
+	}
+	return o;
+}
+
+struct AriaKnob820MinMax : AriaKnob820 {
+	Darius *module;
+
+	AriaKnob820MinMax(Darius* module) {
+		this->module = module;
+		AriaKnob820();
+	}
+
+	void onDragMove(const event::DragMove& e) override {
+		module->lcdMode = SCALE_MODE;
+		module->lcdDirty = true;
+		AriaKnob820::onDragMove(e);
 	}
 };
 
@@ -520,7 +516,7 @@ struct LCDDariusDrawWidget : TransparentWidget {
 			nvgScale(args.vg, 1.5, 1.5);
 		
 			// Piano if scale display
-			if (module->lcdMode == SCALE_DISPLAY_MODE) {
+			if (module->lcdMode == SCALE_MODE) {
 				nvgSave(args.vg);
 				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[0])  ? 12 :  0 ]->handle);
 				nvgTranslate(args.vg, 6, 0);
@@ -549,7 +545,7 @@ struct LCDDariusDrawWidget : TransparentWidget {
 			}
 		
 			// 11 character display if scale display
-			if (module->lcdMode == SCALE_DISPLAY_MODE) {
+			if (module->lcdMode == SCALE_MODE) {
 				nvgSave(args.vg);
 				nvgTranslate(args.vg, 0, 11);
 				std::string lcdText = module->lcdText;
@@ -567,17 +563,13 @@ struct LCDDariusDrawWidget : TransparentWidget {
 
 
 
-
-
-
-
 struct DariusWidget : ModuleWidget {
 	DariusWidget(Darius* module) {
 		setModule(module);
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Darius.svg")));
 		
 		// Signature
-		addChild(createWidget<AriaSignature>(mm2px(Vec(115.0, 114.538))));
+		addChild(createWidget<AriaSignature>(mm2px(Vec(120.0, 114.538))));
 		
 		// Screws
 		addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
@@ -666,38 +658,40 @@ struct DariusWidget : ModuleWidget {
 		addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(74.5, 22.5)), module, Darius::RANDROUTE_PARAM));
 		
 		// Seed
-		addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(83.0, 112.0)), module, Darius::SEED_MODE_PARAM));
-		addInput(createInput<AriaJackIn>(mm2px(Vec(89.5, 112.0)), module, Darius::SEED_INPUT));
+		addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(103.0, 112.0)), module, Darius::SEED_MODE_PARAM));
+		addInput(createInput<AriaJackIn>(mm2px(Vec(109.5, 112.0)), module, Darius::SEED_INPUT));
 
 		// Output area //////////////////
 
 		// LCD
 		LCDFramebufferWidget<Darius> *lfb = new LCDFramebufferWidget<Darius>(module);
 		LCDDariusDrawWidget *ldw = new LCDDariusDrawWidget(module);
-		lfb->box.pos = mm2px(Vec(22.3, 106.3));
+		lfb->box.pos = mm2px(Vec(8.3, 106.7));
 		lfb->addChild(ldw);
 		addChild(lfb);
 
-		// Voltage Range 
-		addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(3.0, 106.6)), module, Darius::RANGE_PARAM));
-
 		// Quantizer toggle
-		addParam(createParam<AriaRockerSwitchHorizontal800>(mm2px(Vec(34.6, 99.2)), module, Darius::QUANTIZE_TOGGLE_PARAM));
+		addParam(createParam<AriaRockerSwitchHorizontal800>(mm2px(Vec(9.1, 99.7)), module, Darius::QUANTIZE_TOGGLE_PARAM));
+
+		// Voltage Range 
+		addParam(createParam<AriaRockerSwitchHorizontal800>(mm2px(Vec(25.7, 118.7)), module, Darius::RANGE_PARAM));
+
+		// Min & Max
+		addParam(createLCDParam<AriaKnob820MinMax>(mm2px(Vec(49.5,  99.0)), module, Darius::MIN_PARAM));
+		addParam(createLCDParam<AriaKnob820MinMax>(mm2px(Vec(49.5, 112.0)), module, Darius::MAX_PARAM));
 
 		// Quantizer Key & Scale
-		addParam(createParam<AriaKnob820>(mm2px(Vec(9.5, 99.0)), module, Darius::QUANTIZE_KEY_PARAM)); // 112.0
-		addParam(createParam<AriaKnob820>(mm2px(Vec(59.5, 99.0)), module, Darius::QUANTIZE_SCALE_PARAM));
+		addParam(createParam<AriaKnob820>(mm2px(Vec(59.5, 99.0)), module, Darius::SCALE_PARAM));
+		addParam(createParam<AriaKnob820>(mm2px(Vec(59.5, 112.0)), module, Darius::KEY_PARAM));
 
-		// Min & Max (FIXME)
-		addParam(createParam<AriaKnob820>(mm2px(Vec(9.5, 112.0)), module, Darius::MIN_PARAM));
-		addParam(createParam<AriaKnob820>(mm2px(Vec(59.5, 112.0)), module, Darius::MAX_PARAM));
+		// External Scale
+		addInput(createInput<AriaJackIn>(mm2px(Vec(69.5, 99.0)), module, Darius::EXT_SCALE_INPUT));
 
 		// Slide
-		addParam(createParam<AriaKnob820>(mm2px(Vec(68.5, 99.0)), module, Darius::SLIDE_PARAM));
+		addParam(createParam<AriaKnob820>(mm2px(Vec(69.5, 112.0)), module, Darius::SLIDE_PARAM));
 
 		// Output!
-		addOutput(createOutput<AriaJackOut>(mm2px(Vec(68.5, 112.0)), module, Darius::CV_OUTPUT));
-
+		addOutput(createOutput<AriaJackOut>(mm2px(Vec(79.5, 112.0)), module, Darius::CV_OUTPUT));
 	}
 
 
@@ -730,7 +724,5 @@ struct DariusWidget : ModuleWidget {
 		menu->addChild(resetRoutesItem);
 	}
 };
-
-
 
 Model* modelDarius = createModel<Darius, DariusWidget>("Darius");

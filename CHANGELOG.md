@@ -15,7 +15,9 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 - [NEW MODULE] Srot: Sort and rotate polyphonic cables.
 - [NEW FEATURE] Darius: Added support for portable sequences.
 - [NEW FEATURE] Darius: Added an optional quantizer.
-- [NEW FEATURE] Darius: The output jacks of nodes that can't be reached is no longer lit. 
+- [NEW FEATURE] Darius: The output jacks of nodes that have 0% chance to be reached are no longer lit. 
+- [NEW FEATURE] Darius: Added route and CV presets in the right-click menu.
+- [FIX] Darius: Individual trigger/gate outputs now work with every input and the step button, not just with the forward input. This may break old patches.
 
 
 
