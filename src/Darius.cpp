@@ -57,6 +57,7 @@ struct Darius : Module {
 	enum OutputIds {
 		ENUMS(GATE_OUTPUT, 36),
 		CV_OUTPUT, // 1.2.0 release
+		GLOBAL_GATE_OUTPUT, // 1.5.0 release
 		NUM_OUTPUTS
 	};
 	enum LightIds {
@@ -691,7 +692,8 @@ struct DariusWidget : ModuleWidget {
 		addParam(createParam<AriaKnob820>(mm2px(Vec(69.5, 112.0)), module, Darius::SLIDE_PARAM));
 
 		// Output!
-		addOutput(createOutput<AriaJackOut>(mm2px(Vec(79.5, 112.0)), module, Darius::CV_OUTPUT));
+		addOutput(createOutput<AriaJackOut>(mm2px(Vec(79.5, 112.0)), module, Darius::GLOBAL_GATE_OUTPUT));
+		addOutput(createOutput<AriaJackOut>(mm2px(Vec(89.5, 112.0)), module, Darius::CV_OUTPUT));
 	}
 
 
