@@ -773,7 +773,6 @@ struct LCDArcaneDrawWidget : TransparentWidget {
 	Arcane *module;
 	std::array<std::shared_ptr<Svg>, 95> asciiSvg; // 32 to 126, the printable range
 	std::array<std::shared_ptr<Svg>, 24> pianoSvg; // 0..11: Unlit, 12..23 = Lit
-	int testImage;
 
 	LCDArcaneDrawWidget(Arcane *module) {
 		this->module = module;

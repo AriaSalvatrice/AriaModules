@@ -54,6 +54,11 @@ namespace prng {
 }
 
 
+enum LCDModes {
+	SCALE_DISPLAY_MODE
+};
+
+
 struct Darius : Module {
 	enum ParamIds {
 		ENUMS(CV_PARAM, 36),
@@ -67,7 +72,9 @@ struct Darius : Module {
 		RANGE_PARAM,
 		SEED_MODE_PARAM, // 1.3.0 release
 		STEPFIRST_PARAM,
-		ATTENUATION_PARAM,
+		MIN_PARAM,
+		MAX_PARAM,
+		SLIDE_PARAM,
 		QUANTIZE_TOGGLE_PARAM,
 		QUANTIZE_KEY_PARAM,
 		QUANTIZE_SCALE_PARAM, // 1.5.0 release
@@ -114,6 +121,7 @@ struct Darius : Module {
 	int lastNode = 0;
 	int lastGate = 0;
 	int pathTraveled[8] = { 0, -1, -1, -1, -1, -1, -1, -1}; // -1 = not gone there yet
+	int lcdMode = SCALE_DISPLAY_MODE;
 	float randomSeed = 0.f;
 	dsp::SchmittTrigger stepUpCvTrigger;
 	dsp::SchmittTrigger stepDownCvTrigger;
@@ -137,7 +145,7 @@ struct Darius : Module {
 		configParam(RANDROUTE_PARAM, 0.f, 1.f, 0.f, "Meta-randomize random route knobs");
 		configParam(SEED_MODE_PARAM, 0.f, 1.f, 0.f, "New random seed on first or all nodes");
 		configParam(RANGE_PARAM, 0.f, 1.f, 0.f, "Voltage output range");
-		configParam(ATTENUATION_PARAM, 0.f, 1.f, 1.f, "Attenuation");
+		configParam(MIN_PARAM, 0.f, 1.f, 1.f, "Minimum CV/Note");
 		for (int i = 0; i < STEP9START; i++)
 			configParam(CV_PARAM + i, 0.f, 10.f, 5.f, "CV");
 		for (int i = 0; i < STEP8START; i++)
@@ -191,14 +199,12 @@ struct Darius : Module {
 	// Undo/Redo for Randomize buttons and Reset right click options.
 	// Thanks to David O'Rourke for the example implementation!
 	// https://github.com/AriaSalvatrice/AriaVCVModules/issues/14
-
 	struct BulkCvAction : history::ModuleAction {
 		std::array<float, 36> oldValues;
 		std::array<float, 36> newValues;
 		int param;
 
 		BulkCvAction(int moduleId, std::string name, int param, std::array<float, 36> oldValues, std::array<float, 36> newValues) {
-			// name = label;
 			this->moduleId = moduleId;
 			this->name = name;
 			this->param = param;
@@ -409,11 +415,12 @@ struct Darius : Module {
 		}
 	}
 	
+	// FIXME - I changed how Min/Max work!
 	void processVoltageOutput(const ProcessArgs& args){
 		if (params[RANGE_PARAM].getValue() == 0.f ) {
-			outputs[CV_OUTPUT].setVoltage(params[CV_PARAM + node].getValue() * params[ATTENUATION_PARAM].getValue());
+			outputs[CV_OUTPUT].setVoltage(params[CV_PARAM + node].getValue() * params[MIN_PARAM].getValue());
 		} else {
-			outputs[CV_OUTPUT].setVoltage(params[CV_PARAM + node].getValue() * params[ATTENUATION_PARAM].getValue() - 5.0);
+			outputs[CV_OUTPUT].setVoltage(params[CV_PARAM + node].getValue() * params[MIN_PARAM].getValue() - 5.0);
 		}
 	}
 	
@@ -488,16 +495,12 @@ struct AriaKnob820Snap : AriaKnob820 {
 };
 
 
-
-
-
-
 // The draw widget from Arcane, adapted to Darius.
+// I dunno yet how to abstract out the code better to avoid more copy-paste.
 struct LCDDariusDrawWidget : TransparentWidget {
 	Darius *module;
 	std::array<std::shared_ptr<Svg>, 95> asciiSvg; // 32 to 126, the printable range
 	std::array<std::shared_ptr<Svg>, 24> pianoSvg; // 0..11: Unlit, 12..23 = Lit
-	int testImage;
 
 	LCDDariusDrawWidget(Darius *module) {
 		this->module = module;
@@ -515,45 +518,49 @@ struct LCDDariusDrawWidget : TransparentWidget {
 	void draw(const DrawArgs &args) override {
 		if (module) {
 			nvgScale(args.vg, 1.5, 1.5);
-			nvgSave(args.vg);
-			
-			// Piano
-			svgDraw(args.vg, pianoSvg[(module->pianoDisplay[0])  ? 12 :  0 ]->handle);
-			nvgTranslate(args.vg, 6, 0);
-			svgDraw(args.vg, pianoSvg[(module->pianoDisplay[1])  ? 13 :  1 ]->handle);
-			nvgTranslate(args.vg, 5, 0);
-			svgDraw(args.vg, pianoSvg[(module->pianoDisplay[2])  ? 14 :  2 ]->handle);
-			nvgTranslate(args.vg, 5, 0);
-			svgDraw(args.vg, pianoSvg[(module->pianoDisplay[3])  ? 15 :  3 ]->handle);
-			nvgTranslate(args.vg, 5, 0);
-			svgDraw(args.vg, pianoSvg[(module->pianoDisplay[4])  ? 16 :  4 ]->handle);
-			nvgTranslate(args.vg, 7, 0);
-			svgDraw(args.vg, pianoSvg[(module->pianoDisplay[5])  ? 17 :  5 ]->handle);
-			nvgTranslate(args.vg, 6, 0);
-			svgDraw(args.vg, pianoSvg[(module->pianoDisplay[6])  ? 18 :  6 ]->handle);
-			nvgTranslate(args.vg, 5, 0);
-			svgDraw(args.vg, pianoSvg[(module->pianoDisplay[7])  ? 19 :  7 ]->handle);
-			nvgTranslate(args.vg, 5, 0);
-			svgDraw(args.vg, pianoSvg[(module->pianoDisplay[8])  ? 20 :  8 ]->handle);
-			nvgTranslate(args.vg, 5, 0);
-			svgDraw(args.vg, pianoSvg[(module->pianoDisplay[9])  ? 21 :  9 ]->handle);
-			nvgTranslate(args.vg, 5, 0);
-			svgDraw(args.vg, pianoSvg[(module->pianoDisplay[10]) ? 22 : 10 ]->handle);
-			nvgTranslate(args.vg, 5, 0);
-			svgDraw(args.vg, pianoSvg[(module->pianoDisplay[11]) ? 23 : 11 ]->handle);
-			nvgRestore(args.vg);
 		
-			// 11 character display
-			nvgSave(args.vg);
-			nvgTranslate(args.vg, 0, 11);
-			std::string lcdText = module->lcdText;
-			lcdText.append(11, ' '); // Ensure the string is long enough
-			for (int i = 0; i < 11; i++) {
-				char c = lcdText.at(i);
-				svgDraw(args.vg, asciiSvg[ c - 32 ]->handle);
+			// Piano if scale display
+			if (module->lcdMode == SCALE_DISPLAY_MODE) {
+				nvgSave(args.vg);
+				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[0])  ? 12 :  0 ]->handle);
 				nvgTranslate(args.vg, 6, 0);
+				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[1])  ? 13 :  1 ]->handle);
+				nvgTranslate(args.vg, 5, 0);
+				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[2])  ? 14 :  2 ]->handle);
+				nvgTranslate(args.vg, 5, 0);
+				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[3])  ? 15 :  3 ]->handle);
+				nvgTranslate(args.vg, 5, 0);
+				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[4])  ? 16 :  4 ]->handle);
+				nvgTranslate(args.vg, 7, 0);
+				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[5])  ? 17 :  5 ]->handle);
+				nvgTranslate(args.vg, 6, 0);
+				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[6])  ? 18 :  6 ]->handle);
+				nvgTranslate(args.vg, 5, 0);
+				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[7])  ? 19 :  7 ]->handle);
+				nvgTranslate(args.vg, 5, 0);
+				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[8])  ? 20 :  8 ]->handle);
+				nvgTranslate(args.vg, 5, 0);
+				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[9])  ? 21 :  9 ]->handle);
+				nvgTranslate(args.vg, 5, 0);
+				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[10]) ? 22 : 10 ]->handle);
+				nvgTranslate(args.vg, 5, 0);
+				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[11]) ? 23 : 11 ]->handle);
+				nvgRestore(args.vg);
 			}
-			nvgRestore(args.vg);
+		
+			// 11 character display if scale display
+			if (module->lcdMode == SCALE_DISPLAY_MODE) {
+				nvgSave(args.vg);
+				nvgTranslate(args.vg, 0, 11);
+				std::string lcdText = module->lcdText;
+				lcdText.append(11, ' '); // Ensure the string is long enough
+				for (int i = 0; i < 11; i++) {
+					char c = lcdText.at(i);
+					svgDraw(args.vg, asciiSvg[ c - 32 ]->handle);
+					nvgTranslate(args.vg, 6, 0);
+				}
+				nvgRestore(args.vg);
+			}
 		}
 	}
 }; // LCDDariusDrawWidget
@@ -571,13 +578,6 @@ struct DariusWidget : ModuleWidget {
 		
 		// Signature
 		addChild(createWidget<AriaSignature>(mm2px(Vec(115.0, 114.538))));
-
-		// LCD		
-		LCDFramebufferWidget<Darius> *lfb = new LCDFramebufferWidget<Darius>(module);
-		LCDDariusDrawWidget *ldw = new LCDDariusDrawWidget(module);
-		lfb->box.pos = mm2px(Vec(37.3, 112.8));
-		lfb->addChild(ldw);
-		addChild(lfb);
 		
 		// Screws
 		addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
@@ -665,19 +665,39 @@ struct DariusWidget : ModuleWidget {
 		addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(64.5, 22.5)), module, Darius::RANDCV_PARAM));
 		addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(74.5, 22.5)), module, Darius::RANDROUTE_PARAM));
 		
-		// Output
-		addParam(createParam<AriaKnob820>(mm2px(Vec(9.5, 82.5)), module, Darius::ATTENUATION_PARAM));
-		addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(3.0, 88.6)), module, Darius::RANGE_PARAM));
-		addOutput(createOutput<AriaJackOut>(mm2px(Vec(9.5, 91.5)), module, Darius::CV_OUTPUT));
-		
 		// Seed
-		addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(3.0, 112.0)), module, Darius::SEED_MODE_PARAM));
-		addInput(createInput<AriaJackIn>(mm2px(Vec(9.5, 112.0)), module, Darius::SEED_INPUT));
+		addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(83.0, 112.0)), module, Darius::SEED_MODE_PARAM));
+		addInput(createInput<AriaJackIn>(mm2px(Vec(89.5, 112.0)), module, Darius::SEED_INPUT));
 
-		// Quantize
-		addParam(createParam<AriaRockerSwitchHorizontalIO800>(mm2px(Vec(33.5, 106.0)), module, Darius::QUANTIZE_TOGGLE_PARAM));
-		addParam(createParam<AriaKnob820>(mm2px(Vec(24.5, 111.0)), module, Darius::QUANTIZE_KEY_PARAM));
-		addParam(createParam<AriaKnob820>(mm2px(Vec(74.5, 111.0)), module, Darius::QUANTIZE_SCALE_PARAM));
+		// Output area //////////////////
+
+		// LCD
+		LCDFramebufferWidget<Darius> *lfb = new LCDFramebufferWidget<Darius>(module);
+		LCDDariusDrawWidget *ldw = new LCDDariusDrawWidget(module);
+		lfb->box.pos = mm2px(Vec(22.3, 106.3));
+		lfb->addChild(ldw);
+		addChild(lfb);
+
+		// Voltage Range 
+		addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(3.0, 106.6)), module, Darius::RANGE_PARAM));
+
+		// Quantizer toggle
+		addParam(createParam<AriaRockerSwitchHorizontal800>(mm2px(Vec(34.6, 99.2)), module, Darius::QUANTIZE_TOGGLE_PARAM));
+
+		// Quantizer Key & Scale
+		addParam(createParam<AriaKnob820>(mm2px(Vec(9.5, 99.0)), module, Darius::QUANTIZE_KEY_PARAM)); // 112.0
+		addParam(createParam<AriaKnob820>(mm2px(Vec(59.5, 99.0)), module, Darius::QUANTIZE_SCALE_PARAM));
+
+		// Min & Max (FIXME)
+		addParam(createParam<AriaKnob820>(mm2px(Vec(9.5, 112.0)), module, Darius::MIN_PARAM));
+		addParam(createParam<AriaKnob820>(mm2px(Vec(59.5, 112.0)), module, Darius::MAX_PARAM));
+
+		// Slide
+		addParam(createParam<AriaKnob820>(mm2px(Vec(68.5, 99.0)), module, Darius::SLIDE_PARAM));
+
+		// Output!
+		addOutput(createOutput<AriaJackOut>(mm2px(Vec(68.5, 112.0)), module, Darius::CV_OUTPUT));
+
 	}
 
 
