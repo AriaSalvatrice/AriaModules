@@ -209,9 +209,9 @@ struct AriaKnob820Transparent : app::SvgKnob {
 // The framebuffer holding the Draw widget.
 // The actual draw widgets that go inside it are made within the modules.
 template <typename T>
-struct LCDFramebufferWidget : FramebufferWidget{
+struct LcdFramebufferWidget : FramebufferWidget{
 	T *module;
-	LCDFramebufferWidget(T *m){
+	LcdFramebufferWidget(T *m){
 		module = m;
 	}
 

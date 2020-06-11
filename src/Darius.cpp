@@ -14,13 +14,14 @@ const int STEP7START = 21; //   27  26  25  24  23  22  21
 const int STEP8START = 28; // 35  34  33  32  31  30  29  28
 const int STEP9START = 36; // (Panel is rotated 90 degrees counter-clockwise compared to this diagram)
 
-
-enum LCDModes {
+enum LcdModes {
+	INIT_MODE,
+	DEFAULT_MODE,
 	SCALE_MODE,
 	NOTE_MODE,
-	MINMAX_MODE
+	MINMAX_MODE,
+	SLIDE_MODE
 };
-
 
 struct Darius : Module {
 	enum ParamIds {
@@ -58,6 +59,7 @@ struct Darius : Module {
 		ENUMS(GATE_OUTPUT, 36),
 		CV_OUTPUT, // 1.2.0 release
 		GLOBAL_GATE_OUTPUT, // 1.5.0 release
+		DEBUG_OUTPUT,
 		NUM_OUTPUTS
 	};
 	enum LightIds {
@@ -75,9 +77,10 @@ struct Darius : Module {
 	bool shSeedNextFirst = false; // S & H the seed next 1st step
 	bool resetCV = false;
 	bool resetRoutes = false;
-	bool pianoDisplay[12] = {true, false, false, false, false, false, false, true, true, false, false, false};
+	bool pianoDisplay[12] = {false, false, false, false, false, false, false, false, false, false, false, false};
 	bool lcdDirty = false;
-	std::string lcdText = "HULLO!!HIYA";
+	std::string lcdText1 = "";
+	std::string lcdText2 = "";
 	int stepFirst = 1;
 	int stepLast = 8;
 	int step = 0;
@@ -85,8 +88,10 @@ struct Darius : Module {
 	int lastNode = 0;
 	int lastGate = 0;
 	int pathTraveled[8] = { 0, -1, -1, -1, -1, -1, -1, -1}; // -1 = not gone there yet
-	int lcdMode = MINMAX_MODE;
+	int lcdMode = INIT_MODE;
 	float randomSeed = 0.f;
+	float slideDuration = 0.f;
+	float lcdLastInteraction = 0.f;
 	dsp::SchmittTrigger stepUpCvTrigger;
 	dsp::SchmittTrigger stepDownCvTrigger;
 	dsp::SchmittTrigger stepBackCvTrigger;
@@ -113,7 +118,7 @@ struct Darius : Module {
 		configParam(MAX_PARAM, 0.f, 10.f, 10.f, "Maximum CV/Note");
 		configParam(KEY_PARAM, 0.f, 1.f, 0.f, "Key");
 		configParam(SCALE_PARAM, 0.f, 1.f, 0.f, "Scale");
-		configParam(SLIDE_PARAM, 0.f, 1.f, 0.f, "Slide");
+		configParam(SLIDE_PARAM, 0.f, 10.f, 0.f, "Slide");
 		for (int i = 0; i < STEP9START; i++)
 			configParam(CV_PARAM + i, 0.f, 10.f, 5.f, "CV");
 		for (int i = 0; i < STEP8START; i++)
@@ -313,6 +318,16 @@ struct Darius : Module {
 			}
 		}
 	}
+
+	// From 1ms to 10s on the log scale. Doing the way it's done in 
+	// https://github.com/mgunyho/Little-Utils/blob/master/src/PulseGenerator.cpp
+	void setSlide(const ProcessArgs& args){
+		slideDuration = params[SLIDE_PARAM].getValue();
+		if (slideDuration > 0.f ) {
+			slideDuration = rescale(slideDuration, 0.f, 10.f, -3.0f, 1.0f);
+			slideDuration = powf(10.0f, slideDuration);
+		}
+	}
 	
 	void nodeForward(const ProcessArgs& args){
 		steppedForward = false;
@@ -415,6 +430,18 @@ struct Darius : Module {
 		}
 	}
 
+	void updateLcd(const ProcessArgs& args){
+		// Reset after 2 seconds since the last knob was touched
+		if(lcdLastInteraction < 2.f) {
+			lcdLastInteraction += args.sampleTime;
+			// Only update once
+			if(lcdLastInteraction >= 2.f) {
+				lcdMode = DEFAULT_MODE;
+				lcdDirty = true;
+			}
+		}
+	}
+
 	void onReset() override {
 		step = 0;
 		node = 0;
@@ -438,6 +465,7 @@ struct Darius : Module {
 
 		setRunStatus(args);
 		setStepStatus(args);
+		setSlide(args);
 
 		if (steppedForward)
 			nodeForward(args);
@@ -446,7 +474,13 @@ struct Darius : Module {
 
 		sendGateOutput(args);
 		setVoltageOutput(args);
-		updateLights(args);	
+		updateLights(args);
+		updateLcd(args);
+
+		// DEBUG("%f", args.sampleTime);
+
+		outputs[DEBUG_OUTPUT].setVoltage(slideDuration);
+
 	}
 };
 
@@ -467,7 +501,7 @@ struct AriaKnob820Snap : AriaKnob820 {
 
 // Passes the module to the created knobs
 template <class TParamWidget>
-TParamWidget* createLCDParam(math::Vec pos, Darius* module, int paramId) {
+TParamWidget* createLcdParam(math::Vec pos, Darius* module, int paramId) {
 	TParamWidget* o = new TParamWidget(module);
 	o->box.pos = pos;
 	if (module) {
@@ -476,6 +510,8 @@ TParamWidget* createLCDParam(math::Vec pos, Darius* module, int paramId) {
 	return o;
 }
 
+// FIXME - How do I avoid duplicating this code this much? 
+// FIXME - Save time of last knob held
 struct AriaKnob820MinMax : AriaKnob820 {
 	Darius *module;
 
@@ -486,6 +522,23 @@ struct AriaKnob820MinMax : AriaKnob820 {
 
 	void onDragMove(const event::DragMove& e) override {
 		module->lcdMode = SCALE_MODE;
+		module->lcdLastInteraction = 0.f;
+		module->lcdDirty = true;
+		AriaKnob820::onDragMove(e);
+	}
+};
+
+struct AriaKnob820Slide : AriaKnob820 {
+	Darius *module;
+
+	AriaKnob820Slide(Darius* module) {
+		this->module = module;
+		AriaKnob820();
+	}
+
+	void onDragMove(const event::DragMove& e) override {
+		module->lcdMode = SLIDE_MODE;
+		module->lcdLastInteraction = 0.f;
 		module->lcdDirty = true;
 		AriaKnob820::onDragMove(e);
 	}
@@ -494,12 +547,12 @@ struct AriaKnob820MinMax : AriaKnob820 {
 
 // The draw widget from Arcane, adapted to Darius.
 // I dunno yet how to abstract out the code better to avoid more copy-paste.
-struct LCDDariusDrawWidget : TransparentWidget {
+struct LcdDariusDrawWidget : TransparentWidget {
 	Darius *module;
 	std::array<std::shared_ptr<Svg>, 95> asciiSvg; // 32 to 126, the printable range
 	std::array<std::shared_ptr<Svg>, 24> pianoSvg; // 0..11: Unlit, 12..23 = Lit
 
-	LCDDariusDrawWidget(Darius *module) {
+	LcdDariusDrawWidget(Darius *module) {
 		this->module = module;
 		if (module) {
 			box.size = mm2px(Vec(36.0, 10.0));
@@ -545,14 +598,14 @@ struct LCDDariusDrawWidget : TransparentWidget {
 				nvgRestore(args.vg);
 			}
 		
-			// 11 character display if scale display
+			// 11 character display at the bottom
 			if (module->lcdMode == SCALE_MODE) {
 				nvgSave(args.vg);
 				nvgTranslate(args.vg, 0, 11);
-				std::string lcdText = module->lcdText;
-				lcdText.append(11, ' '); // Ensure the string is long enough
+				std::string lcdText2 = module->lcdText2;
+				lcdText2.append(11, ' '); // Ensure the string is long enough
 				for (int i = 0; i < 11; i++) {
-					char c = lcdText.at(i);
+					char c = lcdText2.at(i);
 					svgDraw(args.vg, asciiSvg[ c - 32 ]->handle);
 					nvgTranslate(args.vg, 6, 0);
 				}
@@ -560,7 +613,7 @@ struct LCDDariusDrawWidget : TransparentWidget {
 			}
 		}
 	}
-}; // LCDDariusDrawWidget
+}; // LcdDariusDrawWidget
 
 
 
@@ -664,9 +717,9 @@ struct DariusWidget : ModuleWidget {
 
 		// Output area //////////////////
 
-		// LCD
-		LCDFramebufferWidget<Darius> *lfb = new LCDFramebufferWidget<Darius>(module);
-		LCDDariusDrawWidget *ldw = new LCDDariusDrawWidget(module);
+		// Lcd
+		LcdFramebufferWidget<Darius> *lfb = new LcdFramebufferWidget<Darius>(module);
+		LcdDariusDrawWidget *ldw = new LcdDariusDrawWidget(module);
 		lfb->box.pos = mm2px(Vec(8.3, 106.7));
 		lfb->addChild(ldw);
 		addChild(lfb);
@@ -674,12 +727,12 @@ struct DariusWidget : ModuleWidget {
 		// Quantizer toggle
 		addParam(createParam<AriaRockerSwitchHorizontal800>(mm2px(Vec(9.1, 99.7)), module, Darius::QUANTIZE_TOGGLE_PARAM));
 
-		// Voltage Range 
-		addParam(createParam<AriaRockerSwitchHorizontal800>(mm2px(Vec(25.7, 118.7)), module, Darius::RANGE_PARAM));
+		// Voltage Range - TODO: Flip it
+		addParam(createParam<AriaRockerSwitchHorizontal800>(mm2px(Vec(15.9, 118.8)), module, Darius::RANGE_PARAM));
 
 		// Min & Max
-		addParam(createLCDParam<AriaKnob820MinMax>(mm2px(Vec(49.5,  99.0)), module, Darius::MIN_PARAM));
-		addParam(createLCDParam<AriaKnob820MinMax>(mm2px(Vec(49.5, 112.0)), module, Darius::MAX_PARAM));
+		addParam(createLcdParam<AriaKnob820MinMax>(mm2px(Vec(49.5,  99.0)), module, Darius::MIN_PARAM));
+		addParam(createLcdParam<AriaKnob820MinMax>(mm2px(Vec(49.5, 112.0)), module, Darius::MAX_PARAM));
 
 		// Quantizer Key & Scale
 		addParam(createParam<AriaKnob820>(mm2px(Vec(59.5, 99.0)), module, Darius::SCALE_PARAM));
@@ -689,11 +742,14 @@ struct DariusWidget : ModuleWidget {
 		addInput(createInput<AriaJackIn>(mm2px(Vec(69.5, 99.0)), module, Darius::EXT_SCALE_INPUT));
 
 		// Slide
-		addParam(createParam<AriaKnob820>(mm2px(Vec(69.5, 112.0)), module, Darius::SLIDE_PARAM));
+		addParam(createLcdParam<AriaKnob820Slide>(mm2px(Vec(69.5, 112.0)), module, Darius::SLIDE_PARAM));
 
 		// Output!
 		addOutput(createOutput<AriaJackOut>(mm2px(Vec(79.5, 112.0)), module, Darius::GLOBAL_GATE_OUTPUT));
 		addOutput(createOutput<AriaJackOut>(mm2px(Vec(89.5, 112.0)), module, Darius::CV_OUTPUT));
+
+		// Debug
+		addOutput(createOutput<AriaJackOut>(mm2px(Vec(139.5, 116.0)), module, Darius::DEBUG_OUTPUT));
 	}
 
 

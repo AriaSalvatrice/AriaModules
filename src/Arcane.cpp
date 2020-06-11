@@ -769,12 +769,12 @@ struct CardDrawWidget : TransparentWidget {
 
 
 // The draw widget. Making it more generic is hard so there's a bit of duplication with Darius for now.
-struct LCDArcaneDrawWidget : TransparentWidget {
+struct LcdArcaneDrawWidget : TransparentWidget {
 	Arcane *module;
 	std::array<std::shared_ptr<Svg>, 95> asciiSvg; // 32 to 126, the printable range
 	std::array<std::shared_ptr<Svg>, 24> pianoSvg; // 0..11: Unlit, 12..23 = Lit
 
-	LCDArcaneDrawWidget(Arcane *module) {
+	LcdArcaneDrawWidget(Arcane *module) {
 		this->module = module;
 		if (module) {
 			box.size = mm2px(Vec(36.0, 10.0));
@@ -831,7 +831,7 @@ struct LCDArcaneDrawWidget : TransparentWidget {
 			nvgRestore(args.vg);
 		}
 	} // Draw
-}; // LCDArcaneDrawWidget
+}; // LcdArcaneDrawWidget
 
 
 struct ArcaneWidget : ModuleWidget {
@@ -862,8 +862,8 @@ struct ArcaneWidget : ModuleWidget {
 		addChild(cfb);
 		
 		// LCD		
-		LCDFramebufferWidget<Arcane> *lfb = new LCDFramebufferWidget<Arcane>(module);
-		LCDArcaneDrawWidget *ldw = new LCDArcaneDrawWidget(module);
+		LcdFramebufferWidget<Arcane> *lfb = new LcdFramebufferWidget<Arcane>(module);
+		LcdArcaneDrawWidget *ldw = new LcdArcaneDrawWidget(module);
 		lfb->box.pos = mm2px(Vec(83.6, 41.4));
 		lfb->addChild(ldw);
 		addChild(lfb);
@@ -945,8 +945,8 @@ struct AtoutWidget : ModuleWidget {
 		addChild(createWidget<AriaSignature>(mm2px(Vec(31.06, 114.5))));
 		
 		// LCD	
-		LCDFramebufferWidget<Arcane> *fb = new LCDFramebufferWidget<Arcane>(module);
-		LCDArcaneDrawWidget *ldw = new LCDArcaneDrawWidget(module);
+		LcdFramebufferWidget<Arcane> *fb = new LcdFramebufferWidget<Arcane>(module);
+		LcdArcaneDrawWidget *ldw = new LcdArcaneDrawWidget(module);
 		fb->box.pos = mm2px(Vec(6.44, 41.4));
 		fb->addChild(ldw);
 		addChild(fb);
