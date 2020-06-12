@@ -6,7 +6,6 @@
 
 // This contains Arcane, Atout, and Aleister.
 
-
 // The singleton owner downloads the the fortune from the repository.
 // Other modules look for the cached file.
 // Long name to avoid shared namespace collisions.
@@ -45,7 +44,8 @@ struct ArcaneBase : Module {
 	// These are read from JSON
 	int arcana, bpm, wish;
 	std::array<int, 8> notePattern;
-	bool patternB[16], patternC[16], patternD[16], patternE[16], scale[12]; // There is no pattern A
+	std::array<bool, 16> patternB, patternC, patternD, patternE; // There is no pattern A
+	std::array<bool, 12> scale;
 		
 	// FIXME - figure out how to use a timer instead!
 	dsp::ClockDivider readJsonDivider;
@@ -546,7 +546,7 @@ struct Arcane : ArcaneBase {
 			
 			// Quantize
 			for (int i = 0; i < inputs[QNT_INPUT].getChannels(); i++)
-				outputs[QNT_OUTPUT].setVoltage(quantize(inputs[QNT_INPUT].getVoltage(i), scale), i);
+				outputs[QNT_OUTPUT].setVoltage(Quantizer::quantize(inputs[QNT_INPUT].getVoltage(i), scale), i);
 			outputs[QNT_OUTPUT].setChannels(inputs[QNT_INPUT].getChannels());
 		} else { // JSON not parsed, pass quantizer input as-is.
 			for (int i = 0; i < inputs[QNT_INPUT].getChannels(); i++)
