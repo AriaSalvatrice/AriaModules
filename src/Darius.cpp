@@ -102,6 +102,8 @@ struct Darius : Module {
 	dsp::SchmittTrigger resetButtonTrigger;
 	dsp::SchmittTrigger randomizeCvTrigger;
 	dsp::SchmittTrigger randomizeRouteTrigger;
+	dsp::ClockDivider knobDivider;
+
 
 	Darius() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -123,6 +125,7 @@ struct Darius : Module {
 			configParam(CV_PARAM + i, 0.f, 10.f, 5.f, "CV");
 		for (int i = 0; i < STEP8START; i++)
 			configParam(ROUTE_PARAM + i, 0.f, 1.f, 0.5f, "Random route");
+		knobDivider.setDivision(512); // For non-essential knobs
 	}
 	
 	json_t* dataToJson() override {
@@ -319,13 +322,17 @@ struct Darius : Module {
 		}
 	}
 
-	// From 1ms to 10s on the log scale. Doing the way it's done in 
+	// From 1ms to 10s. 
+	// Using this code as reference:
 	// https://github.com/mgunyho/Little-Utils/blob/master/src/PulseGenerator.cpp
+	// FIXME - this has a bit of a performance impact.
 	void setSlide(const ProcessArgs& args){
 		slideDuration = params[SLIDE_PARAM].getValue();
-		if (slideDuration > 0.f ) {
+		if (slideDuration > 0.00001f ) {
 			slideDuration = rescale(slideDuration, 0.f, 10.f, -3.0f, 1.0f);
 			slideDuration = powf(10.0f, slideDuration);
+		} else {
+			slideDuration = 0.f;
 		}
 	}
 	
@@ -430,16 +437,40 @@ struct Darius : Module {
 		}
 	}
 
+	// Only redraws when necessary
 	void updateLcd(const ProcessArgs& args){
-		// Reset after 2 seconds since the last knob was touched
+		// Reset after 2 seconds since the last interactive input was touched
 		if(lcdLastInteraction < 2.f) {
 			lcdLastInteraction += args.sampleTime;
-			// Only update once
+			// Updating only once after reset
 			if(lcdLastInteraction >= 2.f) {
 				lcdMode = DEFAULT_MODE;
 				lcdDirty = true;
 			}
 		}
+
+		if(lcdMode == SLIDE_MODE) {
+			lcdText1 = "SLIDE:";
+			float displayDuration = slideDuration;
+			if (displayDuration == 0.f)
+				lcdText2 = "DISABLED";
+			if (displayDuration > 0.f && displayDuration < 1.f) {
+				int displayDurationMs = displayDuration * 1000;
+				displayDurationMs = truncf(displayDurationMs);
+				lcdText2 = std::to_string(displayDurationMs);
+				lcdText2.append("ms");
+			} 
+			if (displayDuration >= 1.f) {
+				lcdText2 = std::to_string(displayDuration);
+				lcdText2.resize(4);
+				lcdText2.append("s");
+			}
+		}
+
+		if(lcdMode == SCALE_MODE) {
+			lcdText2 = "EXTERNAL";
+		}
+
 	}
 
 	void onReset() override {
@@ -465,7 +496,13 @@ struct Darius : Module {
 
 		setRunStatus(args);
 		setStepStatus(args);
-		setSlide(args);
+
+		// Refreshing some non-essential knobs often has a performance impact
+		// so the divider will remain quite high unless someone complains
+		// it breaks their art. 
+		if (knobDivider.process()) {
+			setSlide(args);
+		}
 
 		if (steppedForward)
 			nodeForward(args);
@@ -475,9 +512,8 @@ struct Darius : Module {
 		sendGateOutput(args);
 		setVoltageOutput(args);
 		updateLights(args);
+		
 		updateLcd(args);
-
-		// DEBUG("%f", args.sampleTime);
 
 		outputs[DEBUG_OUTPUT].setVoltage(slideDuration);
 
@@ -551,6 +587,8 @@ struct LcdDariusDrawWidget : TransparentWidget {
 	Darius *module;
 	std::array<std::shared_ptr<Svg>, 95> asciiSvg; // 32 to 126, the printable range
 	std::array<std::shared_ptr<Svg>, 24> pianoSvg; // 0..11: Unlit, 12..23 = Lit
+	std::string lcdText1;
+	std::string lcdText2;
 
 	LcdDariusDrawWidget(Darius *module) {
 		this->module = module;
@@ -569,7 +607,7 @@ struct LcdDariusDrawWidget : TransparentWidget {
 		if (module) {
 			nvgScale(args.vg, 1.5, 1.5);
 		
-			// Piano if scale display
+			// Piano display
 			if (module->lcdMode == SCALE_MODE) {
 				nvgSave(args.vg);
 				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[0])  ? 12 :  0 ]->handle);
@@ -597,12 +635,25 @@ struct LcdDariusDrawWidget : TransparentWidget {
 				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[11]) ? 23 : 11 ]->handle);
 				nvgRestore(args.vg);
 			}
+
+			// 11 character display at the top.
+			if (module->lcdMode == SLIDE_MODE) {
+				nvgSave(args.vg);
+				lcdText1 = module->lcdText1;
+				lcdText1.append(11, ' '); // Ensure the string is long enough
+				for (int i = 0; i < 11; i++) {
+					char c = lcdText1.at(i);
+					svgDraw(args.vg, asciiSvg[ c - 32 ]->handle);
+					nvgTranslate(args.vg, 6, 0);
+				}
+				nvgRestore(args.vg);
+			}
 		
-			// 11 character display at the bottom
-			if (module->lcdMode == SCALE_MODE) {
+			// 11 character display at the bottom.
+			if (module->lcdMode == SCALE_MODE || module->lcdMode == SLIDE_MODE) {
 				nvgSave(args.vg);
 				nvgTranslate(args.vg, 0, 11);
-				std::string lcdText2 = module->lcdText2;
+				lcdText2 = module->lcdText2;
 				lcdText2.append(11, ' '); // Ensure the string is long enough
 				for (int i = 0; i < 11; i++) {
 					char c = lcdText2.at(i);
