@@ -15,6 +15,7 @@ extern Model *modelSmerge;
 extern Model *modelSpleet;
 extern Model *modelSwerge;
 extern Model *modelSplirge;
+extern Model *modelSrot;
 
 // Sequencer
 extern Model *modelDarius;
