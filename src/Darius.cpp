@@ -467,7 +467,7 @@ struct Darius : Module {
 	// Only redraws when necessary. This sets the data to display, but not which widgets to display.
 	void updateLcd(const ProcessArgs& args){
 		// Reset after 2 seconds since the last interactive input was touched
-		if(lcdLastInteraction < 2.f) {
+		if (lcdLastInteraction < 2.f) {
 			lcdLastInteraction += args.sampleTime;
 			// Updating only once after reset
 			if(lcdLastInteraction >= 2.f) {
@@ -476,12 +476,15 @@ struct Darius : Module {
 			}
 		}
 
-		// Default mode has no display, pick the relevant one instead
+		// Default mode = pick the relevant one instead
 		if(lcdMode == DEFAULT_MODE) {
 			lcdMode = (params[QUANTIZE_TOGGLE_PARAM].getValue() == 0.f) ? CV_MODE : NOTE_MODE;
 		}
 
-		if(lcdMode == SLIDE_MODE) {
+		if (!lcdDirty)
+			return;
+
+		if (lcdMode == SLIDE_MODE) {
 			lcdText1 = "SLIDE:";
 			float displayDuration = slideDuration;
 			if (displayDuration == 0.f)
@@ -499,25 +502,24 @@ struct Darius : Module {
 			}
 		}
 
-		if(lcdMode == SCALE_MODE) {
+		if (lcdMode == SCALE_MODE) {
 			if(params[SCALE_PARAM].getValue() == 0.f) {
 				lcdText2 = "CHROMATIC";
 			} else {
-				lcdText2 = Quantizer::noteLcdName((int)params[KEY_PARAM].getValue());
-				lcdText2.append(" ");
-				lcdText2.append(Quantizer::scaleLcdName((int)params[SCALE_PARAM].getValue()));
+				std::string text = Quantizer::noteLcdName((int)params[KEY_PARAM].getValue());
+				text.append(" ");
+				text.append(Quantizer::scaleLcdName((int)params[SCALE_PARAM].getValue()));
+				lcdText2 = text; // Using an intermediary variable seems to prevent a crash FIXME confirm it.
 			}
-
 			pianoDisplay = Quantizer::validNotesInScaleKey( (int)params[SCALE_PARAM].getValue() , (int)params[KEY_PARAM].getValue() );
 		}
 
-		if(lcdMode == NOTE_MODE){
+		if (lcdMode == NOTE_MODE){
 			lcdText2 = Quantizer::noteName(outputs[CV_OUTPUT].getVoltage());
 			pianoDisplay = Quantizer::pianoDisplay(outputs[CV_OUTPUT].getVoltage());
-			// lcdText2 = "Note Mode";
 		}
 
-		if(lcdMode == CV_MODE){
+		if (lcdMode == CV_MODE){
 			lcdText2 = "CV Mode";
 		}
 
@@ -566,7 +568,6 @@ struct Darius : Module {
 		sendGateOutput(args);
 		setVoltageOutput(args);
 		updateLights(args);
-		
 		updateLcd(args);
 
 		outputs[DEBUG_OUTPUT].setVoltage(slideDuration);

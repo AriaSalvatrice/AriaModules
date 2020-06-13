@@ -48,7 +48,7 @@
           "cwd": "${workspaceRoot}",
           "env":{
               "PATH": "C:/msys64/usr/bin/;C:/msys64/mingw64/bin",
-              "RACK_DIR": "<Rack SDK folder>"
+              "RACK_DIR": "C:/msys64/home/woof/Rack"
           }
         },
         "group": {
