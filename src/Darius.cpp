@@ -11,7 +11,7 @@
 // - Implement what's mentioned in the Changelog lol
 // - Calculate probabilities to reach nodes
 // - Add a LED to the random input to clarify the 0V rule?
-// - Make SVG LCD up/down arrows
+// - Add binary tree preset
 
 
 const int STEP1START = 0;  //               00        
@@ -338,9 +338,25 @@ struct Darius : Module {
 		}
 	}
 
+	int getUpChild(int parent){
+		if (parent == 0) return 1;
+		if (parent == 1) return 3;
+		if (parent == 2) return 4;
+		if (parent >= 3 && parent <= 5)   return parent + 3;
+		if (parent >= 6 && parent <= 9)   return parent + 4;
+		if (parent >= 10 && parent <= 14) return parent + 5;
+		if (parent >= 15 && parent <= 20) return parent + 6;
+		if (parent >= 21 && parent <= 27) return parent + 7;
+		return 0;
+	}
+
+	int getDownChild(int parent){
+		return getUpChild(parent) + 1;
+	}
+
 	void updateRoutes(const ProcessArgs& args){
 		// This is hard to think about, so I did it by hand, lol
-		probabilities[0]  = 100.f;
+		probabilities[0]  = 1.f;
 
 		probabilities[1]  = 1.f - params[ROUTE_PARAM + 0].getValue();
 		probabilities[2]  = params[ROUTE_PARAM + 0].getValue();
@@ -471,7 +487,6 @@ struct Darius : Module {
 		}
 	}
 
-	// FIXME - MinMax!
 	void setVoltageOutput(const ProcessArgs& args){
 		float output = params[CV_PARAM + node].getValue();
 
@@ -524,9 +539,10 @@ struct Darius : Module {
 			lights[GATE_LIGHT + i].setBrightness( (stepFirst <= 6 && stepLast >= 6 ) ? 1.f : 0.f );
 		for (int i = STEP7START; i < STEP8START; i++)
 			lights[GATE_LIGHT + i].setBrightness( (stepFirst <= 7 && stepLast >= 7 ) ? 1.f : 0.f );
-		for (int i = STEP8START; i < STEP9START; i++){
+		for (int i = STEP8START; i < STEP9START; i++)
 			lights[GATE_LIGHT + i].setBrightness( (stepFirst <= 8 && stepLast >= 8 ) ? 1.f : 0.f );
-		}
+		for (int i = 0; i < 36; i++)
+			if (probabilities[i] == 0.f) lights[GATE_LIGHT + i].setBrightness( 0.f );
 	}
 
 	// Only redraws when necessary. This sets the data to display, but not which widgets to display.
@@ -591,10 +607,44 @@ struct Darius : Module {
 		}
 
 		if (lcdMode == ROUTE_MODE){
-			std::string text = "LAST:";
-			text.append(std::to_string(lastRouteChanged));
-			lcdText1 = "ROUTE DEBUG";
-			lcdText2 = text;
+			std::string relative, absolute;
+			relative = std::to_string((1.f - params[ROUTE_PARAM + lastRouteChanged].getValue()) * 100);
+			relative.resize(4);
+			if (1.f - params[ROUTE_PARAM + lastRouteChanged].getValue() == 1.f){
+				relative.resize(3);
+				relative.append(" %");
+			} else {
+				relative.resize(4);
+				relative.append("%");
+			}
+			absolute = std::to_string(probabilities[getUpChild(lastRouteChanged)] * 100);
+			if (probabilities[getUpChild(lastRouteChanged)] == 1.f){
+				absolute.resize(3);
+				absolute.append(" %");
+			} else {
+				absolute.resize(4);
+				absolute.append("%");
+			}
+			lcdText1 = relative + "/" + absolute;
+
+			relative = std::to_string(params[ROUTE_PARAM + lastRouteChanged].getValue() * 100);
+			relative.resize(4);
+			if (params[ROUTE_PARAM + lastRouteChanged].getValue() == 1.f){
+				relative.resize(3);
+				relative.append(" %");
+			} else {
+				relative.resize(4);
+				relative.append("%");
+			}
+			absolute = std::to_string(probabilities[getDownChild(lastRouteChanged)] * 100);
+			if (probabilities[getDownChild(lastRouteChanged)] == 1.f){
+				absolute.resize(3);
+				absolute.append(" %");
+			} else {
+				absolute.resize(4);
+				absolute.append("%");
+			}
+			lcdText2 = relative + "/" + absolute;
 		}
 
 	}
@@ -656,14 +706,6 @@ struct Darius : Module {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-struct AriaKnob820Random : AriaKnob820 {
-	AriaKnob820Random() {
-		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/knob-820-arrow.svg")));
-		minAngle = 0.25 * M_PI;
-		maxAngle = 0.75 * M_PI;
-	}
-};
 
 struct AriaKnob820Snap : AriaKnob820 {
 	AriaKnob820Snap() {
