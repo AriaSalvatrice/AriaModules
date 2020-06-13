@@ -5,6 +5,15 @@
 // Warning - this module was created with very little C++ experience, and features were 
 // added to it later without regard for code quality. This is maintained exploratory code, not good design.
 
+// TODO
+// - Split off the LCD into a reusable component
+// - Make Arcane use that component
+// - Implement what's mentioned in the Changelog lol
+// - Calculate probabilities to reach nodes
+// - Add a LED to the random input to clarify the 0V rule?
+// - Make SVG LCD up/down arrows
+
+
 const int STEP1START = 0;  //               00        
 const int STEP2START = 1;  //             02  01            
 const int STEP3START = 3;  //           05  04  03          
@@ -22,6 +31,7 @@ enum LcdModes {
 	NOTE_MODE,
 	CV_MODE,
 	MINMAX_MODE,
+	ROUTE_MODE,
 	SLIDE_MODE
 };
 
@@ -91,9 +101,12 @@ struct Darius : Module {
 	int lastGate = 0;
 	int pathTraveled[8] = { 0, -1, -1, -1, -1, -1, -1, -1}; // -1 = not gone there yet
 	int lcdMode = INIT_MODE;
+	int lastCvChanged = 0;
+	int lastRouteChanged = 0;
 	float randomSeed = 0.f;
 	float slideDuration = 0.f;
 	float lcdLastInteraction = 0.f;
+	float probabilities[36];
 	dsp::SchmittTrigger stepUpCvTrigger;
 	dsp::SchmittTrigger stepDownCvTrigger;
 	dsp::SchmittTrigger stepBackCvTrigger;
@@ -325,10 +338,62 @@ struct Darius : Module {
 		}
 	}
 
+	void updateRoutes(const ProcessArgs& args){
+		// This is hard to think about, so I did it by hand, lol
+		probabilities[0]  = 100.f;
+
+		probabilities[1]  = 1.f - params[ROUTE_PARAM + 0].getValue();
+		probabilities[2]  = params[ROUTE_PARAM + 0].getValue();
+
+		probabilities[3]  = probabilities[1] *  (1.f - params[ROUTE_PARAM + 1].getValue());
+		probabilities[4]  = (probabilities[1] * params[ROUTE_PARAM + 1].getValue()) + (probabilities[2] * (1.f - params[ROUTE_PARAM + 2].getValue()));
+		probabilities[5]  = probabilities[2] * params[ROUTE_PARAM + 2].getValue();
+
+		probabilities[6]  = probabilities[3] *  (1.f - params[ROUTE_PARAM + 3].getValue());
+		probabilities[7]  = (probabilities[3] * params[ROUTE_PARAM + 3].getValue()) + (probabilities[4] * (1.f - params[ROUTE_PARAM + 4].getValue()));
+		probabilities[8]  = (probabilities[4] * params[ROUTE_PARAM + 4].getValue()) + (probabilities[5] * (1.f - params[ROUTE_PARAM + 5].getValue()));
+		probabilities[9]  = probabilities[5] * params[ROUTE_PARAM + 5].getValue();
+
+		probabilities[10] = probabilities[6] *  (1.f - params[ROUTE_PARAM + 6].getValue());
+		probabilities[11] = (probabilities[6] * params[ROUTE_PARAM + 6].getValue()) + (probabilities[7] * (1.f - params[ROUTE_PARAM + 7].getValue()));
+		probabilities[12] = (probabilities[7] * params[ROUTE_PARAM + 7].getValue()) + (probabilities[8] * (1.f - params[ROUTE_PARAM + 8].getValue()));
+		probabilities[13] = (probabilities[8] * params[ROUTE_PARAM + 8].getValue()) + (probabilities[9] * (1.f - params[ROUTE_PARAM + 9].getValue()));
+		probabilities[14] = probabilities[9] * params[ROUTE_PARAM + 9].getValue();
+
+		probabilities[15] = probabilities[10] *  (1.f - params[ROUTE_PARAM + 10].getValue());
+		probabilities[16] = (probabilities[10] * params[ROUTE_PARAM + 10].getValue()) + (probabilities[11] * (1.f - params[ROUTE_PARAM + 11].getValue()));
+		probabilities[17] = (probabilities[11] * params[ROUTE_PARAM + 11].getValue()) + (probabilities[12] * (1.f - params[ROUTE_PARAM + 12].getValue()));
+		probabilities[18] = (probabilities[12] * params[ROUTE_PARAM + 12].getValue()) + (probabilities[13] * (1.f - params[ROUTE_PARAM + 13].getValue()));
+		probabilities[19] = (probabilities[13] * params[ROUTE_PARAM + 13].getValue()) + (probabilities[14] * (1.f - params[ROUTE_PARAM + 14].getValue()));
+		probabilities[20] = probabilities[14] * params[ROUTE_PARAM + 14].getValue();
+
+		probabilities[21] = probabilities[15] *  (1.f - params[ROUTE_PARAM + 15].getValue());
+		probabilities[22] = (probabilities[15] * params[ROUTE_PARAM + 15].getValue()) + (probabilities[16] * (1.f - params[ROUTE_PARAM + 16].getValue()));
+		probabilities[23] = (probabilities[16] * params[ROUTE_PARAM + 16].getValue()) + (probabilities[17] * (1.f - params[ROUTE_PARAM + 17].getValue()));
+		probabilities[24] = (probabilities[17] * params[ROUTE_PARAM + 17].getValue()) + (probabilities[18] * (1.f - params[ROUTE_PARAM + 18].getValue()));
+		probabilities[25] = (probabilities[18] * params[ROUTE_PARAM + 18].getValue()) + (probabilities[19] * (1.f - params[ROUTE_PARAM + 19].getValue()));
+		probabilities[26] = (probabilities[19] * params[ROUTE_PARAM + 19].getValue()) + (probabilities[20] * (1.f - params[ROUTE_PARAM + 20].getValue()));
+		probabilities[27] = probabilities[20] * params[ROUTE_PARAM + 20].getValue();
+
+		probabilities[28] = probabilities[21] *  (1.f - params[ROUTE_PARAM + 21].getValue());
+		probabilities[29] = (probabilities[21] * params[ROUTE_PARAM + 21].getValue()) + (probabilities[22] * (1.f - params[ROUTE_PARAM + 22].getValue()));
+		probabilities[30] = (probabilities[22] * params[ROUTE_PARAM + 22].getValue()) + (probabilities[23] * (1.f - params[ROUTE_PARAM + 23].getValue()));
+		probabilities[31] = (probabilities[23] * params[ROUTE_PARAM + 23].getValue()) + (probabilities[24] * (1.f - params[ROUTE_PARAM + 24].getValue()));
+		probabilities[32] = (probabilities[24] * params[ROUTE_PARAM + 24].getValue()) + (probabilities[25] * (1.f - params[ROUTE_PARAM + 25].getValue()));
+		probabilities[33] = (probabilities[25] * params[ROUTE_PARAM + 25].getValue()) + (probabilities[26] * (1.f - params[ROUTE_PARAM + 26].getValue()));
+		probabilities[34] = (probabilities[26] * params[ROUTE_PARAM + 26].getValue()) + (probabilities[27] * (1.f - params[ROUTE_PARAM + 27].getValue()));
+		probabilities[35] = probabilities[27] * params[ROUTE_PARAM + 27].getValue();
+
+		for (int i = 0; i < 16; i++) {
+			outputs[DEBUG_OUTPUT].setVoltage(probabilities[i], i);
+			outputs[DEBUG_OUTPUT].setChannels(16);
+		}
+	}
+
 	// From 1ms to 10s. 
 	// Using this code as reference:
 	// https://github.com/mgunyho/Little-Utils/blob/master/src/PulseGenerator.cpp
-	// FIXME - this has a bit of a performance impact.
+	// This has a bit of a performance impact so it's not called every sample.
 	void setSlide(const ProcessArgs& args){
 		slideDuration = params[SLIDE_PARAM].getValue();
 		if (slideDuration > 0.00001f ) {
@@ -465,7 +530,9 @@ struct Darius : Module {
 	}
 
 	// Only redraws when necessary. This sets the data to display, but not which widgets to display.
+	// Updating multiple times a variable that gets read such as lcdText2 causes crashes due to race conditions so don't.
 	void updateLcd(const ProcessArgs& args){
+
 		// Reset after 2 seconds since the last interactive input was touched
 		if (lcdLastInteraction < 2.f) {
 			lcdLastInteraction += args.sampleTime;
@@ -509,7 +576,7 @@ struct Darius : Module {
 				std::string text = Quantizer::noteLcdName((int)params[KEY_PARAM].getValue());
 				text.append(" ");
 				text.append(Quantizer::scaleLcdName((int)params[SCALE_PARAM].getValue()));
-				lcdText2 = text; // Using an intermediary variable seems to prevent a crash FIXME confirm it.
+				lcdText2 = text; 
 			}
 			pianoDisplay = Quantizer::validNotesInScaleKey( (int)params[SCALE_PARAM].getValue() , (int)params[KEY_PARAM].getValue() );
 		}
@@ -523,6 +590,13 @@ struct Darius : Module {
 			lcdText2 = "CV Mode";
 		}
 
+		if (lcdMode == ROUTE_MODE){
+			std::string text = "LAST:";
+			text.append(std::to_string(lastRouteChanged));
+			lcdText1 = "ROUTE DEBUG";
+			lcdText2 = text;
+		}
+
 	}
 
 	void onReset() override {
@@ -532,6 +606,7 @@ struct Darius : Module {
 		pathTraveled[0] = 0;
 		for (int i = 1; i < 8; i++) pathTraveled[i] = -1;
 		lightsReset = true;
+		lcdMode = INIT_MODE;
 		lcdText1 = "MEDITATE...";
 		lcdText2 = "MEDITATION.";
 		lcdLastInteraction = 0.f;
@@ -553,6 +628,9 @@ struct Darius : Module {
 		setRunStatus(args);
 		setStepStatus(args);
 
+		// FIXME - Update lazily instead
+		updateRoutes(args);
+
 		// Refreshing some non-essential knobs often has a performance impact
 		// so the divider will remain quite high unless someone complains
 		// it breaks their art. 
@@ -569,8 +647,6 @@ struct Darius : Module {
 		setVoltageOutput(args);
 		updateLights(args);
 		updateLcd(args);
-
-		outputs[DEBUG_OUTPUT].setVoltage(slideDuration);
 
 	}
 };
@@ -658,6 +734,38 @@ struct AriaKnob820Slide : AriaKnob820 {
 	}
 };
 
+// Also records the last one changed
+template <class TParamWidget>
+TParamWidget* createMainParam(math::Vec pos, Darius* module, int paramId, int lastChanged) {
+	TParamWidget* o = new TParamWidget(module, lastChanged);
+	o->box.pos = pos;
+	if (module) {
+		o->paramQuantity = module->paramQuantities[paramId];
+	}
+	return o;
+}
+
+struct AriaKnob820Route : AriaKnob820 {
+	Darius *module;
+	int lastChanged;
+
+	AriaKnob820Route(Darius* module, int lastChanged) {
+		this->module = module;
+		this->lastChanged = lastChanged;
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/knob-820-arrow.svg")));
+		minAngle = 0.25 * M_PI;
+		maxAngle = 0.75 * M_PI;
+		AriaKnob820();
+	}
+
+	void onDragMove(const event::DragMove& e) override {
+		module->lcdMode = ROUTE_MODE;
+		module->lcdLastInteraction = 0.f;
+		module->lcdDirty = true;
+		module->lastRouteChanged = lastChanged;
+		AriaKnob820::onDragMove(e);
+	}
+};
 
 // The draw widget from Arcane, adapted to Darius.
 // Eventually I want to abstract it out into a reusable component. 
@@ -715,7 +823,7 @@ struct LcdDariusDrawWidget : TransparentWidget {
 			}
 
 			// 11 character display at the top in some modes.
-			if (module->lcdMode == INIT_MODE || module->lcdMode == SLIDE_MODE) {
+			if (module->lcdMode == INIT_MODE || module->lcdMode == SLIDE_MODE || module->lcdMode == ROUTE_MODE) {
 				nvgSave(args.vg);
 				lcdText1 = module->lcdText1;
 				lcdText1.append(11, ' '); // Ensure the string is long enough
@@ -729,7 +837,7 @@ struct LcdDariusDrawWidget : TransparentWidget {
 		
 			// 11 character display at the bottom in pretty much every mode.
 			if (module->lcdMode == INIT_MODE || module->lcdMode == SCALE_MODE || module->lcdMode == SLIDE_MODE
-			 || module->lcdMode == NOTE_MODE || module->lcdMode == CV_MODE) {
+			 || module->lcdMode == NOTE_MODE || module->lcdMode == CV_MODE    || module->lcdMode == ROUTE_MODE ) {
 				nvgSave(args.vg);
 				nvgTranslate(args.vg, 0, 11);
 				lcdText2 = module->lcdText2;
@@ -765,49 +873,49 @@ struct DariusWidget : ModuleWidget {
 		for (int i = 0; i < 1; i++) {
 			addChild(createLight<AriaInputLight>(        mm2px(Vec( 4.5, (16.0 + (6.5 * 7) + i * 13.0))), module, Darius::CV_LIGHT +    i));
 			addParam(createParam<AriaKnob820Transparent>(mm2px(Vec( 4.5, (16.0 + (6.5 * 7) + i * 13.0))), module, Darius::CV_PARAM +    i));
-			addParam(createParam<AriaKnob820Random>(     mm2px(Vec(14.5, (16.0 + (6.5 * 7) + i * 13.0))), module, Darius::ROUTE_PARAM + i));
+			addParam(createMainParam<AriaKnob820Route>(  mm2px(Vec(14.5, (16.0 + (6.5 * 7) + i * 13.0))), module, Darius::ROUTE_PARAM + i, i));
 			addChild(createLight<AriaOutputLight>(       mm2px(Vec( 9.5, (22.5 + (6.5 * 7) + i * 13.0))), module, Darius::GATE_LIGHT +  i));
 			addOutput(createOutput<AriaJackTransparent>( mm2px(Vec( 9.5, (22.5 + (6.5 * 7) + i * 13.0))), module, Darius::GATE_OUTPUT + i));
 		}
 		for (int i = 0; i < 2; i++) {
 			addChild(createLight<AriaInputLight>(        mm2px(Vec(24.5, (16.0 + (6.5 * 6) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP2START));
 			addParam(createParam<AriaKnob820Transparent>(mm2px(Vec(24.5, (16.0 + (6.5 * 6) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP2START));
-			addParam(createParam<AriaKnob820Random>(     mm2px(Vec(34.5, (16.0 + (6.5 * 6) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP2START));
+			addParam(createMainParam<AriaKnob820Route>(  mm2px(Vec(34.5, (16.0 + (6.5 * 6) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP2START, i + STEP2START));
 			addChild(createLight<AriaOutputLight>(       mm2px(Vec(29.5, (22.5 + (6.5 * 6) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP2START));
 			addOutput(createOutput<AriaJackTransparent>( mm2px(Vec(29.5, (22.5 + (6.5 * 6) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP2START));
 		}
 		for (int i = 0; i < 3; i++) {
 			addChild(createLight<AriaInputLight>(        mm2px(Vec(44.5, (16.0 + (6.5 * 5) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP3START));
 			addParam(createParam<AriaKnob820Transparent>(mm2px(Vec(44.5, (16.0 + (6.5 * 5) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP3START));
-			addParam(createParam<AriaKnob820Random>(     mm2px(Vec(54.5, (16.0 + (6.5 * 5) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP3START));
+			addParam(createMainParam<AriaKnob820Route>(  mm2px(Vec(54.5, (16.0 + (6.5 * 5) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP3START, i + STEP3START));
 			addChild(createLight<AriaOutputLight>(       mm2px(Vec(49.5, (22.5 + (6.5 * 5) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP3START));
 			addOutput(createOutput<AriaJackTransparent>( mm2px(Vec(49.5, (22.5 + (6.5 * 5) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP3START));
 		}
 		for (int i = 0; i < 4; i++) {
 			addChild(createLight<AriaInputLight>(        mm2px(Vec(64.5, (16.0 + (6.5 * 4) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP4START));
 			addParam(createParam<AriaKnob820Transparent>(mm2px(Vec(64.5, (16.0 + (6.5 * 4) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP4START));
-			addParam(createParam<AriaKnob820Random>(     mm2px(Vec(74.5, (16.0 + (6.5 * 4) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP4START));
+			addParam(createMainParam<AriaKnob820Route>(  mm2px(Vec(74.5, (16.0 + (6.5 * 4) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP4START, i + STEP4START));
 			addChild(createLight<AriaOutputLight>(       mm2px(Vec(69.5, (22.5 + (6.5 * 4) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP4START));
 			addOutput(createOutput<AriaJackTransparent>( mm2px(Vec(69.5, (22.5 + (6.5 * 4) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP4START));
 		}
 		for (int i = 0; i < 5; i++) {
 			addChild(createLight<AriaInputLight>(        mm2px(Vec(84.5, (16.0 + (6.5 * 3) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP5START));
 			addParam(createParam<AriaKnob820Transparent>(mm2px(Vec(84.5, (16.0 + (6.5 * 3) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP5START));
-			addParam(createParam<AriaKnob820Random>(     mm2px(Vec(94.5, (16.0 + (6.5 * 3) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP5START));
+			addParam(createMainParam<AriaKnob820Route>(  mm2px(Vec(94.5, (16.0 + (6.5 * 3) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP5START, i + STEP5START));
 			addChild(createLight<AriaOutputLight>(       mm2px(Vec(89.5, (22.5 + (6.5 * 3) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP5START));
 			addOutput(createOutput<AriaJackTransparent>( mm2px(Vec(89.5, (22.5 + (6.5 * 3) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP5START));
 		}
 		for (int i = 0; i < 6; i++) {
 			addChild(createLight<AriaInputLight>(        mm2px(Vec(104.5, (16.0 + (6.5 * 2) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP6START));
 			addParam(createParam<AriaKnob820Transparent>(mm2px(Vec(104.5, (16.0 + (6.5 * 2) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP6START));
-			addParam(createParam<AriaKnob820Random>(     mm2px(Vec(114.5, (16.0 + (6.5 * 2) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP6START));
+			addParam(createMainParam<AriaKnob820Route>(  mm2px(Vec(114.5, (16.0 + (6.5 * 2) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP6START, i + STEP6START));
 			addChild(createLight<AriaOutputLight>(       mm2px(Vec(109.5, (22.5 + (6.5 * 2) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP6START));
 			addOutput(createOutput<AriaJackTransparent>( mm2px(Vec(109.5, (22.5 + (6.5 * 2) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP6START));
 		}
 		for (int i = 0; i < 7; i++) {
 			addChild(createLight<AriaInputLight>(        mm2px(Vec(124.5, (16.0 + (6.5 * 1) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP7START));
 			addParam(createParam<AriaKnob820Transparent>(mm2px(Vec(124.5, (16.0 + (6.5 * 1) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP7START));
-			addParam(createParam<AriaKnob820Random>(     mm2px(Vec(134.5, (16.0 + (6.5 * 1) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP7START));
+			addParam(createMainParam<AriaKnob820Route>(  mm2px(Vec(134.5, (16.0 + (6.5 * 1) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP7START, i + STEP7START));
 			addChild(createLight<AriaOutputLight>(       mm2px(Vec(129.5, (22.5 + (6.5 * 1) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP7START));
 			addOutput(createOutput<AriaJackTransparent>( mm2px(Vec(129.5, (22.5 + (6.5 * 1) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP7START));
 		}
