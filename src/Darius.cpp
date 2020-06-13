@@ -1,5 +1,6 @@
 #include "plugin.hpp"
 #include "prng.hpp"
+#include "quantizer.hpp"
 
 // Warning - this module was created with very little C++ experience, and features were 
 // added to it later without regard for code quality. This is maintained exploratory code, not good design.
@@ -19,6 +20,7 @@ enum LcdModes {
 	DEFAULT_MODE,
 	SCALE_MODE,
 	NOTE_MODE,
+	CV_MODE,
 	MINMAX_MODE,
 	SLIDE_MODE
 };
@@ -77,10 +79,10 @@ struct Darius : Module {
 	bool shSeedNextFirst = false; // S & H the seed next 1st step
 	bool resetCV = false;
 	bool resetRoutes = false;
-	bool pianoDisplay[12] = {false, false, false, false, false, false, false, false, false, false, false, false};
 	bool lcdDirty = false;
-	std::string lcdText1 = "";
-	std::string lcdText2 = "";
+	std::array<bool, 12> pianoDisplay = {false, false, false, false, false, false, false, false, false, false, false, false};
+	std::string lcdText1 = "MEDITATE..."; // Loading message
+	std::string lcdText2 = "MEDITATION."; // https://www.youtube.com/watch?v=JqLNY1zyQ6o
 	int stepFirst = 1;
 	int stepLast = 8;
 	int step = 0;
@@ -118,8 +120,8 @@ struct Darius : Module {
 		configParam(RANGE_PARAM, 0.f, 1.f, 0.f, "Voltage output range");
 		configParam(MIN_PARAM, 0.f, 10.f, 0.f, "Minimum CV/Note");
 		configParam(MAX_PARAM, 0.f, 10.f, 10.f, "Maximum CV/Note");
-		configParam(KEY_PARAM, 0.f, 1.f, 0.f, "Key");
-		configParam(SCALE_PARAM, 0.f, 1.f, 0.f, "Scale");
+		configParam(KEY_PARAM, 0.f, 11.f, 0.f, "Key");
+		configParam(SCALE_PARAM, 0.f, (float) Quantizer::NUM_SCALES - 1, 0.f, "Scale");
 		configParam(SLIDE_PARAM, 0.f, 10.f, 0.f, "Slide");
 		for (int i = 0; i < STEP9START; i++)
 			configParam(CV_PARAM + i, 0.f, 10.f, 5.f, "CV");
@@ -264,6 +266,7 @@ struct Darius : Module {
 		resetPathTraveled(args);
 		for (int i = 0; i < 36; i++)
 			outputs[GATE_OUTPUT + i].setVoltage(0.f);
+		lcdDirty = true;
 	}
 	
 	// Sets running to the current run status
@@ -380,6 +383,7 @@ struct Darius : Module {
 		}
 		pathTraveled[step] = node;
 		lastNode = node;
+		lcdDirty = true;
 	}
 	
 	void nodeBack(const ProcessArgs& args){
@@ -388,8 +392,11 @@ struct Darius : Module {
 		// FIXME - This conditional avoids a bizarre problem where randomSeed goes NaN. Not sure what's exactly going on!!
 		if (step < 7) pathTraveled[step + 1] = -1; 
 		lastNode = node;
+		lcdDirty = true;
 	}
 	
+	// FIXME - Global output
+	// FIXME - Trigger from anywhere
 	void sendGateOutput(const ProcessArgs& args){
 		if (inputs[STEP_INPUT].isConnected()){
 			outputs[GATE_OUTPUT + node].setVoltage(inputs[STEP_INPUT].getVoltage());
@@ -398,14 +405,34 @@ struct Darius : Module {
 			outputs[GATE_OUTPUT + node].setVoltage(10.f);
 		}
 	}
-	
-	// FIXME - I changed how Min/Max work!
+
+	// FIXME - MinMax!
 	void setVoltageOutput(const ProcessArgs& args){
-		if (params[RANGE_PARAM].getValue() == 0.f ) {
-			outputs[CV_OUTPUT].setVoltage(params[CV_PARAM + node].getValue());
+		float output = params[CV_PARAM + node].getValue();
+
+		if (params[QUANTIZE_TOGGLE_PARAM].getValue() == 0.f) {
+			// When not quantized
+			if (params[RANGE_PARAM].getValue() == 0.f) {
+				// O~10V
+				output = rescale(output, 0.f, 10.f, params[MIN_PARAM].getValue(), params[MAX_PARAM].getValue());
+			} else {
+				// -5~5V
+				output = rescale(output, 0.f, 10.f, params[MIN_PARAM].getValue() - 5.f, params[MAX_PARAM].getValue() - 5.f);
+			}
 		} else {
-			outputs[CV_OUTPUT].setVoltage(params[CV_PARAM + node].getValue() - 5.0);
+			// When quantized start somewhere closer to what oscillators accept
+			if (params[RANGE_PARAM].getValue() == 0.f) {
+				output = rescale(output, 0.f, 10.f, params[MIN_PARAM].getValue() - 4.f, params[MAX_PARAM].getValue() - 4.f);
+			} else {
+				// -1 octave button
+				output = rescale(output, 0.f, 10.f, params[MIN_PARAM].getValue() - 5.f, params[MAX_PARAM].getValue() - 5.f);
+			}
+			// Then quantize it
+			std::array<bool, 12> validNotes = Quantizer::validNotesInScaleKey( (int)params[SCALE_PARAM].getValue() , (int)params[KEY_PARAM].getValue() );
+			output = Quantizer::quantize(output, validNotes);
 		}
+
+		outputs[CV_OUTPUT].setVoltage(output);
 	}
 	
 	void updateLights(const ProcessArgs& args){
@@ -437,7 +464,7 @@ struct Darius : Module {
 		}
 	}
 
-	// Only redraws when necessary
+	// Only redraws when necessary. This sets the data to display, but not which widgets to display.
 	void updateLcd(const ProcessArgs& args){
 		// Reset after 2 seconds since the last interactive input was touched
 		if(lcdLastInteraction < 2.f) {
@@ -447,6 +474,11 @@ struct Darius : Module {
 				lcdMode = DEFAULT_MODE;
 				lcdDirty = true;
 			}
+		}
+
+		// Default mode has no display, pick the relevant one instead
+		if(lcdMode == DEFAULT_MODE) {
+			lcdMode = (params[QUANTIZE_TOGGLE_PARAM].getValue() == 0.f) ? CV_MODE : NOTE_MODE;
 		}
 
 		if(lcdMode == SLIDE_MODE) {
@@ -468,7 +500,25 @@ struct Darius : Module {
 		}
 
 		if(lcdMode == SCALE_MODE) {
-			lcdText2 = "EXTERNAL";
+			if(params[SCALE_PARAM].getValue() == 0.f) {
+				lcdText2 = "CHROMATIC";
+			} else {
+				lcdText2 = Quantizer::noteLcdName((int)params[KEY_PARAM].getValue());
+				lcdText2.append(" ");
+				lcdText2.append(Quantizer::scaleLcdName((int)params[SCALE_PARAM].getValue()));
+			}
+
+			pianoDisplay = Quantizer::validNotesInScaleKey( (int)params[SCALE_PARAM].getValue() , (int)params[KEY_PARAM].getValue() );
+		}
+
+		if(lcdMode == NOTE_MODE){
+			lcdText2 = Quantizer::noteName(outputs[CV_OUTPUT].getVoltage());
+			pianoDisplay = Quantizer::pianoDisplay(outputs[CV_OUTPUT].getVoltage());
+			// lcdText2 = "Note Mode";
+		}
+
+		if(lcdMode == CV_MODE){
+			lcdText2 = "CV Mode";
 		}
 
 	}
@@ -480,6 +530,10 @@ struct Darius : Module {
 		pathTraveled[0] = 0;
 		for (int i = 1; i < 8; i++) pathTraveled[i] = -1;
 		lightsReset = true;
+		lcdText1 = "MEDITATE...";
+		lcdText2 = "MEDITATION.";
+		lcdLastInteraction = 0.f;
+		lcdDirty = true;
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -520,6 +574,12 @@ struct Darius : Module {
 	}
 };
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 struct AriaKnob820Random : AriaKnob820 {
 	AriaKnob820Random() {
 		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/knob-820-arrow.svg")));
@@ -531,6 +591,7 @@ struct AriaKnob820Random : AriaKnob820 {
 struct AriaKnob820Snap : AriaKnob820 {
 	AriaKnob820Snap() {
 		snap = true;
+		AriaKnob820();
 	}
 };
 
@@ -547,12 +608,28 @@ TParamWidget* createLcdParam(math::Vec pos, Darius* module, int paramId) {
 }
 
 // FIXME - How do I avoid duplicating this code this much? 
-// FIXME - Save time of last knob held
 struct AriaKnob820MinMax : AriaKnob820 {
 	Darius *module;
 
 	AriaKnob820MinMax(Darius* module) {
 		this->module = module;
+		AriaKnob820();
+	}
+
+	void onDragMove(const event::DragMove& e) override {
+		module->lcdMode = MINMAX_MODE;
+		module->lcdLastInteraction = 0.f;
+		module->lcdDirty = true;
+		AriaKnob820::onDragMove(e);
+	}
+};
+
+struct AriaKnob820Scale : AriaKnob820 {
+	Darius *module;
+
+	AriaKnob820Scale(Darius* module) {
+		this->module = module;
+		snap = true;
 		AriaKnob820();
 	}
 
@@ -582,7 +659,7 @@ struct AriaKnob820Slide : AriaKnob820 {
 
 
 // The draw widget from Arcane, adapted to Darius.
-// I dunno yet how to abstract out the code better to avoid more copy-paste.
+// Eventually I want to abstract it out into a reusable component. 
 struct LcdDariusDrawWidget : TransparentWidget {
 	Darius *module;
 	std::array<std::shared_ptr<Svg>, 95> asciiSvg; // 32 to 126, the printable range
@@ -607,8 +684,8 @@ struct LcdDariusDrawWidget : TransparentWidget {
 		if (module) {
 			nvgScale(args.vg, 1.5, 1.5);
 		
-			// Piano display
-			if (module->lcdMode == SCALE_MODE) {
+			// Piano display at the top
+			if (module->lcdMode == SCALE_MODE || module->lcdMode == NOTE_MODE ) {
 				nvgSave(args.vg);
 				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[0])  ? 12 :  0 ]->handle);
 				nvgTranslate(args.vg, 6, 0);
@@ -636,8 +713,8 @@ struct LcdDariusDrawWidget : TransparentWidget {
 				nvgRestore(args.vg);
 			}
 
-			// 11 character display at the top.
-			if (module->lcdMode == SLIDE_MODE) {
+			// 11 character display at the top in some modes.
+			if (module->lcdMode == INIT_MODE || module->lcdMode == SLIDE_MODE) {
 				nvgSave(args.vg);
 				lcdText1 = module->lcdText1;
 				lcdText1.append(11, ' '); // Ensure the string is long enough
@@ -649,8 +726,9 @@ struct LcdDariusDrawWidget : TransparentWidget {
 				nvgRestore(args.vg);
 			}
 		
-			// 11 character display at the bottom.
-			if (module->lcdMode == SCALE_MODE || module->lcdMode == SLIDE_MODE) {
+			// 11 character display at the bottom in pretty much every mode.
+			if (module->lcdMode == INIT_MODE || module->lcdMode == SCALE_MODE || module->lcdMode == SLIDE_MODE
+			 || module->lcdMode == NOTE_MODE || module->lcdMode == CV_MODE) {
 				nvgSave(args.vg);
 				nvgTranslate(args.vg, 0, 11);
 				lcdText2 = module->lcdText2;
@@ -778,16 +856,16 @@ struct DariusWidget : ModuleWidget {
 		// Quantizer toggle
 		addParam(createParam<AriaRockerSwitchHorizontal800>(mm2px(Vec(9.1, 99.7)), module, Darius::QUANTIZE_TOGGLE_PARAM));
 
-		// Voltage Range - TODO: Flip it
-		addParam(createParam<AriaRockerSwitchHorizontal800>(mm2px(Vec(15.9, 118.8)), module, Darius::RANGE_PARAM));
+		// Voltage Range
+		addParam(createParam<AriaRockerSwitchHorizontal800Flipped>(mm2px(Vec(26.0, 118.8)), module, Darius::RANGE_PARAM));
 
 		// Min & Max
 		addParam(createLcdParam<AriaKnob820MinMax>(mm2px(Vec(49.5,  99.0)), module, Darius::MIN_PARAM));
 		addParam(createLcdParam<AriaKnob820MinMax>(mm2px(Vec(49.5, 112.0)), module, Darius::MAX_PARAM));
 
 		// Quantizer Key & Scale
-		addParam(createParam<AriaKnob820>(mm2px(Vec(59.5, 99.0)), module, Darius::SCALE_PARAM));
-		addParam(createParam<AriaKnob820>(mm2px(Vec(59.5, 112.0)), module, Darius::KEY_PARAM));
+		addParam(createLcdParam<AriaKnob820Scale>(mm2px(Vec(59.5, 99.0)), module, Darius::SCALE_PARAM));
+		addParam(createLcdParam<AriaKnob820Scale>(mm2px(Vec(59.5, 112.0)), module, Darius::KEY_PARAM));
 
 		// External Scale
 		addInput(createInput<AriaJackIn>(mm2px(Vec(69.5, 99.0)), module, Darius::EXT_SCALE_INPUT));

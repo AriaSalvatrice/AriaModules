@@ -612,39 +612,37 @@ struct Aleister : ArcaneBase {
 			if ( outputs[PATTERN_D_OUTPUT + i].isConnected() ) polyDRequested = false;
 			if ( outputs[PATTERN_E_OUTPUT + i].isConnected() ) polyERequested = false;
 		}
-		
-		// FIXME - setChannels(16) throws warnings. I don't understand why.
-		// See also: https://github.com/VCVRack/Rack/issues/1524 - possible compiler bug?
-		// Keeping code as is to keep the warnings until I understand what's going on.
+
+		// setChannels(16) throws warnings, but works normally. Ignoring the error to see only useful warnings.
+		// https://github.com/VCVRack/Rack/issues/1524 - compiler bug
 		if (polyBRequested) {
 			for (int i = 0; i < 16; i++) outputs[PATTERN_B_OUTPUT].setVoltage(patternB[i] ? 10.f : 0.f, i);
-			outputs[PATTERN_B_OUTPUT + 0].setChannels(16);
+			outputs[PATTERN_B_OUTPUT].setChannels(16);
 		} else {
 			for (int i = 0; i < 16; i++) outputs[PATTERN_B_OUTPUT + i].setVoltage(patternB[i] ? 10.f : 0.f);
-			outputs[PATTERN_B_OUTPUT + 0].setChannels(0);
+			outputs[PATTERN_B_OUTPUT].setChannels(0);
 		}
 		if (polyCRequested) {
 			for (int i = 0; i < 16; i++) outputs[PATTERN_C_OUTPUT].setVoltage(patternC[i] ? 10.f : 0.f, i);
-			outputs[PATTERN_C_OUTPUT + 0].setChannels(16);
+			outputs[PATTERN_C_OUTPUT].setChannels(16);
 		} else {
 			for (int i = 0; i < 16; i++) outputs[PATTERN_C_OUTPUT + i].setVoltage(patternC[i] ? 10.f : 0.f);
-			outputs[PATTERN_C_OUTPUT + 0].setChannels(0);
+			outputs[PATTERN_C_OUTPUT].setChannels(0);
 		}
 		if (polyDRequested) {
 			for (int i = 0; i < 16; i++) outputs[PATTERN_D_OUTPUT].setVoltage(patternD[i] ? 10.f : 0.f, i);
-			outputs[PATTERN_D_OUTPUT + 0].setChannels(16);
+			outputs[PATTERN_D_OUTPUT].setChannels(16);
 		} else {
 			for (int i = 0; i < 16; i++) outputs[PATTERN_D_OUTPUT + i].setVoltage(patternD[i] ? 10.f : 0.f);
-			outputs[PATTERN_D_OUTPUT + 0].setChannels(0);
+			outputs[PATTERN_D_OUTPUT].setChannels(0);
 		}
 		if (polyERequested) {
 			for (int i = 0; i < 16; i++) outputs[PATTERN_E_OUTPUT].setVoltage(patternE[i] ? 10.f : 0.f, i);
-			outputs[PATTERN_E_OUTPUT + 0].setChannels(16);
+			outputs[PATTERN_E_OUTPUT].setChannels(16);
 		} else {
 			for (int i = 0; i < 16; i++) outputs[PATTERN_E_OUTPUT + i].setVoltage(patternE[i] ? 10.f : 0.f);
-			outputs[PATTERN_E_OUTPUT + 0].setChannels(0);
+			outputs[PATTERN_E_OUTPUT].setChannels(0);
 		}
-		
 	}
 
 	void processLights(const ProcessArgs& args) {

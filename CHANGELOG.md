@@ -6,8 +6,8 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 ## [1.5.0] UNRELEASED
 
 ### Added
-- [NEW FEATURE] Darius: Added an attenuator to the CV output.
-- [NEW FEATURE] Darius: Can now start the sequence on any step. The "Steps" knob is now known as the "Last step" knob. Existing patches should not be broken by this change.
+- [NEW FEATURE] Darius: Added an output range control to the CV output.
+- [NEW FEATURE] Darius: Can now start the sequence on any step. The "Steps" knob is now known as the "Last step" knob.
 - [NEW FEATURE] Darius: Added undo support for the two "Randomize" buttons.
 - [NEW FEATURE] Darius: Added right-click options to reset CV and Routes separately.
 
@@ -15,8 +15,9 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 - [NEW MODULE] Srot: Sort and rotate polyphonic cables.
 - [NEW FEATURE] Darius: Added support for portable sequences.
 - [NEW FEATURE] Darius: Added an optional quantizer.
-- [NEW FEATURE] Darius: The output jacks of nodes that have 0% chance to be reached are no longer lit. 
+- [NEW FEATURE] Darius: The output jacks of nodes that have 0% chance to be reached are no longer lit.
 - [NEW FEATURE] Darius: Added route and CV presets in the right-click menu.
+- [NEW FEATURE] Arcane, Atout: Added a polyphonic Scale output compatible with Darius' external scale input. The jack formerly labeled Scale is now labeled Melody. 
 - [FIX] Darius: Individual trigger/gate outputs now work with every input and the step button, not just with the forward input. This may break old patches.
 
 
