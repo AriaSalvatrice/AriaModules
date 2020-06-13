@@ -80,7 +80,7 @@ struct Darius : Module {
 	bool resetCV = false;
 	bool resetRoutes = false;
 	bool lcdDirty = false;
-	std::array<bool, 12> pianoDisplay = {false, false, false, false, false, false, false, false, false, false, false, false};
+	std::array<bool, 12> pianoDisplay;
 	std::string lcdText1 = "MEDITATE..."; // Loading message
 	std::string lcdText2 = "MEDITATION."; // https://www.youtube.com/watch?v=JqLNY1zyQ6o
 	int stepFirst = 1;
