@@ -10,8 +10,11 @@
 // - Make Arcane use that component
 // - Implement what's mentioned in the Changelog lol
 // - Calculate probabilities to reach nodes
-// - Add a LED to the random input to clarify the 0V rule?
-// - Add binary tree preset
+// - Fix performance of route knobs
+// - Smooth out the values? 
+// - CV/Q button should swap lcd modes
+// - FIXME Random distribution VERY skewed on binary tree!!!
+//   -> It's clean if I S&H white noise in ALL mode, but not in 1st mode.
 
 
 const int STEP1START = 0;  //               00        
@@ -77,6 +80,7 @@ struct Darius : Module {
 	enum LightIds {
 		ENUMS(CV_LIGHT, 36),
 		ENUMS(GATE_LIGHT, 36), // 1.2.0 release
+		SEED_LIGHT,
 		NUM_LIGHTS
 	};
 	
@@ -89,6 +93,10 @@ struct Darius : Module {
 	bool shSeedNextFirst = false; // S & H the seed next 1st step
 	bool resetCV = false;
 	bool resetRoutes = false;
+	bool routesToTop = false;
+	bool routesToBottom = false;
+	bool routesToEqualProbability = false;
+	bool routesToBinaryTree = false;
 	bool lcdDirty = false;
 	std::array<bool, 12> pianoDisplay;
 	std::string lcdText1 = "MEDITATE..."; // Loading message
@@ -256,6 +264,68 @@ struct Darius : Module {
 		APP->history->push(new BulkCvAction(this->id, "reset Darius Routes", ROUTE_PARAM, oldValues, newValues));
 	}
 
+	void processRoutesToTop(const ProcessArgs& args){
+		routesToTop = false;
+		std::array<float, 36> oldValues;
+		std::array<float, 36> newValues;
+		for (int i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
+		for (int i = 0; i < 36; i++) params[ROUTE_PARAM + i].setValue(0.f);	
+		for (int i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
+		APP->history->push(new BulkCvAction(this->id, "set Darius Routes to Top", ROUTE_PARAM, oldValues, newValues));
+	}
+
+	void processRoutesToBottom(const ProcessArgs& args){
+		routesToBottom = false;
+		std::array<float, 36> oldValues;
+		std::array<float, 36> newValues;
+		for (int i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
+		for (int i = 0; i < 36; i++) params[ROUTE_PARAM + i].setValue(1.f);	
+		for (int i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
+		APP->history->push(new BulkCvAction(this->id, "set Darius Routes to Bottom", ROUTE_PARAM, oldValues, newValues));
+	}
+
+	void processRoutesToEqualProbability(const ProcessArgs& args){
+		routesToEqualProbability = false;
+		std::array<float, 36> oldValues;
+		std::array<float, 36> newValues;
+		for (int i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
+		params[ROUTE_PARAM].setValue(0.5f);
+		for (int i = 0; i < 2; i++) params[ROUTE_PARAM + i + STEP2START].setValue( (i + 1) / 3.f );
+		for (int i = 0; i < 3; i++) params[ROUTE_PARAM + i + STEP3START].setValue( (i + 1) / 4.f );
+		for (int i = 0; i < 4; i++) params[ROUTE_PARAM + i + STEP4START].setValue( (i + 1) / 5.f );
+		for (int i = 0; i < 5; i++) params[ROUTE_PARAM + i + STEP5START].setValue( (i + 1) / 6.f );
+		for (int i = 0; i < 6; i++) params[ROUTE_PARAM + i + STEP6START].setValue( (i + 1) / 7.f );
+		for (int i = 0; i < 7; i++) params[ROUTE_PARAM + i + STEP7START].setValue( (i + 1) / 8.f );
+		for (int i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
+		APP->history->push(new BulkCvAction(this->id, "set Darius Routes to Spread out", ROUTE_PARAM, oldValues, newValues));
+	}
+
+	// Thanks to stoermelder for the idea!
+	// https://community.vcvrack.com/t/arias-cool-and-nice-thread-of-barely-working-betas-and-bug-squashing-darius-update/8208/13?u=aria_salvatrice
+	void processRoutesToBinaryTree(const ProcessArgs& args){
+		routesToBinaryTree = false;
+		std::array<float, 36> oldValues;
+		std::array<float, 36> newValues;
+		for (int i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
+		for (int i = 0; i < 36; i++) params[ROUTE_PARAM + i].setValue(0.5f);
+		params[ROUTE_PARAM +  1].setValue(0.f);
+		params[ROUTE_PARAM +  2].setValue(1.f);
+		params[ROUTE_PARAM +  6].setValue(0.f);
+		params[ROUTE_PARAM +  7].setValue(0.f);
+		params[ROUTE_PARAM +  8].setValue(1.f);
+		params[ROUTE_PARAM +  9].setValue(1.f);
+		params[ROUTE_PARAM + 10].setValue(0.f);
+		params[ROUTE_PARAM + 11].setValue(1.f);
+		params[ROUTE_PARAM + 13].setValue(0.f);
+		params[ROUTE_PARAM + 14].setValue(1.f);
+		params[ROUTE_PARAM + 15].setValue(0.f);
+		params[ROUTE_PARAM + 17].setValue(0.f);
+		params[ROUTE_PARAM + 18].setValue(1.f);
+		params[ROUTE_PARAM + 20].setValue(1.f);
+		for (int i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
+		APP->history->push(new BulkCvAction(this->id, "set Darius Routes to Binary tree", ROUTE_PARAM, oldValues, newValues));
+	}
+
 	void resetPathTraveled(const ProcessArgs& args){
 		pathTraveled[0] = 0;
 		for (int i = 1; i < 8; i++) pathTraveled[i] = -1;
@@ -399,11 +469,6 @@ struct Darius : Module {
 		probabilities[33] = (probabilities[25] * params[ROUTE_PARAM + 25].getValue()) + (probabilities[26] * (1.f - params[ROUTE_PARAM + 26].getValue()));
 		probabilities[34] = (probabilities[26] * params[ROUTE_PARAM + 26].getValue()) + (probabilities[27] * (1.f - params[ROUTE_PARAM + 27].getValue()));
 		probabilities[35] = probabilities[27] * params[ROUTE_PARAM + 27].getValue();
-
-		for (int i = 0; i < 16; i++) {
-			outputs[DEBUG_OUTPUT].setVoltage(probabilities[i], i);
-			outputs[DEBUG_OUTPUT].setChannels(16);
-		}
 	}
 
 	// From 1ms to 10s. 
@@ -515,7 +580,12 @@ struct Darius : Module {
 		outputs[CV_OUTPUT].setVoltage(output);
 	}
 	
+	// FIXME - Lights flicker a bit.
 	void updateLights(const ProcessArgs& args){
+		// The Seed input light
+		lights[SEED_LIGHT].setBrightness( ( inputs[SEED_INPUT].getVoltage() == 0.f ) ? 0.f : 1.f );
+
+
 		// Clean up by request only
 		if (lightsReset) {
 			for (int i = 0; i < 36; i++) lights[CV_LIGHT + i].setBrightness( 0.f );
@@ -546,8 +616,11 @@ struct Darius : Module {
 	}
 
 	// Only redraws when necessary. This sets the data to display, but not which widgets to display.
-	// Updating multiple times a variable that gets read such as lcdText2 causes crashes due to race conditions so don't.
 	void updateLcd(const ProcessArgs& args){
+
+		// Updating multiple times a variable that gets read such as lcdText2 causes crashes due to reasons.
+		// Use temporary variables instead and write only once. 
+		std::string text, relative, absolute;
 
 		// Reset after 2 seconds since the last interactive input was touched
 		if (lcdLastInteraction < 2.f) {
@@ -589,7 +662,7 @@ struct Darius : Module {
 			if(params[SCALE_PARAM].getValue() == 0.f) {
 				lcdText2 = "CHROMATIC";
 			} else {
-				std::string text = Quantizer::noteLcdName((int)params[KEY_PARAM].getValue());
+				text = Quantizer::noteLcdName((int)params[KEY_PARAM].getValue());
 				text.append(" ");
 				text.append(Quantizer::scaleLcdName((int)params[SCALE_PARAM].getValue()));
 				lcdText2 = text; 
@@ -603,7 +676,10 @@ struct Darius : Module {
 		}
 
 		if (lcdMode == CV_MODE){
-			lcdText2 = "CV Mode";
+			text = std::to_string( outputs[CV_OUTPUT].getVoltage() );
+			text.resize(7);
+			text.append("V");
+			lcdText2 = text;
 		}
 
 		if (lcdMode == ROUTE_MODE){
@@ -670,10 +746,19 @@ struct Darius : Module {
 			randomizeRoute(args);
 		if (resetCvTrigger.process(inputs[RESET_INPUT].getVoltageSum()) or resetButtonTrigger.process(params[RESET_PARAM].getValue()))
 			reset(args);
+
 		if (resetCV)
 			processResetCV(args);
 		if (resetRoutes)
 			processResetRoutes(args);
+		if (routesToTop)
+			processRoutesToTop(args);
+		if (routesToBottom)
+			processRoutesToBottom(args);
+		if (routesToEqualProbability)
+			processRoutesToEqualProbability(args);
+		if (routesToBinaryTree)
+			processRoutesToBinaryTree(args);
 
 		setRunStatus(args);
 		setStepStatus(args);
@@ -994,6 +1079,7 @@ struct DariusWidget : ModuleWidget {
 		// Seed
 		addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(103.0, 112.0)), module, Darius::SEED_MODE_PARAM));
 		addInput(createInput<AriaJackIn>(mm2px(Vec(109.5, 112.0)), module, Darius::SEED_INPUT));
+		addChild(createLightCentered<SmallLight<InputLight>>(mm2px(Vec(108.7, 121.4)), module, Darius::SEED_LIGHT));
 
 		// Output area //////////////////
 
@@ -1047,19 +1133,65 @@ struct DariusWidget : ModuleWidget {
 		}
 	};
 
+	struct RoutesToTopItem : MenuItem {
+		Darius *module;
+		void onAction(const event::Action &e) override {
+			module->routesToTop = true;
+		}
+	};
+
+	struct RoutesToBottomItem : MenuItem {
+		Darius *module;
+		void onAction(const event::Action &e) override {
+			module->routesToBottom = true;
+		}
+	};
+
+	struct RoutesToEqualProbabilityItem : MenuItem {
+		Darius *module;
+		void onAction(const event::Action &e) override {
+			module->routesToEqualProbability = true;
+		}
+	};
+
+	struct RoutesToBinaryTreeItem : MenuItem {
+		Darius *module;
+		void onAction(const event::Action &e) override {
+			module->routesToBinaryTree = true;
+		}
+	};
+
 	void appendContextMenu(ui::Menu *menu) override {	
 		Darius *module = dynamic_cast<Darius*>(this->module);
 		assert(module);
 
-		menu->addChild(new MenuLabel());
+		menu->addChild(new MenuSeparator());
 		
 		ResetCVItem *resetCVItem = createMenuItem<ResetCVItem>("Reset CV");
 		resetCVItem->module = module;
 		menu->addChild(resetCVItem);
 
-		ResetRoutesItem *resetRoutesItem = createMenuItem<ResetRoutesItem>("Reset Routes");
+		menu->addChild(new MenuSeparator());
+
+		ResetRoutesItem *resetRoutesItem = createMenuItem<ResetRoutesItem>("Reset Routes (normal distribution skewing to center)");
 		resetRoutesItem->module = module;
 		menu->addChild(resetRoutesItem);
+
+		RoutesToTopItem *routesToTopItem = createMenuItem<RoutesToTopItem>("Routes all to Top");
+		routesToTopItem->module = module;
+		menu->addChild(routesToTopItem);
+
+		RoutesToBottomItem *routesToBottomItem = createMenuItem<RoutesToBottomItem>("Routes all to Bottom");
+		routesToBottomItem->module = module;
+		menu->addChild(routesToBottomItem);
+
+		RoutesToEqualProbabilityItem *routesToEqualProbability = createMenuItem<RoutesToEqualProbabilityItem>("Routes Spread out (equal probability)");
+		routesToEqualProbability->module = module;
+		menu->addChild(routesToEqualProbability);
+
+		RoutesToBinaryTreeItem *routesToBinaryTree = createMenuItem<RoutesToBinaryTreeItem>("Routes to Binary tree (equal probability)");
+		routesToBinaryTree->module = module;
+		menu->addChild(routesToBinaryTree);
 	}
 };
 
