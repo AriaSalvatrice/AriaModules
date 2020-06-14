@@ -131,7 +131,6 @@ inline std::array<bool, 12> validNotesInScale(int scale){
 	return none;
 }
 
-// FIXME - this rotation is wrong
 // The individual notes of the corresponding scale from the ScalesEnum, in the specified key
 inline std::array<bool, 12> validNotesInScaleKey(int scale, int key){
 	std::array<bool, 12> notes = validNotesInScale(scale);
