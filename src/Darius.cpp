@@ -10,7 +10,6 @@
 // - Make Arcane use that component
 // - Implement slide
 // - Portable sequences
-// - Poly scale in
 // - Fix gates
 // - Implement global gate
 // - Pluralize route on panel
@@ -100,6 +99,7 @@ struct Darius : Module {
 	bool routesToEqualProbability = false;
 	bool routesToBinaryTree = false;
 	bool lcdDirty = false;
+	std::array<bool, 12> scale;
 	std::array<bool, 12> pianoDisplay;
 	std::string lcdText1 = "MEDITATE..."; // Loading message
 	std::string lcdText2 = "MEDITATION."; // https://www.youtube.com/watch?v=JqLNY1zyQ6o
@@ -548,6 +548,16 @@ struct Darius : Module {
 		lastNode = node;
 		lcdDirty = true;
 	}
+
+	void updateScale(const ProcessArgs& args){
+		if (inputs[EXT_SCALE_INPUT].isConnected()) {
+			for(int i = 0; i < 12; i++) {
+				scale [i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.f) ? true : false;
+			}
+		} else {
+			scale = Quantizer::validNotesInScaleKey( (int)params[SCALE_PARAM].getValue() , (int)params[KEY_PARAM].getValue() );
+		}
+	}
 	
 	// FIXME - Global output
 	// FIXME - Trigger from anywhere
@@ -581,8 +591,8 @@ struct Darius : Module {
 				output = rescale(output, 0.f, 10.f, params[MIN_PARAM].getValue() - 5.f, params[MAX_PARAM].getValue() - 5.f);
 			}
 			// Then quantize it
-			std::array<bool, 12> validNotes = Quantizer::validNotesInScaleKey( (int)params[SCALE_PARAM].getValue() , (int)params[KEY_PARAM].getValue() );
-			output = Quantizer::quantize(output, validNotes);
+			// std::array<bool, 12> validNotes = Quantizer::validNotesInScaleKey( (int)params[SCALE_PARAM].getValue() , (int)params[KEY_PARAM].getValue() );
+			output = Quantizer::quantize(output, scale);
 		}
 
 		outputs[CV_OUTPUT].setVoltage(output);
@@ -677,14 +687,17 @@ struct Darius : Module {
 
 		if (lcdMode == SCALE_MODE) {
 			if(params[SCALE_PARAM].getValue() == 0.f) {
-				lcdText2 = "CHROMATIC";
+				text = "CHROMATIC";
 			} else {
 				text = Quantizer::noteLcdName((int)params[KEY_PARAM].getValue());
 				text.append(" ");
 				text.append(Quantizer::scaleLcdName((int)params[SCALE_PARAM].getValue()));
-				lcdText2 = text; 
 			}
-			pianoDisplay = Quantizer::validNotesInScaleKey( (int)params[SCALE_PARAM].getValue() , (int)params[KEY_PARAM].getValue() );
+			if(inputs[EXT_SCALE_INPUT].isConnected()){
+				text = "EXTERNAL";
+			}
+			lcdText2 = text;
+			pianoDisplay = scale;
 		}
 
 		if (lcdMode == QUANTIZED_MODE){
@@ -728,7 +741,7 @@ struct Darius : Module {
 				}
 				text = std::to_string(f);
 				text.resize(5);
-				lcdText2 = text + "V";
+				lcdText2 = ">" + text + "V";
 			} else {
 				validNotes = Quantizer::validNotesInScaleKey( (int)params[SCALE_PARAM].getValue() , (int)params[KEY_PARAM].getValue() );
 				 if (params[RANGE_PARAM].getValue() == 0.f) {
@@ -738,7 +751,7 @@ struct Darius : Module {
 				 }
 				 f = Quantizer::quantize( f, validNotes);
 				 pianoDisplay = Quantizer::pianoDisplay(f);
-				 lcdText2 = Quantizer::noteName(f);
+				 lcdText2 = ">" + Quantizer::noteName(f);
 			}
 		}
 
@@ -843,6 +856,8 @@ struct Darius : Module {
 			nodeForward(args);
 		if (steppedBack)
 			nodeBack(args);
+
+		updateScale(args);
 
 		sendGateOutput(args);
 		setVoltageOutput(args);
@@ -1024,33 +1039,37 @@ struct LcdDariusDrawWidget : TransparentWidget {
 			nvgScale(args.vg, 1.5, 1.5);
 		
 			// Piano display at the top
-			// FIXME - Hide it in KNOB_MODE when not quantized.
 			if (module->lcdMode == SCALE_MODE || module->lcdMode == QUANTIZED_MODE || module->lcdMode == KNOB_MODE ) {
-				nvgSave(args.vg);
-				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[0])  ? 12 :  0 ]->handle);
-				nvgTranslate(args.vg, 6, 0);
-				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[1])  ? 13 :  1 ]->handle);
-				nvgTranslate(args.vg, 5, 0);
-				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[2])  ? 14 :  2 ]->handle);
-				nvgTranslate(args.vg, 5, 0);
-				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[3])  ? 15 :  3 ]->handle);
-				nvgTranslate(args.vg, 5, 0);
-				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[4])  ? 16 :  4 ]->handle);
-				nvgTranslate(args.vg, 7, 0);
-				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[5])  ? 17 :  5 ]->handle);
-				nvgTranslate(args.vg, 6, 0);
-				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[6])  ? 18 :  6 ]->handle);
-				nvgTranslate(args.vg, 5, 0);
-				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[7])  ? 19 :  7 ]->handle);
-				nvgTranslate(args.vg, 5, 0);
-				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[8])  ? 20 :  8 ]->handle);
-				nvgTranslate(args.vg, 5, 0);
-				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[9])  ? 21 :  9 ]->handle);
-				nvgTranslate(args.vg, 5, 0);
-				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[10]) ? 22 : 10 ]->handle);
-				nvgTranslate(args.vg, 5, 0);
-				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[11]) ? 23 : 11 ]->handle);
-				nvgRestore(args.vg);
+				bool skipPianoDisplay = false;
+				if ( module->lcdMode == KNOB_MODE && module->params[module->QUANTIZE_TOGGLE_PARAM].getValue() == 0.f)
+					skipPianoDisplay = true;
+				if (! skipPianoDisplay ) {
+					nvgSave(args.vg);
+					svgDraw(args.vg, pianoSvg[(module->pianoDisplay[0])  ? 12 :  0 ]->handle);
+					nvgTranslate(args.vg, 6, 0);
+					svgDraw(args.vg, pianoSvg[(module->pianoDisplay[1])  ? 13 :  1 ]->handle);
+					nvgTranslate(args.vg, 5, 0);
+					svgDraw(args.vg, pianoSvg[(module->pianoDisplay[2])  ? 14 :  2 ]->handle);
+					nvgTranslate(args.vg, 5, 0);
+					svgDraw(args.vg, pianoSvg[(module->pianoDisplay[3])  ? 15 :  3 ]->handle);
+					nvgTranslate(args.vg, 5, 0);
+					svgDraw(args.vg, pianoSvg[(module->pianoDisplay[4])  ? 16 :  4 ]->handle);
+					nvgTranslate(args.vg, 7, 0);
+					svgDraw(args.vg, pianoSvg[(module->pianoDisplay[5])  ? 17 :  5 ]->handle);
+					nvgTranslate(args.vg, 6, 0);
+					svgDraw(args.vg, pianoSvg[(module->pianoDisplay[6])  ? 18 :  6 ]->handle);
+					nvgTranslate(args.vg, 5, 0);
+					svgDraw(args.vg, pianoSvg[(module->pianoDisplay[7])  ? 19 :  7 ]->handle);
+					nvgTranslate(args.vg, 5, 0);
+					svgDraw(args.vg, pianoSvg[(module->pianoDisplay[8])  ? 20 :  8 ]->handle);
+					nvgTranslate(args.vg, 5, 0);
+					svgDraw(args.vg, pianoSvg[(module->pianoDisplay[9])  ? 21 :  9 ]->handle);
+					nvgTranslate(args.vg, 5, 0);
+					svgDraw(args.vg, pianoSvg[(module->pianoDisplay[10]) ? 22 : 10 ]->handle);
+					nvgTranslate(args.vg, 5, 0);
+					svgDraw(args.vg, pianoSvg[(module->pianoDisplay[11]) ? 23 : 11 ]->handle);
+					nvgRestore(args.vg);
+				}
 			}
 
 			// 11 character display at the top in some modes.
