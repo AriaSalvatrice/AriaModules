@@ -8,9 +8,8 @@
 // TODO
 // - Split off the LCD into a reusable component
 // - Make Arcane use that component
-// - Fix performance of route knobs
-// - Smooth out the routes numbers so that probs look better
-// - CV/Q button should swap lcd modes
+// - Min/Max display
+// - Implement slide
 // - Portable sequences
 // - Poly scale in
 // - Fix gates
@@ -28,6 +27,8 @@ const int STEP6START = 15; //     20  19  18  17  16  15
 const int STEP7START = 21; //   27  26  25  24  23  22  21  
 const int STEP8START = 28; // 35  34  33  32  31  30  29  28
 const int STEP9START = 36; // (Panel is rotated 90 degrees counter-clockwise compared to this diagram)
+
+const int LCDDIVIDER = 512;
 
 enum LcdModes {
 	INIT_MODE,
@@ -108,7 +109,7 @@ struct Darius : Module {
 	int node = 0;
 	int lastNode = 0;
 	int lastGate = 0;
-	int pathTraveled[8] = { 0, -1, -1, -1, -1, -1, -1, -1}; // -1 = not gone there yet
+	int pathTraveled[8] = { 0, -1, -1, -1, -1, -1, -1, -1 }; // -1 = not gone there yet
 	int lcdMode = INIT_MODE;
 	int lastCvChanged = 0;
 	int lastRouteChanged = 0;
@@ -127,6 +128,7 @@ struct Darius : Module {
 	dsp::SchmittTrigger randomizeCvTrigger;
 	dsp::SchmittTrigger randomizeRouteTrigger;
 	dsp::ClockDivider knobDivider;
+	dsp::ClockDivider lcdDivider;
 	prng::prng prng;
 
 
@@ -143,6 +145,7 @@ struct Darius : Module {
 		configParam(RANGE_PARAM, 0.f, 1.f, 0.f, "Voltage output range");
 		configParam(MIN_PARAM, 0.f, 10.f, 0.f, "Minimum CV/Note");
 		configParam(MAX_PARAM, 0.f, 10.f, 10.f, "Maximum CV/Note");
+		configParam(QUANTIZE_TOGGLE_PARAM, 0.f, 1.f, 0.f, "Precise CV/Quantized V/Oct");
 		configParam(KEY_PARAM, 0.f, 11.f, 0.f, "Key");
 		configParam(SCALE_PARAM, 0.f, (float) Quantizer::NUM_SCALES - 1, 0.f, "Scale");
 		configParam(SLIDE_PARAM, 0.f, 10.f, 0.f, "Slide");
@@ -151,6 +154,7 @@ struct Darius : Module {
 		for (int i = 0; i < STEP8START; i++)
 			configParam(ROUTE_PARAM + i, 0.f, 1.f, 0.5f, "Random route");
 		knobDivider.setDivision(512); // For non-essential knobs
+		lcdDivider.setDivision(LCDDIVIDER); // For non-essential knobs
 		for (int i = 0; i < 100; i++) random::uniform(); // The first few seeds we get are bad, need more warming up.
 	}
 	
@@ -494,12 +498,10 @@ struct Darius : Module {
 		if (step == 1){
 			refreshSeed(args);
 			prng.init(randomSeed, randomSeed);
-			DEBUG("REFRESHED A: %f", randomSeed);
 		} else {
 			if (params[SEED_MODE_PARAM].getValue() == 1.0f && inputs[SEED_INPUT].isConnected()){
 				refreshSeed(args);
 				prng.init(randomSeed, randomSeed);
-				DEBUG("REFRESHED B: %f", randomSeed);
 			}
 		}
 		
@@ -599,26 +601,35 @@ struct Darius : Module {
 				if (pathTraveled[i] >= 0) lights[CV_LIGHT + pathTraveled[i]].setBrightness( 1.f );
 			}
 			lightsReset = false;
-		}
+		}		
+
+		// Using an intermediary to prevent flicker
 		lights[CV_LIGHT + pathTraveled[step]].setBrightness( 1.f );
+
+		float brightness[36];
 		// Light the outputs depending on amount of steps enabled
-		lights[GATE_LIGHT].setBrightness( (stepFirst <= 1 && stepLast >= 1 ) ? 1.f : 0.f );
+		brightness[0] = (stepFirst <= 1 && stepLast >= 1 ) ? 1.f : 0.f ;
 		for (int i = STEP2START; i < STEP3START; i++)
-			lights[GATE_LIGHT + i].setBrightness( (stepFirst <= 2 && stepLast >= 2 ) ? 1.f : 0.f );
+			brightness[i] = (stepFirst <= 2 && stepLast >= 2 ) ? 1.f : 0.f;
 		for (int i = STEP3START; i < STEP4START; i++)
-			lights[GATE_LIGHT + i].setBrightness( (stepFirst <= 3 && stepLast >= 3 ) ? 1.f : 0.f );
+			brightness[i] = (stepFirst <= 3 && stepLast >= 3 ) ? 1.f : 0.f;
 		for (int i = STEP4START; i < STEP5START; i++)
-			lights[GATE_LIGHT + i].setBrightness( (stepFirst <= 4 && stepLast >= 4 ) ? 1.f : 0.f );
+			brightness[i] = (stepFirst <= 4 && stepLast >= 4 ) ? 1.f : 0.f;
 		for (int i = STEP5START; i < STEP6START; i++)
-			lights[GATE_LIGHT + i].setBrightness( (stepFirst <= 5 && stepLast >= 5 ) ? 1.f : 0.f );
+			brightness[i] = (stepFirst <= 5 && stepLast >= 5 ) ? 1.f : 0.f;
 		for (int i = STEP6START; i < STEP7START; i++)
-			lights[GATE_LIGHT + i].setBrightness( (stepFirst <= 6 && stepLast >= 6 ) ? 1.f : 0.f );
+			brightness[i] = (stepFirst <= 6 && stepLast >= 6 ) ? 1.f : 0.f;
 		for (int i = STEP7START; i < STEP8START; i++)
-			lights[GATE_LIGHT + i].setBrightness( (stepFirst <= 7 && stepLast >= 7 ) ? 1.f : 0.f );
+			brightness[i] = (stepFirst <= 7 && stepLast >= 7 ) ? 1.f : 0.f;
 		for (int i = STEP8START; i < STEP9START; i++)
-			lights[GATE_LIGHT + i].setBrightness( (stepFirst <= 8 && stepLast >= 8 ) ? 1.f : 0.f );
+			brightness[i] = (stepFirst <= 8 && stepLast >= 8 ) ? 1.f : 0.f;
+		// And turn off nodes that are impossible to reach
 		for (int i = 0; i < 36; i++)
-			if (probabilities[i] == 0.f) lights[GATE_LIGHT + i].setBrightness( 0.f );
+			if (probabilities[i] == 0.f) brightness[i] = 0.f;
+
+		for (int i = 0; i < 36; i++)
+			lights[GATE_LIGHT + i].setBrightness(brightness[i]);
+		
 	}
 
 	// Only redraws when necessary. This sets the data to display, but not which widgets to display.
@@ -629,10 +640,10 @@ struct Darius : Module {
 		std::string text, relative, absolute;
 
 		// Reset after 2 seconds since the last interactive input was touched
-		if (lcdLastInteraction < 2.f) {
+		if (lcdLastInteraction < (2.f / LCDDIVIDER) ) {
 			lcdLastInteraction += args.sampleTime;
 			// Updating only once after reset
-			if(lcdLastInteraction >= 2.f) {
+			if(lcdLastInteraction >= (2.f / LCDDIVIDER) ) {
 				lcdMode = DEFAULT_MODE;
 				lcdDirty = true;
 			}
@@ -642,9 +653,6 @@ struct Darius : Module {
 		if(lcdMode == DEFAULT_MODE) {
 			lcdMode = (params[QUANTIZE_TOGGLE_PARAM].getValue() == 0.f) ? CV_MODE : NOTE_MODE;
 		}
-
-		if (!lcdDirty)
-			return;
 
 		if (lcdMode == SLIDE_MODE) {
 			lcdText1 = "SLIDE:";
@@ -690,7 +698,8 @@ struct Darius : Module {
 
 		if (lcdMode == ROUTE_MODE){
 			std::string relative, absolute;
-			relative = std::to_string((1.f - params[ROUTE_PARAM + lastRouteChanged].getValue()) * 100);
+
+			relative = std::to_string( (1.f - params[ROUTE_PARAM + lastRouteChanged].getValue()) * 100.f);
 			relative.resize(4);
 			if (1.f - params[ROUTE_PARAM + lastRouteChanged].getValue() == 1.f){
 				relative.resize(3);
@@ -699,7 +708,11 @@ struct Darius : Module {
 				relative.resize(4);
 				relative.append("%");
 			}
-			absolute = std::to_string(probabilities[getUpChild(lastRouteChanged)] * 100);
+			if (probabilities[getUpChild(lastRouteChanged)] >= 0.1f) {
+				absolute = std::to_string(roundf(probabilities[getUpChild(lastRouteChanged)] * 1000.f) / 10.f);
+			} else {
+				absolute = std::to_string(roundf(probabilities[getUpChild(lastRouteChanged)] * 10000.f) / 100.f);
+			}
 			if (probabilities[getUpChild(lastRouteChanged)] == 1.f){
 				absolute.resize(3);
 				absolute.append(" %");
@@ -709,7 +722,7 @@ struct Darius : Module {
 			}
 			lcdText1 = relative + "/" + absolute;
 
-			relative = std::to_string(params[ROUTE_PARAM + lastRouteChanged].getValue() * 100);
+			relative = std::to_string(params[ROUTE_PARAM + lastRouteChanged].getValue() * 100.f);
 			relative.resize(4);
 			if (params[ROUTE_PARAM + lastRouteChanged].getValue() == 1.f){
 				relative.resize(3);
@@ -718,7 +731,11 @@ struct Darius : Module {
 				relative.resize(4);
 				relative.append("%");
 			}
-			absolute = std::to_string(probabilities[getDownChild(lastRouteChanged)] * 100);
+			if (probabilities[getUpChild(lastRouteChanged)] >= 0.1f) {
+				absolute = std::to_string(roundf(probabilities[getDownChild(lastRouteChanged)] * 1000.f) / 10.f);
+			} else {
+				absolute = std::to_string(roundf(probabilities[getDownChild(lastRouteChanged)] * 10000.f) / 100.f);
+			}
 			if (probabilities[getDownChild(lastRouteChanged)] == 1.f){
 				absolute.resize(3);
 				absolute.append(" %");
@@ -728,7 +745,6 @@ struct Darius : Module {
 			}
 			lcdText2 = relative + "/" + absolute;
 		}
-
 	}
 
 	void onReset() override {
@@ -787,7 +803,9 @@ struct Darius : Module {
 		sendGateOutput(args);
 		setVoltageOutput(args);
 		updateLights(args);
-		updateLcd(args);
+		if (lcdDivider.process()) {
+			updateLcd(args);
+		}
 
 	}
 };
@@ -864,6 +882,22 @@ struct AriaKnob820Slide : AriaKnob820 {
 		module->lcdLastInteraction = 0.f;
 		module->lcdDirty = true;
 		AriaKnob820::onDragMove(e);
+	}
+};
+
+struct AriaRockerSwitchHorizontal800ModeReset : AriaRockerSwitchHorizontal800 {
+	Darius *module;
+
+	AriaRockerSwitchHorizontal800ModeReset(Darius* module) {
+		this->module = module;
+		AriaRockerSwitchHorizontal800();
+	}
+
+	void onDragStart(const event::DragStart& e) override {
+		module->lcdMode = DEFAULT_MODE;
+		module->lcdLastInteraction = 0.f;
+		module->lcdDirty = true;
+		AriaRockerSwitchHorizontal800::onDragStart(e);
 	}
 };
 
@@ -1097,7 +1131,7 @@ struct DariusWidget : ModuleWidget {
 		addChild(lfb);
 
 		// Quantizer toggle
-		addParam(createParam<AriaRockerSwitchHorizontal800>(mm2px(Vec(9.1, 99.7)), module, Darius::QUANTIZE_TOGGLE_PARAM));
+		addParam(createLcdParam<AriaRockerSwitchHorizontal800ModeReset>(mm2px(Vec(9.1, 99.7)), module, Darius::QUANTIZE_TOGGLE_PARAM));
 
 		// Voltage Range
 		addParam(createParam<AriaRockerSwitchHorizontal800Flipped>(mm2px(Vec(26.0, 118.8)), module, Darius::RANGE_PARAM));
