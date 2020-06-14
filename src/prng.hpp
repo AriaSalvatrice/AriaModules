@@ -9,11 +9,13 @@
 // not skewed to either side, which was a problem with std's mersenne twister.
 namespace prng {
 
-	static inline uint64_t rotl(const uint64_t x, int k) {
+struct prng {
+
+	inline uint64_t rotl(const uint64_t x, int k) {
 		return (x << k) | (x >> (64 - k));
 	}
 
-	static uint64_t s[2];
+	uint64_t s[2];
 
 	uint64_t next(void) {
 		const uint64_t s0 = s[0];
@@ -28,13 +30,16 @@ namespace prng {
 	}
 	
 	void init(float seed1, float seed2){
-		s[0] = seed1 * 52852712; // Keyboard smash - saling seems to improve results
-		s[1] = seed2 * 60348921;
-		for (int i = 0; i < 10; i++) next(); // Warm up for better results
+		s[0] = seed1 * 572376460694501; // Keyboard smash - salting seems to improve results
+		s[1] = seed2 * 645624357248923;
+		for (int i = 0; i < 50; i++) next(); // Warm up for better results
 	}
 
 	float uniform() {
+		for (int i = 0; i < 50; i++) next(); // More dry runs.
 		return (next() >> (64 - 24)) / std::pow(2.f, 24);
 	}
+
+};
 
 }

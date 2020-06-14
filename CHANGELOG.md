@@ -7,9 +7,10 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 
 ### Added
 
-#### Darius Update
+### Darius Update
 
-- [NOTE] Darius: Many new features were added to Darius. Despite the scale of the revision, it is an update to the original module, rather than a separate Mk2 version. Most existing patches will not be broken. The size of the module remains the same.
+- [NOTE] Darius: Many new features were added to Darius. Despite the scale of the revision, it is an update to the original module, rather than a separate Mk2 version. Most existing patches will not be broken, except those that rely on the external seed input. The width of the module remains the same.
+- [INCOMPATIBLITY] Darius: The random number generation was improved for greater uniformity. This WILL break patches that relied on the Random Seed input to be deterministic. Sorry for the inconvenience.
 - [NEW FEATURE] Darius: Added a LCD providing information about the module state.
 - [NEW FEATURE] Darius: The output jacks of nodes that have 0% chance to be reached are no longer lit.
 - [NEW FEATURE] Darius: Added an output range control to the CV output.
@@ -17,6 +18,8 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 - [NEW FEATURE] Darius: Added undo support for the two "Randomize" buttons.
 - [NEW FEATURE] Darius: Added route and CV presets in the right-click menu.
 - [NEW FEATURE] Darius: Added an optional quantizer, with support for external scales.
+- [FIX] Darius: Fixed random seed not working with multiple instances of Darius.
+
 
 ### Planned
 

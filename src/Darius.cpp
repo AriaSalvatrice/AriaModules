@@ -8,13 +8,15 @@
 // TODO
 // - Split off the LCD into a reusable component
 // - Make Arcane use that component
-// - Implement what's mentioned in the Changelog lol
-// - Calculate probabilities to reach nodes
 // - Fix performance of route knobs
-// - Smooth out the values? 
+// - Smooth out the routes numbers so that probs look better
 // - CV/Q button should swap lcd modes
-// - FIXME Random distribution VERY skewed on binary tree!!!
-//   -> It's clean if I S&H white noise in ALL mode, but not in 1st mode.
+// - Portable sequences
+// - Poly scale in
+// - Fix gates
+// - Implement global gate
+// - Pluralize route on panel
+// - Remove debug output
 
 
 const int STEP1START = 0;  //               00        
@@ -90,7 +92,6 @@ struct Darius : Module {
 	bool forceUp = false;
 	bool forceDown = false;
 	bool lightsReset = false;
-	bool shSeedNextFirst = false; // S & H the seed next 1st step
 	bool resetCV = false;
 	bool resetRoutes = false;
 	bool routesToTop = false;
@@ -126,6 +127,7 @@ struct Darius : Module {
 	dsp::SchmittTrigger randomizeCvTrigger;
 	dsp::SchmittTrigger randomizeRouteTrigger;
 	dsp::ClockDivider knobDivider;
+	prng::prng prng;
 
 
 	Darius() {
@@ -149,6 +151,7 @@ struct Darius : Module {
 		for (int i = 0; i < STEP8START; i++)
 			configParam(ROUTE_PARAM + i, 0.f, 1.f, 0.5f, "Random route");
 		knobDivider.setDivision(512); // For non-essential knobs
+		for (int i = 0; i < 100; i++) random::uniform(); // The first few seeds we get are bad, need more warming up.
 	}
 	
 	json_t* dataToJson() override {
@@ -345,7 +348,6 @@ struct Darius : Module {
 		node = 0;
 		lastNode = 0;
 		lightsReset = true;
-		shSeedNextFirst = true;
 		resetPathTraveled(args);
 		for (int i = 0; i < 36; i++)
 			outputs[GATE_OUTPUT + i].setVoltage(0.f);
@@ -395,7 +397,6 @@ struct Darius : Module {
 		}
 		lastGate = node;
 		if (step >= stepLast || step < stepFirst - 1) {
-			shSeedNextFirst = true;
 			step = 0;
 			node = 0;
 			lastNode = 0;
@@ -488,12 +489,18 @@ struct Darius : Module {
 	void nodeForward(const ProcessArgs& args){
 		steppedForward = false;
 		
-		// Refresh seed as lazily as possible
-		if (step == 1 and shSeedNextFirst){
+		// Refresh seed at start of sequences, and on external seeds
+		// Refresh at the last minute: when about to move the second step.
+		if (step == 1){
 			refreshSeed(args);
-			shSeedNextFirst = false;
+			prng.init(randomSeed, randomSeed);
+			DEBUG("REFRESHED A: %f", randomSeed);
 		} else {
-			if (params[SEED_MODE_PARAM].getValue() == 1.0f) refreshSeed(args);
+			if (params[SEED_MODE_PARAM].getValue() == 1.0f && inputs[SEED_INPUT].isConnected()){
+				refreshSeed(args);
+				prng.init(randomSeed, randomSeed);
+				DEBUG("REFRESHED B: %f", randomSeed);
+			}
 		}
 		
 		if (step == 0){ // Step 1 starting
@@ -518,8 +525,7 @@ struct Darius : Module {
 					forceDown = false;
 				}
 			} else {
-				prng::init(randomSeed, step);
-				if (prng::uniform() < params[ROUTE_PARAM + lastNode].getValue()) {
+				if (prng.uniform() < params[ROUTE_PARAM + lastNode].getValue()) {
 					node = node + step + 1;
 				} else {
 					node = node + step;
