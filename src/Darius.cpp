@@ -8,12 +8,9 @@
 // TODO
 // - Split off the LCD into a reusable component
 // - Make Arcane use that component
-// - Implement slide
 // - Portable sequences
-// - Fix gates
-// - Implement global gate
-// - Pluralize route on panel
-// - Remove debug output
+// - Write docs
+// - Quantized slides would be fun!
 
 
 const int STEP1START = 0;  //               00        
@@ -76,7 +73,6 @@ struct Darius : Module {
 		ENUMS(GATE_OUTPUT, 36),
 		CV_OUTPUT, // 1.2.0 release
 		GLOBAL_GATE_OUTPUT, // 1.5.0 release
-		DEBUG_OUTPUT,
 		NUM_OUTPUTS
 	};
 	enum LightIds {
@@ -114,7 +110,9 @@ struct Darius : Module {
 	int lastCvChanged = 0;
 	int lastRouteChanged = 0;
 	float randomSeed = 0.f;
-	float slideDuration = 0.f;
+	float slideDuration = 0.f; // In ms
+	float slideCounter = 0.f;
+	float lastOutput = 0.f;
 	float lcdLastInteraction = 0.f;
 	float probabilities[36];
 	dsp::SchmittTrigger stepUpCvTrigger;
@@ -127,6 +125,7 @@ struct Darius : Module {
 	dsp::SchmittTrigger resetButtonTrigger;
 	dsp::SchmittTrigger randomizeCvTrigger;
 	dsp::SchmittTrigger randomizeRouteTrigger;
+	dsp::PulseGenerator manualStepTrigger;
 	dsp::ClockDivider knobDivider;
 	dsp::ClockDivider lcdDivider;
 	prng::prng prng;
@@ -377,27 +376,38 @@ struct Darius : Module {
 				step++;
 				steppedForward = true;
 				triggerAccepted = true;
+				slideCounter = 0.f;
+				lastOutput = outputs[CV_OUTPUT].getVoltage();
 			}
 			if (stepUpCvTrigger.process(inputs[STEP_UP_INPUT].getVoltageSum()) and !triggerAccepted){
 				step++;
 				forceUp = true;
 				steppedForward = true;
 				triggerAccepted = true;
+				slideCounter = 0.f;
+				lastOutput = outputs[CV_OUTPUT].getVoltage();
 			}
 			if (stepDownCvTrigger.process(inputs[STEP_DOWN_INPUT].getVoltageSum()) and !triggerAccepted){
 				step++;
 				forceDown = true;
 				steppedForward = true;
 				triggerAccepted = true;
+				slideCounter = 0.f;
+				lastOutput = outputs[CV_OUTPUT].getVoltage();
 			}
 			if (stepBackCvTrigger.process(inputs[STEP_BACK_INPUT].getVoltageSum()) and step > 0 and !triggerAccepted){
 				step--;
 				steppedBack = true;
+				slideCounter = 0.f;
+				lastOutput = outputs[CV_OUTPUT].getVoltage();
 			}
 		}
 		if (stepForwardButtonTrigger.process(params[STEP_PARAM].getValue())){
 			step++; // You can still advance manually if module isn't running
 			steppedForward = true;
+			slideCounter = 0.f;
+			lastOutput = outputs[CV_OUTPUT].getVoltage();
+			manualStepTrigger.trigger(1e-3f);
 		}
 		lastGate = node;
 		if (step >= stepLast || step < stepFirst - 1) {
@@ -406,6 +416,8 @@ struct Darius : Module {
 			lastNode = 0;
 			resetPathTraveled(args);
 			lightsReset = true;
+			slideCounter = 0.f;
+			lastOutput = outputs[CV_OUTPUT].getVoltage();
 			for(int i = 0; i < stepFirst - 1; i++) {
 				step++;
 				nodeForward(args);
@@ -559,14 +571,23 @@ struct Darius : Module {
 		}
 	}
 	
-	// FIXME - Global output
-	// FIXME - Trigger from anywhere
+	// FIXME - Global output in manual operation
 	void sendGateOutput(const ProcessArgs& args){
-		if (inputs[STEP_INPUT].isConnected()){
-			outputs[GATE_OUTPUT + node].setVoltage(inputs[STEP_INPUT].getVoltage());
+
+		bool manualStep = manualStepTrigger.process(args.sampleTime);
+
+		if (inputs[STEP_INPUT].isConnected() || inputs[STEP_BACK_INPUT].isConnected() || inputs[STEP_UP_INPUT].isConnected() || inputs[STEP_DOWN_INPUT].isConnected()){
+			float output;
+			output = inputs[STEP_INPUT].getVoltageSum();
+			output = (inputs[STEP_BACK_INPUT].getVoltageSum() > output) ? inputs[STEP_BACK_INPUT].getVoltageSum() : output;
+			output = (inputs[STEP_UP_INPUT].getVoltageSum() > output)   ? inputs[STEP_UP_INPUT].getVoltageSum()   : output;
+			output = (inputs[STEP_DOWN_INPUT].getVoltageSum() > output) ? inputs[STEP_DOWN_INPUT].getVoltageSum() : output;
+			outputs[GATE_OUTPUT + node].setVoltage(output);
+			outputs[GLOBAL_GATE_OUTPUT].setVoltage(output);
 		} else {
 			outputs[GATE_OUTPUT + lastGate].setVoltage(0.f);
 			outputs[GATE_OUTPUT + node].setVoltage(10.f);
+			outputs[GLOBAL_GATE_OUTPUT].setVoltage( (manualStep) ? 10.f : 0.f );
 		}
 	}
 
@@ -591,8 +612,13 @@ struct Darius : Module {
 				output = rescale(output, 0.f, 10.f, params[MIN_PARAM].getValue() - 5.f, params[MAX_PARAM].getValue() - 5.f);
 			}
 			// Then quantize it
-			// std::array<bool, 12> validNotes = Quantizer::validNotesInScaleKey( (int)params[SCALE_PARAM].getValue() , (int)params[KEY_PARAM].getValue() );
 			output = Quantizer::quantize(output, scale);
+		}
+
+		// Slide
+		if (slideDuration > 0.f && slideDuration > slideCounter) {
+			output = crossfade(lastOutput, output, (slideCounter / slideDuration) );
+			slideCounter += args.sampleTime;
 		}
 
 		outputs[CV_OUTPUT].setVoltage(output);
@@ -650,6 +676,9 @@ struct Darius : Module {
 		std::string text, relative, absolute;
 		float f;
 		std::array<bool, 12> validNotes;
+
+		// Since we might be sliding, refresh at least this often
+		lcdDirty = true;
 
 		// Reset after 3 seconds since the last interactive input was touched
 		if (lcdLastInteraction < (3.f / LCDDIVIDER) ) {
@@ -861,8 +890,9 @@ struct Darius : Module {
 
 		sendGateOutput(args);
 		setVoltageOutput(args);
-		updateLights(args);
+		
 		if (lcdDivider.process()) {
+			updateLights(args); // Does it work to move it here?
 			updateLcd(args);
 		}
 
@@ -1211,15 +1241,15 @@ struct DariusWidget : ModuleWidget {
 		// Lcd
 		LcdFramebufferWidget<Darius> *lfb = new LcdFramebufferWidget<Darius>(module);
 		LcdDariusDrawWidget *ldw = new LcdDariusDrawWidget(module);
-		lfb->box.pos = mm2px(Vec(8.3, 106.7));
+		lfb->box.pos = mm2px(Vec(10.3, 106.7));
 		lfb->addChild(ldw);
 		addChild(lfb);
 
 		// Quantizer toggle
-		addParam(createLcdParam<AriaRockerSwitchHorizontal800ModeReset>(mm2px(Vec(9.1, 99.7)), module, Darius::QUANTIZE_TOGGLE_PARAM));
+		addParam(createLcdParam<AriaRockerSwitchHorizontal800ModeReset>(mm2px(Vec(11.1, 99.7)), module, Darius::QUANTIZE_TOGGLE_PARAM));
 
 		// Voltage Range
-		addParam(createParam<AriaRockerSwitchHorizontal800Flipped>(mm2px(Vec(26.0, 118.8)), module, Darius::RANGE_PARAM));
+		addParam(createParam<AriaRockerSwitchHorizontal800Flipped>(mm2px(Vec(28.0, 118.8)), module, Darius::RANGE_PARAM));
 
 		// Min & Max
 		addParam(createLcdParam<AriaKnob820MinMax>(mm2px(Vec(49.5,  99.0)), module, Darius::MIN_PARAM));
@@ -1238,9 +1268,6 @@ struct DariusWidget : ModuleWidget {
 		// Output!
 		addOutput(createOutput<AriaJackOut>(mm2px(Vec(79.5, 112.0)), module, Darius::GLOBAL_GATE_OUTPUT));
 		addOutput(createOutput<AriaJackOut>(mm2px(Vec(89.5, 112.0)), module, Darius::CV_OUTPUT));
-
-		// Debug
-		addOutput(createOutput<AriaJackOut>(mm2px(Vec(139.5, 116.0)), module, Darius::DEBUG_OUTPUT));
 	}
 
 
@@ -1317,6 +1344,8 @@ struct DariusWidget : ModuleWidget {
 		RoutesToBinaryTreeItem *routesToBinaryTree = createMenuItem<RoutesToBinaryTreeItem>("Routes to Binary tree (equal probability)");
 		routesToBinaryTree->module = module;
 		menu->addChild(routesToBinaryTree);
+
+		menu->addChild(new MenuSeparator());
 	}
 };
 

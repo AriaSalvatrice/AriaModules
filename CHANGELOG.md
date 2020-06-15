@@ -10,7 +10,7 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 ### Darius Update
 
 - [NOTE] Darius: Many new features were added to Darius. Despite the scale of the revision, it is an update to the original module, rather than a separate Mk2 version. Most existing patches will not be broken, except those that rely on the external seed input. The width of the module remains the same.
-- [INCOMPATIBLITY] Darius: The random number generation was improved for greater uniformity. This WILL break patches that relied on the Random Seed input to be deterministic. Sorry for the inconvenience.
+- [DEPRECATED] Darius: The random number generation was improved for greater uniformity. This WILL break patches that relied on the Random Seed input to be deterministic. Sorry for the inconvenience.
 - [NEW FEATURE] Darius: Added a LCD providing information about the module state.
 - [NEW FEATURE] Darius: The output jacks of nodes that have 0% chance to be reached are no longer lit.
 - [NEW FEATURE] Darius: Added an output range control to the CV output.
@@ -19,14 +19,13 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 - [NEW FEATURE] Darius: Added route and CV presets in the right-click menu.
 - [NEW FEATURE] Darius: Added an optional quantizer, with support for external scales.
 - [FIX] Darius: Fixed random seed not working with multiple instances of Darius.
-
+- [FIX] Darius: Individual trigger/gate outputs now work with every input and the step button, not just with the forward input. This may break old patches.
 
 ### Planned
 
 - [NEW MODULE] Srot: Sort and rotate polyphonic cables.
 - [NEW FEATURE] Darius: Added support for portable sequences.
 - [NEW FEATURE] Arcane, Atout: Added a polyphonic Scale output compatible with Darius' external scale input. The jack formerly labeled Scale is now labeled Melody. 
-- [FIX] Darius: Individual trigger/gate outputs now work with every input and the step button, not just with the forward input. This may break old patches.
 
 
 
