@@ -7,6 +7,8 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 
 ### Added
 
+- [NEW FEATURE] Arcane, Atout: Added a polyphonic Scale output compatible with Darius' external scale input. The jack formerly labeled Scale is now labeled Melody. 
+
 ### Darius Update
 
 - [NOTE] Darius: Many new features were added to Darius. Despite the scale of the revision, it is an update to the original module, rather than a separate Mk2 version. Most existing patches will not be broken, except those that rely on the external seed input. The width of the module remains the same.
@@ -25,7 +27,6 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 
 - [NEW MODULE] Srot: Sort and rotate polyphonic cables.
 - [NEW FEATURE] Darius: Added support for portable sequences.
-- [NEW FEATURE] Arcane, Atout: Added a polyphonic Scale output compatible with Darius' external scale input. The jack formerly labeled Scale is now labeled Melody. 
 
 
 

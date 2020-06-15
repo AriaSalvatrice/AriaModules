@@ -9,8 +9,8 @@
 // - Split off the LCD into a reusable component
 // - Make Arcane use that component
 // - Portable sequences
-// - Write docs
-// - Quantized slides would be fun!
+// - "New point of departure" mode
+// - Quantized slides would be fun! (But maybe use another module? idk)
 
 
 const int STEP1START = 0;  //               00        
