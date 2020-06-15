@@ -2,7 +2,9 @@
 
 namespace Quantizer {
 
-// Modes are not supported
+// Except for Major/natural minor & pentatonic scales, I avoid scales that are modes of another.
+// I want the curation limited to interesting instant satisfaction presets that
+// work well with generative patterns and sound good to average modern western ears.
 enum ScalesEnum {
 	CHROMATIC,
 	MAJOR,
@@ -11,29 +13,40 @@ enum ScalesEnum {
 	HARMONIC_MINOR,
 	PENTATONIC_MAJOR,
 	PENTATONIC_MINOR,
+	WHOLE_TONE,
 	BLUES_MAJOR,
 	BLUES_MINOR,
+	DOMINANT_DIMINISHED,
 	BEBOP_MAJOR,
-	SPANISH_GYPSY,
+	BEBOP_MINOR,
+	GYPSY_MAJOR,
+	EIGHT_TONE_SPANISH,
+	HIRAJOSHI,
+	IN_SEN,
 	NUM_SCALES
 };
 
 
 // The name of the scale from the ScalesEnum, with proper capitalization
-// Not used yet!
 inline std::string scaleDisplayName(int scale){
 	switch(scale){
-		case CHROMATIC: 		return "Chromatic";
-		case MAJOR:	 			return "Major";
-		case NATURAL_MINOR:		return "Natural Minor";
-		case MELODIC_MINOR:		return "Melodic Minor";
-		case HARMONIC_MINOR:	return "Harmonic Minor";
-		case PENTATONIC_MAJOR:	return "Pentatonic Major";
-		case PENTATONIC_MINOR:	return "Pentatonic Minor";
-		case BLUES_MAJOR:		return "Blues Major";
-		case BLUES_MINOR:		return "Blues Minor";
-		case BEBOP_MAJOR:		return "Bebop Major";
-		case SPANISH_GYPSY:		return "Spanish Gypsy";
+		case CHROMATIC: 			return "Chromatic";
+		case MAJOR:	 				return "Major";
+		case NATURAL_MINOR:			return "Natural Minor";
+		case MELODIC_MINOR:			return "Melodic Minor";
+		case HARMONIC_MINOR:		return "Harmonic Minor";
+		case PENTATONIC_MAJOR:		return "Pentatonic Major";
+		case PENTATONIC_MINOR:		return "Pentatonic Minor";
+		case WHOLE_TONE:			return "Whole Tone";
+		case BLUES_MAJOR:			return "Blues Major";
+		case BLUES_MINOR:			return "Blues Minor";
+		case DOMINANT_DIMINISHED:	return "Dominant Diminished";
+		case BEBOP_MAJOR:			return "Bebop Major";
+		case BEBOP_MINOR:			return "Bebop Minor";
+		case GYPSY_MAJOR:			return "Gypsy Major"; // Double Harmonic
+		case EIGHT_TONE_SPANISH:	return "Eight Tone Spanish";
+		case HIRAJOSHI:				return "Hirajōshi";
+		case IN_SEN:				return "In Sen";
 	}
 	return "";
 }
@@ -41,21 +54,105 @@ inline std::string scaleDisplayName(int scale){
 
 // The name of the scale from the ScalesEnum, fit to display on a LCD: 8 characters, uppercase or lowercase without descenders.
 // First scale being chromatic, an exception can be made in implentations to fit the whole word by removing the key.
+// When synonyms exist, names are generally chosen to fit on the LCD.
 inline std::string scaleLcdName(int scale){
 	switch(scale){
-		case CHROMATIC: 		return "CHROMA. ";
-		case MAJOR:	 			return "MAJOR   ";
-		case NATURAL_MINOR:	 	return "n.MINOR ";
-		case MELODIC_MINOR:		return "m.MINOR ";
-		case HARMONIC_MINOR:	return "h.MINOR ";
-		case PENTATONIC_MAJOR:	return "PENTA. M";
-		case PENTATONIC_MINOR:	return "PENTA. m";
-		case BLUES_MAJOR:		return "BLUES M ";
-		case BLUES_MINOR:		return "BLUES m ";
-		case BEBOP_MAJOR:		return "BEBOP M ";
-		case SPANISH_GYPSY:		return "SP.GYPSY";
+		case CHROMATIC: 			return "CHROMA. ";
+		case MAJOR:	 				return "MAJOR   ";
+		case NATURAL_MINOR:	 		return "n.MINOR ";
+		case MELODIC_MINOR:			return "m.MINOR ";
+		case HARMONIC_MINOR:		return "h.MINOR ";
+		case PENTATONIC_MAJOR:		return "PENTA. M";
+		case PENTATONIC_MINOR:		return "PENTA. m";
+		case WHOLE_TONE:			return "WHOLE T.";
+		case BLUES_MAJOR:			return "BLUES M ";
+		case BLUES_MINOR:			return "BLUES m ";
+		case DOMINANT_DIMINISHED:	return "DOM. dim";
+		case BEBOP_MAJOR:			return "BEBOP M ";
+		case BEBOP_MINOR:			return "BEBOP m ";
+		case GYPSY_MAJOR:			return "GYPSY M ";
+		case EIGHT_TONE_SPANISH:	return "8SPANISH";
+		case HIRAJOSHI:				return "HIRAJO. ";
+		case IN_SEN:				return "IN SEN  ";
 	}
 	return "";
+}
+
+
+// The individual notes of the corresponding scale from the ScalesEnum, in the key of C
+inline std::array<bool, 12> validNotesInScale(int scale){
+	switch(scale){
+		case CHROMATIC: {
+			std::array<bool, 12> s {true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true};
+			return s;
+		}
+		case MAJOR: {
+			std::array<bool, 12> s {true, false,  true, false,  true,  true, false,  true, false,  true, false,  true};
+			return s;
+		}
+		case NATURAL_MINOR: {
+			std::array<bool, 12> s {true, false,  true,  true, false,  true, false,  true,  true, false,  true, false};
+			return s;
+		}
+		case MELODIC_MINOR: {
+			std::array<bool, 12> s {true, false,  true,  true, false,  true, false,  true, false,  true, false,  true};
+			return s;
+		}
+		case HARMONIC_MINOR: {
+			std::array<bool, 12> s {true, false,  true,  true, false,  true, false,  true,  true, false, false,  true};
+			return s;
+		}
+		case PENTATONIC_MAJOR: {
+			std::array<bool, 12> s {true, false,  true, false,  true, false, false,  true, false,  true, false, false};
+			return s;
+		}
+		case PENTATONIC_MINOR: {
+			std::array<bool, 12> s {true, false, false,  true, false,  true, false,  true, false, false,  true, false};
+			return s;
+		}
+		case WHOLE_TONE: {
+			std::array<bool, 12> s {true, false,  true, false,  true, false,  true, false,  true, false,  true, false};
+			return s;
+		}
+		case BLUES_MAJOR: {
+			std::array<bool, 12> s {true, false,  true,  true,  true, false, false,  true, false,  true, false, false};
+			return s;
+		}
+		case BLUES_MINOR: {
+			std::array<bool, 12> s {true, false, false,  true, false,  true,  true,  true, false, false,  true, false};
+			return s;
+		}
+		case DOMINANT_DIMINISHED: {
+			std::array<bool, 12> s {true,  true, false,  true,  true, false,  true,  true, false,  true,  true, false};
+			return s;
+		}
+		case BEBOP_MAJOR: {
+			std::array<bool, 12> s {true, false,  true, false,  true,  true, false,  true,  true,  true, false,  true};
+			return s;
+		}
+		case BEBOP_MINOR: {
+			std::array<bool, 12> s {true, false,  true,  true,  true,  true, false,  true, false,  true,  true, false};
+			return s;
+		}
+		case GYPSY_MAJOR: {
+			std::array<bool, 12> s {true,  true, false, false,  true,  true, false,  true,  true, false, false,  true};
+			return s;
+		}
+		case EIGHT_TONE_SPANISH: {
+			std::array<bool, 12> s {true,  true, false,  true,  true,  true,  true, false,  true, false,  true, false};
+			return s;
+		}
+		case HIRAJOSHI: {
+			std::array<bool, 12> s {true,  true, false, false, false,  true,  true, false, false, false,  true, false};
+			return s;
+		}
+		case IN_SEN: {
+			std::array<bool, 12> s {true,  true, false, false, false,  true, false,  true, false, false,  true, false};
+			return s;
+		}
+	}
+	std::array<bool, 12> none     {false, false, false, false, false, false, false, false, false, false, false, false};
+	return none;
 }
 
 
@@ -76,59 +173,6 @@ inline std::string noteLcdName(int scale){
 		case 11: return "B ";
 	}
 	return "";
-}
-
-
-// The individual notes of the corresponding scale from the ScalesEnum, in the key of C
-inline std::array<bool, 12> validNotesInScale(int scale){
-	switch(scale){
-		case CHROMATIC: {
-			std::array<bool, 12> chromatic 	{true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true};
-			return chromatic;
-		}
-		case MAJOR: {
-			std::array<bool, 12> major 		{true, false,  true, false,  true,  true, false,  true, false,  true, false,  true};
-			return major;
-		}
-		case NATURAL_MINOR: {
-			std::array<bool, 12> n_minor 	{true, false,  true,  true, false,  true, false,  true,  true, false,  true, false};
-			return n_minor;
-		}
-		case MELODIC_MINOR: {
-			std::array<bool, 12> n_minor 	{true, false,  true,  true, false,  true, false,  true, false,  true, false,  true};
-			return n_minor;
-		}
-		case HARMONIC_MINOR: {
-			std::array<bool, 12> n_minor 	{true, false,  true,  true, false,  true, false,  true,  true, false, false,  true};
-			return n_minor;
-		}
-		case PENTATONIC_MAJOR: {
-			std::array<bool, 12> n_minor 	{true, false,  true, false,  true, false, false,  true, false,  true, false, false};
-			return n_minor;
-		}
-		case PENTATONIC_MINOR: {
-			std::array<bool, 12> n_minor 	{true, false, false,  true, false,  true, false,  true, false, false,  true, false};
-			return n_minor;
-		}
-		case BLUES_MAJOR: {
-			std::array<bool, 12> n_minor 	{true, false,  true,  true,  true, false, false,  true, false,  true, false, false};
-			return n_minor;
-		}
-		case BLUES_MINOR: {
-			std::array<bool, 12> n_minor 	{true, false, false,  true, false,  true,  true,  true, false, false,  true, false};
-			return n_minor;
-		}
-		case BEBOP_MAJOR: {
-			std::array<bool, 12> n_minor 	{true, false,  true, false,  true,  true, false,  true,  true,  true, false,  true};
-			return n_minor;
-		}
-		case SPANISH_GYPSY: {
-			std::array<bool, 12> n_minor 	{true,  true, false, false,  true,  true, false,  true,  true, false,  true, false};
-			return n_minor;
-		}		
-	}
-	std::array<bool, 12> none 				{false, false, false, false, false, false, false, false, false, false, false, false};
-	return none;
 }
 
 // The individual notes of the corresponding scale from the ScalesEnum, in the specified key
