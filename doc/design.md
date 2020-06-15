@@ -18,6 +18,8 @@ Font sizes expressed in however the hell Inkscape chooses to interpret pt and px
 
 Align the baselines first, then use Path > Object to Path to convert them ASAP - no need to keep a master version with editable labels, just remake those when necessary. It's a good idea to keep a text template outside the drawable boundariees of the file.
 
+When labels call for a stroke to make them easier to distinguish from the background, the stroke is 0.5mm, and converted to a path.
+
 
 ## Colors
 

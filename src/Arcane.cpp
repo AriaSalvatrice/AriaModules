@@ -171,13 +171,13 @@ struct Arcane : ArcaneBase {
 		RUN_PARAM,
 		RESET_PARAM,
 		PULSE_RAMP_PARAM,
-		PULSE_WIDTH_PARAM,
+		PULSE_WIDTH_PARAM, // 1.3.0
 		NUM_PARAMS
 	};
 	enum InputIds {
 		QNT_INPUT,
 		RUN_INPUT,
-		RESET_INPUT,
+		RESET_INPUT, // 1.3.0
 		NUM_INPUTS
 	};
 	enum OutputIds {
@@ -210,11 +210,12 @@ struct Arcane : ArcaneBase {
 		PATTERN_E_16_OUTPUT,
 		PATTERN_E_8_OUTPUT,
 		PATTERN_E_4_OUTPUT,
-		PATTERN_E_1_OUTPUT,
+		PATTERN_E_1_OUTPUT, // 1.3.0
+		EXTERNAL_SCALE_OUTPUT,
 		NUM_OUTPUTS
 	};
 	enum LightIds {
-		EXPANDER_LIGHT,
+		EXPANDER_LIGHT, // 1.3.0
 		NUM_LIGHTS
 	};
 
@@ -255,6 +256,9 @@ struct Arcane : ArcaneBase {
 		}
 		outputs[SCALE_OUTPUT].setChannels(notesInScale);
 		outputs[SCALE_PADDED_OUTPUT].setChannels(8);
+		for (int i = 0; i < 12; i++)
+			outputs[EXTERNAL_SCALE_OUTPUT].setVoltage( (scale[i]) ? 10.f : 0.f, i);
+		outputs[EXTERNAL_SCALE_OUTPUT].setChannels(12);
 	}
 	
 	
@@ -870,9 +874,10 @@ struct ArcaneWidget : ModuleWidget {
 		addInput(createInput<AriaJackIn>(   mm2px(Vec(x + 00.0, y + 00.0)), module, Arcane::QNT_INPUT));
 		addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 32.0, y + 00.0)), module, Arcane::QNT_OUTPUT));
 		
-		// Scale notes
+		// Scale
 		addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 00.0, y + 08.0)), module, Arcane::SCALE_OUTPUT));
-		addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 32.0, y + 08.0)), module, Arcane::SCALE_PADDED_OUTPUT));
+		addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 16.0, y + 08.0)), module, Arcane::SCALE_PADDED_OUTPUT));
+		addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 32.0, y + 08.0)), module, Arcane::EXTERNAL_SCALE_OUTPUT));
 
 		// Arcane
 		addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 00.0, y + 36.0)), module, Arcane::ARCANA_OUTPUT));
@@ -958,9 +963,10 @@ struct AtoutWidget : ModuleWidget {
 		addInput(createInput<AriaJackIn>(   mm2px(Vec(x + 00.0, y + 00.0)), module, Arcane::QNT_INPUT));
 		addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 32.0, y + 00.0)), module, Arcane::QNT_OUTPUT));
 		
-		// Scale notes
+		// Scale
 		addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 00.0, y + 08.0)), module, Arcane::SCALE_OUTPUT));
-		addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 32.0, y + 08.0)), module, Arcane::SCALE_PADDED_OUTPUT));
+		addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 16.0, y + 08.0)), module, Arcane::SCALE_PADDED_OUTPUT));
+		addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 32.0, y + 08.0)), module, Arcane::EXTERNAL_SCALE_OUTPUT));
 
 		// Arcane
 		addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 00.0, y + 36.0)), module, Arcane::ARCANA_OUTPUT));
