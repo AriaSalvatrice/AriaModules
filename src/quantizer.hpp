@@ -19,7 +19,7 @@ enum ScalesEnum {
 	DOMINANT_DIMINISHED,
 	BEBOP_MAJOR,
 	BEBOP_MINOR,
-	GYPSY_MAJOR,
+	DOUBLE_HARMONIC,
 	EIGHT_TONE_SPANISH,
 	HIRAJOSHI,
 	IN_SEN,
@@ -43,7 +43,7 @@ inline std::string scaleDisplayName(int scale){
 		case DOMINANT_DIMINISHED:	return "Dominant Diminished";
 		case BEBOP_MAJOR:			return "Bebop Major";
 		case BEBOP_MINOR:			return "Bebop Minor";
-		case GYPSY_MAJOR:			return "Gypsy Major"; // Double Harmonic
+		case DOUBLE_HARMONIC:		return "Double Harmonic";
 		case EIGHT_TONE_SPANISH:	return "Eight Tone Spanish";
 		case HIRAJOSHI:				return "Hirajōshi";
 		case IN_SEN:				return "In Sen";
@@ -70,7 +70,7 @@ inline std::string scaleLcdName(int scale){
 		case DOMINANT_DIMINISHED:	return "DOM. dim";
 		case BEBOP_MAJOR:			return "BEBOP M ";
 		case BEBOP_MINOR:			return "BEBOP m ";
-		case GYPSY_MAJOR:			return "GYPSY M ";
+		case DOUBLE_HARMONIC:		return "DbHARMO.";
 		case EIGHT_TONE_SPANISH:	return "8SPANISH";
 		case HIRAJOSHI:				return "HIRAJO. ";
 		case IN_SEN:				return "IN SEN  ";
@@ -134,7 +134,7 @@ inline std::array<bool, 12> validNotesInScale(int scale){
 			std::array<bool, 12> s {true, false,  true,  true,  true,  true, false,  true, false,  true,  true, false};
 			return s;
 		}
-		case GYPSY_MAJOR: {
+		case DOUBLE_HARMONIC: {
 			std::array<bool, 12> s {true,  true, false, false,  true,  true, false,  true,  true, false, false,  true};
 			return s;
 		}
