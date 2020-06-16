@@ -61,41 +61,50 @@ Here comes yet another gimmick module challenging you to integrate its way of th
 
 **Darius** is a 8-step sequencer where each node branches into two possible paths, creating repeating patterns that start similarly and resolve differently. Takes a whole 32hp of space to fit all its knobs. 
 
-To get started immediately, patch in a clock to the **Forward⯈** input, randomize the CV, patch the main output to an oscillator, and listen what happens.
+To get started immediately: patch in a clock to the **Forward⯈** input, randomize the CV, enable the **quantizer**, patch the **CV output** to an oscillator, and listen what happens. The module's **LCD** will help you figure out what's going on when you grope at the auspicuous-looking array of knobs.
 
 On each node:
 
 - **CV Knob** (left): sets the CV for that step.
-- **Random route knob** (right): alters the probability to pick the top or the bottom node on the next step when stepping **Forward⯈**. If the knob's arrow points to the right, that means 50/50. 
-- **Output**: when active, passes through the clock input (both gates and trigs work), or sends 10V continuously if no step input is plugged in.
+- **Random route knob** (right): alters the probability to pick the top or the bottom node on the next step when stepping **Forward⯈**. If the knob's arrow points to the right, that means 50/50. (Because of floating point math imprecision, sometimes the probabilities displayed on the LCD are off by 0.1%)
+- **Gate Output**: when the node is active, passes through the gate or step inputs received on any of the directional inputs, or sends 10V continuously if no step input is plugged in.
 
 On the top-left of the module:
 
-- **⯇Back**, **Up⯅**, **Down⯆**, **Forward⯈**: Takes a step in the corresponding direction when it receives a gate or a trigger. Stepping **Up⯅** or **Down⯆** advances a step in the corresponding direction, it's used to force the module to take a certain route. Going **⯇Back** remembers the path you've taken, and does nothing if you're already on the first step. You can also step **Forward⯈** manually, by using the button, which works even if the module isn't running. 
-- **Run**: Starts and stops the module.
+- **⯇Back**, **Up⯅**, **Down⯆**, **Forward⯈**: Takes a step in the corresponding direction when it receives a gate or a trigger. Stepping **Up⯅** or **Down⯆** advances a step in the corresponding direction, it's used to force the module to take a certain route, but can't be used to move within the same step. Going **⯇Back** remembers the path you've taken, and does nothing if you're already on the first step. You can also step **Forward⯈** manually, by using the button, which works even if the module isn't running. 
+- **Step**: This manual input works even if the module isn't running. 
+- **Run**: Starts and stops accepting directional inputs.
 - **Reset**: Go back to the first node. 
 
 Those inputs are generally connected to the corresponding output of a clock, but anything that sends gates or triggers will work. Triggers are accepted on any polyphonic channel, which is useful for creative self-patching via a poly merge module.
 
 On the top of the module:
 
-- **Steps**: lets you choose the duration of the pattern, from 1 to 8 steps.
-- **Randomize**: those two buttons operate on the CV and the routes separately. If you don't like the results, you can use **Edit > Undo**. 
+- **Step range**: Choose on which step to start and end the pattern, from 1 to 8 steps in total.
+- **Randomize**: Those two buttons operate on the CV and the routes separately. If you don't like the results, you can use **Edit > Undo**. 
 
 On the bottom-left:
 
-- **Range selection**: Select if the knobs output voltage from 0V to 10V, or -5V to 5V. You can use an attenuator for more precise control of the output range.
-- **CV**: The main output. The most common way to use it is to patch it to an attenuator, going into a quantizer, going into an oscillator. 
+- **CV/Quantize**: Whether to output precise CV (best for modulation), or quantized V/OCT CV (Twelve-tone Equal Temperament only - the usual Western tuning system).
+- **-5V\~5V/0V\~10V**: In CV mode, selects if the knobs output voltage from 0V to 10V, or -5V to 5V. In quantized mode, removes 1 octave from the output. 
+- **Min** and **Max**: Limit the CV output range. The words are only suggestions, if the **Min** is larger than the **Max**, it just flips in which direction the **CV** knobs operate.
+- **Scale** and **Key**: Select which notes to quantize to when in Quantize mode. The available scales were curated for ease of use and instant satisfaction rather than for comprehensiveness, avoiding duplication in the form of scales that can be expressed as modes of another. 
+- **External scale**: Accepts the scale in a format my other modules use: as a 12-channel polyphonic cable, where enabled notes have a continuous 10V signal, and disabled notes, 0V. You can use Darius as an arpeggiator by sending it a chord rather than a full scale!
+- **Slide**: The fun knob.
+- **Global Gate**: Passes through the gate or step inputs received on any of the directional inputs, or sends a short trig if operated via the manual Step button. It's useful if are controlling Darius using more than one directional input.
+- **CV**: The main output. 
 
-The last two are an advanced feature - just ignore them if you don't understand what they do:
+On the bottom-right, next to the signature, are two inputs used to fix the random seed, if you want Darius to be a bit more deterministic.
 
-- **1st/All**: Decides whether to store the random seed and plan out the route when on the first node, or whether to use a fresh random seed and flip the coin at moment to decide the node forward. In **1st** mode, going back and forth repeatedly results in the same path, until the first node is reached from step 8 (it won't refresh it if you reach the first node from stepping back). In effect, it acts as a sample and hold for the **Random** input at the exact moment the first node is _left_.
 - **Random**: Use this to fix the random seed! When the input is not patched, or when it's receiving 0V, **Darius** flips the coin randomly. But when it's receiving a seed, the coin flips become deterministic - it will take the same route every time. Try out alternating, every bar, sending it an arbitrary fixed voltage such as 4.58V then 0V, to create call-and-response phrases where the first part is always the same.
+- **1st/All**: Decides whether to store the random seed and plan out the route when on the first node, or whether to use a fresh random seed and flip the coin at moment to decide the node forward. In **1st** mode, going back and forth repeatedly results in the same path (unless you alter the routes), until the first node is reached from step 8 (it won't refresh it if you reach the first node from stepping back). In effect, it acts as a sample and hold for the **Random** input at the exact moment the first node is _left_.
+
+Via the **right-click menu**, you can load various presets for the CV and routes. 
 
 If you send triggers to the directional inputs at the exact same time, only one will be accepted. The default priority is: 
-**Forward⯈**, **Up⯅**, **Down⯆**, **⯇Back**. If you want a different priority, you can patch logic gates with modules such as [Count Modula's](https://github.com/countmodula/VCVRackPlugins) to do that.
+**Forward⯈**, **Up⯅**, **Down⯆**, **⯇Back**. If you want a different priority, you can patch logic gates with modules such as [Count Modula's](https://github.com/countmodula/VCVRackPlugins) to do that. If the priorities aren't working as expected, do not forget that every single cable a signal travels through adds at least one sample of delay, so your triggers might not be actually simultaneous.
 
-Darius has a simple panel, few advanced features, and is impossible to truly tame - by design. It is meant to be easy to learn, suprising to use, and fun to master. Many of its apparent limitations can be overcome with a bit of creative patching. It works wonderfully with [stoermelder PackOne](https://github.com/stoermelder/vcvrack-packone)'s [CV-MAP](https://github.com/stoermelder/vcvrack-packone/blob/v1/docs/CVMap.md) and [8FACE](https://github.com/stoermelder/vcvrack-packone/blob/v1/docs/EightFace.md) to give you CV control over the knobs and add multiple preset banks.
+Darius has a simple panel, easily understood features, and is impossible to truly tame - by design. It is meant to be easy to learn, suprising to use, and fun to master. It can be used as a melody sequencer, an arpeggiator, a source of modulation, a drum sequencer, even as a worthless waveshaper. Many of its apparent limitations can be overcome with a bit of creative patching. It works wonderfully with [stoermelder PackOne](https://github.com/stoermelder/vcvrack-packone)'s [CV-MAP](https://github.com/stoermelder/vcvrack-packone/blob/v1/docs/CVMap.md) and [8FACE](https://github.com/stoermelder/vcvrack-packone/blob/v1/docs/EightFace.md) to give you CV control over the knobs and add multiple preset banks.
 
 Darius is named after the eponymous arcade shoot-em-up game series, known for its surreal visuals, its fish-themed enemies, its [unique soundtracks](https://www.youtube.com/watch?v=6FEdlAL3bX0), its multi-display arcade cabinets, and for allowing the player to select their route through the game via a branching map.
 
@@ -103,7 +112,7 @@ Darius is named after the eponymous arcade shoot-em-up game series, known for it
 
 I guess the module is also technically named after some dead Persian guy who did some King stuff, I heard on Wikipedia, the free encyclopedia.
 
-**Protip for cool kids only:** if you leave all the **Random route** knobs to the default, the pattern is more likely to end up towards the center than the two extremes. In my tests, on default settings, the distribution is 0.8%, 5.5%, 16.4%, 27.3%, 27.3%, 16.4%, 5.5%, 0.8%. Are you a big brain enough math nerd to dial in the perfect settings for a uniform 12.5% chance per output?
+**Protip for cool kids only:** The plural of Darius is Darii.
 
 
 
@@ -117,6 +126,8 @@ I hope luck is on your side. Every day, you will share together the fortune I sh
 
 Modules in the Arcane series are comprised almost only of output jacks, sending today's fortune as CV. **Those values are the same for every Arcane user**, and nobody can predict or influence them. I pronounce a new oracle every day at 12:00 AM UTC without fail.
 
+To get started immediately: use the topmost **1/16** output to drive the clock of a step sequencer, send that sequencer's output to Arcane's quantizer input, send the quantizer output to an oscillator, and listen what happens. Next, try other jacks as a clock. 
+
 Optional video introduction, showing a song made with Arcane:
 
 [![Arcane video](/doc/arcane-video.png)](https://youtu.be/g66gyHkzz0E)
@@ -126,33 +137,34 @@ You can [download the demo patch from Patchstorage](https://patchstorage.com/arc
 
 Every day, I will draw the following cards, and impart the following knowledge:
 
-- **_Arcane Majeur_** - a major arcana of the Tarot of Marseilles.
-- **_Bâtons_** (Wands), **_Coupes_** (Cups), **_Deniers_** (Coins), **_Épées_** (Swords) - a different 16 step binary pattern for each suit of the Tarot.
-- **Scale pattern** - The notes of a music scale comprised of 5, 6, 7, or 8 notes, often scales common in popular Western music, and sometimes less common ones. Which note is the root of the scale isn't specified, only which notes are part of the scale.
-- **8 note pattern** - Every note from the selected scale, sorted in a random order. If the scale has fewer than 8 notes, up to 3 different notes will be repeated at the end, an octave higher.
-- **BPM** - Integer ranging from 60 to 180 BPM, with values between 90 and 150 twice as likely.
+- **_Arcane Majeur_**: a major arcana of the Tarot of Marseilles.
+- **_Bâtons_** (Wands), **_Coupes_** (Cups), **_Deniers_** (Coins), **_Épées_** (Swords): a different 16 step binary pattern for each suit of the Tarot.
+- **Scale pattern**: The notes of a music scale comprised of 5, 6, 7, or 8 notes, often scales common in popular Western music, and sometimes less common ones. Which note is the root of the scale isn't specified, only which notes are part of the scale.
+- **8 note pattern**: Every note from the selected scale, sorted in a random order. If the scale has fewer than 8 notes, up to 3 different notes will be repeated at the end, an octave higher.
+- **BPM**: Integer ranging from 60 to 180 BPM, with values between 90 and 150 twice as likely.
 - My **sincerest wish** of luck, love, health, and prosperity.
 
 How to interpret my fortune is up to you and your friends. You can make use of a single output jack of the module, or all of them. You can craft an ephemeral song that will no longer exist tomorrow. You can create an unchanging patch that will grace you with a new song every day. There are no rules but the ones you choose to follow. 
 
 All I can do is reveal some mundane obscura to get you started scrying the will of the jacks:
 
-- **Quantizer** - A pair of polyphonic ports quantizing input to the nearest scale note.    
+- **Quantizer**: A pair of polyphonic ports quantizing input to the nearest scale note.    
 Try to combine it with the [Split and Merge series](#split-and-merge-splort-smerge-spleet-swerge-and-splirge), the ability to sort by voltage might prove useful. 
-- **Scale notes** - Polyphonic ports sending every note of the scale on the fourth octave (0V~0.9166667V), in the order of the 8 note pattern.    
-The left jack named "Scale" sends as many notes as there are in the scale (between 5 and 8). The second jack named "Padded" sends the entire 8 note pattern, with any repeated note being one octave higher than normal.     
+- **Melody**: Polyphonic ports sending every note of the scale on the fourth octave (0V~0.9166667V), in the order of the 8 note pattern. It sends as many notes as there are in the scale (between 5 and 8).
+- **Padded**: Like **Melody**, sends the entire 8 note pattern, with any repeated note being one octave higher than normal.
 If you combine them with [ML_modules sequential switch 8->1](https://github.com/martin-lueders/ML_modules/wiki/Sequential-Switches), they can become a melody.
-- **_Arcane Majeur_** - The number of the arcana, divided by 10.    
+- **External Scale**: Sends the scale in a format my other modules use: as a 12-channel polyphonic cable, where enabled notes have a continuous 10V signal, and disabled notes, 0V. Try it with **Darius**!
+- **_Arcane Majeur_**: The number of the arcana, divided by 10.    
 Thus, _The Fool_ is 0V, _The Magician_ is 0.1V, and so on up to 2.1V for _The World_. Following the conventions of the Tarot of Marseilles, the 8th arcana is Justice, and the 11th is Strength, unlike the ordering popularized by the Rider-Waite-Smith deck, which swaps those two arcana around.    
 You can multiply this signal by 4.76 with an offsetter such as [Bogaudio's](https://github.com/bogaudio/BogaudioModules#offset) to obtain a 0V~9.99V signal, if you wish.
-- **BPM** - Follows the [VCV Standard](https://vcvrack.com/manual/VoltageStandards#pitch-and-frequencies) for clocks and LFOs where 0V stands for 120BPM.    
+- **BPM**: Follows the [VCV Standard](https://vcvrack.com/manual/VoltageStandards#pitch-and-frequencies) for clocks and LFOs where 0V stands for 120BPM.    
 You can send that signal to a compatible clock module such as [Impromptu Modular's Clocked](https://marcboule.github.io/ImpromptuModular/#clocked) if you require a clock (for example, for swing, or other time signatures than 4/4).
-- **Reset** and **Run** - They control all the outputs below them. Operate them manually using the button, or synchronize multiple devices by sending them a trigger from a single source, for example the [Little Utils Button](https://github.com/mgunyho/Little-Utils#button).
-- **Gate/Ramp** on the **32nd note**, **16th note**, **8th note**, **4th note**, **Bar** - Sends, depending on the position of the **Gate/Ramp** switch, either a gate synchronized to the BPM at the corresponding interval in 4/4 time, or a 0V-10V ramp corresponding to that phase.    
+- **Reset** and **Run**: They control all the outputs below them. Operate them manually using the button, or synchronize multiple devices by sending them a trigger from a single source, for example the [Little Utils Button](https://github.com/mgunyho/Little-Utils#button).
+- **Gate/Ramp** on the **32nd note**, **16th note**, **8th note**, **4th note**, **Bar**: Sends, depending on the position of the **Gate/Ramp** switch, either a gate synchronized to the BPM at the corresponding interval in 4/4 time, or a 0V-10V ramp corresponding to that phase.    
 While **Arcane** can serve as a master clock, the ramp can be used to drive the [ZZC Clock](https://zzc.github.io/en/clock-manipulation/clock/), if you'd prefer to use it.
-- **_Bâtons_**, **_Coupes_**, **_Deniers_**, **_Épées_**. The four patterns, sent as gates on each 32nd note, 16th note, 8th note, 4th note, or bar.    
+- **_Bâtons_**, **_Coupes_**, **_Deniers_**, **_Épées_**: The four patterns, sent as gates on each 32nd note, 16th note, 8th note, 4th note, or bar.    
 Don't limit yourself to drums, you can use them in many different ways! Want to visualize the patterns, or to use them as something different than a rhythm? Try out the **Aleister** expander.
-- The **Pulse Width** knob lets you select how long the gates are, proportionally to their note length. It affects every gate output. Need more granular control over pulse widths? An external clock or a pulse generator such as [Submarine's](https://github.com/david-c14/SubmarineFree/blob/master/manual/PG.md) will help.
+- **Pulse Width**: Selects how long the gates are, proportionally to their note length. It affects every gate output. Need more granular control over pulse widths? An external clock or a pulse generator such as [Submarine's](https://github.com/david-c14/SubmarineFree/blob/master/manual/PG.md) will help.
 
 The module's **LCD** will show you the date of the fortune, the BPM, the name of the arcana, and the notes of the scale. However, it cannot unambiguously name the scale, since your fortune doesn't stipulate on which note the scale starts.
 
@@ -226,6 +238,8 @@ Signature Series Blank Plate
 ![Blank Plate](/doc/blank.png)
 
 A complimentary 8hp blank plate and ♥-head screwdriver are included with every Signature Series module purchase.
+
+**Protip for cool kids only:** Having one or two blank plates in your patch is fine, but if you find yourself having too many of them, it's generally considered a red flag you're doing something wrong. The accepted best practice in the virtual modular community is to make your patch as gratuitously complicated as possible until you reach at least 95% CPU usage. 
 
 
 

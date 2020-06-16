@@ -47,6 +47,7 @@ struct AriaJackTransparent : SVGPort {
 };
 
 /////////////// Old style lights - TODO: Remove dependency on component library
+
 // Still used for a few things! 
 template <typename TBase = GrayModuleLightWidget>
 struct TOutputLight : TBase {
@@ -66,6 +67,7 @@ typedef TInputLight<> InputLight;
 
 
 /////////////// Jack lights
+
 // Those lights should be added before transparent jacks, at the same position.
 struct AriaJackLight : app::ModuleLightWidget {
 	AriaJackLight() {
@@ -170,6 +172,14 @@ struct AriaRockerSwitchHorizontal800 : SvgSwitch {
 	AriaRockerSwitchHorizontal800() {
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-l.svg")));
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-r.svg")));
+	}
+};
+
+// Rocker siwtch, horizontal. Right is default
+struct AriaRockerSwitchHorizontal800Flipped : SvgSwitch {
+	AriaRockerSwitchHorizontal800Flipped() {
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-r.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-l.svg")));
 	}
 };
 
