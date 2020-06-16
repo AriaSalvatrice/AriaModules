@@ -3,11 +3,16 @@ Changelog
 
 The versioning follows this standard: the first number corresponds to the VCV rack version used. The second number is increased any time a new module is added. The third number is increased when something is added or fixed without adding any new module.
 
-## [1.5.0] UNRELEASED
+## [1.4.1] - 2020-06-16
 
 ### Added
 
 - [NEW FEATURE] Arcane, Atout: Added a polyphonic Scale output compatible with Darius' external scale input. The jack formerly labeled Scale is now labeled Melody. 
+
+### Fixed
+
+- [FIX] UnDuLaR: When restarting Rack, the locks are released.
+- [FIX] UnDuLaR: Improved jumping by large offsets not having a sufficient overshoot buffer.
 
 ### Darius Update
 

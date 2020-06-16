@@ -90,7 +90,13 @@ struct Undular : Module {
 		
 		// Feels just as fast as without a divider and saves noticeable CPU
 		// NO, reducing this will NOT fix the jitter when locked.
-		scrollDivider.setDivision(32); 
+		scrollDivider.setDivision(32);
+	}
+
+	// Do not save the status of the locks
+	void onAdd() override{
+		params[X_LOCK_PARAM].setValue(0.f);
+		params[Y_LOCK_PARAM].setValue(0.f);
 	}
 	
 	// Selects the most useful min & max positions to scroll to. Why do these values work? I DUNNO.
@@ -114,9 +120,9 @@ struct Undular : Module {
 		jumpLeft  = (lTrigger.process(inputs[L_INPUT].getVoltageSum())) ? true : false;
 		jumpRight = (rTrigger.process(inputs[R_INPUT].getVoltageSum())) ? true : false;
 
-		// Add a 2U buffer
+		// Add a 6U buffer
 		if (jumpUp) {
-			if (position.y - params[Y_STEP_PARAM].getValue() * RACK_GRID_HEIGHT / 3 > scrollMinY - RACK_GRID_HEIGHT * 0.66f) {
+			if (position.y - params[Y_STEP_PARAM].getValue() * RACK_GRID_HEIGHT / 3 > scrollMinY - RACK_GRID_HEIGHT * 2.f) {
 				position.y = position.y - params[Y_STEP_PARAM].getValue() * RACK_GRID_HEIGHT / 3;
 			} else {
 				position.y = scrollMaxY;
@@ -124,7 +130,7 @@ struct Undular : Module {
 			APP->scene->rackScroll->offset = position;
 		}
 		if (jumpDown) {
-			if (position.y + params[Y_STEP_PARAM].getValue() * RACK_GRID_HEIGHT / 3 < scrollMaxY + RACK_GRID_HEIGHT * 0.66f) {
+			if (position.y + params[Y_STEP_PARAM].getValue() * RACK_GRID_HEIGHT / 3 < scrollMaxY + RACK_GRID_HEIGHT * 2.f) {
 				position.y = position.y + params[Y_STEP_PARAM].getValue() * RACK_GRID_HEIGHT / 3;
 			} else {
 				position.y = scrollMinY;
