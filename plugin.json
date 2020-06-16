@@ -1,7 +1,7 @@
 {
   "slug": "AriaSalvatrice",
   "name": "Aria Salvatrice",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "license": "WTFPL",
   "brand": "Aria Salvatrice",
   "author": "Aria Salvatrice",
@@ -59,16 +59,6 @@
       "slug": "Splirge",
       "name": "Signature Series Splirge",
       "description": "4 channels polyphonic split and merge with optional sort mode",
-      "tags": [
-        "Polyphonic",
-        "Utility",
-        "Logic"
-      ]
-    },
-    {
-      "slug": "Srot",
-      "name": "Signature Series Srot",
-      "description": "Polyphonic cable order sorter, randomizer and rotator, with link support to Splort and Smerge",
       "tags": [
         "Polyphonic",
         "Utility",

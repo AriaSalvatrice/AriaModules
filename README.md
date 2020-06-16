@@ -61,12 +61,12 @@ Here comes yet another gimmick module challenging you to integrate its way of th
 
 **Darius** is a 8-step sequencer where each node branches into two possible paths, creating repeating patterns that start similarly and resolve differently. Takes a whole 32hp of space to fit all its knobs. 
 
-To get started immediately, patch in a clock to the **Forward⯈** input, randomize the CV, enable the **quantizer**, patch the **CV output** to an oscillator, and listen what happens. The module's **LCD** will help you figure out what's going on when you grope at the auspicuous-looking array of knobs.
+To get started immediately: patch in a clock to the **Forward⯈** input, randomize the CV, enable the **quantizer**, patch the **CV output** to an oscillator, and listen what happens. The module's **LCD** will help you figure out what's going on when you grope at the auspicuous-looking array of knobs.
 
 On each node:
 
 - **CV Knob** (left): sets the CV for that step.
-- **Random route knob** (right): alters the probability to pick the top or the bottom node on the next step when stepping **Forward⯈**. If the knob's arrow points to the right, that means 50/50.
+- **Random route knob** (right): alters the probability to pick the top or the bottom node on the next step when stepping **Forward⯈**. If the knob's arrow points to the right, that means 50/50. (Because of floating point math imprecision, sometimes the probabilities displayed on the LCD are off by 0.1%)
 - **Gate Output**: when the node is active, passes through the gate or step inputs received on any of the directional inputs, or sends 10V continuously if no step input is plugged in.
 
 On the top-left of the module:
@@ -99,6 +99,8 @@ On the bottom-right, next to the signature, are two inputs used to fix the rando
 - **Random**: Use this to fix the random seed! When the input is not patched, or when it's receiving 0V, **Darius** flips the coin randomly. But when it's receiving a seed, the coin flips become deterministic - it will take the same route every time. Try out alternating, every bar, sending it an arbitrary fixed voltage such as 4.58V then 0V, to create call-and-response phrases where the first part is always the same.
 - **1st/All**: Decides whether to store the random seed and plan out the route when on the first node, or whether to use a fresh random seed and flip the coin at moment to decide the node forward. In **1st** mode, going back and forth repeatedly results in the same path (unless you alter the routes), until the first node is reached from step 8 (it won't refresh it if you reach the first node from stepping back). In effect, it acts as a sample and hold for the **Random** input at the exact moment the first node is _left_.
 
+Via the **right-click menu**, you can load various presets for the CV and routes. 
+
 If you send triggers to the directional inputs at the exact same time, only one will be accepted. The default priority is: 
 **Forward⯈**, **Up⯅**, **Down⯆**, **⯇Back**. If you want a different priority, you can patch logic gates with modules such as [Count Modula's](https://github.com/countmodula/VCVRackPlugins) to do that. If the priorities aren't working as expected, do not forget that every single cable a signal travels through adds at least one sample of delay, so your triggers might not be actually simultaneous.
 
@@ -123,6 +125,8 @@ Arcane, Atout & Aleister - Today's Fortune ★
 I hope luck is on your side. Every day, you will share together the fortune I shall grant you. It is your task to interpret what my augury means to you.
 
 Modules in the Arcane series are comprised almost only of output jacks, sending today's fortune as CV. **Those values are the same for every Arcane user**, and nobody can predict or influence them. I pronounce a new oracle every day at 12:00 AM UTC without fail.
+
+To get started immediately: use the topmost **1/16** output to drive the clock of a step sequencer, send that sequencer's output to Arcane's quantizer input, send the quantizer output to an oscillator, and listen what happens. Next, try other jacks as a clock. 
 
 Optional video introduction, showing a song made with Arcane:
 

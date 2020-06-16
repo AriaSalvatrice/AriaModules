@@ -791,7 +791,7 @@ struct Darius : Module {
 			lcdStatus.lcdPage = Lcd::TEXT1_AND_TEXT2_PAGE;
 			relative = std::to_string( (1.f - params[ROUTE_PARAM + lastRouteChanged].getValue()) * 100.f);
 			relative.resize(4);
-			if (1.f - params[ROUTE_PARAM + lastRouteChanged].getValue() == 1.f){
+			if (1.f - params[ROUTE_PARAM + lastRouteChanged].getValue() >= 0.9999f){
 				relative.resize(3);
 				relative.append(" %");
 			} else {
@@ -803,7 +803,7 @@ struct Darius : Module {
 			} else {
 				absolute = std::to_string(roundf(probabilities[getUpChild(lastRouteChanged)] * 10000.f) / 100.f);
 			}
-			if (probabilities[getUpChild(lastRouteChanged)] == 1.f){
+			if (probabilities[getUpChild(lastRouteChanged)] >= 0.9999f){
 				absolute.resize(3);
 				absolute.append(" %");
 			} else {
@@ -814,7 +814,7 @@ struct Darius : Module {
 
 			relative = std::to_string(params[ROUTE_PARAM + lastRouteChanged].getValue() * 100.f);
 			relative.resize(4);
-			if (params[ROUTE_PARAM + lastRouteChanged].getValue() == 1.f){
+			if (params[ROUTE_PARAM + lastRouteChanged].getValue() >= 0.9999f){
 				relative.resize(3);
 				relative.append(" %");
 			} else {
@@ -826,7 +826,7 @@ struct Darius : Module {
 			} else {
 				absolute = std::to_string(roundf(probabilities[getDownChild(lastRouteChanged)] * 10000.f) / 100.f);
 			}
-			if (probabilities[getDownChild(lastRouteChanged)] == 1.f){
+			if (probabilities[getDownChild(lastRouteChanged)] >= 0.9999f){
 				absolute.resize(3);
 				absolute.append(" %");
 			} else {
@@ -1252,8 +1252,6 @@ struct DariusWidget : ModuleWidget {
 		RoutesToBinaryTreeItem *routesToBinaryTree = createMenuItem<RoutesToBinaryTreeItem>("Routes to Binary tree (equal probability)");
 		routesToBinaryTree->module = module;
 		menu->addChild(routesToBinaryTree);
-
-		menu->addChild(new MenuSeparator());
 	}
 };
 

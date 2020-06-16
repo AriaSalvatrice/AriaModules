@@ -11,7 +11,7 @@ void init(Plugin* p) {
 	p->addModel(modelSpleet);
 	p->addModel(modelSwerge);
 	p->addModel(modelSplirge);
-	p->addModel(modelSrot);
+	// p->addModel(modelSrot);
 
 	// Sequencer
 	p->addModel(modelDarius);

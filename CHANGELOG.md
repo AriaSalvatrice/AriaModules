@@ -23,11 +23,6 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 - [FIX] Darius: Fixed random seed not working with multiple instances of Darius.
 - [FIX] Darius: Individual trigger/gate outputs now work with every input and the step button, not just with the forward input. This may break old patches.
 
-### Planned
-
-- [NEW MODULE] Srot: Sort and rotate polyphonic cables.
-- [NEW FEATURE] Darius: Added support for portable sequences.
-
 
 
 
