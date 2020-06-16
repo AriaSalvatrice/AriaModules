@@ -7,8 +7,6 @@
 // added to it later without regard for code quality. This is maintained exploratory code, not good design.
 
 // TODO
-// - Split off the LCD into a reusable component
-// - Make Arcane use that component
 // - Portable sequences
 // - "New point of departure" mode
 // - Quantized slides would be fun! (But maybe use another module? idk)
@@ -26,6 +24,18 @@ const int STEP9START = 36; // (Panel is rotated 90 degrees counter-clockwise com
 
 const int DISPLAYDIVIDER = 512;
 const int KNOBDIVIDER = 512;
+
+enum LcdModes {
+	INIT_MODE,
+	DEFAULT_MODE,
+	SCALE_MODE,
+	KNOB_MODE,
+	QUANTIZED_MODE,
+	CV_MODE,
+	MINMAX_MODE,
+	ROUTE_MODE,
+	SLIDE_MODE
+};
 
 struct Darius : Module {
 	enum ParamIds {
@@ -84,11 +94,8 @@ struct Darius : Module {
 	bool routesToBottom = false;
 	bool routesToEqualProbability = false;
 	bool routesToBinaryTree = false;
-	bool lcdDirty = false;
 	std::array<bool, 12> scale;
 	std::array<bool, 12> pianoDisplay;
-	std::string lcdText1 = "MEDITATE..."; // Loading message
-	std::string lcdText2 = "MEDITATION."; // https://www.youtube.com/watch?v=JqLNY1zyQ6o
 	int stepFirst = 1;
 	int stepLast = 8;
 	int step = 0;
@@ -96,7 +103,7 @@ struct Darius : Module {
 	int lastNode = 0;
 	int lastGate = 0;
 	int pathTraveled[8] = { 0, -1, -1, -1, -1, -1, -1, -1 }; // -1 = not gone there yet
-	int lcdMode = Lcd::INIT_MODE;
+	int lcdMode = INIT_MODE;
 	int lastCvChanged = 0;
 	int lastRouteChanged = 0;
 	float randomSeed = 0.f;
@@ -119,7 +126,7 @@ struct Darius : Module {
 	dsp::ClockDivider knobDivider;
 	dsp::ClockDivider displayDivider;
 	prng::prng prng;
-
+	Lcd::LcdStatus lcdStatus;
 
 	Darius() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -144,6 +151,9 @@ struct Darius : Module {
 			configParam(ROUTE_PARAM + i, 0.f, 1.f, 0.5f, "Random route");
 		knobDivider.setDivision(KNOBDIVIDER); 
 		displayDivider.setDivision(DISPLAYDIVIDER);
+		lcdStatus.lcdPage = Lcd::TEXT1_AND_TEXT2_MODE;
+		lcdStatus.lcdText1 = "MEDITATE..."; // Loading message
+		lcdStatus.lcdText2 = "MEDITATION."; // https://www.youtube.com/watch?v=JqLNY1zyQ6o
 		for (int i = 0; i < 100; i++) random::uniform(); // The first few seeds we get seem bad, need more warming up. Might just be superstition.
 	}
 	
@@ -334,7 +344,7 @@ struct Darius : Module {
 			randomSeed = random::uniform();
 		}
 	}
-	
+
 	// Reset to the first step
 	void reset(const ProcessArgs& args){
 		step = 0;
@@ -344,7 +354,7 @@ struct Darius : Module {
 		resetPathTraveled(args);
 		for (int i = 0; i < 36; i++)
 			outputs[GATE_OUTPUT + i].setVoltage(0.f);
-		lcdDirty = true;
+		lcdStatus.lcdDirty = true;
 	}
 	
 	// Sets running to the current run status
@@ -539,7 +549,7 @@ struct Darius : Module {
 		}
 		pathTraveled[step] = node;
 		lastNode = node;
-		lcdDirty = true;
+		lcdStatus.lcdDirty = true;
 	}
 	
 	void nodeBack(const ProcessArgs& args){
@@ -548,7 +558,7 @@ struct Darius : Module {
 		// FIXME - This conditional avoids a bizarre problem where randomSeed goes NaN. Not sure what's exactly going on!!
 		if (step < 7) pathTraveled[step + 1] = -1; 
 		lastNode = node;
-		lcdDirty = true;
+		lcdStatus.lcdDirty = true;
 	}
 
 	void updateScale(const ProcessArgs& args){
@@ -656,7 +666,7 @@ struct Darius : Module {
 		
 	}
 
-	// Only redraws when necessary. This sets the data to display, but not which widgets to display.
+	// Sets the lcdStatus according to the lcdMode.
 	void updateLcd(const ProcessArgs& args){
 
 		// Updating multiple times a variable that gets read such as lcdText2 causes crashes due to reasons.
@@ -666,42 +676,44 @@ struct Darius : Module {
 		std::array<bool, 12> validNotes;
 
 		// Since we might be sliding, refresh at least this often
-		lcdDirty = true;
+		lcdStatus.lcdDirty = true;
 
 		// Reset after 3 seconds since the last interactive input was touched
 		if (lcdLastInteraction < (3.f / DISPLAYDIVIDER) ) {
 			lcdLastInteraction += args.sampleTime;
 			// Updating only once after reset
 			if(lcdLastInteraction >= (3.f / DISPLAYDIVIDER) ) {
-				lcdMode = Lcd::DEFAULT_MODE;
-				lcdDirty = true;
+				lcdMode = DEFAULT_MODE;
+				lcdStatus.lcdDirty = true;
 			}
 		}
 
 		// Default mode = pick the relevant one instead
-		if(lcdMode == Lcd::DEFAULT_MODE) {
-			lcdMode = (params[QUANTIZE_TOGGLE_PARAM].getValue() == 0.f) ? Lcd::CV_MODE : Lcd::QUANTIZED_MODE;
+		if(lcdMode == DEFAULT_MODE) {
+			lcdMode = (params[QUANTIZE_TOGGLE_PARAM].getValue() == 0.f) ? CV_MODE : QUANTIZED_MODE;
 		}
 
-		if (lcdMode == Lcd::SLIDE_MODE) {
-			lcdText1 = "SLIDE:";
+		if (lcdMode == SLIDE_MODE) {
+			lcdStatus.lcdPage = Lcd::TEXT2_MODE;
+			lcdStatus.lcdText1 = "SLIDE:";
 			float displayDuration = slideDuration;
 			if (displayDuration == 0.f)
-				lcdText2 = "DISABLED";
+				lcdStatus.lcdText2 = "DISABLED";
 			if (displayDuration > 0.f && displayDuration < 1.f) {
 				int displayDurationMs = displayDuration * 1000;
 				displayDurationMs = truncf(displayDurationMs);
-				lcdText2 = std::to_string(displayDurationMs);
-				lcdText2.append("ms");
+				lcdStatus.lcdText2 = std::to_string(displayDurationMs);
+				lcdStatus.lcdText2.append("ms");
 			} 
 			if (displayDuration >= 1.f) {
-				lcdText2 = std::to_string(displayDuration);
-				lcdText2.resize(4);
-				lcdText2.append("s");
+				lcdStatus.lcdText2 = std::to_string(displayDuration);
+				lcdStatus.lcdText2.resize(4);
+				lcdStatus.lcdText2.append("s");
 			}
 		}
 
-		if (lcdMode == Lcd::SCALE_MODE) {
+		if (lcdMode == SCALE_MODE) {
+			lcdStatus.lcdPage = Lcd::PIANO_AND_TEXT2_MODE;
 			if(params[SCALE_PARAM].getValue() == 0.f) {
 				text = "CHROMATIC";
 			} else {
@@ -712,22 +724,25 @@ struct Darius : Module {
 			if(inputs[EXT_SCALE_INPUT].isConnected()){
 				text = "EXTERNAL";
 			}
-			lcdText2 = text;
+			lcdStatus.lcdText2 = text;
 			pianoDisplay = scale;
 		}
 
-		if (lcdMode == Lcd::QUANTIZED_MODE){
-			lcdText2 = Quantizer::noteName(outputs[CV_OUTPUT].getVoltage());
+		if (lcdMode == QUANTIZED_MODE){
+			lcdStatus.lcdPage = Lcd::PIANO_AND_TEXT2_MODE;
+			lcdStatus.lcdText2 = Quantizer::noteName(outputs[CV_OUTPUT].getVoltage());
 			pianoDisplay = Quantizer::pianoDisplay(outputs[CV_OUTPUT].getVoltage());
 		}
 
-		if (lcdMode == Lcd::CV_MODE){
+		if (lcdMode == CV_MODE){
+			lcdStatus.lcdPage = Lcd::TEXT2_MODE;
 			text = std::to_string( outputs[CV_OUTPUT].getVoltage() );
 			text.resize(5);
-			lcdText2 = text + "V";
+			lcdStatus.lcdText2 = text + "V";
 		}
 
-		if (lcdMode == Lcd::MINMAX_MODE) {
+		if (lcdMode == MINMAX_MODE) {
+			lcdStatus.lcdPage = Lcd::TEXT1_AND_TEXT2_MODE;
 			if (params[QUANTIZE_TOGGLE_PARAM].getValue() == 0.f) {
 				text = (params[RANGE_PARAM].getValue() == 0.f) ? std::to_string(params[MIN_PARAM].getValue()) : std::to_string(params[MIN_PARAM].getValue() - 5.f);
 				text.resize(5);
@@ -735,7 +750,7 @@ struct Darius : Module {
 			} else {
 				text = (params[RANGE_PARAM].getValue() == 0.f) ? Quantizer::noteName(params[MIN_PARAM].getValue() - 4.f) : Quantizer::noteName(params[MIN_PARAM].getValue() - 5.f);
 			}
-			lcdText1 = "Min: " + text;
+			lcdStatus.lcdText1 = "Min: " + text;
 
 			if (params[QUANTIZE_TOGGLE_PARAM].getValue() == 0.f) {
 				text = (params[RANGE_PARAM].getValue() == 0.f) ? std::to_string(params[MAX_PARAM].getValue()) : std::to_string(params[MAX_PARAM].getValue() - 5.f);
@@ -744,12 +759,13 @@ struct Darius : Module {
 			} else {
 				text = (params[RANGE_PARAM].getValue() == 0.f) ? Quantizer::noteName(params[MAX_PARAM].getValue() - 4.f) : Quantizer::noteName(params[MAX_PARAM].getValue() - 5.f);
 			}
-			lcdText2 = "Max: " + text;
+			lcdStatus.lcdText2 = "Max: " + text;
 		}
 
 
-		if (lcdMode == Lcd::KNOB_MODE) {
+		if (lcdMode == KNOB_MODE) {
 			if (params[QUANTIZE_TOGGLE_PARAM].getValue() == 0.f) {
+				lcdStatus.lcdPage = Lcd::TEXT2_MODE;
 				if (params[RANGE_PARAM].getValue() == 0.f) {
 					f = rescale( params[CV_PARAM + lastCvChanged].getValue(), 0.f, 10.f, params[MIN_PARAM].getValue(), params[MAX_PARAM].getValue());
 				} else {
@@ -757,8 +773,9 @@ struct Darius : Module {
 				}
 				text = std::to_string(f);
 				text.resize(5);
-				lcdText2 = ">" + text + "V";
+				lcdStatus.lcdText2 = ">" + text + "V";
 			} else {
+				lcdStatus.lcdPage = Lcd::PIANO_AND_TEXT2_MODE;
 				validNotes = Quantizer::validNotesInScaleKey( (int)params[SCALE_PARAM].getValue() , (int)params[KEY_PARAM].getValue() );
 				 if (params[RANGE_PARAM].getValue() == 0.f) {
 					 f = rescale(params[CV_PARAM + lastCvChanged].getValue(), 0.f, 10.f, params[MIN_PARAM].getValue() - 4.f, params[MAX_PARAM].getValue() - 4.f);
@@ -767,11 +784,12 @@ struct Darius : Module {
 				 }
 				 f = Quantizer::quantize( f, validNotes);
 				 pianoDisplay = Quantizer::pianoDisplay(f);
-				 lcdText2 = ">" + Quantizer::noteName(f);
+				 lcdStatus.lcdText2 = ">" + Quantizer::noteName(f);
 			}
 		}
 
-		if (lcdMode == Lcd::ROUTE_MODE) {
+		if (lcdMode == ROUTE_MODE) {
+			lcdStatus.lcdPage = Lcd::TEXT1_AND_TEXT2_MODE;
 			relative = std::to_string( (1.f - params[ROUTE_PARAM + lastRouteChanged].getValue()) * 100.f);
 			relative.resize(4);
 			if (1.f - params[ROUTE_PARAM + lastRouteChanged].getValue() == 1.f){
@@ -793,7 +811,7 @@ struct Darius : Module {
 				absolute.resize(4);
 				absolute.append("%");
 			}
-			lcdText1 = relative + "/" + absolute;
+			lcdStatus.lcdText1 = relative + "/" + absolute;
 
 			relative = std::to_string(params[ROUTE_PARAM + lastRouteChanged].getValue() * 100.f);
 			relative.resize(4);
@@ -816,7 +834,7 @@ struct Darius : Module {
 				absolute.resize(4);
 				absolute.append("%");
 			}
-			lcdText2 = relative + "/" + absolute;
+			lcdStatus.lcdText2 = relative + "/" + absolute;
 		}
 	}
 
@@ -827,11 +845,11 @@ struct Darius : Module {
 		pathTraveled[0] = 0;
 		for (int i = 1; i < 8; i++) pathTraveled[i] = -1;
 		lightsReset = true;
-		lcdMode = Lcd::INIT_MODE;
-		lcdText1 = "MEDITATE...";
-		lcdText2 = "MEDITATION.";
+		lcdMode = INIT_MODE;
+		lcdStatus.lcdText1 = "MEDITATE...";
+		lcdStatus.lcdText2 = "MEDITATION.";
 		lcdLastInteraction = 0.f;
-		lcdDirty = true;
+		lcdStatus.lcdDirty = true;
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -920,9 +938,9 @@ struct AriaKnob820MinMax : AriaKnob820 {
 	}
 
 	void onDragMove(const event::DragMove& e) override {
-		module->lcdMode = Lcd::MINMAX_MODE;
+		module->lcdMode = MINMAX_MODE;
 		module->lcdLastInteraction = 0.f;
-		module->lcdDirty = true;
+		module->lcdStatus.lcdDirty = true;
 		AriaKnob820::onDragMove(e);
 	}
 };
@@ -937,9 +955,9 @@ struct AriaKnob820Scale : AriaKnob820 {
 	}
 
 	void onDragMove(const event::DragMove& e) override {
-		module->lcdMode = Lcd::SCALE_MODE;
+		module->lcdMode = SCALE_MODE;
 		module->lcdLastInteraction = 0.f;
-		module->lcdDirty = true;
+		module->lcdStatus.lcdDirty = true;
 		AriaKnob820::onDragMove(e);
 	}
 };
@@ -953,9 +971,9 @@ struct AriaKnob820Slide : AriaKnob820 {
 	}
 
 	void onDragMove(const event::DragMove& e) override {
-		module->lcdMode = Lcd::SLIDE_MODE;
+		module->lcdMode = SLIDE_MODE;
 		module->lcdLastInteraction = 0.f;
-		module->lcdDirty = true;
+		module->lcdStatus.lcdDirty = true;
 		AriaKnob820::onDragMove(e);
 	}
 };
@@ -969,9 +987,9 @@ struct AriaRockerSwitchHorizontal800ModeReset : AriaRockerSwitchHorizontal800 {
 	}
 
 	void onDragStart(const event::DragStart& e) override {
-		module->lcdMode = Lcd::DEFAULT_MODE;
+		module->lcdMode = DEFAULT_MODE;
 		module->lcdLastInteraction = 0.f;
-		module->lcdDirty = true;
+		module->lcdStatus.lcdDirty = true;
 		AriaRockerSwitchHorizontal800::onDragStart(e);
 	}
 };
@@ -1001,9 +1019,9 @@ struct AriaKnob820Route : AriaKnob820 {
 	}
 
 	void onDragMove(const event::DragMove& e) override {
-		module->lcdMode = Lcd::ROUTE_MODE;
+		module->lcdMode = ROUTE_MODE;
 		module->lcdLastInteraction = 0.f;
-		module->lcdDirty = true;
+		module->lcdStatus.lcdDirty = true;
 		module->lastRouteChanged = lastChanged;
 		AriaKnob820::onDragMove(e);
 	}
@@ -1020,9 +1038,9 @@ struct AriaKnob820TransparentCV : AriaKnob820Transparent {
 	}
 
 	void onDragMove(const event::DragMove& e) override {
-		module->lcdMode = Lcd::KNOB_MODE;
+		module->lcdMode = KNOB_MODE;
 		module->lcdLastInteraction = 0.f;
-		module->lcdDirty = true;
+		module->lcdStatus.lcdDirty = true;
 		module->lastCvChanged = lastChanged;
 		AriaKnob820Transparent::onDragMove(e);
 	}

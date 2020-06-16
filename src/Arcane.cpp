@@ -234,7 +234,7 @@ struct Arcane : ArcaneBase {
 	
 	// LCD stuff
 	std::string lcdText = "";
-	bool lcdDirty = false;
+	Lcd::LcdStatus lcdStatus;
 	dsp::ClockDivider lcdDivider; 
 	int lcdPage = 0;
 
@@ -508,7 +508,7 @@ struct Arcane : ArcaneBase {
 		running = true;
 		lcdPage = 0;
 		cardDelayCounter = 0;
-		lcdDirty = true;
+		lcdStatus.lcdDirty = true;
 		cardDirty = true;
 		ArcaneBase::onReset();
 	}
@@ -563,7 +563,7 @@ struct Arcane : ArcaneBase {
 		
 		if (lcdDivider.process()) {
 			processLcdText(args);
-			lcdDirty = true;
+			lcdStatus.lcdDirty = true;
 			if (jsonParsed) {
 				// Slow down loading the card by 8 secs, to simulate the user placing it manually themself
 				// and give them time to read the message on the faceplate, conveying better the theme
