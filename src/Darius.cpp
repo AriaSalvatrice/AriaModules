@@ -24,6 +24,7 @@ const int STEP8START = 28; // 35  34  33  32  31  30  29  28
 const int STEP9START = 36; // (Panel is rotated 90 degrees counter-clockwise compared to this diagram)
 
 const int LCDDIVIDER = 512;
+const int KNOBDIVIDER = 512;
 
 enum LcdModes {
 	INIT_MODE,
@@ -152,9 +153,9 @@ struct Darius : Module {
 			configParam(CV_PARAM + i, 0.f, 10.f, 5.f, "CV");
 		for (int i = 0; i < STEP8START; i++)
 			configParam(ROUTE_PARAM + i, 0.f, 1.f, 0.5f, "Random route");
-		knobDivider.setDivision(512); // For non-essential knobs
-		lcdDivider.setDivision(LCDDIVIDER); // For non-essential knobs
-		for (int i = 0; i < 100; i++) random::uniform(); // The first few seeds we get are bad, need more warming up.
+		knobDivider.setDivision(KNOBDIVIDER); 
+		lcdDivider.setDivision(LCDDIVIDER);
+		for (int i = 0; i < 100; i++) random::uniform(); // The first few seeds we get seem bad, need more warming up. Might just be superstition.
 	}
 	
 	json_t* dataToJson() override {
@@ -506,7 +507,7 @@ struct Darius : Module {
 		steppedForward = false;
 		
 		// Refresh seed at start of sequences, and on external seeds
-		// Refresh at the last minute: when about to move the second step.
+		// Refresh at the last minute: when about to move the second step (step == 1), not when entering the first (step == 0).
 		if (step == 1){
 			refreshSeed(args);
 			prng.init(randomSeed, randomSeed);
@@ -571,7 +572,6 @@ struct Darius : Module {
 		}
 	}
 	
-	// FIXME - Global output in manual operation
 	void sendGateOutput(const ProcessArgs& args){
 
 		bool manualStep = manualStepTrigger.process(args.sampleTime);
@@ -624,7 +624,6 @@ struct Darius : Module {
 		outputs[CV_OUTPUT].setVoltage(output);
 	}
 	
-	// FIXME - Lights flicker a bit.
 	void updateLights(const ProcessArgs& args){
 		// The Seed input light
 		lights[SEED_LIGHT].setBrightness( ( inputs[SEED_INPUT].getVoltage() == 0.f ) ? 0.f : 1.f );
@@ -691,7 +690,6 @@ struct Darius : Module {
 		}
 
 		// Default mode = pick the relevant one instead
-		// FIXME - this method causes issues. Merge the modes.
 		if(lcdMode == DEFAULT_MODE) {
 			lcdMode = (params[QUANTIZE_TOGGLE_PARAM].getValue() == 0.f) ? CV_MODE : QUANTIZED_MODE;
 		}
@@ -871,7 +869,6 @@ struct Darius : Module {
 		setRunStatus(args);
 		setStepStatus(args);
 
-		// FIXME - Update lazily instead
 		updateRoutes(args);
 
 		// Refreshing some non-essential knobs often has a performance impact

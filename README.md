@@ -86,9 +86,9 @@ On the top of the module:
 On the bottom-left:
 
 - **CV/Quantize**: Whether to output precise CV (best for modulation), or quantized V/OCT CV (Twelve-tone Equal Temperament only - the usual Western tuning system).
-- **-5V~5V/0V~10V**: In CV mode, selects if the knobs output voltage from 0V to 10V, or -5V to 5V. In quantized mode, removes 1 octave from the output. 
-- **Min** and **Max**: Limits the CV output range. The words are only suggestions, if the **Min** is larger than the **Max**, it just flips in which direction the **CV** knobs operate.
-- **Scale** and **Key**: Selects which notes to quantize to when in Quantize mode. The available scales were curated for ease of use and instant satisfaction rather than for comprehensiveness, avoiding duplication in the form of scales that can be expressed as modes of another. 
+- **-5V\~5V/0V\~10V**: In CV mode, selects if the knobs output voltage from 0V to 10V, or -5V to 5V. In quantized mode, removes 1 octave from the output. 
+- **Min** and **Max**: Limit the CV output range. The words are only suggestions, if the **Min** is larger than the **Max**, it just flips in which direction the **CV** knobs operate.
+- **Scale** and **Key**: Select which notes to quantize to when in Quantize mode. The available scales were curated for ease of use and instant satisfaction rather than for comprehensiveness, avoiding duplication in the form of scales that can be expressed as modes of another. 
 - **External scale**: Accepts the scale in a format my other modules use: as a 12-channel polyphonic cable, where enabled notes have a continuous 10V signal, and disabled notes, 0V. You can use Darius as an arpeggiator by sending it a chord rather than a full scale!
 - **Slide**: The fun knob.
 - **Global Gate**: Passes through the gate or step inputs received on any of the directional inputs, or sends a short trig if operated via the manual Step button. It's useful if are controlling Darius using more than one directional input.
