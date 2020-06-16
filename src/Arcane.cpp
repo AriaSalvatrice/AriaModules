@@ -39,8 +39,11 @@ struct ArcaneBase : Module {
 	bool owningSingleton = false;
 	bool jsonParsed = false;
 	
-	// Used to display on the LCD: once set it change only on reset.
-	std::string todaysFortuneDate = getCurrentFortuneDate();
+	// LCD stuff
+	Lcd::LcdStatus lcdStatus;
+	dsp::ClockDivider lcdDivider; 
+	int lcdMode = 0; // FIXME change it to mode for consistency
+	std::string todaysFortuneDate = getCurrentFortuneDate(); // Used to display on the LCD. Once set it changes only on reset.
 	
 	// These are read from JSON
 	int arcana, bpm, wish;
@@ -98,8 +101,10 @@ struct ArcaneBase : Module {
 		int scaleNum = 0;
 		json_t* scaleNumJ = json_object_get(rootJ, "scale");
 		if (scaleNumJ) scaleNum = json_integer_value(scaleNumJ);
-		for (int i = 0; i < 12; ++i)
+		for (int i = 0; i < 12; ++i){
 			scale[11 - i] = (scaleNum >> i) & 1;
+			lcdStatus.pianoDisplay[11 - i] = (scaleNum >> i) & 1;
+		}
 		
 		json_t* notePatternJ = json_object_get(rootJ, "notePattern");		
 		if (notePatternJ) {
@@ -232,12 +237,6 @@ struct Arcane : ArcaneBase {
 	dsp::SchmittTrigger resetCvTrigger;
 	dsp::SchmittTrigger resetButtonTrigger;
 	
-	// LCD stuff
-	std::string lcdText = "";
-	Lcd::LcdStatus lcdStatus;
-	dsp::ClockDivider lcdDivider; 
-	int lcdPage = 0;
-
 	// Only for Arcane
 	bool cardDirty = true;
 	int cardDelayCounter = 0;
@@ -436,58 +435,58 @@ struct Arcane : ArcaneBase {
 	void processLcdText(const ProcessArgs& args) {
 		lcdDivider.setDivision(args.sampleRate * 2); // 2 seconds. Any way to set it up from the constructor instead?
 		if (jsonParsed) {
-			switch (lcdPage) {
+			switch (lcdMode) {
 				case 0:
-					lcdText = todaysFortuneDate;
-					lcdPage++;
+					lcdStatus.lcdText2 = todaysFortuneDate;
+					lcdMode++;
 					break;
 				case 1:
-					if (arcana == 0 ) lcdText = "   FOOL    ";
-					if (arcana == 1 ) lcdText = " MAGICIAN  ";
-					if (arcana == 2 ) lcdText = "H.PRIESTESS";
-					if (arcana == 3 ) lcdText = "  EMPRESS  ";
-					if (arcana == 4 ) lcdText = "  EMPEROR  ";
-					if (arcana == 5 ) lcdText = "HIEROPHANT ";
-					if (arcana == 6 ) lcdText = "  LOVERS   ";
-					if (arcana == 7 ) lcdText = "  CHARIOT  ";
-					if (arcana == 8 ) lcdText = "  JUSTICE  ";
-					if (arcana == 9 ) lcdText = "  HERMIT   ";
-					if (arcana == 10) lcdText = "W. FORTUNE ";
-					if (arcana == 11) lcdText = "  STRENGTH ";
-					if (arcana == 12) lcdText = "HANGED MAN ";
-					if (arcana == 13) lcdText = "           "; // Intentional
-					if (arcana == 14) lcdText = "TEMPERANCE ";
-					if (arcana == 15) lcdText = "   DEVIL   ";
-					if (arcana == 16) lcdText = "   TOWER   ";
-					if (arcana == 17) lcdText = "   STAR    ";
-					if (arcana == 18) lcdText = "   MOON    ";
-					if (arcana == 19) lcdText = "    SUN    ";
-					if (arcana == 20) lcdText = " JUDGEMENT ";
-					if (arcana == 21) lcdText = "   WORLD   ";
-					lcdPage++;
+					if (arcana == 0 ) lcdStatus.lcdText2 = "   FOOL    ";
+					if (arcana == 1 ) lcdStatus.lcdText2 = " MAGICIAN  ";
+					if (arcana == 2 ) lcdStatus.lcdText2 = "H.PRIESTESS";
+					if (arcana == 3 ) lcdStatus.lcdText2 = "  EMPRESS  ";
+					if (arcana == 4 ) lcdStatus.lcdText2 = "  EMPEROR  ";
+					if (arcana == 5 ) lcdStatus.lcdText2 = "HIEROPHANT ";
+					if (arcana == 6 ) lcdStatus.lcdText2 = "  LOVERS   ";
+					if (arcana == 7 ) lcdStatus.lcdText2 = "  CHARIOT  ";
+					if (arcana == 8 ) lcdStatus.lcdText2 = "  JUSTICE  ";
+					if (arcana == 9 ) lcdStatus.lcdText2 = "  HERMIT   ";
+					if (arcana == 10) lcdStatus.lcdText2 = "W. FORTUNE ";
+					if (arcana == 11) lcdStatus.lcdText2 = "  STRENGTH ";
+					if (arcana == 12) lcdStatus.lcdText2 = "HANGED MAN ";
+					if (arcana == 13) lcdStatus.lcdText2 = "           "; // Intentional
+					if (arcana == 14) lcdStatus.lcdText2 = "TEMPERANCE ";
+					if (arcana == 15) lcdStatus.lcdText2 = "   DEVIL   ";
+					if (arcana == 16) lcdStatus.lcdText2 = "   TOWER   ";
+					if (arcana == 17) lcdStatus.lcdText2 = "   STAR    ";
+					if (arcana == 18) lcdStatus.lcdText2 = "   MOON    ";
+					if (arcana == 19) lcdStatus.lcdText2 = "    SUN    ";
+					if (arcana == 20) lcdStatus.lcdText2 = " JUDGEMENT ";
+					if (arcana == 21) lcdStatus.lcdText2 = "   WORLD   ";
+					lcdMode++;
 					break;
 				case 2:
-					lcdText = "  " + std::to_string(bpm) + " BPM";
-					lcdPage++;
+					lcdStatus.lcdText2 = "  " + std::to_string(bpm) + " BPM";
+					lcdMode++;
 					break;
 				case 3:
-					if (wish == 0) lcdText = "WISH:LUCK";
-					if (wish == 1) lcdText = "WISH:LOVE";
-					if (wish == 2) lcdText = "WISH:HEALTH";
-					if (wish == 3) lcdText = "WISH:MONEY";
+					if (wish == 0) lcdStatus.lcdText2 = "WISH:LUCK";
+					if (wish == 1) lcdStatus.lcdText2 = "WISH:LOVE";
+					if (wish == 2) lcdStatus.lcdText2 = "WISH:HEALTH";
+					if (wish == 3) lcdStatus.lcdText2 = "WISH:MONEY";
 					if (todaysFortuneDate != getCurrentFortuneDate()) {
-						lcdPage = 4;
+						lcdMode = 4;
 					} else {
-						lcdPage = 0;
+						lcdMode = 0;
 					}
 					break;
 				case 4: 
-					lcdText = "NEW ORACLE!";
-					lcdPage = 0;
+					lcdStatus.lcdText2 = "NEW ORACLE!";
+					lcdMode = 0;
 					break;
 			}
 		} else { // JSON not parsed
-			lcdText = (owningSingleton) ? "DOWNLOADING" : "WAIT ON D/L"; 
+			lcdStatus.lcdText2 = (owningSingleton) ? "DOWNLOADING" : "WAIT ON D/L"; 
 		}
 	}
 	
@@ -506,7 +505,7 @@ struct Arcane : ArcaneBase {
 		pulseQuarter = false;
 		pulseBar = false;
 		running = true;
-		lcdPage = 0;
+		lcdMode = 0;
 		cardDelayCounter = 0;
 		lcdStatus.lcdDirty = true;
 		cardDirty = true;
@@ -534,6 +533,7 @@ struct Arcane : ArcaneBase {
 		configParam(PULSE_WIDTH_PARAM, 1.f, 99.f, 1.f, "Pulse width for all outputs", "%");
 		configParam(PULSE_RAMP_PARAM, 0.f, 1.f, 0.f, "Clock Pulse/Ramp output");
 		lcdDivider.setDivision(1000); // Gets changed on first tick
+		lcdStatus.lcdPage = Lcd::PIANO_AND_TEXT2_PAGE;
 	}
 	
 	void process(const ProcessArgs& args) override {
@@ -770,73 +770,6 @@ struct CardDrawWidget : TransparentWidget {
 };
 
 
-// The draw widget. 
-// TODO: Use the generic LCD widget eventually, for easier maintenance.
-struct LcdArcaneDrawWidget : TransparentWidget {
-	Arcane *module;
-	std::array<std::shared_ptr<Svg>, 95> asciiSvg; // 32 to 126, the printable range
-	std::array<std::shared_ptr<Svg>, 24> pianoSvg; // 0..11: Unlit, 12..23 = Lit
-
-	LcdArcaneDrawWidget(Arcane *module) {
-		this->module = module;
-		if (module) {
-			box.size = mm2px(Vec(36.0, 10.0));
-			for (int i = 0; i < 12; i++) // Unlit
-				pianoSvg[i] = APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/lcd/piano/u" + std::to_string(i) + ".svg"));
-			for (int i = 0; i < 12; i++) // Lit
-				pianoSvg[i + 12] = APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/lcd/piano/l" + std::to_string(i) + ".svg"));
-			for (int i = 0; i < 95; i++)
-				asciiSvg[i] = APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/lcd/Fixed_v01/" + std::to_string(i + 32) + ".svg"));
-		}
-	}
-
-	void draw(const DrawArgs &args) override {
-		if (module) {
-			nvgScale(args.vg, 1.5, 1.5);
-
-			// Piano
-			nvgSave(args.vg);
-			svgDraw(args.vg, pianoSvg[(module->scale[0])  ? 12 :  0 ]->handle);
-			nvgTranslate(args.vg, 6, 0);
-			svgDraw(args.vg, pianoSvg[(module->scale[1])  ? 13 :  1 ]->handle);
-			nvgTranslate(args.vg, 5, 0);
-			svgDraw(args.vg, pianoSvg[(module->scale[2])  ? 14 :  2 ]->handle);
-			nvgTranslate(args.vg, 5, 0);
-			svgDraw(args.vg, pianoSvg[(module->scale[3])  ? 15 :  3 ]->handle);
-			nvgTranslate(args.vg, 5, 0);
-			svgDraw(args.vg, pianoSvg[(module->scale[4])  ? 16 :  4 ]->handle);
-			nvgTranslate(args.vg, 7, 0);
-			svgDraw(args.vg, pianoSvg[(module->scale[5])  ? 17 :  5 ]->handle);
-			nvgTranslate(args.vg, 6, 0);
-			svgDraw(args.vg, pianoSvg[(module->scale[6])  ? 18 :  6 ]->handle);
-			nvgTranslate(args.vg, 5, 0);
-			svgDraw(args.vg, pianoSvg[(module->scale[7])  ? 19 :  7 ]->handle);
-			nvgTranslate(args.vg, 5, 0);
-			svgDraw(args.vg, pianoSvg[(module->scale[8])  ? 20 :  8 ]->handle);
-			nvgTranslate(args.vg, 5, 0);
-			svgDraw(args.vg, pianoSvg[(module->scale[9])  ? 21 :  9 ]->handle);
-			nvgTranslate(args.vg, 5, 0);
-			svgDraw(args.vg, pianoSvg[(module->scale[10]) ? 22 : 10 ]->handle);
-			nvgTranslate(args.vg, 5, 0);
-			svgDraw(args.vg, pianoSvg[(module->scale[11]) ? 23 : 11 ]->handle);
-			nvgRestore(args.vg);
-
-			// 11 character display
-			nvgSave(args.vg);
-			nvgTranslate(args.vg, 0, 11);
-			std::string lcdText = module->lcdText;
-			lcdText.append(11, ' '); // Ensure the string is long enough
-			for (int i = 0; i < 11; i++) {
-				char c = lcdText.at(i);
-				svgDraw(args.vg, asciiSvg[ c - 32 ]->handle);
-				nvgTranslate(args.vg, 6, 0);
-			}
-			nvgRestore(args.vg);
-		}
-	} // Draw
-}; // LcdArcaneDrawWidget
-
-
 struct ArcaneWidget : ModuleWidget {
 	// Offset
 	float x = 80.32;
@@ -864,9 +797,9 @@ struct ArcaneWidget : ModuleWidget {
 		cfb->addChild(cdw);
 		addChild(cfb);
 		
-		// LCD		
+		// LCD
 		Lcd::LcdFramebufferWidget<Arcane> *lfb = new Lcd::LcdFramebufferWidget<Arcane>(module);
-		LcdArcaneDrawWidget *ldw = new LcdArcaneDrawWidget(module);
+		Lcd::LcdDrawWidget<Arcane> *ldw = new Lcd::LcdDrawWidget<Arcane>(module);
 		lfb->box.pos = mm2px(Vec(83.6, 41.4));
 		lfb->addChild(ldw);
 		addChild(lfb);
@@ -950,7 +883,7 @@ struct AtoutWidget : ModuleWidget {
 		
 		// LCD	
 		Lcd::LcdFramebufferWidget<Arcane> *fb = new Lcd::LcdFramebufferWidget<Arcane>(module);
-		LcdArcaneDrawWidget *ldw = new LcdArcaneDrawWidget(module);
+		Lcd::LcdDrawWidget<Arcane> *ldw = new Lcd::LcdDrawWidget<Arcane>(module);
 		fb->box.pos = mm2px(Vec(6.44, 41.4));
 		fb->addChild(ldw);
 		addChild(fb);

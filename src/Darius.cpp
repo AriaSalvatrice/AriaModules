@@ -95,7 +95,6 @@ struct Darius : Module {
 	bool routesToEqualProbability = false;
 	bool routesToBinaryTree = false;
 	std::array<bool, 12> scale;
-	std::array<bool, 12> pianoDisplay;
 	int stepFirst = 1;
 	int stepLast = 8;
 	int step = 0;
@@ -151,7 +150,7 @@ struct Darius : Module {
 			configParam(ROUTE_PARAM + i, 0.f, 1.f, 0.5f, "Random route");
 		knobDivider.setDivision(KNOBDIVIDER); 
 		displayDivider.setDivision(DISPLAYDIVIDER);
-		lcdStatus.lcdPage = Lcd::TEXT1_AND_TEXT2_MODE;
+		lcdStatus.lcdPage = Lcd::TEXT1_AND_TEXT2_PAGE;
 		lcdStatus.lcdText1 = "MEDITATE..."; // Loading message
 		lcdStatus.lcdText2 = "MEDITATION."; // https://www.youtube.com/watch?v=JqLNY1zyQ6o
 		for (int i = 0; i < 100; i++) random::uniform(); // The first few seeds we get seem bad, need more warming up. Might just be superstition.
@@ -694,7 +693,7 @@ struct Darius : Module {
 		}
 
 		if (lcdMode == SLIDE_MODE) {
-			lcdStatus.lcdPage = Lcd::TEXT2_MODE;
+			lcdStatus.lcdPage = Lcd::TEXT2_PAGE;
 			lcdStatus.lcdText1 = "SLIDE:";
 			float displayDuration = slideDuration;
 			if (displayDuration == 0.f)
@@ -713,7 +712,7 @@ struct Darius : Module {
 		}
 
 		if (lcdMode == SCALE_MODE) {
-			lcdStatus.lcdPage = Lcd::PIANO_AND_TEXT2_MODE;
+			lcdStatus.lcdPage = Lcd::PIANO_AND_TEXT2_PAGE;
 			if(params[SCALE_PARAM].getValue() == 0.f) {
 				text = "CHROMATIC";
 			} else {
@@ -725,24 +724,24 @@ struct Darius : Module {
 				text = "EXTERNAL";
 			}
 			lcdStatus.lcdText2 = text;
-			pianoDisplay = scale;
+			lcdStatus.pianoDisplay = scale;
 		}
 
 		if (lcdMode == QUANTIZED_MODE){
-			lcdStatus.lcdPage = Lcd::PIANO_AND_TEXT2_MODE;
+			lcdStatus.lcdPage = Lcd::PIANO_AND_TEXT2_PAGE;
 			lcdStatus.lcdText2 = Quantizer::noteName(outputs[CV_OUTPUT].getVoltage());
-			pianoDisplay = Quantizer::pianoDisplay(outputs[CV_OUTPUT].getVoltage());
+			lcdStatus.pianoDisplay = Quantizer::pianoDisplay(outputs[CV_OUTPUT].getVoltage());
 		}
 
 		if (lcdMode == CV_MODE){
-			lcdStatus.lcdPage = Lcd::TEXT2_MODE;
+			lcdStatus.lcdPage = Lcd::TEXT2_PAGE;
 			text = std::to_string( outputs[CV_OUTPUT].getVoltage() );
 			text.resize(5);
 			lcdStatus.lcdText2 = text + "V";
 		}
 
 		if (lcdMode == MINMAX_MODE) {
-			lcdStatus.lcdPage = Lcd::TEXT1_AND_TEXT2_MODE;
+			lcdStatus.lcdPage = Lcd::TEXT1_AND_TEXT2_PAGE;
 			if (params[QUANTIZE_TOGGLE_PARAM].getValue() == 0.f) {
 				text = (params[RANGE_PARAM].getValue() == 0.f) ? std::to_string(params[MIN_PARAM].getValue()) : std::to_string(params[MIN_PARAM].getValue() - 5.f);
 				text.resize(5);
@@ -765,7 +764,7 @@ struct Darius : Module {
 
 		if (lcdMode == KNOB_MODE) {
 			if (params[QUANTIZE_TOGGLE_PARAM].getValue() == 0.f) {
-				lcdStatus.lcdPage = Lcd::TEXT2_MODE;
+				lcdStatus.lcdPage = Lcd::TEXT2_PAGE;
 				if (params[RANGE_PARAM].getValue() == 0.f) {
 					f = rescale( params[CV_PARAM + lastCvChanged].getValue(), 0.f, 10.f, params[MIN_PARAM].getValue(), params[MAX_PARAM].getValue());
 				} else {
@@ -775,7 +774,7 @@ struct Darius : Module {
 				text.resize(5);
 				lcdStatus.lcdText2 = ">" + text + "V";
 			} else {
-				lcdStatus.lcdPage = Lcd::PIANO_AND_TEXT2_MODE;
+				lcdStatus.lcdPage = Lcd::PIANO_AND_TEXT2_PAGE;
 				validNotes = Quantizer::validNotesInScaleKey( (int)params[SCALE_PARAM].getValue() , (int)params[KEY_PARAM].getValue() );
 				 if (params[RANGE_PARAM].getValue() == 0.f) {
 					 f = rescale(params[CV_PARAM + lastCvChanged].getValue(), 0.f, 10.f, params[MIN_PARAM].getValue() - 4.f, params[MAX_PARAM].getValue() - 4.f);
@@ -783,13 +782,13 @@ struct Darius : Module {
 					 f = rescale(params[CV_PARAM + lastCvChanged].getValue(), 0.f, 10.f, params[MIN_PARAM].getValue() - 5.f, params[MAX_PARAM].getValue() - 5.f);
 				 }
 				 f = Quantizer::quantize( f, validNotes);
-				 pianoDisplay = Quantizer::pianoDisplay(f);
+				 lcdStatus.pianoDisplay = Quantizer::pianoDisplay(f);
 				 lcdStatus.lcdText2 = ">" + Quantizer::noteName(f);
 			}
 		}
 
 		if (lcdMode == ROUTE_MODE) {
-			lcdStatus.lcdPage = Lcd::TEXT1_AND_TEXT2_MODE;
+			lcdStatus.lcdPage = Lcd::TEXT1_AND_TEXT2_PAGE;
 			relative = std::to_string( (1.f - params[ROUTE_PARAM + lastRouteChanged].getValue()) * 100.f);
 			relative.resize(4);
 			if (1.f - params[ROUTE_PARAM + lastRouteChanged].getValue() == 1.f){

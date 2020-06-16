@@ -3,38 +3,42 @@
 using namespace rack;
 extern Plugin* pluginInstance;
 
-// The LCD is only concerned with displaying data. 
+// This LCD widget is only concerned with displaying data. 
 //
-// The LCD Mode is tracked by each module individually.
-// This widget only cares about the LCD Page. 
-// 
-// It can display two lines of text, or a piano and a line of text.
+// The LCD PAGE is the layout, e.g., two lines of text, or a piano and a line of text.
+// The LCD MODE is the internal state of the LCD as tracked by each module
+// individually. This widget doesn't care about the LCD MODE.
 // 
 // On Arcane and Darius, the SVG of the LCD is a little bit too small to display
 // descenders on the second line of text, so uppercase is mostly used.
-// 
+// Future modules will have a slightly larger LCD to fit descenders. 
+//
 // If you like this widget, it's probably reasonably easy to re-use in your own module. 
 // However, it's not very generic yet, since it has not been used much. And it's
-// probably not a very good or idiomatic design, I'm new at C++ stuff.
-// If you're gonna reuse it, please change my signature color scheme to your own.
+// not a good or an idiomatic design, I'm new at C++ stuff. And I have not
+// profiled its performance impact in detail.
+// 
+// If you're gonna reuse this code despite the warnings, please change my signature
+// color scheme to your own.
 
 namespace Lcd {
 
 // What to draw on the LCD.
 enum LcdPage {
-	TEXT1_MODE,
-	TEXT2_MODE,
-	TEXT1_AND_TEXT2_MODE,
-	PIANO_AND_TEXT2_MODE
+	OFF_MODE,
+	TEXT1_PAGE,
+	TEXT2_PAGE,
+	TEXT1_AND_TEXT2_PAGE,
+	PIANO_AND_TEXT2_PAGE
 };
 
 // The LCD's status.
 struct LcdStatus {
 	// The first line, not displayed on every page. 
-	std::string lcdText1;
+	std::string lcdText1 = "";
 
 	// The second line, currently displayed on every page. 
-	std::string lcdText2;
+	std::string lcdText2 = "";
 
 	// The piano display
 	std::array<bool, 12> pianoDisplay;
@@ -43,7 +47,12 @@ struct LcdStatus {
 	bool lcdDirty = false;
 
 	// LCD-specific page: whether to draw two lines of text, a piano, etc.
-	int lcdPage;
+	int lcdPage = OFF_MODE;
+
+	LcdStatus() {
+		for (int i = 0; i < 12; i++) pianoDisplay[i] = false;
+	}
+
 };
 
 // The framebuffer holding the Draw widget.
@@ -93,37 +102,37 @@ struct LcdDrawWidget : TransparentWidget {
 			nvgScale(args.vg, 1.5, 1.5);
 		
 			// Piano display at the top.
-			if ( module->lcdStatus.lcdPage == PIANO_AND_TEXT2_MODE ) {
+			if ( module->lcdStatus.lcdPage == PIANO_AND_TEXT2_PAGE ) {
 				nvgSave(args.vg);
-				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[0])  ? 12 :  0 ]->handle);
+				svgDraw(args.vg, pianoSvg[(module->lcdStatus.pianoDisplay[0])  ? 12 :  0 ]->handle);
 				nvgTranslate(args.vg, 6, 0);
-				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[1])  ? 13 :  1 ]->handle);
+				svgDraw(args.vg, pianoSvg[(module->lcdStatus.pianoDisplay[1])  ? 13 :  1 ]->handle);
 				nvgTranslate(args.vg, 5, 0);
-				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[2])  ? 14 :  2 ]->handle);
+				svgDraw(args.vg, pianoSvg[(module->lcdStatus.pianoDisplay[2])  ? 14 :  2 ]->handle);
 				nvgTranslate(args.vg, 5, 0);
-				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[3])  ? 15 :  3 ]->handle);
+				svgDraw(args.vg, pianoSvg[(module->lcdStatus.pianoDisplay[3])  ? 15 :  3 ]->handle);
 				nvgTranslate(args.vg, 5, 0);
-				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[4])  ? 16 :  4 ]->handle);
+				svgDraw(args.vg, pianoSvg[(module->lcdStatus.pianoDisplay[4])  ? 16 :  4 ]->handle);
 				nvgTranslate(args.vg, 7, 0);
-				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[5])  ? 17 :  5 ]->handle);
+				svgDraw(args.vg, pianoSvg[(module->lcdStatus.pianoDisplay[5])  ? 17 :  5 ]->handle);
 				nvgTranslate(args.vg, 6, 0);
-				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[6])  ? 18 :  6 ]->handle);
+				svgDraw(args.vg, pianoSvg[(module->lcdStatus.pianoDisplay[6])  ? 18 :  6 ]->handle);
 				nvgTranslate(args.vg, 5, 0);
-				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[7])  ? 19 :  7 ]->handle);
+				svgDraw(args.vg, pianoSvg[(module->lcdStatus.pianoDisplay[7])  ? 19 :  7 ]->handle);
 				nvgTranslate(args.vg, 5, 0);
-				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[8])  ? 20 :  8 ]->handle);
+				svgDraw(args.vg, pianoSvg[(module->lcdStatus.pianoDisplay[8])  ? 20 :  8 ]->handle);
 				nvgTranslate(args.vg, 5, 0);
-				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[9])  ? 21 :  9 ]->handle);
+				svgDraw(args.vg, pianoSvg[(module->lcdStatus.pianoDisplay[9])  ? 21 :  9 ]->handle);
 				nvgTranslate(args.vg, 5, 0);
-				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[10]) ? 22 : 10 ]->handle);
+				svgDraw(args.vg, pianoSvg[(module->lcdStatus.pianoDisplay[10]) ? 22 : 10 ]->handle);
 				nvgTranslate(args.vg, 5, 0);
-				svgDraw(args.vg, pianoSvg[(module->pianoDisplay[11]) ? 23 : 11 ]->handle);
+				svgDraw(args.vg, pianoSvg[(module->lcdStatus.pianoDisplay[11]) ? 23 : 11 ]->handle);
 				nvgRestore(args.vg);
 			}
 
 			// 11 character display at the top.
-			if ( module->lcdStatus.lcdPage == TEXT1_MODE
-			  || module->lcdStatus.lcdPage == TEXT1_AND_TEXT2_MODE ) {
+			if ( module->lcdStatus.lcdPage == TEXT1_PAGE
+			  || module->lcdStatus.lcdPage == TEXT1_AND_TEXT2_PAGE ) {
 				nvgSave(args.vg);
 				lcdText1 = module->lcdStatus.lcdText1;
 				lcdText1.append(11, ' '); // Ensure the string is long enough
@@ -136,9 +145,9 @@ struct LcdDrawWidget : TransparentWidget {
 			}
 		
 			// 11 character display at the bottom.
-			if ( module->lcdStatus.lcdPage == TEXT2_MODE
-			  || module->lcdStatus.lcdPage == TEXT1_AND_TEXT2_MODE
-			  || module->lcdStatus.lcdPage == PIANO_AND_TEXT2_MODE ) {
+			if ( module->lcdStatus.lcdPage == TEXT2_PAGE
+			  || module->lcdStatus.lcdPage == TEXT1_AND_TEXT2_PAGE
+			  || module->lcdStatus.lcdPage == PIANO_AND_TEXT2_PAGE ) {
 				nvgSave(args.vg);
 				nvgTranslate(args.vg, 0, 11);
 				lcdText2 = module->lcdStatus.lcdText2;
