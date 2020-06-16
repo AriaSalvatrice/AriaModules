@@ -1,6 +1,7 @@
 #include "plugin.hpp"
 #include "prng.hpp"
 #include "quantizer.hpp"
+#include "lcd.hpp"
 
 // Warning - this module was created with very little C++ experience, and features were 
 // added to it later without regard for code quality. This is maintained exploratory code, not good design.
@@ -23,20 +24,8 @@ const int STEP7START = 21; //   27  26  25  24  23  22  21
 const int STEP8START = 28; // 35  34  33  32  31  30  29  28
 const int STEP9START = 36; // (Panel is rotated 90 degrees counter-clockwise compared to this diagram)
 
-const int LCDDIVIDER = 512;
+const int DISPLAYDIVIDER = 512;
 const int KNOBDIVIDER = 512;
-
-enum LcdModes {
-	INIT_MODE,
-	DEFAULT_MODE,
-	SCALE_MODE,
-	KNOB_MODE,
-	QUANTIZED_MODE,
-	CV_MODE,
-	MINMAX_MODE,
-	ROUTE_MODE,
-	SLIDE_MODE
-};
 
 struct Darius : Module {
 	enum ParamIds {
@@ -107,7 +96,7 @@ struct Darius : Module {
 	int lastNode = 0;
 	int lastGate = 0;
 	int pathTraveled[8] = { 0, -1, -1, -1, -1, -1, -1, -1 }; // -1 = not gone there yet
-	int lcdMode = INIT_MODE;
+	int lcdMode = Lcd::INIT_MODE;
 	int lastCvChanged = 0;
 	int lastRouteChanged = 0;
 	float randomSeed = 0.f;
@@ -128,7 +117,7 @@ struct Darius : Module {
 	dsp::SchmittTrigger randomizeRouteTrigger;
 	dsp::PulseGenerator manualStepTrigger;
 	dsp::ClockDivider knobDivider;
-	dsp::ClockDivider lcdDivider;
+	dsp::ClockDivider displayDivider;
 	prng::prng prng;
 
 
@@ -154,7 +143,7 @@ struct Darius : Module {
 		for (int i = 0; i < STEP8START; i++)
 			configParam(ROUTE_PARAM + i, 0.f, 1.f, 0.5f, "Random route");
 		knobDivider.setDivision(KNOBDIVIDER); 
-		lcdDivider.setDivision(LCDDIVIDER);
+		displayDivider.setDivision(DISPLAYDIVIDER);
 		for (int i = 0; i < 100; i++) random::uniform(); // The first few seeds we get seem bad, need more warming up. Might just be superstition.
 	}
 	
@@ -680,21 +669,21 @@ struct Darius : Module {
 		lcdDirty = true;
 
 		// Reset after 3 seconds since the last interactive input was touched
-		if (lcdLastInteraction < (3.f / LCDDIVIDER) ) {
+		if (lcdLastInteraction < (3.f / DISPLAYDIVIDER) ) {
 			lcdLastInteraction += args.sampleTime;
 			// Updating only once after reset
-			if(lcdLastInteraction >= (3.f / LCDDIVIDER) ) {
-				lcdMode = DEFAULT_MODE;
+			if(lcdLastInteraction >= (3.f / DISPLAYDIVIDER) ) {
+				lcdMode = Lcd::DEFAULT_MODE;
 				lcdDirty = true;
 			}
 		}
 
 		// Default mode = pick the relevant one instead
-		if(lcdMode == DEFAULT_MODE) {
-			lcdMode = (params[QUANTIZE_TOGGLE_PARAM].getValue() == 0.f) ? CV_MODE : QUANTIZED_MODE;
+		if(lcdMode == Lcd::DEFAULT_MODE) {
+			lcdMode = (params[QUANTIZE_TOGGLE_PARAM].getValue() == 0.f) ? Lcd::CV_MODE : Lcd::QUANTIZED_MODE;
 		}
 
-		if (lcdMode == SLIDE_MODE) {
+		if (lcdMode == Lcd::SLIDE_MODE) {
 			lcdText1 = "SLIDE:";
 			float displayDuration = slideDuration;
 			if (displayDuration == 0.f)
@@ -712,7 +701,7 @@ struct Darius : Module {
 			}
 		}
 
-		if (lcdMode == SCALE_MODE) {
+		if (lcdMode == Lcd::SCALE_MODE) {
 			if(params[SCALE_PARAM].getValue() == 0.f) {
 				text = "CHROMATIC";
 			} else {
@@ -727,18 +716,18 @@ struct Darius : Module {
 			pianoDisplay = scale;
 		}
 
-		if (lcdMode == QUANTIZED_MODE){
+		if (lcdMode == Lcd::QUANTIZED_MODE){
 			lcdText2 = Quantizer::noteName(outputs[CV_OUTPUT].getVoltage());
 			pianoDisplay = Quantizer::pianoDisplay(outputs[CV_OUTPUT].getVoltage());
 		}
 
-		if (lcdMode == CV_MODE){
+		if (lcdMode == Lcd::CV_MODE){
 			text = std::to_string( outputs[CV_OUTPUT].getVoltage() );
 			text.resize(5);
 			lcdText2 = text + "V";
 		}
 
-		if (lcdMode == MINMAX_MODE) {
+		if (lcdMode == Lcd::MINMAX_MODE) {
 			if (params[QUANTIZE_TOGGLE_PARAM].getValue() == 0.f) {
 				text = (params[RANGE_PARAM].getValue() == 0.f) ? std::to_string(params[MIN_PARAM].getValue()) : std::to_string(params[MIN_PARAM].getValue() - 5.f);
 				text.resize(5);
@@ -759,7 +748,7 @@ struct Darius : Module {
 		}
 
 
-		if (lcdMode == KNOB_MODE) {
+		if (lcdMode == Lcd::KNOB_MODE) {
 			if (params[QUANTIZE_TOGGLE_PARAM].getValue() == 0.f) {
 				if (params[RANGE_PARAM].getValue() == 0.f) {
 					f = rescale( params[CV_PARAM + lastCvChanged].getValue(), 0.f, 10.f, params[MIN_PARAM].getValue(), params[MAX_PARAM].getValue());
@@ -782,7 +771,7 @@ struct Darius : Module {
 			}
 		}
 
-		if (lcdMode == ROUTE_MODE) {
+		if (lcdMode == Lcd::ROUTE_MODE) {
 			relative = std::to_string( (1.f - params[ROUTE_PARAM + lastRouteChanged].getValue()) * 100.f);
 			relative.resize(4);
 			if (1.f - params[ROUTE_PARAM + lastRouteChanged].getValue() == 1.f){
@@ -838,7 +827,7 @@ struct Darius : Module {
 		pathTraveled[0] = 0;
 		for (int i = 1; i < 8; i++) pathTraveled[i] = -1;
 		lightsReset = true;
-		lcdMode = INIT_MODE;
+		lcdMode = Lcd::INIT_MODE;
 		lcdText1 = "MEDITATE...";
 		lcdText2 = "MEDITATION.";
 		lcdLastInteraction = 0.f;
@@ -888,8 +877,8 @@ struct Darius : Module {
 		sendGateOutput(args);
 		setVoltageOutput(args);
 		
-		if (lcdDivider.process()) {
-			updateLights(args); // Does it work to move it here?
+		if (displayDivider.process()) {
+			updateLights(args);
 			updateLcd(args);
 		}
 
@@ -931,7 +920,7 @@ struct AriaKnob820MinMax : AriaKnob820 {
 	}
 
 	void onDragMove(const event::DragMove& e) override {
-		module->lcdMode = MINMAX_MODE;
+		module->lcdMode = Lcd::MINMAX_MODE;
 		module->lcdLastInteraction = 0.f;
 		module->lcdDirty = true;
 		AriaKnob820::onDragMove(e);
@@ -948,7 +937,7 @@ struct AriaKnob820Scale : AriaKnob820 {
 	}
 
 	void onDragMove(const event::DragMove& e) override {
-		module->lcdMode = SCALE_MODE;
+		module->lcdMode = Lcd::SCALE_MODE;
 		module->lcdLastInteraction = 0.f;
 		module->lcdDirty = true;
 		AriaKnob820::onDragMove(e);
@@ -964,7 +953,7 @@ struct AriaKnob820Slide : AriaKnob820 {
 	}
 
 	void onDragMove(const event::DragMove& e) override {
-		module->lcdMode = SLIDE_MODE;
+		module->lcdMode = Lcd::SLIDE_MODE;
 		module->lcdLastInteraction = 0.f;
 		module->lcdDirty = true;
 		AriaKnob820::onDragMove(e);
@@ -980,7 +969,7 @@ struct AriaRockerSwitchHorizontal800ModeReset : AriaRockerSwitchHorizontal800 {
 	}
 
 	void onDragStart(const event::DragStart& e) override {
-		module->lcdMode = DEFAULT_MODE;
+		module->lcdMode = Lcd::DEFAULT_MODE;
 		module->lcdLastInteraction = 0.f;
 		module->lcdDirty = true;
 		AriaRockerSwitchHorizontal800::onDragStart(e);
@@ -1012,7 +1001,7 @@ struct AriaKnob820Route : AriaKnob820 {
 	}
 
 	void onDragMove(const event::DragMove& e) override {
-		module->lcdMode = ROUTE_MODE;
+		module->lcdMode = Lcd::ROUTE_MODE;
 		module->lcdLastInteraction = 0.f;
 		module->lcdDirty = true;
 		module->lastRouteChanged = lastChanged;
@@ -1031,108 +1020,13 @@ struct AriaKnob820TransparentCV : AriaKnob820Transparent {
 	}
 
 	void onDragMove(const event::DragMove& e) override {
-		module->lcdMode = KNOB_MODE;
+		module->lcdMode = Lcd::KNOB_MODE;
 		module->lcdLastInteraction = 0.f;
 		module->lcdDirty = true;
 		module->lastCvChanged = lastChanged;
 		AriaKnob820Transparent::onDragMove(e);
 	}
 };
-
-// The draw widget from Arcane, adapted to Darius.
-// Eventually I want to abstract it out into a reusable component. 
-struct LcdDariusDrawWidget : TransparentWidget {
-	Darius *module;
-	std::array<std::shared_ptr<Svg>, 95> asciiSvg; // 32 to 126, the printable range
-	std::array<std::shared_ptr<Svg>, 24> pianoSvg; // 0..11: Unlit, 12..23 = Lit
-	std::string lcdText1;
-	std::string lcdText2;
-
-	LcdDariusDrawWidget(Darius *module) {
-		this->module = module;
-		if (module) {
-			box.size = mm2px(Vec(36.0, 10.0));
-			for (int i = 0; i < 12; i++) // Unlit
-				pianoSvg[i] = APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/lcd/piano/u" + std::to_string(i) + ".svg"));
-			for (int i = 0; i < 12; i++) // Lit
-				pianoSvg[i + 12] = APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/lcd/piano/l" + std::to_string(i) + ".svg"));
-			for (int i = 0; i < 95; i++)
-				asciiSvg[i] = APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/lcd/Fixed_v01/" + std::to_string(i + 32) + ".svg"));
-		}
-	}
-
-	void draw(const DrawArgs &args) override {
-		if (module) {
-			nvgScale(args.vg, 1.5, 1.5);
-		
-			// Piano display at the top
-			if (module->lcdMode == SCALE_MODE || module->lcdMode == QUANTIZED_MODE || module->lcdMode == KNOB_MODE ) {
-				bool skipPianoDisplay = false;
-				if ( module->lcdMode == KNOB_MODE && module->params[module->QUANTIZE_TOGGLE_PARAM].getValue() == 0.f)
-					skipPianoDisplay = true;
-				if (! skipPianoDisplay ) {
-					nvgSave(args.vg);
-					svgDraw(args.vg, pianoSvg[(module->pianoDisplay[0])  ? 12 :  0 ]->handle);
-					nvgTranslate(args.vg, 6, 0);
-					svgDraw(args.vg, pianoSvg[(module->pianoDisplay[1])  ? 13 :  1 ]->handle);
-					nvgTranslate(args.vg, 5, 0);
-					svgDraw(args.vg, pianoSvg[(module->pianoDisplay[2])  ? 14 :  2 ]->handle);
-					nvgTranslate(args.vg, 5, 0);
-					svgDraw(args.vg, pianoSvg[(module->pianoDisplay[3])  ? 15 :  3 ]->handle);
-					nvgTranslate(args.vg, 5, 0);
-					svgDraw(args.vg, pianoSvg[(module->pianoDisplay[4])  ? 16 :  4 ]->handle);
-					nvgTranslate(args.vg, 7, 0);
-					svgDraw(args.vg, pianoSvg[(module->pianoDisplay[5])  ? 17 :  5 ]->handle);
-					nvgTranslate(args.vg, 6, 0);
-					svgDraw(args.vg, pianoSvg[(module->pianoDisplay[6])  ? 18 :  6 ]->handle);
-					nvgTranslate(args.vg, 5, 0);
-					svgDraw(args.vg, pianoSvg[(module->pianoDisplay[7])  ? 19 :  7 ]->handle);
-					nvgTranslate(args.vg, 5, 0);
-					svgDraw(args.vg, pianoSvg[(module->pianoDisplay[8])  ? 20 :  8 ]->handle);
-					nvgTranslate(args.vg, 5, 0);
-					svgDraw(args.vg, pianoSvg[(module->pianoDisplay[9])  ? 21 :  9 ]->handle);
-					nvgTranslate(args.vg, 5, 0);
-					svgDraw(args.vg, pianoSvg[(module->pianoDisplay[10]) ? 22 : 10 ]->handle);
-					nvgTranslate(args.vg, 5, 0);
-					svgDraw(args.vg, pianoSvg[(module->pianoDisplay[11]) ? 23 : 11 ]->handle);
-					nvgRestore(args.vg);
-				}
-			}
-
-			// 11 character display at the top in some modes.
-			if (module->lcdMode == INIT_MODE || module->lcdMode == SLIDE_MODE || module->lcdMode == ROUTE_MODE
-			 || module->lcdMode == MINMAX_MODE    ) {
-				nvgSave(args.vg);
-				lcdText1 = module->lcdText1;
-				lcdText1.append(11, ' '); // Ensure the string is long enough
-				for (int i = 0; i < 11; i++) {
-					char c = lcdText1.at(i);
-					svgDraw(args.vg, asciiSvg[ c - 32 ]->handle);
-					nvgTranslate(args.vg, 6, 0);
-				}
-				nvgRestore(args.vg);
-			}
-		
-			// 11 character display at the bottom in pretty much every mode.
-			if (module->lcdMode == INIT_MODE       || module->lcdMode == SCALE_MODE    || module->lcdMode == SLIDE_MODE
-			 || module->lcdMode == QUANTIZED_MODE  || module->lcdMode == CV_MODE       || module->lcdMode == ROUTE_MODE
-			 || module->lcdMode == MINMAX_MODE     || module->lcdMode == KNOB_MODE ) {
-				nvgSave(args.vg);
-				nvgTranslate(args.vg, 0, 11);
-				lcdText2 = module->lcdText2;
-				lcdText2.append(11, ' '); // Ensure the string is long enough
-				for (int i = 0; i < 11; i++) {
-					char c = lcdText2.at(i);
-					svgDraw(args.vg, asciiSvg[ c - 32 ]->handle);
-					nvgTranslate(args.vg, 6, 0);
-				}
-				nvgRestore(args.vg);
-			}
-		}
-	}
-}; // LcdDariusDrawWidget
-
-
 
 struct DariusWidget : ModuleWidget {
 	DariusWidget(Darius* module) {
@@ -1236,8 +1130,8 @@ struct DariusWidget : ModuleWidget {
 		// Output area //////////////////
 
 		// Lcd
-		LcdFramebufferWidget<Darius> *lfb = new LcdFramebufferWidget<Darius>(module);
-		LcdDariusDrawWidget *ldw = new LcdDariusDrawWidget(module);
+		Lcd::LcdFramebufferWidget<Darius> *lfb = new Lcd::LcdFramebufferWidget<Darius>(module);
+		Lcd::LcdDrawWidget<Darius> *ldw = new Lcd::LcdDrawWidget<Darius>(module);
 		lfb->box.pos = mm2px(Vec(10.3, 106.7));
 		lfb->addChild(ldw);
 		addChild(lfb);

@@ -1,6 +1,7 @@
 #include "plugin.hpp"
 #include "network.hpp"
 #include "quantizer.hpp"
+#include "lcd.hpp"
 #include <ctime>
 #include <thread>
 
@@ -47,7 +48,6 @@ struct ArcaneBase : Module {
 	std::array<bool, 16> patternB, patternC, patternD, patternE; // There is no pattern A
 	std::array<bool, 12> scale;
 		
-	// FIXME - figure out how to use a timer instead!
 	dsp::ClockDivider readJsonDivider;
 	// Huge performance gain not to send all static values each tick. Will do that unless people yell it breaks something.
 	dsp::ClockDivider refreshDivider;	
@@ -770,7 +770,8 @@ struct CardDrawWidget : TransparentWidget {
 };
 
 
-// The draw widget. Making it more generic is hard so there's a bit of duplication with Darius for now.
+// The draw widget. 
+// TODO: Use the generic LCD widget eventually, for easier maintenance.
 struct LcdArcaneDrawWidget : TransparentWidget {
 	Arcane *module;
 	std::array<std::shared_ptr<Svg>, 95> asciiSvg; // 32 to 126, the printable range
@@ -864,7 +865,7 @@ struct ArcaneWidget : ModuleWidget {
 		addChild(cfb);
 		
 		// LCD		
-		LcdFramebufferWidget<Arcane> *lfb = new LcdFramebufferWidget<Arcane>(module);
+		Lcd::LcdFramebufferWidget<Arcane> *lfb = new Lcd::LcdFramebufferWidget<Arcane>(module);
 		LcdArcaneDrawWidget *ldw = new LcdArcaneDrawWidget(module);
 		lfb->box.pos = mm2px(Vec(83.6, 41.4));
 		lfb->addChild(ldw);
@@ -948,7 +949,7 @@ struct AtoutWidget : ModuleWidget {
 		addChild(createWidget<AriaSignature>(mm2px(Vec(31.06, 114.5))));
 		
 		// LCD	
-		LcdFramebufferWidget<Arcane> *fb = new LcdFramebufferWidget<Arcane>(module);
+		Lcd::LcdFramebufferWidget<Arcane> *fb = new Lcd::LcdFramebufferWidget<Arcane>(module);
 		LcdArcaneDrawWidget *ldw = new LcdArcaneDrawWidget(module);
 		fb->box.pos = mm2px(Vec(6.44, 41.4));
 		fb->addChild(ldw);

@@ -209,27 +209,3 @@ struct AriaKnob820Transparent : app::SvgKnob {
 		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/knob-820-transparent.svg")));
 	}
 };
-
-
-
-//////////////////////////////// LCD
-
-// The framebuffer holding the Draw widget.
-// The actual draw widgets that go inside it are made within the modules.
-template <typename T>
-struct LcdFramebufferWidget : FramebufferWidget{
-	T *module;
-	LcdFramebufferWidget(T *m){
-		module = m;
-	}
-
-	void step() override{
-		if (module) { // Required to avoid crashing module browser
-			if(module->lcdDirty){
-				FramebufferWidget::dirty = true;
-				module->lcdDirty = false;
-			}
-			FramebufferWidget::step();
-		}
-	}
-};
