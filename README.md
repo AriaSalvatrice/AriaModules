@@ -3,7 +3,7 @@ Aria Salvatrice's Signature Series VCV Rack Modules
 
 Hiya hello hey hi. These here are a few cool and nice modules what for [VCV Rack](https://vcvrack.com/). I hope you like them.
 
-Module documentation:
+Modules documentation:
 
 - [Split and Merge: Splort, Smerge, Spleet, Swerge, and Splirge](#split-and-merge-splort-smerge-spleet-swerge-and-splirge)
 - [Darius Branching Step Sequencer](#darius-branching-step-sequencer)
@@ -81,7 +81,7 @@ Those inputs are generally connected to the corresponding output of a clock, but
 On the top of the module:
 
 - **Step range**: Choose on which step to start and end the pattern, from 1 to 8 steps in total.
-- **Randomize**: Those two buttons operate on the CV and the routes separately. If you don't like the results, you can use **Edit > Undo**. 
+- **Randomize**: Those two buttons operate on the CV and the routes separately. If you don't like the results, you can use `Edit > Undo`. 
 
 On the bottom-left:
 
@@ -104,7 +104,7 @@ Via the **right-click menu**, you can load various presets for the CV and routes
 If you send triggers to the directional inputs at the exact same time, only one will be accepted. The default priority is: 
 **Forward⯈**, **Up⯅**, **Down⯆**, **⯇Back**. If you want a different priority, you can patch logic gates with modules such as [Count Modula's](https://github.com/countmodula/VCVRackPlugins) to do that. If the priorities aren't working as expected, do not forget that every single cable a signal travels through adds at least one sample of delay, so your triggers might not be actually simultaneous.
 
-Darius has a simple panel, easily understood features, and is impossible to truly tame - by design. It is meant to be easy to learn, suprising to use, and fun to master. It can be used as a melody sequencer, an arpeggiator, a source of modulation, a drum sequencer, even as a worthless waveshaper. Many of its apparent limitations can be overcome with a bit of creative patching. It works wonderfully with [stoermelder PackOne](https://github.com/stoermelder/vcvrack-packone)'s [CV-MAP](https://github.com/stoermelder/vcvrack-packone/blob/v1/docs/CVMap.md) and [8FACE](https://github.com/stoermelder/vcvrack-packone/blob/v1/docs/EightFace.md) to give you CV control over the knobs and add multiple preset banks.
+Darius has a simple panel, easily understood features, and is impossible to truly tame - by design. It is meant to be easy to learn, surprising to use, and fun to master. It can be used as a melody sequencer, an arpeggiator, a source of modulation, a drum sequencer, even as a worthless waveshaper. Many of its apparent limitations can be overcome with a bit of creative patching. It works wonderfully with [stoermelder PackOne](https://github.com/stoermelder/vcvrack-packone)'s [CV-MAP](https://github.com/stoermelder/vcvrack-packone/blob/v1/docs/CVMap.md) and [8FACE](https://github.com/stoermelder/vcvrack-packone/blob/v1/docs/EightFace.md) to give you CV control over the knobs and add multiple preset banks.
 
 Darius is named after the eponymous arcade shoot-em-up game series, known for its surreal visuals, its fish-themed enemies, its [unique soundtracks](https://www.youtube.com/watch?v=6FEdlAL3bX0), its multi-display arcade cabinets, and for allowing the player to select their route through the game via a branching map.
 
@@ -126,7 +126,7 @@ I hope luck is on your side. Every day, you will share together the fortune I sh
 
 Modules in the Arcane series are comprised almost only of output jacks, sending today's fortune as CV. **Those values are the same for every Arcane user**, and nobody can predict or influence them. I pronounce a new oracle every day at 12:00 AM UTC without fail.
 
-To get started immediately: use the topmost **1/16** output to drive the clock of a step sequencer, send that sequencer's output to Arcane's quantizer input, send the quantizer output to an oscillator, and listen what happens. Next, try other jacks as a clock. 
+To get started immediately: use the topmost **1/16** output to drive the clock input of a step sequencer, send that sequencer's output to Arcane's quantizer input, send the quantizer output to an oscillator, and listen what happens. Next, try other jacks as a clock. 
 
 Optional video introduction, showing a song made with Arcane:
 
@@ -252,12 +252,13 @@ Those modules are part of the [VCV plugin library](https://vcvrack.com/plugins.h
 
 
 
-Acknowledgements & Credits
---------------------------
+Acknowledgements & Credits & Other Assorted Namedrops
+-----------------------------------------------------
 
-Thanks to everyone who created open-source modules I could learn from and make songs with. Thanks to Andrew Belt for creating VCV Rack and providing code suggestions. Thanks to my music-making LGBT internet shitposting gang for introducing me to VCV and modular synthesis as something that's not just for old guys with more disposable income than impetus to write fresh songs. Thanks to my dog for no particular reason. 
+Thanks to everyone who created open-source modules I could learn from and make songs with. Thanks to Andrew Belt for creating VCV Rack and providing code suggestions. Thanks to my music-making LGBT internet shitposting gang for introducing me to VCV and modular synthesis as something that's not just for old guys with more disposable income than impetus to write fresh songs. 
+Thanks to [Sophie](https://twitter.com/DreamyDoric) for music theory advice. Thanks to [Heavy Viper](https://rekkanogotoku.com/) for years of inspiring conversation about synths and music. Thanks to [Mog](https://github.com/JustMog/Mog-VCV) for Mog. Thanks to my dog for no particular reason.
 
-**And most importantly, thanks to YOU for using my art.**
+**But most of all, thanks to YOU for using my art.**
 
 The modules use the following fonts:
 - [Francois One](https://fonts.google.com/specimen/Francois+One) by [Vernon Adams](http://sansoxygen.com/) 
@@ -279,7 +280,7 @@ The graphics are also distributed under the WTFPL, save for the following except
 
 - My signature/logo remains copyrighted.
   - If you edit my code to use my modules as a base for your own altered modules, remove my signature from your faceplates, even if you think your changes are trivial: I don't want to endorse and take credit for something I didn't vet or personally participate in.
-  - If you are faithfully porting my code to a fork of VCV Rack, are compiling binaries for another platform, or are otherwise faitfully distributing my modules as I designed them, you can leave in the signature. If unsure, just ask.
+  - If you are faithfully porting my code to a fork of VCV Rack, are compiling binaries for another platform, or are otherwise faithfully distributing my modules as I designed them, keep the signature. If unsure, just ask.
   - The easiest way to remove my signature from every module is by blanking or replacing the graphic in the [`res/components/signature.svg`](res/components/signature.svg) file, and removing it from the blank plate: [`res/Blank.svg`](res/Blank.svg).
 - The files in `res/Arcane` are all distributed under the [CC-BY-NC-SA](https://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_US) license, as they are a derivative work of the [CBD Tarot](https://www.cbdtarot.com/) released under that license.
 - The files in `res/components/lcd/Fixed_v01` were exported from the [Fixed_v01 font by Orgdot](http://www.orgdot.com/aliasfonts/index.htm), which is released under [a custom MIT-style license](res/components/lcd/Fixed_v01/LICENSE.txt), included in the source and in binary distributions.
