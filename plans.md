@@ -139,3 +139,14 @@ The processor gives meaning to the cells and provides outputs. Here's a possible
 | Drag Left then Right | Tie and slide both        | Ratchet             | -
 
 
+
+# Alien communication device
+My very own take on the Turing machine. The spaceship of the alien princess leaves our solar system tomorrow. For now she graces earth with a song.
+
+ Something that is less concerned with being an elegant electronic circuit, or an elegant algorithm, and is more concerned with the musicality of its output, and the playfulness of its interaction. 
+
+I want it to embrace repetitive, fractal, kaleidoscopic structures, without diving deep into a single-algorithm aesthetic. It should shed any pretense of algorithmic purity and hardcode stuff that just plain sounds good.
+
+Keep the big knob. The big knob is great. When you turn it, you must hear it. And memory banks. 
+
+Build your own relationship to the intrument. It should be labeled in an alien language. The documentation should be absolutely worthless. Its buttons should have an obvious effect, but it should be impossible to explain what that effect is.
