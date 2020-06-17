@@ -6,7 +6,7 @@ There's no such thing as stealing ideas, but there is such a thing as duplicatio
 
 - I will not create modules that already exist in a form that satisfies me.
 - I will not create modules I will not use to make and play music. I've come to call the genres I write in "Baroque Technopop" and "Pastoral Industrial". With VCV, I focus on live aleatoric techno. Music anchored in 4/4 time and Western tonality. I do not care much for ambient, drone, noise, "experimental", xenharmonic music, and other common uses of a modular. If my modules are useful for that purpose, that's only a side-effect.
-- There is a ton I do not know. I barely know C++ or music theory. I don't know DSP at all. I want to focus on creating things that help me build skills transferable in other fields I'm interested in. I do not want to go embark on learning dead ends that can't be folded back into future creative work.
+- There is a ton I do not know. I barely know C++ or music theory. I don't know DSP at all. I want to focus on creating things that help me build skills transferable in other fields I'm interested in. I do not want to embark on learning dead ends that can't be folded back into future creative work.
 - Everything module I make must synergize with my own existing modules to form a coherent system.
 - I do not own a single hardware module and I have no plans to. I do not care whether it's economically and technically feasible to create hardware versions of my modules.
 - I approach the modular as an artist, not as an electrical engineer.
@@ -38,6 +38,7 @@ Think pitchbend wheel. A series of controllers that can spring back, and can be 
 - Meant to be operated with the mouse or touch, not from CV or MIDI. 
 - Form factors offered: Wheel (pitchbend/modulation), XY Pad, Joystick (Travel constrained to a circle shape). 
 - They can spring back, and you can tweak the tension of the spring in each direction.
+- Latch feature: if you push a controller up to the edge, it locks in position, until you push the release button or grab the controller again.
 - In pitchbend mode, you can set bend up and down range separately.
 - You can quantize input, and you can tell the pitchbend to aim for _n_ scale degrees above/below within the current scale/chord.
 - You can also quantize output for a stepped glissando.
@@ -89,7 +90,7 @@ The system will:
 
 It will be a multi-module system, based on the expander UI metaphor.
 
-I am not sure yet how it will operate internally. Having a bidirectional expander bus across 5 modules is probably a terrible idea. Sharing a single data structure in memory is not thread-safe. I am thinking of allowing each module to read but not write the data of other's, and allow the user to change the channel of each module.
+I am not sure yet how it will operate internally. Having a bidirectional expander bus across 4 modules is probably a terrible idea. Sharing a single data structure in memory is not thread-safe. I am thinking of allowing each module to read but not write the data of other's, and allow the user to change the channel of each module.
 
 The system is comprised of the following classes of devices, operating in the following order:
 
@@ -131,10 +132,10 @@ The processor gives meaning to the cells and provides outputs. Here's a possible
 | Quadruple click      | -                         | -                   | -
 | Drag Up              | Octave +1                 | 60% prob            | Octave +1
 | Drag Down            | Octave -1                 | 40% prob            | Octave -1
-| Drag Left            | Slide from previous step  | 2x trig             | -
-| Drag Right           | Tie with next step        | 4x trig             | -
 | Drag Down then Up    | Octave +2                 | 80% prob            | Octave +2
 | Drag Up then Down    | Octave -2                 | 20% prob            | Octave -2
+| Drag Left            | Slide from previous step  | 2x trig             | -
+| Drag Right           | Tie with next step        | 4x trig             | -
 | Drag Right then Left | Tie and slide both        | Flam                | -
 | Drag Left then Right | Tie and slide both        | Ratchet             | -
 
@@ -143,10 +144,23 @@ The processor gives meaning to the cells and provides outputs. Here's a possible
 # Alien communication device
 My very own take on the Turing machine. The spaceship of the alien princess leaves our solar system tomorrow. For now she graces earth with a song.
 
- Something that is less concerned with being an elegant electronic circuit, or an elegant algorithm, and is more concerned with the musicality of its output, and the playfulness of its interaction. 
+Something that is less concerned with being an elegant electronic circuit, or an elegant algorithm, and is more concerned with the musicality of its output, and the playfulness of its interaction. 
 
 I want it to embrace repetitive, fractal, kaleidoscopic structures, without diving deep into a single-algorithm aesthetic. It should shed any pretense of algorithmic purity and hardcode stuff that just plain sounds good.
 
 Keep the big knob. The big knob is great. When you turn it, you must hear it. And memory banks. 
 
 Build your own relationship to the intrument. It should be labeled in an alien language. The documentation should be absolutely worthless. Its buttons should have an obvious effect, but it should be impossible to explain what that effect is.
+
+
+# VVR - Voltage Voltage Rectification
+
+Send it a clock, and triggers/gates to four directional Stepchart inputs, one bar in advance. 
+
+Connect a Dance Dance Revolution pad to the Player input. Triggers are steps, gates are holds. 
+
+If the player performs a step/hold perfectly, it gets passed to a specific group of outputs output. Less than perfectly, to another group. If they miss, to a third group. How well they are doing is expressed as a CV. 
+
+This project sounds fun, but it'd be a lot of work. I'd be much more eager to implement it if people are interested in doing something neat with it - especially if there's artists eager to turn it into some sort of participatory installation art. 
+
+And if someone's willing to help with that problem, we could use machine learning to parse the large corpus of existing Stepmania charts out there, and use it to generate stepcharts on the fly. 
