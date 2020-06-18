@@ -878,7 +878,7 @@ struct Darius : Module {
 
         updateRoutes(args);
 
-        // Refreshing some non-essential knobs often has a performance impact
+        // Refreshing slide knobs often has a performance impact
         // so the divider will remain quite high unless someone complains
         // it breaks their art. 
         if (knobDivider.process()) {
@@ -899,7 +899,6 @@ struct Darius : Module {
             updateLights(args);
             updateLcd(args);
         }
-
     }
 };
 

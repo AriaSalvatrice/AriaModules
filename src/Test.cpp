@@ -3,6 +3,7 @@
 #include <thread>
 #include <iomanip>
 #include <random>
+#include "lib/duktape/duktape.h"
 
 // This module is to make all sorts of tests without having to recompile too much or deal with complex code interactions.
 
@@ -24,47 +25,22 @@ struct Test : Module {
         NUM_LIGHTS
     };
     dsp::ClockDivider testDivider;
-
+    duk_context* ctx = NULL;
     
     Test() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         testDivider.setDivision(44);
+        ctx = duk_create_heap_default();
+        DEBUG("HI");
+    }
 
+    ~Test(){
+        if (ctx) duk_destroy_heap(ctx);
     }
 
     void process(const ProcessArgs& args) override {
-        // outputs[TEST_OUTPUT + 0].setVoltage( 0.f);
-        // outputs[TEST_OUTPUT + 1].setVoltage( 0.f);
-        // outputs[TEST_OUTPUT + 2].setVoltage( 0.f);
-        // outputs[TEST_OUTPUT + 3].setVoltage( 0.f);
-        // outputs[TEST_OUTPUT + 4].setVoltage( 0.f);
-        // outputs[TEST_OUTPUT + 5].setVoltage( 0.f);
-        // outputs[TEST_OUTPUT + 6].setVoltage( 0.f);
-        // outputs[TEST_OUTPUT + 7].setVoltage( 0.f);
-        // outputs[TEST_OUTPUT + 8].setVoltage( 0.f);
-        // outputs[TEST_OUTPUT + 9].setVoltage( 0.f);
-        // outputs[TEST_OUTPUT + 10].setVoltage(0.f);
-        // outputs[TEST_OUTPUT + 11].setVoltage(0.f);
 
-        // lights[TEST_LIGHT + 0].setBrightness(1.f);
-
-        // float random = 0;
-        
-        if (testDivider.process()) {
-            std::mt19937 generator(7777);	
-            std::bernoulli_distribution coinFlip(0.5);
-            outputs[TEST_OUTPUT + 0].setVoltage( (coinFlip(generator)) ? 0.f : 10.f );
-            outputs[TEST_OUTPUT + 1].setVoltage( (coinFlip(generator)) ? 0.f : 10.f );
-            outputs[TEST_OUTPUT + 2].setVoltage( (coinFlip(generator)) ? 0.f : 10.f );
-            outputs[TEST_OUTPUT + 3].setVoltage( (coinFlip(generator)) ? 0.f : 10.f );
-            outputs[TEST_OUTPUT + 4].setVoltage( (coinFlip(generator)) ? 0.f : 10.f );
-            outputs[TEST_OUTPUT + 5].setVoltage( (coinFlip(generator)) ? 0.f : 10.f );
-            outputs[TEST_OUTPUT + 6].setVoltage( (coinFlip(generator)) ? 0.f : 10.f );
-            outputs[TEST_OUTPUT + 7].setVoltage( (coinFlip(generator)) ? 0.f : 10.f );
-            outputs[TEST_OUTPUT + 8].setVoltage( (coinFlip(generator)) ? 0.f : 10.f );
-        }
-        
-    }	
+    }
 };
 
 

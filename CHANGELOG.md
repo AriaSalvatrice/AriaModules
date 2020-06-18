@@ -3,6 +3,12 @@ Changelog
 
 The versioning follows this standard: the first number corresponds to the VCV rack version used. The second number is increased any time a new module is added. The third number is increased when something is added or fixed without adding any new module.
 
+## Unreleased
+
+- Nothing lol
+
+
+
 ## [1.4.1] - 2020-06-16
 
 ### Added

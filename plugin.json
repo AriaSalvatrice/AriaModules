@@ -121,6 +121,33 @@
       ]
     },
     {
+      "slug": "Srot",
+      "name": "Signature Series Srot",
+      "description": "-",
+      "tags": [
+        "Controller",
+		"Visual"
+      ]
+    },
+    {
+      "slug": "Bendlet",
+      "name": "Signature Series Bendlet",
+      "description": "-",
+      "tags": [
+        "Controller",
+		"Visual"
+      ]
+    },
+    {
+      "slug": "Test",
+      "name": "Signature Series Test",
+      "description": "-",
+      "tags": [
+        "Controller",
+		"Visual"
+      ]
+    },
+    {
       "slug": "Blank",
       "name": "Signature Series 8hp Blank Plate",
       "description": "A complimentary blank plate and ♥-head screwdriver are included with every Signature Series module purchase",
