@@ -3,7 +3,6 @@
 #include <thread>
 #include <iomanip>
 #include <random>
-#include "lib/duktape/duktape.h"
 
 // This module is to make all sorts of tests without having to recompile too much or deal with complex code interactions.
 
@@ -25,17 +24,16 @@ struct Test : Module {
         NUM_LIGHTS
     };
     dsp::ClockDivider testDivider;
-    duk_context* ctx = NULL;
+
+
     
     Test() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         testDivider.setDivision(44);
-        ctx = duk_create_heap_default();
-        DEBUG("HI");
+
     }
 
     ~Test(){
-        if (ctx) duk_destroy_heap(ctx);
     }
 
     void process(const ProcessArgs& args) override {
