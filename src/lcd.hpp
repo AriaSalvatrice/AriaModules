@@ -25,7 +25,7 @@ namespace Lcd {
 
 // What to draw on the LCD.
 enum LcdPage {
-    OFF_MODE,
+    OFF_PAGE,
     TEXT1_PAGE,
     TEXT2_PAGE,
     TEXT1_AND_TEXT2_PAGE,
@@ -47,7 +47,7 @@ struct LcdStatus {
     bool lcdDirty = false;
 
     // LCD-specific page: whether to draw two lines of text, a piano, etc.
-    int lcdPage = OFF_MODE;
+    int lcdPage = OFF_PAGE;
 
     LcdStatus() {
         for (int i = 0; i < 12; i++) pianoDisplay[i] = false;

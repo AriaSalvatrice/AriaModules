@@ -223,7 +223,7 @@ inline float quantize(float voltage, std::array<bool, 12> validNotes) {
 }
 
 // Note name and octave
-inline std::string noteName(float voltage) {
+inline std::string noteOctaveLcdName(float voltage) {
     voltage = voltage * 12.f + 60.f;
     int octave = (int) voltage / 12 - 1;
     int note = (int) voltage % 12;

@@ -729,7 +729,7 @@ struct Darius : Module {
 
         if (lcdMode == QUANTIZED_MODE){
             lcdStatus.lcdPage = Lcd::PIANO_AND_TEXT2_PAGE;
-            lcdStatus.lcdText2 = Quantizer::noteName(outputs[CV_OUTPUT].getVoltage());
+            lcdStatus.lcdText2 = Quantizer::noteOctaveLcdName(outputs[CV_OUTPUT].getVoltage());
             lcdStatus.pianoDisplay = Quantizer::pianoDisplay(outputs[CV_OUTPUT].getVoltage());
         }
 
@@ -747,7 +747,7 @@ struct Darius : Module {
                 text.resize(5);
                 text.append("V");
             } else {
-                text = (params[RANGE_PARAM].getValue() == 0.f) ? Quantizer::noteName(params[MIN_PARAM].getValue() - 4.f) : Quantizer::noteName(params[MIN_PARAM].getValue() - 5.f);
+                text = (params[RANGE_PARAM].getValue() == 0.f) ? Quantizer::noteOctaveLcdName(params[MIN_PARAM].getValue() - 4.f) : Quantizer::noteOctaveLcdName(params[MIN_PARAM].getValue() - 5.f);
             }
             lcdStatus.lcdText1 = "Min: " + text;
 
@@ -756,7 +756,7 @@ struct Darius : Module {
                 text.resize(5);
                 text.append("V");
             } else {
-                text = (params[RANGE_PARAM].getValue() == 0.f) ? Quantizer::noteName(params[MAX_PARAM].getValue() - 4.f) : Quantizer::noteName(params[MAX_PARAM].getValue() - 5.f);
+                text = (params[RANGE_PARAM].getValue() == 0.f) ? Quantizer::noteOctaveLcdName(params[MAX_PARAM].getValue() - 4.f) : Quantizer::noteOctaveLcdName(params[MAX_PARAM].getValue() - 5.f);
             }
             lcdStatus.lcdText2 = "Max: " + text;
         }
@@ -783,7 +783,7 @@ struct Darius : Module {
                  }
                  f = Quantizer::quantize( f, validNotes);
                  lcdStatus.pianoDisplay = Quantizer::pianoDisplay(f);
-                 lcdStatus.lcdText2 = ">" + Quantizer::noteName(f);
+                 lcdStatus.lcdText2 = ">" + Quantizer::noteOctaveLcdName(f);
             }
         }
 
@@ -845,6 +845,7 @@ struct Darius : Module {
         for (int i = 1; i < 8; i++) pathTraveled[i] = -1;
         lightsReset = true;
         lcdMode = INIT_MODE;
+        lcdStatus.lcdPage = Lcd::TEXT1_AND_TEXT2_PAGE;
         lcdStatus.lcdText1 = "MEDITATE...";
         lcdStatus.lcdText2 = "MEDITATION.";
         lcdLastInteraction = 0.f;
