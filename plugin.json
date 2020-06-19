@@ -1,7 +1,7 @@
 {
   "slug": "AriaSalvatrice",
   "name": "Aria Salvatrice",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "license": "WTFPL",
   "brand": "Aria Salvatrice",
   "author": "Aria Salvatrice",
@@ -115,33 +115,6 @@
       "slug": "Undular",
       "name": "Signature Series Undular",
       "description": "Scroll the rack via CV for live performance. If locked by mistake: Engine > Sample Rate > Pause",
-      "tags": [
-        "Controller",
-		"Visual"
-      ]
-    },
-    {
-      "slug": "Srot",
-      "name": "Signature Series Srot",
-      "description": "-",
-      "tags": [
-        "Controller",
-		"Visual"
-      ]
-    },
-    {
-      "slug": "Bendlet",
-      "name": "Signature Series Bendlet",
-      "description": "-",
-      "tags": [
-        "Controller",
-		"Visual"
-      ]
-    },
-    {
-      "slug": "Test",
-      "name": "Signature Series Test",
-      "description": "-",
       "tags": [
         "Controller",
 		"Visual"

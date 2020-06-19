@@ -9,9 +9,6 @@
 //
 // Note: the module calls them "path" internally, but they should be called "routes" for the user.
 
-// TODO
-// - Quantized slides would be fun! (But maybe use another module? idk)
-
 
 const int STEP1START = 0;  //               00        
 const int STEP2START = 1;  //             02  01            

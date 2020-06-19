@@ -3,9 +3,9 @@ Changelog
 
 The versioning follows this standard: the first number corresponds to the VCV rack version used. The second number is increased any time a new module is added. The third number is increased when something is added or fixed without adding any new module.
 
-## Unreleased
+## [1.4.2] - UNRELEASED
 
-- Nothing lol
+- [NEW FEATURE] Darius: Added experimental support for Portable sequences from the right-click menu.
 
 
 

@@ -11,7 +11,7 @@ void init(Plugin* p) {
     p->addModel(modelSpleet);
     p->addModel(modelSwerge);
     p->addModel(modelSplirge);
-    p->addModel(modelSrot);
+    // p->addModel(modelSrot);
 
     // Sequencer
     p->addModel(modelDarius);
@@ -27,7 +27,7 @@ void init(Plugin* p) {
     // Blank plate
     p->addModel(modelBlank);
 
-    p->addModel(modelBendlet);
-    p->addModel(modelTest);
+    // p->addModel(modelBendlet);
+    // p->addModel(modelTest);
 
 }

@@ -15,7 +15,7 @@ extern Model *modelSmerge;
 extern Model *modelSpleet;
 extern Model *modelSwerge;
 extern Model *modelSplirge;
-extern Model *modelSrot;
+// extern Model *modelSrot;
 
 // Sequencer
 extern Model *modelDarius;
@@ -31,5 +31,5 @@ extern Model *modelUndular;
 // Blank plate
 extern Model *modelBlank;
 
-extern Model *modelBendlet;
-extern Model *modelTest;
+// extern Model *modelBendlet;
+// extern Model *modelTest;
