@@ -50,11 +50,13 @@ struct Note {
         return rootJ;
     }
 
-};
+    // No fromJson for notes - doesn't seem to have any use case
+
+}; // Note
 
 // Contains one or more PortableSequence::Note
 struct Sequence {
-    float length;
+    float length = 0.f;
     std::vector<PortableSequence::Note> notes;
 
     // Added to the end
@@ -93,8 +95,50 @@ struct Sequence {
         return rootJ;
     }
 
+    // Returns true if import successful.
+    // Does not validate data in great detail - so clamp it after import.
+    bool fromJson(const char* clipboard) {
+        DEBUG("Yay!");
+        json_error_t error;
+        json_t* rootJ = json_loads(clipboard, 0, &error);
+        if (!rootJ) {
+            WARN("Portable Sequence: Could not prase clipboard as JSON");
+            return false;
+        }
+        json_t* vcvrackSequenceJ = json_object_get(rootJ, "vcvrack-sequence");
+        if (!vcvrackSequenceJ) {
+            WARN("Portable Sequence: No vcvrack-sequence data found");
+            return false; 
+        }
+        json_t* notesJ = json_object_get(vcvrackSequenceJ, "notes");
+        if (!notesJ) {
+            WARN("Portable Sequence: No notes data found");
+            return false; 
+        }
+        for(std::size_t i = 0; i < json_array_size(notesJ); i++) {
+            json_t* noteJ = json_array_get(notesJ, i);
+            PortableSequence::Note note;
+            note.start = json_real_value(json_object_get(noteJ, "start"));
+            note.pitch = json_real_value(json_object_get(noteJ, "pitch"));
+            note.length = json_real_value(json_object_get(noteJ, "length"));
+            json_t* velocityJ = json_object_get(noteJ, "velocity");
+            json_t* playProbabilityJ = json_object_get(noteJ, "playProbability");
+            note.velocity = (velocityJ) ? json_real_value(velocityJ) : -1.f;
+            note.playProbability = (playProbabilityJ) ? json_real_value(playProbabilityJ) : -1.f;
+            addNote(note);
+        }
+        json_t* lengthJ = json_object_get(vcvrackSequenceJ, "length");
+        if (!lengthJ) {
+            WARN("Portable Sequence: No global length found. It will be automatically calculated instead.");
+            calculateLength();
+        } else {
+            length = json_real_value(lengthJ);
+        }
+        return true;
+    }
+
     // Copies the portable sequence to the user's clipboard
-    // Does not clamp or sort first - do it explicitly if desired.
+    // Does not clamp or sort first - do so before explicitly if desired.
     void toClipboard() {
         json_t* sequenceJ = this->toJson();
         char* sequenceC = json_dumps(sequenceJ, JSON_INDENT(2) | JSON_REAL_PRECISION(9));
@@ -103,7 +147,12 @@ struct Sequence {
         json_decref(sequenceJ);
     }
 
-};
+    // Returns true if import successful
+    bool fromClipboard() {
+        const char* clipboard = glfwGetClipboardString(APP->window->win);
+        return (clipboard == NULL) ? false : fromJson(clipboard);
+    }
 
+}; // Sequence
 
 } // PortableSequence
