@@ -76,7 +76,7 @@ struct Sequence {
         });
     }
 
-    // Can also set it explicitly instead FIXME
+    // Can also set it explicitly instead
     void calculateLength(){
         int lastStartingNote = 0;
         for(std::size_t i = 0; i < notes.size() - 1; i++)
@@ -98,7 +98,6 @@ struct Sequence {
     // Returns true if import successful.
     // Does not validate data in great detail - so clamp it after import.
     bool fromJson(const char* clipboard) {
-        DEBUG("Yay!");
         json_error_t error;
         json_t* rootJ = json_loads(clipboard, 0, &error);
         if (!rootJ) {
