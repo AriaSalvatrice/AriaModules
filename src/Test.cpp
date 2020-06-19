@@ -3,6 +3,7 @@
 #include <thread>
 #include <iomanip>
 #include <random>
+#include "portablesequence.hpp"
 
 // This module is to make all sorts of tests without having to recompile too much or deal with complex code interactions.
 
@@ -31,6 +32,28 @@ struct Test : Module {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         testDivider.setDivision(44);
 
+        PortableSequence::Sequence sequence;
+        PortableSequence::Note note1;
+        note1.start = 12.f;
+        note1.pitch = 1.15f;
+        note1.length = 4.f;
+        note1.velocity = 1.5f;
+        PortableSequence::Note note2;
+        note2.start = 7.f;
+        note2.pitch = 9454.15f;
+        note2.length = 0.05f;
+        PortableSequence::Note note3;
+        note3.start = 8.f;
+        note3.pitch = -4.25f;
+        note3.length = 2.0f;
+        note3.playProbability = 0.6f;
+        sequence.addNote(note1);
+        sequence.addNote(note2);
+        sequence.addNote(note3);
+        sequence.clampValues();
+        sequence.calculateLength();
+        sequence.sort();
+        sequence.toClipboard();
     }
 
     ~Test(){
