@@ -22,6 +22,7 @@ struct Srot : Module {
     void process(const ProcessArgs& args) override {
 
     }
+
 };
 
 
@@ -40,6 +41,7 @@ struct SrotWidget : ModuleWidget {
         addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         
     }
+
 };
 
 Model* modelSrot = createModel<Srot, SrotWidget>("Srot");
