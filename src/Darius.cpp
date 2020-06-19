@@ -2,13 +2,14 @@
 #include "prng.hpp"
 #include "quantizer.hpp"
 #include "lcd.hpp"
+#include "portablesequence.hpp"
 
 // Warning - this module was created with very little C++ experience, and features were 
 // added to it later without regard for code quality. This is maintained exploratory code, not good design.
+//
+// Note: the module calls them "path" internally, but they should be called "routes" for the user.
 
 // TODO
-// - Portable sequences
-// - "New point of departure" mode
 // - Quantized slides would be fun! (But maybe use another module? idk)
 
 
@@ -94,6 +95,8 @@ struct Darius : Module {
     bool routesToBottom = false;
     bool routesToEqualProbability = false;
     bool routesToBinaryTree = false;
+    bool copyPortableSequence = false;
+    bool pastePortableSequence = false;
     std::array<bool, 12> scale;
     int stepFirst = 1;
     int stepLast = 8;
@@ -329,6 +332,65 @@ struct Darius : Module {
         params[ROUTE_PARAM + 20].setValue(1.f);
         for (int i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
         APP->history->push(new BulkCvAction(this->id, "set Darius Routes to Binary tree", ROUTE_PARAM, oldValues, newValues));
+    }
+
+    void importPortableSequence(const ProcessArgs& args){
+        pastePortableSequence = false;
+        std::array<float, 36> oldValues;
+        std::array<float, 36> newValues;
+        PortableSequence::Sequence sequence;
+        sequence.fromClipboard();
+        sequence.sort();
+        sequence.clampValues();
+        for (int i = 0; i < 36; i++) oldValues[i] = params[CV_PARAM + i].getValue(); 
+        for(int i = 0; i < 1; i++) params[CV_PARAM + i + STEP1START].setValue( (sequence.notes.size() > 0) ? clamp(sequence.notes[0].pitch + 4.f, 0.f, 10.f) : 5.f);
+        for(int i = 0; i < 2; i++) params[CV_PARAM + i + STEP2START].setValue( (sequence.notes.size() > 1) ? clamp(sequence.notes[1].pitch + 4.f, 0.f, 10.f) : 5.f);
+        for(int i = 0; i < 3; i++) params[CV_PARAM + i + STEP3START].setValue( (sequence.notes.size() > 2) ? clamp(sequence.notes[2].pitch + 4.f, 0.f, 10.f) : 5.f);
+        for(int i = 0; i < 4; i++) params[CV_PARAM + i + STEP4START].setValue( (sequence.notes.size() > 3) ? clamp(sequence.notes[3].pitch + 4.f, 0.f, 10.f) : 5.f);
+        for(int i = 0; i < 5; i++) params[CV_PARAM + i + STEP5START].setValue( (sequence.notes.size() > 4) ? clamp(sequence.notes[4].pitch + 4.f, 0.f, 10.f) : 5.f);
+        for(int i = 0; i < 6; i++) params[CV_PARAM + i + STEP6START].setValue( (sequence.notes.size() > 5) ? clamp(sequence.notes[5].pitch + 4.f, 0.f, 10.f) : 5.f);
+        for(int i = 0; i < 7; i++) params[CV_PARAM + i + STEP7START].setValue( (sequence.notes.size() > 6) ? clamp(sequence.notes[6].pitch + 4.f, 0.f, 10.f) : 5.f);
+        for(int i = 0; i < 8; i++) params[CV_PARAM + i + STEP8START].setValue( (sequence.notes.size() > 7) ? clamp(sequence.notes[7].pitch + 4.f, 0.f, 10.f) : 5.f);
+        for (int i = 0; i < 36; i++) newValues[i] = params[CV_PARAM + i].getValue();
+        APP->history->push(new BulkCvAction(this->id, "import Portable Sequence", CV_PARAM, oldValues, newValues));
+    }
+
+    // OK, this one is gonna be messy lol
+    void exportPortableSequence(const ProcessArgs& args){
+        copyPortableSequence = false;
+        PortableSequence::Sequence sequence;
+        PortableSequence::Note note;
+        prng::prng localPrng;
+        float localSeed;
+        int currentNode = 0;
+
+        if (inputs[SEED_INPUT].isConnected() and (inputs[SEED_INPUT].getVoltage() != 0.f) ) {
+            localSeed = inputs[SEED_INPUT].getVoltage();
+        } else {
+            localSeed = random::uniform();
+        }
+        localPrng.init(localSeed, localSeed);
+
+        note.length = 1.f;
+        for (int i = 0; i < 8; i++) {
+            note.start = (float) i;
+            note.pitch = params[CV_PARAM + currentNode].getValue();
+            if (params[QUANTIZE_TOGGLE_PARAM].getValue() == 1.f) {
+                note.pitch = rescale(note.pitch, 0.f, 10.f, params[MIN_PARAM].getValue() - 4.f, params[MAX_PARAM].getValue() - 4.f);
+                note.pitch = Quantizer::quantize(note.pitch, scale);
+            } else {
+                note.pitch = rescale(note.pitch, 0.f, 10.f, params[MIN_PARAM].getValue(), params[MAX_PARAM].getValue());
+            }
+            if ( i + 1 >= (int) params[STEPFIRST_PARAM].getValue() && i + 1 <= (int) params[STEPCOUNT_PARAM].getValue()){
+                sequence.addNote(note);
+            }
+            currentNode = (localPrng.uniform() < params[ROUTE_PARAM + currentNode].getValue()) ? currentNode + i + 2 : currentNode + i + 1;
+        }
+
+        sequence.clampValues();
+        sequence.sort();
+        sequence.calculateLength();
+        sequence.toClipboard();
     }
 
     void resetPathTraveled(const ProcessArgs& args){
@@ -853,6 +915,13 @@ struct Darius : Module {
     }
 
     void process(const ProcessArgs& args) override {
+        if (copyPortableSequence)
+            exportPortableSequence(args);
+
+        if (pastePortableSequence)
+            importPortableSequence(args);
+
+
         if (randomizeCvTrigger.process(params[RANDCV_PARAM].getValue()))
             randomizeCv(args);
         if (randomizeRouteTrigger.process(params[RANDROUTE_PARAM].getValue()))
@@ -1179,6 +1248,20 @@ struct DariusWidget : ModuleWidget {
     }
 
 
+    struct CopyPortableSequenceItem : MenuItem {
+        Darius *module;
+        void onAction(const event::Action &e) override {
+            module->copyPortableSequence = true;
+        }
+    };
+
+    struct PastePortableSequenceItem : MenuItem {
+        Darius *module;
+        void onAction(const event::Action &e) override {
+            module->pastePortableSequence = true;
+        }
+    };
+
     struct ResetCVItem : MenuItem {
         Darius *module;
         void onAction(const event::Action &e) override {
@@ -1226,7 +1309,20 @@ struct DariusWidget : ModuleWidget {
         assert(module);
 
         menu->addChild(new MenuSeparator());
-        
+
+        CopyPortableSequenceItem *copyPortableSequenceItem = createMenuItem<CopyPortableSequenceItem>("Copy one possible route as Portable Sequence");
+        copyPortableSequenceItem->module = module;
+        menu->addChild(copyPortableSequenceItem);
+
+        PastePortableSequenceItem *pastePortableSequenceItem = createMenuItem<PastePortableSequenceItem>("Paste Portable Sequence (identical values per step)");
+        pastePortableSequenceItem->module = module;
+        menu->addChild(pastePortableSequenceItem);
+
+        MenuLabel *pasteNotes = createMenuLabel<MenuLabel>("After pasting, set MIN/MAX knobs to maximum range");
+        menu->addChild(pasteNotes);
+      
+        menu->addChild(new MenuSeparator());
+
         ResetCVItem *resetCVItem = createMenuItem<ResetCVItem>("Reset CV");
         resetCVItem->module = module;
         menu->addChild(resetCVItem);
