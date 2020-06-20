@@ -76,12 +76,10 @@ struct Sequence {
         });
     }
 
-    // Can also set it explicitly instead
+    // Length is best set explicitly, but can be calculated if missing
     void calculateLength(){
-        int lastStartingNote = 0;
         for(std::size_t i = 0; i < notes.size() - 1; i++)
-            lastStartingNote = (notes[i].start > notes[i+1].start) ? i : i+1;
-        length = notes[lastStartingNote].start + notes[lastStartingNote].length;
+            length = ((notes[i].start + notes[i].length) > length) ? (notes[i].start + notes[i].length) : length;
     }
 
     json_t* toJson() {
