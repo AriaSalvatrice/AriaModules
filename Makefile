@@ -30,7 +30,7 @@ LUAJIT ?= 1
 
 # QuickJS
 ifeq ($(QUICKJS), 1)
-SOURCES += src/QuickJSEngine.cpp
+# SOURCES += src/QuickJSEngine.cpp
 quickjs := dep/lib/quickjs/libquickjs.a
 DEPS += $(quickjs)
 OBJECTS += $(quickjs)
@@ -47,7 +47,7 @@ endif
 
 # LuaJIT
 ifeq ($(LUAJIT), 1)
-SOURCES += src/LuaJITEngine.cpp
+# SOURCES += src/LuaJITEngine.cpp
 luajit := dep/lib/libluajit-5.1.a
 OBJECTS += $(luajit)
 DEPS += $(luajit)
