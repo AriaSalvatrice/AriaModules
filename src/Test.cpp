@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <random>
 #include "portablesequence.hpp"
+#include "dep/LuaJIT-2.0.5/src/lua.hpp"
 
 // This module is to make all sorts of tests without having to recompile too much or deal with complex code interactions.
 

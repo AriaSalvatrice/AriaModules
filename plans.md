@@ -7,7 +7,7 @@ There's no such thing as stealing ideas, but there is such a thing as duplicatio
 - I will not create modules that already exist in a form that satisfies me.
 - I will not create modules I will not use to make and play music. I've come to call the genres I write in "Baroque Technopop" and "Pastoral Industrial". With VCV, I focus on live aleatoric techno. Music anchored in 4/4 time and Western tonality. I do not care much for ambient, drone, noise, "experimental", xenharmonic music, and other common uses of a modular. If my modules are useful for that purpose, that's only a side-effect.
 - There is a ton I do not know. I barely know C++ or music theory. I don't know DSP at all. I want to focus on creating things that help me build skills transferable in other fields I'm interested in. I do not want to embark on learning dead ends that can't be folded back into future creative work.
-- Everything module I make must synergize with my own existing modules to form a coherent system.
+- Every module I make must synergize with my own existing modules to form a coherent system.
 - I do not own a single hardware module and I have no plans to. I do not care whether it's economically and technically feasible to create hardware versions of my modules.
 - I approach the modular as an artist, not as an electrical engineer.
 - I will only create modules for as long as the activity holds my interest, and not a minute longer. 

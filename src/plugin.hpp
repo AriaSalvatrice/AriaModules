@@ -32,4 +32,4 @@ extern Model *modelUndular;
 extern Model *modelBlank;
 
 // extern Model *modelBendlet;
-// extern Model *modelTest;
+extern Model *modelTest;

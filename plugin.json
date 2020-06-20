@@ -80,10 +80,10 @@
       "description": "Today's fortune ★",
       "tags": [
         "Random",
-		"Clock generator",
-		"Polyphonic",
-		"Quantizer",
-		"Sequencer"
+        "Clock generator",
+        "Polyphonic",
+        "Quantizer",
+        "Sequencer"
       ]
     },
     {
@@ -92,10 +92,10 @@
       "description": "Today's fortune ★",
       "tags": [
         "Random",
-		"Clock generator",
-		"Polyphonic",
-		"Quantizer",
-		"Sequencer"
+        "Clock generator",
+        "Polyphonic",
+        "Quantizer",
+        "Sequencer"
       ]
     },
     {
@@ -104,11 +104,11 @@
       "description": "Today's fortune ★",
       "tags": [
         "Random",
-		"Clock generator",
-		"Polyphonic",
-		"Quantizer",
-		"Sequencer",
-		"Expander"
+        "Clock generator",
+        "Polyphonic",
+        "Quantizer",
+        "Sequencer",
+        "Expander"
       ]
     },
     {
@@ -117,7 +117,16 @@
       "description": "Scroll the rack via CV for live performance. If locked by mistake: Engine > Sample Rate > Pause",
       "tags": [
         "Controller",
-		"Visual"
+    		"Visual"
+      ]
+    },
+    {
+      "slug": "Test",
+      "name": "Test",
+      "description": "-",
+      "tags": [
+        "Controller",
+		    "Visual"
       ]
     },
     {
