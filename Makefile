@@ -2,7 +2,7 @@
 RACK_DIR ?= ../..
 
 # FLAGS will be passed to both the C and C++ compiler
-FLAGS +=
+FLAGS += -Idep/include
 CFLAGS +=
 CXXFLAGS +=
 
@@ -17,6 +17,49 @@ SOURCES += $(wildcard src/*.cpp)
 # The compiled plugin and "plugin.json" are automatically added.
 DISTRIBUTABLES += res
 DISTRIBUTABLES += $(wildcard LICENSE*)
+
+
+
+
+# Testing Prototype's makefile to try out QuickJS & LuaJIT stuff
+
+include $(RACK_DIR)/arch.mk
+
+QUICKJS ?= 0
+LUAJIT ?= 1
+
+# QuickJS
+ifeq ($(QUICKJS), 1)
+SOURCES += src/QuickJSEngine.cpp
+quickjs := dep/lib/quickjs/libquickjs.a
+DEPS += $(quickjs)
+OBJECTS += $(quickjs)
+QUICKJS_MAKE_FLAGS += prefix="$(DEP_PATH)"
+ifdef ARCH_WIN
+	QUICKJS_MAKE_FLAGS += CONFIG_WIN32=y
+endif
+$(quickjs):
+	cd dep && git clone "https://github.com/JerrySievert/QuickJS.git"
+	cd dep/QuickJS && git checkout 807adc8ca9010502853d471bd8331cdc1d376b94
+	cd dep/QuickJS && $(MAKE) $(QUICKJS_MAKE_FLAGS)
+	cd dep/QuickJS && $(MAKE) $(QUICKJS_MAKE_FLAGS) install
+endif
+
+# LuaJIT
+ifeq ($(LUAJIT), 1)
+SOURCES += src/LuaJITEngine.cpp
+luajit := dep/lib/libluajit-5.1.a
+OBJECTS += $(luajit)
+DEPS += $(luajit)
+$(luajit):
+	$(WGET) "http://luajit.org/download/LuaJIT-2.0.5.tar.gz"
+	$(SHA256) LuaJIT-2.0.5.tar.gz 874b1f8297c697821f561f9b73b57ffd419ed8f4278c82e05b48806d30c1e979
+	cd dep && $(UNTAR) ../LuaJIT-2.0.5.tar.gz
+	cd dep/LuaJIT-2.0.5 && $(MAKE) BUILDMODE=static PREFIX="$(DEP_PATH)" install
+endif
+
+
+
 
 # Include the Rack plugin Makefile framework
 include $(RACK_DIR)/plugin.mk
