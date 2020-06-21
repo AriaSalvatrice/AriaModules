@@ -9,12 +9,12 @@
       {
         "label": "Build application and add to Rack plugin folder",
         "type": "shell",
-        "command": "make install",
+        "command": "make install -j4",
         "options": {
           "cwd": "${workspaceRoot}",
           "env":{
-              "PATH": "C:/msys64/usr/bin/;C:/msys64/mingw64/bin",
-              "RACK_DIR": "C:/msys64/home/woof/Rack"
+              "PATH": "C:\\msys64\\usr\\bin\\;C:\\msys64\\mingw64\\bin",
+              "RACK_DIR": "C:\\msys64\\home\\woof\\Rack"
           }
         },
         "group": {

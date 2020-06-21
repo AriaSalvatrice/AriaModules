@@ -1,10 +1,9 @@
 #include "plugin.hpp"
-#include <luajit-2.0/lua.hpp>
-#include <luajit-2.0/lualib.h>
-#include <luajit-2.0/lauxlib.h>
-
+#include <quickjs/quickjs.h>
 
 // This module is to make all sorts of tests without having to recompile too much or deal with complex code interactions.
+
+
 
 struct Test : Module {
     enum ParamIds {
@@ -23,26 +22,49 @@ struct Test : Module {
         ENUMS(TEST_LIGHT, 12),
         NUM_LIGHTS
     };
-    dsp::ClockDivider testDivider;
-    lua_State *L = NULL;
+    JSRuntime *rt = NULL;
+    JSContext *ctx = NULL;
     
     Test() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        testDivider.setDivision(44);
-        L = luaL_newstate();
-        luaL_openlibs(L);
-        luaL_dostring(L, "function add (a , b) return a + b end");
-        lua_getglobal(L, "add");
-        lua_pushnumber(L, 12);
-        lua_pushnumber(L, 46);
-        lua_call(L, 2, 1);
-        int sum = (int)lua_tonumber(L, -1);
-        lua_pop(L, 1);
-        DEBUG("Calculation from Lua: %d", sum);
+
+        rt = JS_NewRuntime();
+        ctx = JS_NewContext(rt);
+
+        static const std::string& script = R"(
+            function hello() {
+                var z = 777;
+                return z;
+            }
+
+            stuff = "Henlo from Javascript lol";
+        )";
+
+        JSValue whocareslol = JS_NewObject(ctx);
+        JSValue global_obj = JS_GetGlobalObject(ctx);
+        JSValue idek = JS_Eval(ctx, script.c_str(), script.size(), "test", 0);
+        JSValue function = JS_GetPropertyStr(ctx, global_obj, "hello");
+        JSValue val = JS_Call(ctx, function, JS_UNDEFINED, 1, &whocareslol);
+        JSValue stuff = JS_GetPropertyStr(ctx, global_obj, "stuff");
+
+        int32_t num = 0;
+        JS_ToInt32(ctx, &num, val);
+        size_t plen;
+        const char *string = JS_ToCStringLen(ctx, &plen, stuff);
+        DEBUG("%s", string);
+        DEBUG("Lucky number: %u", num);
+
+        JS_FreeValue(ctx, stuff);
+        JS_FreeValue(ctx, val);
+        JS_FreeValue(ctx, function);
+        JS_FreeValue(ctx, idek);
+        JS_FreeValue(ctx, global_obj);
+        JS_FreeValue(ctx, whocareslol);
     }
 
     ~Test(){
-        if (L) lua_close(L);
+        if (ctx) JS_FreeContext(ctx);
+        if (rt) JS_FreeRuntime(rt);
     }
 
     void process(const ProcessArgs& args) override {

@@ -25,7 +25,7 @@ DISTRIBUTABLES += $(wildcard LICENSE*)
 
 include $(RACK_DIR)/arch.mk
 
-QUICKJS ?= 0
+QUICKJS ?= 1
 LUAJIT ?= 1
 
 # QuickJS

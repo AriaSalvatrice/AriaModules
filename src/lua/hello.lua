@@ -1,1 +1,0 @@
-text = "Heyo from lua"
