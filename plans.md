@@ -8,7 +8,7 @@ There's no such thing as stealing ideas, but there is such a thing as duplicatio
 - I will not create modules I will not use to make and play music. I've come to call the genres I write in "Baroque Technopop" and "Pastoral Industrial". With VCV, I focus on live aleatoric techno. Music anchored in 4/4 time and Western tonality. I do not care much for ambient, drone, noise, "experimental", xenharmonic music, and other common uses of a modular. If my modules are useful for that purpose, that's only a side-effect.
 - There is a ton I do not know. I barely know C++ or music theory. I don't know DSP at all. I want to focus on creating things that help me build skills transferable in other fields I'm interested in. I do not want to embark on learning dead ends that can't be folded back into future creative work.
 - Every module I make must synergize with my own existing modules to form a coherent system.
-- I do not own a single hardware module and I have no plans to. I do not care whether it's economically and technically feasible to create hardware versions of my modules.
+- I do not own a single hardware module and I have no plans to. I do not care whether it's economically and technically feasible to create hardware versions of my modules. However, their operation must be realistic. No clicking on a LCD as the primary way to change its value, for example.
 - I approach the modular as an artist, not as an electrical engineer.
 - I will only create modules for as long as the activity holds my interest, and not a minute longer. 
 - Professional decorum can fuck off. 
@@ -164,3 +164,44 @@ If the player performs a step/hold perfectly, it gets passed to a specific group
 This project sounds fun, but it'd be a lot of work. I'd be much more eager to implement it if people are interested in doing something neat with it - especially if there's artists eager to turn it into some sort of participatory installation art. 
 
 And if someone's willing to help with that problem, we could use machine learning to parse the large corpus of existing Stepmania charts out there, and use it to generate stepcharts on the fly. 
+
+
+# Self-patched self-modifying step sequencer
+
+Monophonic step sequencer where you program individual pitches, quantized to a scale with external scale support (cf. Darius). The default range is 3 octaves, you can increase or decrease it with Min/Max knobs. You can change the amount of steps. The module would be offered in 8 steps form factor, maybe 16 too but it would be huge.
+
+The sequencer is programmed through self-patching to self-modify a sequence, much like Mog Network. Depending on your approach to patching, and which external modules you use, it can be very deterministic or completely chaotic. It aims to be fun to use rather than versatile in configuration options.
+
+There are global step controls accepting trig/gates. Upon receiving any step control trig/gate, the module starts waiting a window of 1ms, then processes all the trigs in batch, to apply precedence and addition rules. This way, all sort of logic can be performed with external modules (as those add at least one sample of delay). Trigs sent to other parts of the module received outside the window have no effect. Here are the step control trigs from high to low precedence:
+
+- Go to a random queued step, then clear the queue. If queue empty and no other step trig is received, cancel the wait window.
+- Random teleport to any step
+- Random walk (wrap around)
+- Go back a step (wrap around at the start)
+- Advance a step (wrap around at the end)
+
+The pitch for each step is shown on a LCD, and can be changed with an infinite knob per step. Internally, it saves the precise V/Oct, and quantizes it if the scale changes.
+
+Each step also has CV trigger inputs. Simultaneous trigs operating on scale degrees are additive. Operations that would make a pitch go out of bounds wrap around.
+
+- +1 scale degree
+- +2 scale degree
+- +3 scale degree
+- +1 octave
+- -1 scale degree
+- -2 scale degree
+- -3 scale degree
+- -1 octave
+- Queue this to be the next step, after the current trig wait window
+- Make this the current step after current trig wait window is over
+
+Each step has multiple trig outs:
+
+- Trig when reached
+- 50% chance trig when reached
+- Trig every 2nd time reached
+- Trig queued on next step when reached
+
+Outputs are just CV/Gate (forwarded from input). There is a slide knob and trig in, and slide is only enabled for a step if a trig is received. 
+
+Every trig is accepted polyphonically for ease of merging with external modules.

@@ -1,9 +1,9 @@
 #include "plugin.hpp"
-#include <quickjs/quickjs.h>
+// #include <quickjs/quickjs.h>
+#include "javascript.hpp"
+#include "javascript-libraries.hpp"
 
 // This module is to make all sorts of tests without having to recompile too much or deal with complex code interactions.
-
-
 
 struct Test : Module {
     enum ParamIds {
@@ -22,49 +22,66 @@ struct Test : Module {
         ENUMS(TEST_LIGHT, 12),
         NUM_LIGHTS
     };
-    JSRuntime *rt = NULL;
-    JSContext *ctx = NULL;
+    // JSRuntime *rt = NULL;
+    // JSContext *ctx = NULL;
+    // Javascript::Runtime js;
     
     Test() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
-        rt = JS_NewRuntime();
-        ctx = JS_NewContext(rt);
+        Javascript::Runtime js;
 
-        static const std::string& script = R"(
-            function hello() {
-                var z = 777;
-                return z;
-            }
+        js.evaluateString(JavascriptLibraries::TONALJS);
+        js.evaluateString("progression = Tonal.Progression.fromRomanNumerals('C', ['IMaj7', 'IIm7', 'V7'])");
+        const char* progression = js.readVariableAsChar("progression");
+        DEBUG("JS progression = %s", progression);
+        // [6.049 debug src/Test.cpp:37] JS progression = CMaj7,Dm7,G7
 
-            stuff = "Henlo from Javascript lol";
-        )";
+        js.evaluateString("number = '5' + '0'");
+        int32_t number = js.readVariableAsInt32("number");
+        DEBUG("JS number = %d", number);
+        // [6.049 debug src/Test.cpp:41] JS number = 50
+        
 
-        JSValue whocareslol = JS_NewObject(ctx);
-        JSValue global_obj = JS_GetGlobalObject(ctx);
-        JSValue idek = JS_Eval(ctx, script.c_str(), script.size(), "test", 0);
-        JSValue function = JS_GetPropertyStr(ctx, global_obj, "hello");
-        JSValue val = JS_Call(ctx, function, JS_UNDEFINED, 1, &whocareslol);
-        JSValue stuff = JS_GetPropertyStr(ctx, global_obj, "stuff");
 
-        int32_t num = 0;
-        JS_ToInt32(ctx, &num, val);
-        size_t plen;
-        const char *string = JS_ToCStringLen(ctx, &plen, stuff);
-        DEBUG("%s", string);
-        DEBUG("Lucky number: %u", num);
+        // rt = JS_NewRuntime();
+        // ctx = JS_NewContext(rt);
 
-        JS_FreeValue(ctx, stuff);
-        JS_FreeValue(ctx, val);
-        JS_FreeValue(ctx, function);
-        JS_FreeValue(ctx, idek);
-        JS_FreeValue(ctx, global_obj);
-        JS_FreeValue(ctx, whocareslol);
+        // static const std::string& script = R"END(
+        //     function hello() {
+        //         var z = 777;
+        //         return z;
+        //     }
+
+        //     stuff = "Henlo from Javascript lol";
+        // )END";
+
+        // JSValue whocareslol = JS_NewObject(ctx);
+        // JSValue global_obj = JS_GetGlobalObject(ctx);
+        // JSValue idek = JS_Eval(ctx, script.c_str(), script.size(), "test", 0);
+        // JS_FreeValue(ctx, idek);
+
+        // JSValue function = JS_GetPropertyStr(ctx, global_obj, "hello");
+        // JSValue val = JS_Call(ctx, function, JS_UNDEFINED, 1, &whocareslol);
+        // JSValue stuff = JS_GetPropertyStr(ctx, global_obj, "stuff");
+
+        // int32_t num = 0;
+        // JS_ToInt32(ctx, &num, val);
+        // size_t plen;
+        // const char *string = JS_ToCStringLen(ctx, &plen, stuff);
+        // DEBUG("%s", string);
+        // DEBUG("Lucky number: %u", num);
+
+        // JS_FreeValue(ctx, stuff);
+        // JS_FreeValue(ctx, val);
+        // JS_FreeValue(ctx, function);
+        // JS_FreeValue(ctx, global_obj);
+        // JS_FreeValue(ctx, whocareslol);
     }
 
     ~Test(){
-        if (ctx) JS_FreeContext(ctx);
-        if (rt) JS_FreeRuntime(rt);
+        // if (ctx) JS_FreeContext(ctx);
+        // if (rt) JS_FreeRuntime(rt);
     }
 
     void process(const ProcessArgs& args) override {
