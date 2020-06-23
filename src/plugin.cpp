@@ -13,6 +13,9 @@ void init(Plugin* p) {
     p->addModel(modelSplirge);
     // p->addModel(modelSrot);
 
+    // Quantizers
+    p->addModel(modelQuack);
+
     // Sequencer
     p->addModel(modelDarius);
     

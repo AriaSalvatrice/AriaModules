@@ -13,18 +13,17 @@
    height="5mm"
    viewBox="0 0 5.0000005 5.0000008"
    version="1.1"
-   id="svg1620"
+   id="svg5251"
    sodipodi:docname="pushbutton-500-off.svg"
    inkscape:version="0.92.4 (5da689c313, 2019-01-14)">
   <metadata
-     id="metadata1624">
+     id="metadata5255">
     <rdf:RDF>
       <cc:Work
          rdf:about="">
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
         <dc:title />
       </cc:Work>
     </rdf:RDF>
@@ -40,30 +39,56 @@
      inkscape:pageshadow="2"
      inkscape:window-width="1920"
      inkscape:window-height="1019"
-     id="namedview1622"
+     id="namedview5253"
      showgrid="false"
-     inkscape:zoom="19.212821"
-     inkscape:cx="-2.3161615"
-     inkscape:cy="6.1417323"
-     inkscape:window-x="-4"
-     inkscape:window-y="387"
+     inkscape:zoom="15.229675"
+     inkscape:cx="9.5275915"
+     inkscape:cy="-2.1699178"
+     inkscape:window-x="1076"
+     inkscape:window-y="442"
      inkscape:window-maximized="1"
-     inkscape:current-layer="svg1620"
-     inkscape:document-units="mm" />
+     inkscape:current-layer="svg5251"
+     showguides="false" />
   <defs
-     id="defs1602">
+     id="defs5243">
     <linearGradient
-       id="a">
+       inkscape:collect="always"
+       id="linearGradient7068">
       <stop
+         style="stop-color:#ffffff;stop-opacity:0.26666668"
          offset="0"
-         stop-color="#fff"
-         stop-opacity=".42424244"
-         id="stop1592" />
+         id="stop7064" />
       <stop
+         style="stop-color:#ffffff;stop-opacity:0"
          offset="1"
+         id="stop7066" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient7060">
+      <stop
+         style="stop-color:#469ca9;stop-opacity:1"
+         offset="0"
+         id="stop7056" />
+      <stop
+         style="stop-color:#0e6977;stop-opacity:1"
+         offset="1"
+         id="stop7058" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient5849">
+      <stop
+         style="stop-color:#ff00ff;stop-opacity:1"
+         id="stop5845"
+         stop-opacity=".42424244"
          stop-color="#fff"
+         offset="0" />
+      <stop
+         style="stop-color:#ff0000;stop-opacity:1"
+         id="stop5847"
          stop-opacity="0"
-         id="stop1594" />
+         stop-color="#fff"
+         offset="1" />
     </linearGradient>
     <linearGradient
        id="b"
@@ -72,7 +97,7 @@
       <stop
          offset="0"
          stop-color="#fcaebb"
-         id="stop1597" />
+         id="stop5238" />
     </linearGradient>
     <linearGradient
        xlink:href="#a"
@@ -82,50 +107,59 @@
        x2="2.4603302"
        y2="19.024151"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(1.4444799,0,0,1.4444799,-1.0132248,-23.020928)" />
+       gradientTransform="matrix(2.3833945,0,0,2.3833945,-1.6968203,-38.00954)" />
     <linearGradient
        xlink:href="#b"
        id="c"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(0.70423075,0,0,0.71429229,-2.8661968,-32.142848)" />
+       gradientTransform="matrix(1.15494,0,0,1.17144,-4.700563,-52.714275)" />
+    <linearGradient
+       id="a-4"
+       osb:paint="solid"
+       gradientTransform="translate(3.2334699,0.12816856)">
+      <stop
+         offset="0"
+         stop-color="#ffcc03"
+         id="stop936" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient7060"
+       id="linearGradient7062"
+       x1="4.1877122"
+       y1="0.72966093"
+       x2="4.186017"
+       y2="7.4008484"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.60606064,0,0,0.60606064,0.01515151,0.01515226)" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient7068"
+       id="linearGradient7070"
+       x1="4.0322042"
+       y1="0.99110156"
+       x2="4.0288143"
+       y2="4.7783904"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.49999993,0,0,0.49999993,0.44999999,0.25000114)" />
   </defs>
-  <flowRoot
-     xml:space="preserve"
-     style="font-style:normal;font-variant:normal;font-weight:400;font-stretch:normal;font-size:40px;line-height:1.25;font-family:'Segoe UI Historic';-inkscape-font-specification:'Segoe UI Historic';letter-spacing:0;word-spacing:0;fill:#000000;fill-opacity:1;stroke:none"
-     font-style="normal"
-     font-variant="normal"
-     font-weight="400"
-     font-stretch="normal"
-     font-size="40"
-     letter-spacing="0"
-     word-spacing="0"
-     transform="translate(-147.43359,-129.91299)"
-     id="flowRoot1610">
-    <flowRegion
-   id="flowRegion1606">
-      <path
-   d="M 100.71429,71.383568 H 457.14285 V 342.09786 H 100.71429 Z"
-   id="path1604"
-   inkscape:connector-curvature="0" />
-    </flowRegion>
-    <flowPara
-   id="flowPara1608" />
-  </flowRoot>  <circle
-     style="fill:url(#c);stroke-width:0.99999994;paint-order:markers fill stroke"
-     id="circle1612"
-     r="2.5"
-     cx="2.5"
-     cy="2.5" />
   <circle
-     style="fill:#151515;stroke-width:1;paint-order:markers fill stroke"
-     id="circle1614"
-     r="2.25"
-     cx="2.5"
-     cy="2.5" />
+     cx="2.5000002"
+     cy="2.5000002"
+     id="circle5245"
+     style="fill:#083d45;fill-opacity:1;stroke-width:0.60975617;paint-order:markers fill stroke"
+     r="2.5000002" />
   <circle
-     style="fill:url(#d);stroke-width:0.99999988;paint-order:markers fill stroke"
-     id="circle1616"
-     cy="2.5"
-     cx="2.5"
-     r="2" />
+     cy="2.5000002"
+     cx="2.5000002"
+     id="circle5249"
+     style="fill:url(#linearGradient7062);fill-opacity:1;stroke-width:0.56910574;paint-order:markers fill stroke"
+     r="2.0000002" />
+  <ellipse
+     style="opacity:1;fill:url(#linearGradient7070);fill-opacity:1;stroke:none;stroke-width:0.29197353;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
+     id="path7054"
+     cx="2.5000002"
+     cy="1.6750003"
+     rx="1.2500001"
+     ry="0.92500001" />
 </svg>

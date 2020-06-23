@@ -66,6 +66,16 @@
       ]
     },
     {
+      "slug": "Quack",
+      "name": "Signature Series Quack",
+      "description": "Quatherine the Quantizing Duck's Quality Quad Quantizer",
+      "tags": [
+        "Polyphonic",
+        "Quantizer",
+        "Quad"
+      ]
+    },
+    {
       "slug": "Darius",
       "name": "Signature Series Darius",
       "description": "Branching 8-step sequencer taking a random path through its nodes",

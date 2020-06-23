@@ -7,12 +7,21 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 
 - Nothing
 
+### Changed
+
+- [CHANGE] All modules: small changes to the visual design of the pushbuttons
+
+## NOT YET LOL
+
+- [NEW] Quack: Quantizer.
 
 
 
 ## [1.4.2] - 2020-06-19
 
-- [NEW FEATURE] Darius: Added experimental support for Portable sequences from the right-click menu.
+### Added 
+
+- [NEW] Darius: Added experimental support for Portable sequences from the right-click menu.
 
 
 
@@ -21,7 +30,7 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 
 ### Added
 
-- [NEW FEATURE] Arcane, Atout: Added a polyphonic Scale output compatible with Darius' external scale input. The jack formerly labeled Scale is now labeled Melody. 
+- [NEW] Arcane, Atout: Added a polyphonic Scale output compatible with Darius' external scale input. The jack formerly labeled Scale is now labeled Melody. 
 
 ### Fixed
 
@@ -32,13 +41,13 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 
 - [NOTE] Darius: Many new features were added to Darius. Despite the scale of the revision, it is an update to the original module, rather than a separate Mk2 version. Most existing patches will not be broken, except those that rely on the external seed input. The width of the module remains the same.
 - [DEPRECATED] Darius: The random number generation was improved for greater uniformity. This WILL break patches that relied on the Random Seed input to be deterministic. Sorry for the inconvenience.
-- [NEW FEATURE] Darius: Added a LCD providing information about the module state.
-- [NEW FEATURE] Darius: The output jacks of nodes that have 0% chance to be reached are no longer lit.
-- [NEW FEATURE] Darius: Added an output range control to the CV output.
-- [NEW FEATURE] Darius: Can now start the sequence on any step. The "Steps" knob is now known as the "Last step" knob.
-- [NEW FEATURE] Darius: Added undo support for the two "Randomize" buttons.
-- [NEW FEATURE] Darius: Added route and CV presets in the right-click menu.
-- [NEW FEATURE] Darius: Added an optional quantizer, with support for external scales.
+- [NEW] Darius: Added a LCD providing information about the module state.
+- [NEW] Darius: The output jacks of nodes that have 0% chance to be reached are no longer lit.
+- [NEW] Darius: Added an output range control to the CV output.
+- [NEW] Darius: Can now start the sequence on any step. The "Steps" knob is now known as the "Last step" knob.
+- [NEW] Darius: Added undo support for the two "Randomize" buttons.
+- [NEW] Darius: Added route and CV presets in the right-click menu.
+- [NEW] Darius: Added an optional quantizer, with support for external scales.
 - [FIX] Darius: Fixed random seed not working with multiple instances of Darius.
 - [FIX] Darius: Individual trigger/gate outputs now work with every input and the step button, not just with the forward input. This may break old patches.
 
@@ -49,7 +58,7 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 
 ### Added
 
-- [NEW MODULE] UnDuLaR: Scroll the rack via CV for live performance.
+- [NEW] UnDuLaR: Scroll the rack via CV for live performance.
 
 ### Fixed
 
@@ -61,15 +70,18 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 
 ## [1.3.0] - 2020-01-29
 
+### New modules
+
+- [NEW] Arcane: Today's fortune ★
+- [NEW] Atout: Today's fortune ★
+- [NEW] Aleister: Today's fortune ★
+
 ### Added
 
-- [NEW MODULE] Arcane: Today's fortune ★
-- [NEW MODULE] Atout: Today's fortune ★
-- [NEW MODULE] Aleister: Today's fortune ★
-- [NEW FEATURE] Darius: All trigger inputs now accept polyphonic input. Existing patches are very unlikely to be broken by this new feature. If they are, they can be fixed by splitting any polyphonic trigger input then sending only the first channel.
-- [NEW FEATURE] Darius: Added a "RND" seed CV input, and a switch to decide to refresh it on "1st/all" step(s), to force a specific random seed to be used.
-- [NEW FEATURE] Darius: Added a CV range selector: 0V~10V or -5V~5V. CV Knobs now default to the center on new instances for ease of use in -5V~5V mode.
-- [NEW FEATURE] Darius: Added new trigger controls: Back, Up, and Down. The "Step" CV input is now called "Forward" for consistency.
+- [NEW] Darius: All trigger inputs now accept polyphonic input. Existing patches are very unlikely to be broken by this new feature. If they are, they can be fixed by splitting any polyphonic trigger input then sending only the first channel.
+- [NEW] Darius: Added a "RND" seed CV input, and a switch to decide to refresh it on "1st/all" step(s), to force a specific random seed to be used.
+- [NEW] Darius: Added a CV range selector: 0V~10V or -5V~5V. CV Knobs now default to the center on new instances for ease of use in -5V~5V mode.
+- [NEW] Darius: Added new trigger controls: Back, Up, and Down. The "Step" CV input is now called "Forward" for consistency.
 
 ### Changed
 
@@ -87,23 +99,26 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 
 ## [1.2.0] - 2020-01-17
 
-### Added
+### New modules
 
-- [NEW MODULE] Darius: Branching 8-step sequencer taking a random path through its nodes
+- [NEW] Darius: Branching 8-step sequencer taking a random path through its nodes
 
 
 
 
 ## [1.1.0] - 2020-01-13
 
+### New modules
+
+- [NEW] Splort: 16 channels polyphonic split with optional chainable sort mode
+- [NEW] Smerge: 16 channels polyphonic merge with optional chainable sort mode
+- [NEW] Spleet: Dual 4 channels / single 8 channels polyphonic split with optional sort mode
+- [NEW] Swerge: Dual 4 channels / single 8 channels polyphonic merge with optional sort mode
+- [NEW] Blank Plate: A complimentary blank plate and ♥-head screwdriver are provided with every Signature Series module purchase
+
 ### Added
 
-- [NEW MODULE] Splort: 16 channels polyphonic split with optional chainable sort mode
-- [NEW MODULE] Smerge: 16 channels polyphonic merge with optional chainable sort mode
-- [NEW MODULE] Spleet: Dual 4 channels / single 8 channels polyphonic split with optional sort mode
-- [NEW MODULE] Swerge: Dual 4 channels / single 8 channels polyphonic merge with optional sort mode
-- [NEW MODULE] Blank Plate: A complimentary blank plate and ♥-head screwdriver are provided with every Signature Series module purchase
-- [NEW FEATURE] Splirge: Sort mode added.
+- [NEW] Splirge: Sort mode added.
 
 ### Changed
 
@@ -118,7 +133,6 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 
 ## [1.0.0] - 2019-12-13
 
-### Added
+### New modules
 
-- [NOTE] First public release, just a simple module to get started making them
-- [NEW MODULE] Splirge - 3hp 4 channels split and merge
+- [NEW] Splirge - 3hp 4 channels split and merge

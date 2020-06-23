@@ -1,5 +1,5 @@
-Aria Salvatrice's Signature Series VCV Rack Modules
-===================================================
+Aria Salvatrice Signature Series Synthesizer Modules
+====================================================
 
 Hiya hello hey hi. These here are a few cool and nice modules what for [VCV Rack](https://vcvrack.com/). I hope you like them.
 
@@ -256,7 +256,7 @@ Acknowledgements & Credits & Other Assorted Namedrops
 -----------------------------------------------------
 
 Thanks to everyone who created open-source modules I could learn from and make songs with. Thanks to Andrew Belt for creating VCV Rack and providing code suggestions. Thanks to my music-making LGBT internet shitposting gang for introducing me to VCV and modular synthesis as something that's not just for old guys with more disposable income than impetus to write fresh songs. 
-Thanks to [Sophie](https://twitter.com/DreamyDoric) for music theory advice. Thanks to [Heavy Viper](https://rekkanogotoku.com/) for years of inspiring conversation about synths and music. Thanks to [Mog](https://github.com/JustMog/Mog-VCV) for Mog. Thanks to all VCV creators for their assistance, in particular [Squinky Labs](https://github.com/squinkylabs/SquinkyVCV), [Stoermelder](https://github.com/stoermelder/vcvrack-packone), [David O'Rourke](https://github.com/david-c14/SubmarineFree), [Omri Cohen](https://www.youtube.com/channel/UCuWKHSHTHMV_nVSeNH4gYAg), [Jerry Sievert](https://legitimatesounding.com/). Thanks to [my dog Ornstein](https://ornstein.neocities.org/) for being a good dog.
+Thanks to [Sophie](https://twitter.com/DreamyDoric) for music theory advice. Thanks to [Heavy Viper](https://rekkanogotoku.com/) for years of inspiring conversation about synths and music. Thanks to [Mog](https://github.com/JustMog/Mog-VCV) for Mog. Thanks to all VCV creators for their assistance, in particular [Squinky Labs](https://github.com/squinkylabs/SquinkyVCV), [Stoermelder](https://github.com/stoermelder/vcvrack-packone), [David O'Rourke](https://github.com/david-c14/SubmarineFree), [Omri Cohen](https://www.youtube.com/channel/UCuWKHSHTHMV_nVSeNH4gYAg), and [Jerry Sievert](https://legitimatesounding.com/). Thanks to [my dog Ornstein](https://ornstein.neocities.org/) for being a good dog.
 
 **But most of all, thanks to YOU for using my art.**
 
@@ -267,7 +267,7 @@ The modules use the following fonts:
 
 The **Arcane** module uses Tarot cards altered from [Yoav Ben-Dov's CBD Tarot](https://www.cbdtarot.com/).
 
-The **UnDuLaR** module's background uses the traditional yagasuri kimono pattern as provided by [ULOCO, UOTOMIZU](https://forallcreators.com/yagasuri-background/).
+The **UnDuLaR** module background uses the traditional yagasuri kimono pattern as provided by [ULOCO, UOTOMIZU](https://forallcreators.com/yagasuri-background/).
 
 
 
