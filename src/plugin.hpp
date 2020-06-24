@@ -18,7 +18,9 @@ extern Model *modelSplirge;
 // extern Model *modelSrot;
 
 // Quantizers
+extern Model *modelQqqq;
 extern Model *modelQuack;
+extern Model *modelQ;
 
 // Sequencer
 extern Model *modelDarius;

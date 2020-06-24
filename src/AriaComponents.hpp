@@ -5,6 +5,19 @@ extern Plugin* pluginInstance;
 
 // - TODO: Remove every single dependency on the component library, since it is not open-source. 
 
+//////////////////////////////// Base
+
+struct SvgSwitchUnshadowed : SvgSwitch {
+    SvgSwitchUnshadowed() {
+        fb = new widget::FramebufferWidget;
+        addChild(fb);
+
+        sw = new widget::SvgWidget;
+        fb->addChild(sw);
+    }
+};
+
+
 //////////////////////////////// Decorative
 
 // These require a standard <3-shaped screwdriver, provided complimentary with every purchasee. 
@@ -168,7 +181,7 @@ struct AriaPushButton820Momentary : SvgSwitch {
 };
 
 // Rocker siwtch, horizontal. Left is default
-struct AriaRockerSwitchHorizontal800 : SvgSwitch {
+struct AriaRockerSwitchHorizontal800 : SvgSwitchUnshadowed {
     AriaRockerSwitchHorizontal800() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-l.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-r.svg")));
@@ -176,14 +189,14 @@ struct AriaRockerSwitchHorizontal800 : SvgSwitch {
 };
 
 // Rocker siwtch, horizontal. Right is default
-struct AriaRockerSwitchHorizontal800Flipped : SvgSwitch {
+struct AriaRockerSwitchHorizontal800Flipped : SvgSwitchUnshadowed {
     AriaRockerSwitchHorizontal800Flipped() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-r.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-l.svg")));
     }
 };
 
-struct AriaRockerSwitchVertical800 : SvgSwitch {
+struct AriaRockerSwitchVertical800 : SvgSwitchUnshadowed {
     AriaRockerSwitchVertical800() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-u.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-d.svg")));

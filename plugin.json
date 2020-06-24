@@ -66,13 +66,29 @@
       ]
     },
     {
-      "slug": "Quack",
-      "name": "Signature Series Quack",
-      "description": "Quatherine the Quantizing Duck's Quality Quad Quantizer",
+      "slug": "Qqqq",
+      "name": "Quatherine's Quality Quad Quantizer",
+      "description": "Quatherine the Quantum Duck presents Quatherine's Quality Quad Quantizer",
       "tags": [
         "Polyphonic",
         "Quantizer",
         "Quad"
+      ]
+    },
+    {
+      "slug": "Quack",
+      "name": "Quatherine's Quack",
+      "description": "Quatherine the Quantum Duck's smaller quantizer",
+      "tags": [
+        "Quantizer"
+      ]
+    },
+    {
+      "slug": "Q",
+      "name": "Quatherine's Q<",
+      "description": "Quatherine the Quantum Duck's tiny quantizer",
+      "tags": [
+        "Quantizer"
       ]
     },
     {

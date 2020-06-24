@@ -148,7 +148,7 @@ struct Darius : Module {
             configParam(CV_PARAM + i, 0.f, 10.f, 5.f, "CV");
         for (int i = 0; i < STEP8START; i++)
             configParam(ROUTE_PARAM + i, 0.f, 1.f, 0.5f, "Random route");
-        knobDivider.setDivision(KNOBDIVIDER); 
+        knobDivider.setDivision(KNOBDIVIDER);
         displayDivider.setDivision(DISPLAYDIVIDER);
         lcdStatus.lcdPage = Lcd::TEXT1_AND_TEXT2_PAGE;
         lcdStatus.lcdText1 = "MEDITATE..."; // Loading message
@@ -969,9 +969,19 @@ struct Darius : Module {
 };
 
 
+
+
+
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
 
 
 struct AriaKnob820Snap : AriaKnob820 {
