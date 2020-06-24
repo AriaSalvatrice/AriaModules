@@ -613,7 +613,7 @@ struct Darius : Module {
     void nodeBack(const ProcessArgs& args){
         lightsReset = true;
         node = pathTraveled[step];
-        // FIXME - This conditional avoids a bizarre problem where randomSeed goes NaN. Not sure what's exactly going on!!
+        // FIXME: This conditional avoids a bizarre problem where randomSeed goes NaN. Not sure what's exactly going on!!
         if (step < 7) pathTraveled[step + 1] = -1; 
         lastNode = node;
         lcdStatus.lcdDirty = true;
@@ -992,18 +992,8 @@ struct AriaKnob820Snap : AriaKnob820 {
 };
 
 
-// Passes the module to the created knobs
-template <class TParamWidget>
-TParamWidget* createLcdParam(math::Vec pos, Darius* module, int paramId) {
-    TParamWidget* o = new TParamWidget(module);
-    o->box.pos = pos;
-    if (module) {
-        o->paramQuantity = module->paramQuantities[paramId];
-    }
-    return o;
-}
 
-// FIXME - How do I avoid duplicating this code this much? 
+// FIXME: How do I avoid duplicating this code this much? 
 struct AriaKnob820MinMax : AriaKnob820 {
     Darius *module;
 
@@ -1230,24 +1220,24 @@ struct DariusWidget : ModuleWidget {
         addChild(lfb);
 
         // Quantizer toggle
-        addParam(createLcdParam<AriaRockerSwitchHorizontal800ModeReset>(mm2px(Vec(11.1, 99.7)), module, Darius::QUANTIZE_TOGGLE_PARAM));
+        addParam(createModuleParam<AriaRockerSwitchHorizontal800ModeReset, Darius>(mm2px(Vec(11.1, 99.7)), module, Darius::QUANTIZE_TOGGLE_PARAM));
 
         // Voltage Range
         addParam(createParam<AriaRockerSwitchHorizontal800Flipped>(mm2px(Vec(28.0, 118.8)), module, Darius::RANGE_PARAM));
 
         // Min & Max
-        addParam(createLcdParam<AriaKnob820MinMax>(mm2px(Vec(49.5,  99.0)), module, Darius::MIN_PARAM));
-        addParam(createLcdParam<AriaKnob820MinMax>(mm2px(Vec(49.5, 112.0)), module, Darius::MAX_PARAM));
+        addParam(createModuleParam<AriaKnob820MinMax, Darius>(mm2px(Vec(49.5,  99.0)), module, Darius::MIN_PARAM));
+        addParam(createModuleParam<AriaKnob820MinMax, Darius>(mm2px(Vec(49.5, 112.0)), module, Darius::MAX_PARAM));
 
         // Quantizer Key & Scale
-        addParam(createLcdParam<AriaKnob820Scale>(mm2px(Vec(59.5, 99.0)), module, Darius::SCALE_PARAM));
-        addParam(createLcdParam<AriaKnob820Scale>(mm2px(Vec(59.5, 112.0)), module, Darius::KEY_PARAM));
+        addParam(createModuleParam<AriaKnob820Scale, Darius>(mm2px(Vec(59.5, 99.0)), module, Darius::SCALE_PARAM));
+        addParam(createModuleParam<AriaKnob820Scale, Darius>(mm2px(Vec(59.5, 112.0)), module, Darius::KEY_PARAM));
 
         // External Scale
         addInput(createInput<AriaJackIn>(mm2px(Vec(69.5, 99.0)), module, Darius::EXT_SCALE_INPUT));
 
         // Slide
-        addParam(createLcdParam<AriaKnob820Slide>(mm2px(Vec(69.5, 112.0)), module, Darius::SLIDE_PARAM));
+        addParam(createModuleParam<AriaKnob820Slide, Darius>(mm2px(Vec(69.5, 112.0)), module, Darius::SLIDE_PARAM));
 
         // Output!
         addOutput(createOutput<AriaJackOut>(mm2px(Vec(79.5, 112.0)), module, Darius::GLOBAL_GATE_OUTPUT));

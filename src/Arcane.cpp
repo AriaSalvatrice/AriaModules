@@ -23,7 +23,7 @@ std::string getCurrentFortuneDate() {
 }
 
 
-// TODO - It'd be cleaner to move it within the struct, but I couldn't figure out how to make threading work if I do that.
+// TODO: It'd be cleaner to move it within the struct, but I couldn't figure out how to make threading work if I do that.
 void downloadTodaysFortune() {
     // Craft the URL and the filename. The URL is rate-limited, but users should never run into it.
     std::string url = "https://raw.githubusercontent.com/AriaSalvatrice/Arcane/master/v1/" + getCurrentFortuneDate() + ".json";
@@ -42,7 +42,7 @@ struct ArcaneBase : Module {
     // LCD stuff
     Lcd::LcdStatus lcdStatus;
     dsp::ClockDivider lcdDivider; 
-    int lcdMode = 0; // FIXME change it to mode for consistency
+    int lcdMode = 0;
     std::string todaysFortuneDate = getCurrentFortuneDate(); // Used to display on the LCD. Once set it changes only on reset.
     
     // These are read from JSON
@@ -950,7 +950,6 @@ struct AtoutWidget : ModuleWidget {
         addParam(createParam<AriaKnob820>(mm2px(Vec(x + 3.8, y + 96.0)), module, Arcane::PULSE_WIDTH_PARAM));	
         
         // On Atout, the Pulse/Ramp rocker is at the bottom
-        // FIXME - It has an ugly shadow!
         addParam(createParam<AriaRockerSwitchHorizontal800>(mm2px(Vec(x + 3.8, y + 105.5)), module, Arcane::PULSE_RAMP_PARAM));
         
         // Expander light

@@ -5,6 +5,21 @@ extern Plugin* pluginInstance;
 
 // - TODO: Remove every single dependency on the component library, since it is not open-source. 
 
+//////////////////////////////// Helpers
+
+// Passes the module to the created knobs
+// FIXME: - is there a cleaner way to go about it?
+template <class TParamWidget, class TModule>
+TParamWidget* createModuleParam(math::Vec pos, TModule* module, int paramId) {
+    TParamWidget* o = new TParamWidget(module);
+    o->box.pos = pos;
+    if (module) {
+        o->paramQuantity = module->paramQuantities[paramId];
+    }
+    return o;
+}
+
+
 //////////////////////////////// Base
 
 struct SvgSwitchUnshadowed : SvgSwitch {
@@ -14,6 +29,7 @@ struct SvgSwitchUnshadowed : SvgSwitch {
 
         sw = new widget::SvgWidget;
         fb->addChild(sw);
+        SvgSwitch();
     }
 };
 
