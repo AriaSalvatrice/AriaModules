@@ -22,9 +22,11 @@ struct Qqqq : Module {
         ENUMS(SCALING_PARAM, 4),
         ENUMS(OFFSET_PARAM, 4),
         ENUMS(TRANSPOSE_PARAM, 4),
-        ENUMS(TRANSPOSE_MODE_PARAM, 4),
+        ENUMS(TRANSPOSE_MODE_PARAM, 4), 
         ENUMS(SHTH_MODE_PARAM, 4),
         ENUMS(VISUALIZE_PARAM, 4),
+        // TRANSPOSE_MODE_PARAM,
+        // SHTH_MODE_PARAM,
         KEY_PARAM,
         SCALE_PARAM,
         SLOT_PARAM,
@@ -34,9 +36,9 @@ struct Qqqq : Module {
     };
     enum InputIds {
         ENUMS(CV_INPUT, 4),
-        ENUMS(SCALING_INPUT, 4),
-        ENUMS(OFFSET_INPUT, 4),
-        ENUMS(TRANSPOSE_INPUT, 4),
+        // ENUMS(SCALING_INPUT, 4),
+        // ENUMS(OFFSET_INPUT, 4),
+        // ENUMS(TRANSPOSE_INPUT, 4),
         ENUMS(SHTH_INPUT, 4),
         EXT_SCALE_INPUT,
         NUM_INPUTS
@@ -242,21 +244,34 @@ struct QqqqWidget : ModuleWidget {
         addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
     }
 
-    void drawPianoKeys(float pianoXoffset, float pianoYoffset, Qqqq* module) {
+    void drawPianoKeys(float xOffset, float yOffset, Qqqq* module) {
         // First we create the white keys only.
-        addParam(createModuleParam<AriaPianoC, Qqqq>(    mm2px(Vec(pianoXoffset, pianoYoffset -  0.f)), module, Qqqq::NOTE_PARAM +  0)); // C
-        addParam(createModuleParam<AriaPianoWhite, Qqqq>(mm2px(Vec(pianoXoffset, pianoYoffset - 14.f)), module, Qqqq::NOTE_PARAM +  2)); // D
-        addParam(createModuleParam<AriaPianoE, Qqqq>(    mm2px(Vec(pianoXoffset, pianoYoffset - 28.f)), module, Qqqq::NOTE_PARAM +  4)); // E
-        addParam(createModuleParam<AriaPianoF, Qqqq>(    mm2px(Vec(pianoXoffset, pianoYoffset - 42.f)), module, Qqqq::NOTE_PARAM +  5)); // F
-        addParam(createModuleParam<AriaPianoWhite, Qqqq>(mm2px(Vec(pianoXoffset, pianoYoffset - 56.f)), module, Qqqq::NOTE_PARAM +  7)); // G
-        addParam(createModuleParam<AriaPianoWhite, Qqqq>(mm2px(Vec(pianoXoffset, pianoYoffset - 70.f)), module, Qqqq::NOTE_PARAM +  9)); // A
-        addParam(createModuleParam<AriaPianoB, Qqqq>(    mm2px(Vec(pianoXoffset, pianoYoffset - 84.f)), module, Qqqq::NOTE_PARAM + 11)); // B
+        addParam(createModuleParam<AriaPianoC, Qqqq>(    mm2px(Vec(xOffset, yOffset -  0.f)), module, Qqqq::NOTE_PARAM +  0)); // C
+        addParam(createModuleParam<AriaPianoWhite, Qqqq>(mm2px(Vec(xOffset, yOffset - 14.f)), module, Qqqq::NOTE_PARAM +  2)); // D
+        addParam(createModuleParam<AriaPianoE, Qqqq>(    mm2px(Vec(xOffset, yOffset - 28.f)), module, Qqqq::NOTE_PARAM +  4)); // E
+        addParam(createModuleParam<AriaPianoF, Qqqq>(    mm2px(Vec(xOffset, yOffset - 42.f)), module, Qqqq::NOTE_PARAM +  5)); // F
+        addParam(createModuleParam<AriaPianoWhite, Qqqq>(mm2px(Vec(xOffset, yOffset - 56.f)), module, Qqqq::NOTE_PARAM +  7)); // G
+        addParam(createModuleParam<AriaPianoWhite, Qqqq>(mm2px(Vec(xOffset, yOffset - 70.f)), module, Qqqq::NOTE_PARAM +  9)); // A
+        addParam(createModuleParam<AriaPianoB, Qqqq>(    mm2px(Vec(xOffset, yOffset - 84.f)), module, Qqqq::NOTE_PARAM + 11)); // B
         // Then, the black keys, so they overlap the clickable area of the white keys, avoiding the need he need for a custom widget.
-        addParam(createModuleParam<AriaPianoBlack, Qqqq>(mm2px(Vec(pianoXoffset, pianoYoffset -  5.f)), module, Qqqq::NOTE_PARAM +  1)); // C#
-        addParam(createModuleParam<AriaPianoBlack, Qqqq>(mm2px(Vec(pianoXoffset, pianoYoffset - 19.f)), module, Qqqq::NOTE_PARAM +  3)); // D#
-        addParam(createModuleParam<AriaPianoBlack, Qqqq>(mm2px(Vec(pianoXoffset, pianoYoffset - 47.f)), module, Qqqq::NOTE_PARAM +  6)); // F#
-        addParam(createModuleParam<AriaPianoBlack, Qqqq>(mm2px(Vec(pianoXoffset, pianoYoffset - 61.f)), module, Qqqq::NOTE_PARAM +  8)); // G#
-        addParam(createModuleParam<AriaPianoBlack, Qqqq>(mm2px(Vec(pianoXoffset, pianoYoffset - 75.f)), module, Qqqq::NOTE_PARAM + 10)); // A#
+        addParam(createModuleParam<AriaPianoBlack, Qqqq>(mm2px(Vec(xOffset, yOffset -  5.f)), module, Qqqq::NOTE_PARAM +  1)); // C#
+        addParam(createModuleParam<AriaPianoBlack, Qqqq>(mm2px(Vec(xOffset, yOffset - 19.f)), module, Qqqq::NOTE_PARAM +  3)); // D#
+        addParam(createModuleParam<AriaPianoBlack, Qqqq>(mm2px(Vec(xOffset, yOffset - 47.f)), module, Qqqq::NOTE_PARAM +  6)); // F#
+        addParam(createModuleParam<AriaPianoBlack, Qqqq>(mm2px(Vec(xOffset, yOffset - 61.f)), module, Qqqq::NOTE_PARAM +  8)); // G#
+        addParam(createModuleParam<AriaPianoBlack, Qqqq>(mm2px(Vec(xOffset, yOffset - 75.f)), module, Qqqq::NOTE_PARAM + 10)); // A#
+    }
+
+    void drawQuantizerColumn(float xOffset, float yOffset, Qqqq* module, int col) {
+        addInput(createInput<AriaJackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 0.f)), module, Qqqq::CV_INPUT + col));
+        addParam(createParam<AriaKnob820>(mm2px(Vec(xOffset + 0.f, yOffset + 10.f)), module, Qqqq::SCALING_PARAM + col));
+        addParam(createParam<AriaKnob820>(mm2px(Vec(xOffset + 0.f, yOffset + 20.f)), module, Qqqq::OFFSET_PARAM + col));
+        addParam(createParam<AriaKnob820>(mm2px(Vec(xOffset + 0.f, yOffset + 30.f)), module, Qqqq::TRANSPOSE_PARAM + col));
+        addInput(createInput<AriaJackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 40.f)), module, Qqqq::SHTH_INPUT + col));
+        addParam(createParam<AriaPushButton820>(mm2px(Vec(xOffset + 0.f, yOffset + 50.f)), module, Qqqq::VISUALIZE_PARAM + col));
+        addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 0.f, yOffset + 60.f)), module, Qqqq::CV_OUTPUT + col));
+
+        addParam(createParam<AriaPushButton500>(mm2px(Vec(xOffset + -0.5f, yOffset + 70.f)), module, Qqqq::SHTH_MODE_PARAM + col));
+        addParam(createParam<AriaPushButton500Momentary>(mm2px(Vec(xOffset + 3.5f, yOffset + 72.5f)), module, Qqqq::TRANSPOSE_MODE_PARAM + col));
     }
 
     QqqqWidget(Qqqq* module) {
@@ -264,15 +279,23 @@ struct QqqqWidget : ModuleWidget {
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Qqqq.svg")));
         
         drawScrews();
-        drawPianoKeys(4.7f, 105.8f, module);
+        drawPianoKeys(4.7f, 102.8f, module);
 
         // The LCD will go around here
 
         // Key, Scale, External
-        addParam(createModuleParam<AriaKnob820Scale, Qqqq>(mm2px(Vec(25.f, 32.f)), module, Qqqq::KEY_PARAM));
-        addParam(createModuleParam<AriaKnob820Scale, Qqqq>(mm2px(Vec(35.f, 32.f)), module, Qqqq::SCALE_PARAM));
-        addInput(createInput<AriaJackIn>(mm2px(Vec(47.f, 32.f)), module, Qqqq::EXT_SCALE_INPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(57.f, 32.f)), module, Qqqq::EXT_SCALE_OUTPUT));   
+        addParam(createModuleParam<AriaKnob820Scale, Qqqq>(mm2px(Vec(25.f, 29.f)), module, Qqqq::KEY_PARAM));
+        addParam(createModuleParam<AriaKnob820Scale, Qqqq>(mm2px(Vec(35.f, 29.f)), module, Qqqq::SCALE_PARAM));
+        addInput(createInput<AriaJackIn>(mm2px(Vec(45.f, 29.f)), module, Qqqq::EXT_SCALE_INPUT));
+        addOutput(createOutput<AriaJackOut>(mm2px(Vec(55.f, 29.f)), module, Qqqq::EXT_SCALE_OUTPUT));
+
+        // Step programmer will go there
+
+        // The quantizer columns
+        drawQuantizerColumn(25.f, 49.f, module, 0);
+        drawQuantizerColumn(35.f, 49.f, module, 1);
+        drawQuantizerColumn(45.f, 49.f, module, 2);
+        drawQuantizerColumn(55.f, 49.f, module, 3);
     }
 };
 
