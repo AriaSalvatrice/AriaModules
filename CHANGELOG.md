@@ -9,15 +9,15 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 
 ### Added
 
-- [NEW] Quatherine the Quantum Duck presents Quatherine's Quality Quad Quantizer: A 
+- [NEW] Quatherine the Quantum Duck presents Quatherine's Quality Quad Quantizer (Qqqq): A quantizer with custom & external scales, 16 scenes, offset, sample and hold, transposition, and lead sheet chords parsing.
+- [NEW] Quack: Smaller version of Qqqq, with piano buttons, and a single polyphonic quantizer column.
+- [NEW] Q<: Tiniy version of Qqqq, with a single polyphonic quantizer column.
 
 ### Changed
 
-- [CHANGE] All modules: small changes to the visual design of the pushbuttons
+- [CHANGE] All modules: Small changes to the visual design of the pushbuttons.
 
 ## NOT YET LOL
-
-- [NEW] Quack: Quantizer.
 
 
 

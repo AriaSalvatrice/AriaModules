@@ -3,6 +3,8 @@
 using namespace rack;
 extern Plugin* pluginInstance;
 
+// Widgets are only added to my library as the need arises.
+
 // - TODO: Remove every single dependency on the component library, since it is not open-source. 
 
 //////////////////////////////// Helpers
@@ -78,6 +80,7 @@ struct AriaJackTransparent : SVGPort {
 /////////////// Old style lights - TODO: Remove dependency on component library
 
 // Still used for a few things! 
+// FIXME: Are they still used?
 template <typename TBase = GrayModuleLightWidget>
 struct TOutputLight : TBase {
     TOutputLight() {
@@ -193,6 +196,14 @@ struct AriaPushButton820Momentary : SvgSwitch {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-820-off.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-820-on.svg")));
         momentary = true;
+    }
+};
+
+// You won't guess its color when you press it.
+struct AriaPushButton820Pink : SvgSwitch {
+    AriaPushButton820Pink() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-820-off.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-820-pink.svg")));
     }
 };
 

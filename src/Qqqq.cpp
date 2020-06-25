@@ -25,9 +25,10 @@ struct Qqqq : Module {
         ENUMS(TRANSPOSE_MODE_PARAM, 4), 
         ENUMS(SHTH_MODE_PARAM, 4),
         ENUMS(VISUALIZE_PARAM, 4),
+        ENUMS(SLOT_BUTTON_PARAM, 16),
         KEY_PARAM,
         SCALE_PARAM,
-        SLOT_PARAM,
+        // SLOT_KNOB_PARAM,
         PASTE_CLIPBOARD_PARAM,
         KEYBOARD_INPUT_PARAM,
         NUM_PARAMS
@@ -267,7 +268,7 @@ struct QqqqWidget : ModuleWidget {
         addParam(createParam<AriaPushButton500>(mm2px(Vec(xOffset + -0.5f, yOffset + 42.5f)), module, Qqqq::TRANSPOSE_MODE_PARAM + col));
 
         addInput(createInput<AriaJackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 50.f)), module, Qqqq::SHTH_INPUT + col));
-        addParam(createParam<AriaPushButton820>(mm2px(Vec(xOffset + 0.f, yOffset + 60.f)), module, Qqqq::VISUALIZE_PARAM + col));
+        addParam(createParam<AriaPushButton820Pink>(mm2px(Vec(xOffset + 0.f, yOffset + 60.f)), module, Qqqq::VISUALIZE_PARAM + col));
         addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 0.f, yOffset + 70.f)), module, Qqqq::CV_OUTPUT + col));
 
     }
@@ -284,14 +285,14 @@ struct QqqqWidget : ModuleWidget {
 
         // The LCD will go around here
 
-        // Key, Scale, External
-        addParam(createModuleParam<AriaKnob820Scale, Qqqq>(mm2px(Vec(25.f, 29.f)), module, Qqqq::KEY_PARAM));
-        addParam(createModuleParam<AriaKnob820Scale, Qqqq>(mm2px(Vec(35.f, 29.f)), module, Qqqq::SCALE_PARAM));
+        // Scale, Key, External
+        addParam(createModuleParam<AriaKnob820Scale, Qqqq>(mm2px(Vec(25.f, 29.f)), module, Qqqq::SCALE_PARAM));
+        addParam(createModuleParam<AriaKnob820Scale, Qqqq>(mm2px(Vec(35.f, 29.f)), module, Qqqq::KEY_PARAM));
         addInput(createInput<AriaJackIn>(mm2px(Vec(45.f, 29.f)), module, Qqqq::EXT_SCALE_INPUT));
         addOutput(createOutput<AriaJackOut>(mm2px(Vec(55.f, 29.f)), module, Qqqq::EXT_SCALE_OUTPUT));
 
         // Step programmer will go there
-        addParam(createParam<AriaKnob820>(mm2px(Vec(74.f, 53.f)), module, Qqqq::SLOT_PARAM));
+        // addParam(createParam<AriaKnob820>(mm2px(Vec(74.f, 53.f)), module, Qqqq::SLOT_KNOB_PARAM));
         addInput(createInput<AriaJackIn>(mm2px(Vec(84.f, 53.f)), module, Qqqq::SLOT_INPUT));
 
         // The quantizer columns

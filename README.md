@@ -1,18 +1,27 @@
 Aria Salvatrice Signature Series Synthesizer Modules
 ====================================================
 
-Hiya hello hey hi. These here are a few cool and nice modules what for [VCV Rack](https://vcvrack.com/). I hope you like them.
+Hiya hello hey hi. These here are a few cool and nice modules what for [VCV Rack](https://vcvrack.com/). You can download them from [its built-in library](library.vcvrack.com/).
 
-Modules documentation:
+I am some sort of multimedia artist interested in generative processes, creating [music](https://ariasalvatrice.bandcamp.com/releases) in genres I've come to call "Gay Baroque Technopop" and "Pastoral Industrial". All these synthesizer modules were designed for my own use first. I will not create yet another ADSR or VCO unless they do something unique. With this collection, I aim to create an integrated system of opinionated modules focused on the live performance of aleatoric techno. Nonetheless, they are versatile, and many people enjoyed using them in all sorts of music. I hope you will like them too.
+
+FIXME: **If you wish to show your support for my synthesizer modules, tips are accepted, but not required:**
+
+
+----
+
+Modules documentation
+---------------------
 
 - [Split and Merge: Splort, Smerge, Spleet, Swerge, and Splirge](#split-and-merge-splort-smerge-spleet-swerge-and-splirge)
+- [Quatherina the Quantum Duck presents Quatherina's Quality Quad Quantizer](#quatherina-the-quantum-duck-presents-quatherinas-quality-quad-quantizer)
 - [Darius Branching Step Sequencer](#darius-branching-step-sequencer)
 - [Arcane, Atout & Aleister - Today's Fortune ★](#arcane-atout--aleister---todays-fortune-)
-- [Quatherina the Quantum Duck presents Quatherina's Quality Quad Quantizer](#quatherina-the-quantum-duck-presents-quatherinas-quality-quad-quantizer)
 - [UnDuLaR Rack Scroller](#undular-rack-scroller)
 - [Signature Series Blank Plate](#signature-series-blank-plate)
 
-Other thingies:
+Other thingies
+--------------
 
 - [Changelog](CHANGELOG.md)
 - [Installation](#installation)
@@ -45,6 +54,81 @@ Splort and Smerge, the 16 channel modules, have a special feature: they can **Li
 The word "Splirge" seems to have been coined by the late Håkan Müller as part of [a Reason Rack Extension](https://www.reasonstudios.com/shop/rack-extension/mxsplirger-cv-flexible-split-merge/), and I think it's a cool word. The rest of the names were crafted by a consortium of expert linguists and personal branding gurus. 
 
 **Protip for cool kids only:** here's how the link feature works internally: it's a polyphonic cable, each channel is set to either 0V (means the channel isn't connected), or to a multiple of 0.1V to specify its order (so the first channel in sort order is 0.1V, the 12th one is 1.2V, etc). It doesn't expect specific values, just for them to be in the correct order. Try out a polyphonic sample and hold on the Link cable! 
+
+
+
+
+Quatherina the Quantum Duck presents Quatherina's Quality Quad Quantizer
+------------------------------------------------------------------------
+
+![Qqqq](/doc/qqqq.png)
+
+Quatherina the Quantum Duck is best known for her aventures in the Quartz Quasar, in the Quaint Quarry, in the Quarrelsome Quahaug Quagmire, in the Quarantined Quaestor Quadripoint, and in Canada (the canonicity of that last adventure being a point of debate amongst Quatherina's fans that I wish to remain neutral about).    
+To finance her adventuring lifestyle, she has graciously accepted a payment (in the form of an undisclosed tonnage of Quaker Oats) to lend her name and likeness in endorsement of my synthesizer modules.
+
+**Quatherina the Quantum Duck presents Quatherina's Quality Quad Quantizer** is a quantizer: it coerces any input signal into the closest pitch of the scale, and outputs it as a V/Oct signal. It only works with Twelve-tone Equal Temperament, the usual Western tuning system. It provides four separate quantizer lines, each with a built-in scaler and offsetter to change the range of the signal, the ability to transpose the signal, and sample & hold. You can save scales and chords in 16 slots.
+
+There are three different form factors available of the same underlying module:
+
+- **Quatherina's Quality Quad Quantizer**  (or **Qqqq**): The full 20hp version, featuring piano buttons, 4 polyphonic quantizer columns, and 16 memory slots.
+- TODO: **Quack**: This smaller 7hp version only include piano buttons, and a single polyphonic quantizer column from Qqqq.
+- TODO: **Q<**: 3hp. One column. External input only. Small.
+
+Those modules are all expanders of each other: the left one sets the scale to the one on the right, which forwards it. For example, if you only require two quantizer lines and no sequencer, you can use **Quack** on the left and **Q<** on the right, to use only half the size of **Qqqq**. If expander behavior is not desired, you can leave a gap between the instances, or TODO: disable expander features from the right-click menu.
+
+The scale of the device can be set from multiple sources, and **the last source to make a change always has the last word what's the scale**. All the quantizer lines on a module follow the same scale.
+
+Let's look at the controls of **Qqqq** in detail. If you understand them, you'll also understand what the smaller form factors do.
+
+- **Piano keys**: They always show you the current scale. Keys lit in yellow are parts of the scale, while unlit keys are disallowed. You can also click on the keys to change which notes are allowed. When you click the **visualize** button of a quantizer line, the notes currently playing on that line are lit pink.
+
+In the **LCD Area at the top of the device**:
+
+- **Scale** and **Key**: Selects the scale. The available scales were curated for ease of use and instant satisfaction rather than for comprehensiveness, avoiding duplication in the form of scales that can be expressed as modes of another (for your convenience, an exception is made for Natural Minor and Pentatonic Minor). The following scales are available:
+    - Chromatic
+    - Major
+    - Natural Minor
+    - Melodic Minor
+    - Harmonic Minor
+    - Pentatonic Major
+    - Pentatonic Minor
+    - Whole Tone
+    - Blues Major
+    - Blues Minor
+    - Dominant Diminishe
+    - Bebop Major
+    - Bebop Minor
+    - Double Harmonic
+    - Eight Tone Spanish
+    - Hirajōshi
+    - In Sen
+- **External Scale**: This input and output express the scale current as a 12-channel polyphonic cable, where enabled notes have a continuous 10V signal, and disabled notes, 0V. This way of expressing a scale is supported by my other modules, such as **Arcane** and **Darius**. Try it out with my splitters and mergers! 
+
+To the top right of the module:
+
+- **Scene slot**: Those 16 buttons allow you to save 16 different scales. Navigating to a slot loads it, and changing the scale while a slot is active saves the scale to that slot. You can right-click on those buttons to copy and paste scales.
+- **Scene input**: Navigates the scenes via CV. Useful with a step sequencer! Accepts 0V~10V. 
+
+To the bottom-right of the module:
+
+- **Likeness of Quatherina**: Increases the appeal of the module through co-branding.
+
+To the center of the module are the four quantizer columns, through which signal flows from top to bottom.
+
+- **CV Input**: Each input jack is forwarded to the columns to its right, if you want to process the same signal in different ways. Inputs are polyphonic.
+- **% Scale**: Attenuates, amplifies, or inverts the input.
+- **Offset**: Adds or remove a fixed voltage to the input.
+- **Transpose**: Transposes the signal according to one of the three rules, set by the transpose mode button under the knob.
+- **Transpose mode**: Selects one of the three transposition rules for the knob directly above it. Each transposition rules results in output that remains in harmony. The rules are:
+    - **Unlit** - _Octaves Mode_: Quantizes the signal first, then transposes it up or down by full octaves.
+    - **Yellow** - _Semitones Mode_: Transposes the signal up or down by a few semitones first, then quantizes it. 
+    - **Pink** - _Scale degrees Mode_: Quantizes the signal first, then transposes the signal by a specific amount of scale degrees.
+- **Sample & Hold / Track & Hold toggle**: Swaps between the two modes for the input directly below it. Unlit is Sample & Hold, lit is Track & Hold.
+- **Sample & Hold / Track & Hold input**: When plugged in, instead of operating continuously, the quantizer will Sample & Hold or Track & Hold the signal. When you're quantizing a noisy source of modulation, it's useful to send it the same gate you'd send to the envelope that will play the note in question. If the **CV input** is polyphonic, send it the same amount of channels.
+- **Output** - The quantized signal! Polyphony is defined by the **CV Input**. You only pay the CPU cost of the features you use: if left unplugged, unused columns avoid doing unecessary math.
+
+
+**Protip for cool kids only:** Did you know that there are a few people out there who do not use Quantizers, and instead choose to learn something called "Music Theory"? Those people do all their music by thinking really hard about maths! It's true - check out your library for more information.
 
 
 
@@ -89,8 +173,8 @@ On the bottom-left:
 - **CV/Quantize**: Whether to output precise CV (best for modulation), or quantized V/OCT CV (Twelve-tone Equal Temperament only - the usual Western tuning system).
 - **-5V\~5V/0V\~10V**: In CV mode, selects if the knobs output voltage from 0V to 10V, or -5V to 5V. In quantized mode, removes 1 octave from the output. 
 - **Min** and **Max**: Limit the CV output range. The words are only suggestions, if the **Min** is larger than the **Max**, it just flips in which direction the **CV** knobs operate.
-- **Scale** and **Key**: Select which notes to quantize to when in Quantize mode. The available scales were curated for ease of use and instant satisfaction rather than for comprehensiveness, avoiding duplication in the form of scales that can be expressed as modes of another. 
-- **External scale**: Accepts the scale in a format my other modules use: as a 12-channel polyphonic cable, where enabled notes have a continuous 10V signal, and disabled notes, 0V. You can use Darius as an arpeggiator by sending it a chord rather than a full scale!
+- **Scale** and **Key**: Select which notes to quantize to when in Quantize mode. The available scales are the same as in the **Qqqq** modules. 
+- **External scale**: Accepts the scale in the format **Qqqq** sends. You can use Darius as an arpeggiator by sending it a chord rather than a full scale!
 - **Slide**: The fun knob.
 - **Global Gate**: Passes through the gate or step inputs received on any of the directional inputs, or sends a short trig if operated via the manual Step button. It's useful if are controlling Darius using more than one directional input.
 - **CV**: The main output. 
@@ -199,34 +283,6 @@ It should go without saying that no sane courtroom would ever humor the idea the
 
 
 
-Quatherina the Quantum Duck presents Quatherina's Quality Quad Quantizer
-------------------------------------------------------------------------
-
-![Qqqq](/doc/qqqq.png)
-
-Quatherina the Quantum Duck is best known for her aventures in the Quartz Quasar, in the Quarantined Quaestor Quadripoint, and in Quanada. To finance her adventuring lifestyle, she has graciously accepted an undisclosed payment in Quaker Oats to lend her name and likeness in endorsement of my synthesizer modules.
-
-**Quatherina the Quantum Duck presents Quatherina's Quality Quad Quantizer** is a quantizer: it coerces any input signal into the closest pitch of the scale, and outputs it as a V/Oct signal. It only works with Twelve-tone Equal Temperament, the usual Western tuning system. It provides four separate quantizer lines, each with a built-in scaler and offsetter to change the range of the signal, the ability to transpose the signal, and sample & hold. You can save scales and chords in 16 slots.
-
-There are three different form factors available of the same underlying module:
-
-- **Quatherina's Quality Quad Quantizer**  (or **Qqqq**): The full 20hp version, featuring piano buttons, 4 polyphonic quantizer columns, and 16 memory slots.
-- **Quack**: This smaller 7hp version only include piano buttons, and a single polyphonic quantizer column from Qqqq.
-- **Q<**: 3hp. One column. External input only. Small.
-
-Those modules are all expanders of each other: the left one sets the scale to the one on the right, which forwards it. For example, if you only require two quantizer lines and no sequencer, you can use **Quack** on the left and **Q<** on the right, to use only half the size of **Qqqq**. If expander behavior is not desired, simply leave a gap between the instances.
-
-All the quantizer lines on a module follow the same scale, which can be set in multiple ways. The piano always shows you the current scale: keys lit in yellow are allowed, unlit keys are disallowed. When visualization is enabled on a quantizer line, the note currently playing is lit pink. You can also click on the keys to change which notes are allowed.
-
-The scale of the device can be set in multiple ways, and the last source to make a change has the last word what's the scale. 
-
-
-
-
-
-
-
-
 UnDuLaR Rack Scroller
 ---------------------
 
@@ -322,7 +378,7 @@ You may freely distribute alternate faceplates for my modules. You will find inf
 Contact
 -------
 
-Send me questions and dog gifs to <woof@aria.dog>. 
+You can send me comments on the [VCV Rack community forums](https://community.vcvrack.com/). You can send me bug reports and feature requests on [my GitHub project page](https://github.com/AriaSalvatrice/AriaVCVModules/issues). You can send me dontations to FIXME: . You can send me dog gifs to <woof@aria.dog>. 
 
 ttyl,
 
