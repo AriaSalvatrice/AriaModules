@@ -7,6 +7,10 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 
 - Nothing
 
+### Added
+
+- [NEW] Quatherine the Quantum Duck presents Quatherine's Quality Quad Quantizer: A 
+
 ### Changed
 
 - [CHANGE] All modules: small changes to the visual design of the pushbuttons

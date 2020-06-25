@@ -48,7 +48,7 @@ Think pitchbend wheel. A series of controllers that can spring back, and can be 
 
 # Quantizer / chord sequencer
 
-Currently working on this one.
+Currently working on this one!
 
 A quantizer system with scene support, allowing you to create and use external scales (c.f. Darius), making use of the code I already have. Scene support to quickly change the tonality of the piece. You can use it to program chords and scales. 
 

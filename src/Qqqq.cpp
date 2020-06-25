@@ -25,8 +25,6 @@ struct Qqqq : Module {
         ENUMS(TRANSPOSE_MODE_PARAM, 4), 
         ENUMS(SHTH_MODE_PARAM, 4),
         ENUMS(VISUALIZE_PARAM, 4),
-        // TRANSPOSE_MODE_PARAM,
-        // SHTH_MODE_PARAM,
         KEY_PARAM,
         SCALE_PARAM,
         SLOT_PARAM,
@@ -36,11 +34,9 @@ struct Qqqq : Module {
     };
     enum InputIds {
         ENUMS(CV_INPUT, 4),
-        // ENUMS(SCALING_INPUT, 4),
-        // ENUMS(OFFSET_INPUT, 4),
-        // ENUMS(TRANSPOSE_INPUT, 4),
         ENUMS(SHTH_INPUT, 4),
         EXT_SCALE_INPUT,
+        SLOT_INPUT,
         NUM_INPUTS
     };
     enum OutputIds {
@@ -266,18 +262,23 @@ struct QqqqWidget : ModuleWidget {
         addParam(createParam<AriaKnob820>(mm2px(Vec(xOffset + 0.f, yOffset + 10.f)), module, Qqqq::SCALING_PARAM + col));
         addParam(createParam<AriaKnob820>(mm2px(Vec(xOffset + 0.f, yOffset + 20.f)), module, Qqqq::OFFSET_PARAM + col));
         addParam(createParam<AriaKnob820>(mm2px(Vec(xOffset + 0.f, yOffset + 30.f)), module, Qqqq::TRANSPOSE_PARAM + col));
-        addInput(createInput<AriaJackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 40.f)), module, Qqqq::SHTH_INPUT + col));
-        addParam(createParam<AriaPushButton820>(mm2px(Vec(xOffset + 0.f, yOffset + 50.f)), module, Qqqq::VISUALIZE_PARAM + col));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 0.f, yOffset + 60.f)), module, Qqqq::CV_OUTPUT + col));
 
-        addParam(createParam<AriaPushButton500>(mm2px(Vec(xOffset + -0.5f, yOffset + 70.f)), module, Qqqq::SHTH_MODE_PARAM + col));
-        addParam(createParam<AriaPushButton500Momentary>(mm2px(Vec(xOffset + 3.5f, yOffset + 72.5f)), module, Qqqq::TRANSPOSE_MODE_PARAM + col));
+        addParam(createParam<AriaPushButton500>(mm2px(Vec(xOffset + 3.5f, yOffset + 40.f)), module, Qqqq::SHTH_MODE_PARAM + col));
+        addParam(createParam<AriaPushButton500>(mm2px(Vec(xOffset + -0.5f, yOffset + 42.5f)), module, Qqqq::TRANSPOSE_MODE_PARAM + col));
+
+        addInput(createInput<AriaJackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 50.f)), module, Qqqq::SHTH_INPUT + col));
+        addParam(createParam<AriaPushButton820>(mm2px(Vec(xOffset + 0.f, yOffset + 60.f)), module, Qqqq::VISUALIZE_PARAM + col));
+        addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 0.f, yOffset + 70.f)), module, Qqqq::CV_OUTPUT + col));
+
     }
 
     QqqqWidget(Qqqq* module) {
         setModule(module);
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Qqqq.svg")));
         
+        // Signature
+        addChild(createWidget<AriaSignature>(mm2px(Vec(65.f, 114.5f))));
+
         drawScrews();
         drawPianoKeys(4.7f, 102.8f, module);
 
@@ -290,12 +291,14 @@ struct QqqqWidget : ModuleWidget {
         addOutput(createOutput<AriaJackOut>(mm2px(Vec(55.f, 29.f)), module, Qqqq::EXT_SCALE_OUTPUT));
 
         // Step programmer will go there
+        addParam(createParam<AriaKnob820>(mm2px(Vec(74.f, 53.f)), module, Qqqq::SLOT_PARAM));
+        addInput(createInput<AriaJackIn>(mm2px(Vec(84.f, 53.f)), module, Qqqq::SLOT_INPUT));
 
         // The quantizer columns
-        drawQuantizerColumn(25.f, 49.f, module, 0);
-        drawQuantizerColumn(35.f, 49.f, module, 1);
-        drawQuantizerColumn(45.f, 49.f, module, 2);
-        drawQuantizerColumn(55.f, 49.f, module, 3);
+        drawQuantizerColumn(25.f, 43.f, module, 0);
+        drawQuantizerColumn(35.f, 43.f, module, 1);
+        drawQuantizerColumn(45.f, 43.f, module, 2);
+        drawQuantizerColumn(55.f, 43.f, module, 3);
     }
 };
 
