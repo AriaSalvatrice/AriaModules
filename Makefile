@@ -48,8 +48,6 @@ include $(RACK_DIR)/plugin.mk
 ifdef ARCH_WIN
 # extra dist target for Azure CI Windows build, as there is only 7zip available and no zip command
 azure-win-dist: all
-	make dep
-	rm -rf dist
 	mkdir -p dist/$(SLUG)
 	@# Strip and copy plugin binary
 	cp $(TARGET) dist/$(SLUG)/
