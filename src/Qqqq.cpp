@@ -4,7 +4,7 @@
 #include "javascript.hpp"
 #include "javascript-libraries.hpp"
 
-/* Quatherine's Quality Quad Quantizer, Quack, Q<
+/* Quatherina's Quality Quad Quantizer, Quack, Q<
    All three modules are the same, with different widgets.
 */ 
 

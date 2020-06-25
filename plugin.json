@@ -67,8 +67,8 @@
     },
     {
       "slug": "Qqqq",
-      "name": "Quatherine's Quality Quad Quantizer",
-      "description": "Quatherine the Quantum Duck's Quantizer with custom & external scales, 16 scenes, offset, sample and hold, transposition, and lead sheet chords parsing",
+      "name": "Quatherina's Quality Quad Quantizer",
+      "description": "Quatherina the Quantum Duck's Quantizer with custom & external scales, 16 scenes, offset, sample and hold, transposition, and lead sheet chords parsing",
       "tags": [
         "Polyphonic",
         "Quantizer",
@@ -77,16 +77,16 @@
     },
     {
       "slug": "Quack",
-      "name": "Quatherine's Quack",
-      "description": "Quatherine the Quantum Duck's smaller quantizer",
+      "name": "Quatherina's Quack",
+      "description": "Quatherina the Quantum Duck's smaller quantizer",
       "tags": [
         "Quantizer"
       ]
     },
     {
       "slug": "Q",
-      "name": "Quatherine's Q<",
-      "description": "Quatherine the Quantum Duck's tiny quantizer",
+      "name": "Quatherina's Q<",
+      "description": "Quatherina the Quantum Duck's tiny quantizer",
       "tags": [
         "Quantizer"
       ]

@@ -8,7 +8,7 @@ Modules documentation:
 - [Split and Merge: Splort, Smerge, Spleet, Swerge, and Splirge](#split-and-merge-splort-smerge-spleet-swerge-and-splirge)
 - [Darius Branching Step Sequencer](#darius-branching-step-sequencer)
 - [Arcane, Atout & Aleister - Today's Fortune ★](#arcane-atout--aleister---todays-fortune-)
-- [Quatherine the Quantum Duck presents Quatherine's Quality Quad Quantizer]()
+- [Quatherina the Quantum Duck presents Quatherina's Quality Quad Quantizer](#quatherina-the-quantum-duck-presents-quatherinas-quality-quad-quantizer)
 - [UnDuLaR Rack Scroller](#undular-rack-scroller)
 - [Signature Series Blank Plate](#signature-series-blank-plate)
 
@@ -199,24 +199,24 @@ It should go without saying that no sane courtroom would ever humor the idea the
 
 
 
-Quatherine the Quantum Duck presents Quatherine's Quality Quad Quantizer
+Quatherina the Quantum Duck presents Quatherina's Quality Quad Quantizer
 ------------------------------------------------------------------------
 
 ![Qqqq](/doc/qqqq.png)
 
-Quatherine the Quantum Duck is best known for her aventures in the Quartz Quasar, in the Quarantined Quaestor Quadripoint, and in Quanada. To finance her adventuring lifestyle, she has graciously accepted an undisclosed payment in Quaker Oats to lend her name and likeness to endorse my synthesizer modules.
+Quatherina the Quantum Duck is best known for her aventures in the Quartz Quasar, in the Quarantined Quaestor Quadripoint, and in Quanada. To finance her adventuring lifestyle, she has graciously accepted an undisclosed payment in Quaker Oats to lend her name and likeness in endorsement of my synthesizer modules.
 
-**Quatherine the Quantum Duck presents Quatherine's Quality Quad Quantizer** (or **Qqqq**) is a quantizer: it coerces any input signal into the closest pitch of the scale, and outputs it as a V/Oct signal. It only works with Twelve-tone Equal Temperament, the usual Western tuning system. It provides four separate quantizer lines, each with a built-in scaler and offsetter to change the range of the signal, the ability to transpose the signal, and sample & hold. You can save scales and chords in 16 slots.
+**Quatherina the Quantum Duck presents Quatherina's Quality Quad Quantizer** is a quantizer: it coerces any input signal into the closest pitch of the scale, and outputs it as a V/Oct signal. It only works with Twelve-tone Equal Temperament, the usual Western tuning system. It provides four separate quantizer lines, each with a built-in scaler and offsetter to change the range of the signal, the ability to transpose the signal, and sample & hold. You can save scales and chords in 16 slots.
 
 There are three different form factors available of the same underlying module:
 
-- **Quatherine the Quantum Duck presents Quatherine's Quality Quad Quantizer**: The full 20hp version, featuring piano buttons, 4 polyphonic quantizer columns, and 16 memory slots.
+- **Quatherina's Quality Quad Quantizer**  (or **Qqqq**): The full 20hp version, featuring piano buttons, 4 polyphonic quantizer columns, and 16 memory slots.
 - **Quack**: This smaller 7hp version only include piano buttons, and a single polyphonic quantizer column from Qqqq.
 - **Q<**: 3hp. One column. External input only. Small.
 
-Those modules are all expanders of each other: the left one sets the scale to the one on the right, which forwards it. If this behavior is not desired, separate the instances.
+Those modules are all expanders of each other: the left one sets the scale to the one on the right, which forwards it. For example, if you only require two quantizer lines and no sequencer, you can use **Quack** on the left and **Q<** on the right, to use only half the size of **Qqqq**. If expander behavior is not desired, simply leave a gap between the instances.
 
-All the quantizer line on a module follow the same scale, which can be set in multiple ways. The piano always shows you the current scale: keys lit in yellow are allowed, unlit keys are disallowed. When visualization is enabled on a quantizer line, the note currently playing is lit pink. You can also click on the keys to change which notes are allowed.
+All the quantizer lines on a module follow the same scale, which can be set in multiple ways. The piano always shows you the current scale: keys lit in yellow are allowed, unlit keys are disallowed. When visualization is enabled on a quantizer line, the note currently playing is lit pink. You can also click on the keys to change which notes are allowed.
 
 The scale of the device can be set in multiple ways, and the last source to make a change has the last word what's the scale. 
 
