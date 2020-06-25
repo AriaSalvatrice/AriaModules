@@ -28,7 +28,6 @@ struct Qqqq : Module {
         ENUMS(SLOT_BUTTON_PARAM, 16),
         KEY_PARAM,
         SCALE_PARAM,
-        // SLOT_KNOB_PARAM,
         PASTE_CLIPBOARD_PARAM,
         KEYBOARD_INPUT_PARAM,
         NUM_PARAMS
@@ -292,7 +291,6 @@ struct QqqqWidget : ModuleWidget {
         addOutput(createOutput<AriaJackOut>(mm2px(Vec(55.f, 29.f)), module, Qqqq::EXT_SCALE_OUTPUT));
 
         // Step programmer will go there
-        // addParam(createParam<AriaKnob820>(mm2px(Vec(74.f, 53.f)), module, Qqqq::SLOT_KNOB_PARAM));
         addInput(createInput<AriaJackIn>(mm2px(Vec(84.f, 53.f)), module, Qqqq::SLOT_INPUT));
 
         // The quantizer columns

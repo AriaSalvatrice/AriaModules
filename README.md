@@ -76,7 +76,8 @@ There are three different form factors available of the same underlying module:
 
 Those modules are all expanders of each other: the left one sets the scale to the one on the right, which forwards it. For example, if you only require two quantizer lines and no sequencer, you can use **Quack** on the left and **Q<** on the right, to use only half the size of **Qqqq**. If expander behavior is not desired, you can leave a gap between the instances, or TODO: disable expander features from the right-click menu.
 
-The scale of the device can be set from multiple sources, and **the last source to make a change always has the last word what's the scale**. All the quantizer lines on a module follow the same scale.
+The scale of the device can be set from multiple sources, and **the last source to make a change always has the last word what's the scale**. All the quantizer lines on a module follow the same scale. And while in this documentation, I call them scales for simplicity, **Qqqq** also works with chords, and can be a fantasatic arpeggiator. 
+
 
 Let's look at the controls of **Qqqq** in detail. If you understand them, you'll also understand what the smaller form factors do.
 
@@ -84,30 +85,37 @@ Let's look at the controls of **Qqqq** in detail. If you understand them, you'll
 
 In the **LCD Area at the top of the device**:
 
-- **Scale** and **Key**: Selects the scale. The available scales were curated for ease of use and instant satisfaction rather than for comprehensiveness, avoiding duplication in the form of scales that can be expressed as modes of another (for your convenience, an exception is made for Natural Minor and Pentatonic Minor). The following scales are available:
-    - Chromatic
-    - Major
-    - Natural Minor
-    - Melodic Minor
-    - Harmonic Minor
-    - Pentatonic Major
-    - Pentatonic Minor
-    - Whole Tone
-    - Blues Major
-    - Blues Minor
-    - Dominant Diminishe
-    - Bebop Major
-    - Bebop Minor
-    - Double Harmonic
-    - Eight Tone Spanish
-    - Hirajōshi
-    - In Sen
+- **Scale** and **Key**: Selects the scale, and its key. The available scales were curated for ease of use and instant satisfaction rather than for comprehensiveness, avoiding duplication in the form of scales that can be expressed as modes of another (for your convenience, an exception is made for Natural Minor and Pentatonic Minor). The following scales, along with my qualified opinion about them, are available:
+    - **Chromatic** - All the notes, all the time! It's a great deal if you like every note!
+    - **Major** - The white keys of the piano! I'm not really sure why we need anything else, but hey, your call if you want something exotic.
+    - **Natural Minor** - AKA Aeolian mode, it has the same pattern as the major scale, but it has a different tonic making it more suitable for being sad.
+    - **Melodic Minor** - You can use it to write melodies! Before this scale was invented, music had no melodies.
+    - **Harmonic Minor** - This is the fancy, high-culture, bourgeois minor scale, used by refined individuals. That shit slaps.
+    - **Pentatonic Major** - It's the guitar scale! It has only 5 notes. Yet guitars have 6 strings. How does it even work? Theory makes my head hurt.
+    - **Pentatonic Minor** - Same scam as with natural minor: it's the exact same notes as major, just with their order shuffled around a bit.
+    - **Whole Tone** - This one has structure! It is for fans of symmetry and kaleidoscopes and fractals and putting a fibonacci spiral overlay on a renaissance painting. 
+    - **Blues Major** - It's for when you got the blues, but aren't that sad about it.
+    - **Blues Minor** - That is for special occasions.
+    - **Dominant Diminished** - That bad boy makes Honked up Hot Jazz 
+    - **Bebop Major** - This one has a "blue note", like those albums with the cool typography on the cover.
+    - **Bebop Minor** - This one is for fans of animé. You're welcome.
+    - **Double Harmonic** - It's so harmonic, cultures from all over the world claim this one as theirs!
+    - **Eight Tone Spanish** - When I tried to find more useful info about it, I found a forum post from 2003, where a posted said indignantly that scales "[are] not a democracy, but a hierarchy".
+    - **Hirajōshi** - It's all you need to rip a sick shamisen solo. Anything else is for poseur kids.
+    - **In Sen** - That one was originally used for Japanese wind chimes. Instantly become the most original dark ambient modular artist around by feeding it to [Rings and Clouds](https://vcvrack.com/AudibleInstruments) for 3 hours.
 - **External Scale**: This input and output express the scale current as a 12-channel polyphonic cable, where enabled notes have a continuous 10V signal, and disabled notes, 0V. This way of expressing a scale is supported by my other modules, such as **Arcane** and **Darius**. Try it out with my splitters and mergers! 
 
 To the top right of the module:
 
-- **Scene slot**: Those 16 buttons allow you to save 16 different scales. Navigating to a slot loads it, and changing the scale while a slot is active saves the scale to that slot. You can right-click on those buttons to copy and paste scales.
-- **Scene input**: Navigates the scenes via CV. Useful with a step sequencer! Accepts 0V~10V. 
+- **Scene slot**: Those 16 buttons allow you to save 16 different scales. Navigating to a slot loads it, and changing the scale while a slot is active saves the scale to that slot. You can right-click on those buttons to copy and paste scales. You can map those buttons via MIDI!
+- **Scene input**: Navigates the scenes via CV. Useful with a step sequencer! Accepts 0V~10V. When plugged in, buttons can't be operated manually anymore.
+
+To the right, below the **Scene slots**:
+
+- **Keyboard** and **Paste** input. They allow you to write down or paste input from the clipboard, and have it transformed to chords. The three following notations are supported (which you're using is automatically detected):
+    - **Lead sheet notation**: Chord symbols, separated with spaces, commas, or hyphens. It's pretty liberal in what it accepts! For example, this is a valid input: `G am C B, E/G# Bb A,Fsus2  Csus2`
+    - **Roman numberal notation**: FIXME: 
+    - **Portable Sequence**: Simultaneous notes from a [portable sequence](https://github.com/squinkylabs/SquinkyVCV/blob/master/docs/clipboard-format.md) are interpreted as a new scale.
 
 To the bottom-right of the module:
 
