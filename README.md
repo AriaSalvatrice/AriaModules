@@ -72,7 +72,7 @@ There are three different form factors available of the same underlying module:
 
 - **Quatherina's Quality Quad Quantizer**  (or **Qqqq**): The full 20hp version, featuring piano buttons, 4 polyphonic quantizer columns, and 16 memory slots.
 - TODO: **Quack**: This smaller 7hp version only include piano buttons, and a single polyphonic quantizer column from Qqqq.
-- TODO: **Q<**: 3hp. One column. External input only. Small.
+- TODO: **Q<**: 3hp. 1 column. External input. Tiny.
 
 Those modules are all expanders of each other: the left one sets the scale to the one on the right, which forwards it. For example, if you only require two quantizer lines and no sequencer, you can use **Quack** on the left and **Q<** on the right, to use only half the size of **Qqqq**. If expander behavior is not desired, you can leave a gap between the instances, or TODO: disable expander features from the right-click menu.
 
@@ -114,7 +114,7 @@ To the right, below the **Scene slots**:
 
 - **Keyboard** and **Paste** input. They allow you to write down or paste input from the clipboard, and have it transformed to chords. The three following notations are supported (which you're using is automatically detected):
     - **Lead sheet notation**: Chord symbols, separated with spaces, commas, or hyphens. It's pretty liberal in what it accepts! For example, this is a valid input: `G am C B, E/G# Bb A,Fsus2  Csus2`
-    - **Roman numberal notation**: FIXME: 
+    - **Roman numeral notation**: FIXME: 
     - **Portable Sequence**: Simultaneous notes from a [portable sequence](https://github.com/squinkylabs/SquinkyVCV/blob/master/docs/clipboard-format.md) are interpreted as a new scale.
 
 To the bottom-right of the module:
