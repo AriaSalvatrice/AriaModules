@@ -388,7 +388,10 @@ You may freely distribute alternate faceplates for my modules. You will find inf
 Contact
 -------
 
-You can send me comments on the [VCV Rack community forums](https://community.vcvrack.com/). You can send me bug reports and feature requests on [my GitHub project page](https://github.com/AriaSalvatrice/AriaVCVModules/issues). You can send me dontations to FIXME: . You can send me dog gifs to <woof@aria.dog>. 
+You can send me comments on the [VCV Rack community forums](https://community.vcvrack.com/).    
+You can send me bug reports and feature requests on [my GitHub project page](https://github.com/AriaSalvatrice/AriaVCVModules/issues).    
+You can send me dontations to FIXME: .    
+You can send me dog gifs to <woof@aria.dog>. 
 
 ttyl,
 
