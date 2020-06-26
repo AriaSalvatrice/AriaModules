@@ -1,7 +1,10 @@
 #pragma once
 #include <rack.hpp>
+
+// FIXME: Both forms of this path are broken on OS X and Linux
 // #include <quickjs/quickjs.h>
-#include "../dep/QuickJS/quickjs.h"
+// #include "../dep/QuickJS/quickjs.h"
+#include "quickjs/quickjs.h"
 
 // This encapsulates QuickJS, the same Javascript engine used in VCV Prototype.
 // This is very experimental, and done in the simplest way that would accomplish my goals,

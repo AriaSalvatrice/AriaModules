@@ -230,6 +230,24 @@ struct AriaPianoBlack : SvgSwitchUnshadowed {
     }
 };
 
+// Keyboard, clipboard
+
+struct AriaPushButtonKeyboard : SvgSwitchUnshadowed {
+    AriaPushButtonKeyboard() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/button-keyboard.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/button-keyboard-pressed.svg")));
+        momentary = true;
+    }
+};
+struct AriaPushButtonClipboard : SvgSwitchUnshadowed {
+    AriaPushButtonClipboard() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/button-clipboard.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/button-clipboard-pressed.svg")));
+        momentary = true;
+    }
+};
+
+
 
 struct QqqqWidget : ModuleWidget {
 
@@ -292,6 +310,10 @@ struct QqqqWidget : ModuleWidget {
 
         // Step programmer will go there
         addInput(createInput<AriaJackIn>(mm2px(Vec(84.f, 53.f)), module, Qqqq::SLOT_INPUT));
+
+        // Keyboard/Clipboard inputs
+        addParam(createParam<AriaPushButtonKeyboard>(mm2px(Vec(83.f, 64.f)), module, Qqqq::KEYBOARD_INPUT_PARAM));
+        addParam(createParam<AriaPushButtonClipboard>(mm2px(Vec(83.f, 73.f)), module, Qqqq::PASTE_CLIPBOARD_PARAM));
 
         // The quantizer columns
         drawQuantizerColumn(25.f, 43.f, module, 0);

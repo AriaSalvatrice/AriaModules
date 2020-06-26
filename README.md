@@ -61,7 +61,7 @@ The word "Splirge" seems to have been coined by the late Håkan Müller as part 
 Quatherina the Quantum Duck presents Quatherina's Quality Quad Quantizer
 ------------------------------------------------------------------------
 
-![Qqqq](/doc/qqqq.png)
+![QQQQ](/doc/QQQQ.png)
 
 Quatherina the Quantum Duck is best known for her aventures in the Quartz Quasar, in the Quaint Quarry, in the Quarrelsome Quahaug Quagmire, in the Quarantined Quaestor Quadripoint, and in Canada (the canonicity of that last adventure being a point of debate amongst Quatherina's fans that I wish to remain neutral about).    
 To finance her adventuring lifestyle, she has graciously accepted a payment (in the form of an undisclosed tonnage of Quaker Oats) to lend her name and likeness in endorsement of my synthesizer modules.
@@ -70,16 +70,16 @@ To finance her adventuring lifestyle, she has graciously accepted a payment (in 
 
 There are three different form factors available of the same underlying module:
 
-- **Quatherina's Quality Quad Quantizer**  (or **Qqqq**): The full 20hp version, featuring piano buttons, 4 polyphonic quantizer columns, and 16 memory slots.
-- TODO: **Quack**: This smaller 7hp version only include piano buttons, and a single polyphonic quantizer column from Qqqq.
+- **Quatherina's Quality Quad Quantizer**  (or **QQQQ**): The full 20hp version, featuring piano buttons, 4 polyphonic quantizer columns, and 16 memory slots.
+- TODO: **Quack**: This smaller 7hp version only include piano buttons, and a single polyphonic quantizer column from QQQQ.
 - TODO: **Q<**: 3hp. 1 column. External input. Tiny.
 
-Those modules are all expanders of each other: the left one sets the scale to the one on the right, which forwards it. For example, if you only require two quantizer lines and no sequencer, you can use **Quack** on the left and **Q<** on the right, to use only half the size of **Qqqq**. If expander behavior is not desired, you can leave a gap between the instances, or TODO: disable expander features from the right-click menu.
+Those modules are all expanders of each other: the left one sets the scale to the one on the right, which forwards it. For example, if you only require two quantizer lines and no sequencer, you can use **Quack** on the left and **Q<** on the right, to use only half the size of **QQQQ**. If expander behavior is not desired, you can leave a gap between the instances, or TODO: disable expander features from the right-click menu.
 
-The scale of the device can be set from multiple sources, and **the last source to make a change always has the last word what's the scale**. All the quantizer lines on a module follow the same scale. And while in this documentation, I call them scales for simplicity, **Qqqq** also works with chords, and can be a fantasatic arpeggiator. 
+The scale of the device can be set from multiple sources, and **the last source to make a change always has the last word what's the scale**. All the quantizer lines on a module follow the same scale. And while in this documentation, I call them scales for simplicity, **QQQQ** also works with chords, and can be a fantasatic arpeggiator. 
 
 
-Let's look at the controls of **Qqqq** in detail. If you understand them, you'll also understand what the smaller form factors do.
+Let's look at the controls of **QQQQ** in detail. If you understand them, you'll also understand what the smaller form factors do.
 
 - **Piano keys**: They always show you the current scale. Keys lit in yellow are parts of the scale, while unlit keys are disallowed. You can also click on the keys to change which notes are allowed. When you click the **visualize** button of a quantizer line, the notes currently playing on that line are lit pink.
 
@@ -88,7 +88,7 @@ In the **LCD Area at the top of the device**:
 - **Scale** and **Key**: Selects the scale, and its key. The available scales were curated for ease of use and instant satisfaction rather than for comprehensiveness, avoiding duplication in the form of scales that can be expressed as modes of another (for your convenience, an exception is made for Natural Minor and Pentatonic Minor). The following scales, along with my qualified opinion about them, are available:
     - **Chromatic** - All the notes, all the time! It's a great deal if you like every note!
     - **Major** - The white keys of the piano! I'm not really sure why we need anything else, but hey, your call if you want something exotic.
-    - **Natural Minor** - AKA Aeolian mode, it has the same pattern as the major scale, but it has a different tonic making it more suitable for being sad.
+    - **Natural Minor** - It is the exact same thing as the major scale, but it has a different "tonic" making it more suitable for being sad.
     - **Melodic Minor** - You can use it to write melodies! Before this scale was invented, music had no melodies.
     - **Harmonic Minor** - This is the fancy, high-culture, bourgeois minor scale, used by refined individuals. That shit slaps.
     - **Pentatonic Major** - It's the guitar scale! It has only 5 notes. Yet guitars have 6 strings. How does it even work? Theory makes my head hurt.
@@ -117,7 +117,9 @@ To the right, below the **Scene slots**:
     - **Roman numeral notation**: FIXME: 
     - **Portable Sequence**: Simultaneous notes from a [portable sequence](https://github.com/squinkylabs/SquinkyVCV/blob/master/docs/clipboard-format.md) are interpreted as a new scale.
 
-To the bottom-right of the module:
+Note that **QQQQ** only thinks in scales, not in chords. After you import a chord progression, **QQQQ** doesn't care about the voicing of the chord. It's all folded back to a single octave. 
+
+Next, to the bottom-right of the module:
 
 - **Likeness of Quatherina**: Increases the appeal of the module through co-branding.
 
@@ -136,7 +138,7 @@ To the center of the module are the four quantizer columns, through which signal
 - **Output** - The quantized signal! Polyphony is defined by the **CV Input**. You only pay the CPU cost of the features you use: if left unplugged, unused columns avoid doing unecessary math.
 
 
-**Protip for cool kids only:** Did you know that there are a few people out there who do not use Quantizers, and instead choose to learn something called "Music Theory"? Those people do all their music by thinking really hard about maths! It's true - check out your library for more information.
+**Protip for cool kids only:** Did you know that there are a few people out there who do not use Quantizers, and instead choose to spend years to learn something called "Music Theory"? Those people do all their music by thinking really hard about maths! It's true - check out your library for more information.
 
 
 
@@ -181,8 +183,8 @@ On the bottom-left:
 - **CV/Quantize**: Whether to output precise CV (best for modulation), or quantized V/OCT CV (Twelve-tone Equal Temperament only - the usual Western tuning system).
 - **-5V\~5V/0V\~10V**: In CV mode, selects if the knobs output voltage from 0V to 10V, or -5V to 5V. In quantized mode, removes 1 octave from the output. 
 - **Min** and **Max**: Limit the CV output range. The words are only suggestions, if the **Min** is larger than the **Max**, it just flips in which direction the **CV** knobs operate.
-- **Scale** and **Key**: Select which notes to quantize to when in Quantize mode. The available scales are the same as in the **Qqqq** modules. 
-- **External scale**: Accepts the scale in the format **Qqqq** sends. You can use Darius as an arpeggiator by sending it a chord rather than a full scale!
+- **Scale** and **Key**: Select which notes to quantize to when in Quantize mode. The available scales are the same as in the **QQQQ** modules. 
+- **External scale**: Accepts the scale in the format **QQQQ** sends. You can use Darius as an arpeggiator by sending it a chord rather than a full scale!
 - **Slide**: The fun knob.
 - **Global Gate**: Passes through the gate or step inputs received on any of the directional inputs, or sends a short trig if operated via the manual Step button. It's useful if are controlling Darius using more than one directional input.
 - **CV**: The main output. 
