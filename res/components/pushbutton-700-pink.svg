@@ -9,12 +9,12 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="8.1999998mm"
-   height="8.1999998mm"
-   viewBox="0 0 8.2000006 8.2000011"
+   width="7mm"
+   height="7mm"
+   viewBox="0 0 7.0000007 7.0000011"
    version="1.1"
    id="svg5251"
-   sodipodi:docname="pushbutton-820-pink.svg"
+   sodipodi:docname="pushbutton-700-pink.svg"
    inkscape:version="0.92.4 (5da689c313, 2019-01-14)">
   <metadata
      id="metadata5255">
@@ -24,7 +24,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -42,8 +42,8 @@
      id="namedview5253"
      showgrid="false"
      inkscape:zoom="15.229675"
-     inkscape:cx="-6.0872486"
-     inkscape:cy="15.244593"
+     inkscape:cx="23.95239"
+     inkscape:cy="13.919284"
      inkscape:window-x="1076"
      inkscape:window-y="442"
      inkscape:window-maximized="1"
@@ -63,18 +63,6 @@
          id="stop7066" />
     </linearGradient>
     <linearGradient
-       inkscape:collect="always"
-       id="linearGradient7060">
-      <stop
-         style="stop-color:#fedae0;stop-opacity:1"
-         offset="0"
-         id="stop7056" />
-      <stop
-         style="stop-color:#fcaebb;stop-opacity:1"
-         offset="1"
-         id="stop7058" />
-    </linearGradient>
-    <linearGradient
        id="linearGradient5849">
       <stop
          style="stop-color:#ff00ff;stop-opacity:1"
@@ -92,7 +80,7 @@
     <linearGradient
        id="b"
        osb:paint="solid"
-       gradientTransform="matrix(1 0 0 .8 2e-7 31.699973)">
+       gradientTransform="matrix(1,0,0,0.8,2e-7,31.699973)">
       <stop
          offset="0"
          stop-color="#fcaebb"
@@ -123,13 +111,14 @@
     </linearGradient>
     <linearGradient
        inkscape:collect="always"
-       xlink:href="#linearGradient7060"
+       xlink:href="#linearGradient7060-9"
        id="linearGradient7062"
        x1="4.1877122"
        y1="0.72966093"
        x2="4.186017"
        y2="7.4008484"
-       gradientUnits="userSpaceOnUse" />
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.85365868,0,0,0.85365868,6.9780977e-8,-1.1606853e-6)" />
     <linearGradient
        inkscape:collect="always"
        xlink:href="#linearGradient7068"
@@ -138,37 +127,50 @@
        y1="0.99110156"
        x2="4.0288143"
        y2="4.7783904"
-       gradientUnits="userSpaceOnUse" />
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.85365868,0,0,0.85365868,9.9833432e-8,-1.1606853e-6)" />
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient7060-9">
+      <stop
+         style="stop-color:#fedae0;stop-opacity:1"
+         offset="0"
+         id="stop7056-2" />
+      <stop
+         style="stop-color:#fcaebb;stop-opacity:1"
+         offset="1"
+         id="stop7058-1" />
+    </linearGradient>
   </defs>
   <circle
-     cx="4.1000004"
-     cy="4.1000004"
-     r="4.0999999"
+     cx="3.500001"
+     cy="3.4999998"
+     r="3.5000005"
      id="circle5245"
-     style="fill:#083d45;fill-opacity:1;paint-order:markers fill stroke" />
+     style="fill:#083d45;fill-opacity:1;stroke-width:0.85365868;paint-order:markers fill stroke" />
   <circle
-     cx="4.1000004"
-     cy="4.1000004"
-     r="3.7000005"
+     cx="3.500001"
+     cy="3.4999998"
+     r="3.1585376"
      id="circle5247"
-     style="fill:#469ca9;fill-opacity:1;stroke-width:0.97185755;paint-order:markers fill stroke" />
+     style="fill:#469ca9;fill-opacity:1;stroke-width:0.82963461;paint-order:markers fill stroke" />
   <circle
-     cy="4.1000004"
-     cx="4.1000004"
-     r="3.3000004"
+     cy="3.4999998"
+     cx="3.500001"
+     r="2.8170741"
      id="circle5249"
-     style="fill:url(#linearGradient7062);fill-opacity:1;stroke-width:0.93902451;paint-order:markers fill stroke" />
+     style="fill:url(#linearGradient7062);fill-opacity:1.0;stroke-width:0.80160642;paint-order:markers fill stroke" />
   <circle
      style="fill:#083d45;fill-opacity:1;stroke-width:0.21341465;paint-order:markers fill stroke"
      id="circle8625"
      r="0.75000006"
-     cx="4.1000004"
-     cy="4.1000004" />
+     cx="3.500001"
+     cy="3.4999998" />
   <ellipse
-     style="opacity:1;fill:url(#linearGradient7070);fill-opacity:1;stroke:none;stroke-width:0.58394712;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
+     style="opacity:1;fill:url(#linearGradient7070);fill-opacity:1;stroke:none;stroke-width:0.49849153;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
      id="path7054"
-     cx="4.1000009"
-     cy="2.8500001"
-     rx="2.5000005"
-     ry="1.8500003" />
+     cx="3.5000017"
+     cy="2.4329262"
+     rx="2.1341472"
+     ry="1.5792688" />
 </svg>

@@ -115,9 +115,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.8"
-     inkscape:cx="-11.889108"
-     inkscape:cy="33.627822"
+     inkscape:zoom="7.9195959"
+     inkscape:cx="9.0128645"
+     inkscape:cy="40.289412"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -134,7 +134,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -168,5 +168,11 @@
          d="m 59.033608,92.698701 v 0.800984 c -3e-6,2.310186 -1.89115,4.19716 -4.200777,4.19716 h -5.000212 c -0.07427,0 -0.113634,-0.0021 -0.146244,-0.0041 -0.03353,0.0024 -0.07435,0.0041 -0.144694,0.0041 h -1.507918 v 1.60352 h 1.507918 c 0.0939,0 0.149751,0.004 0.165882,0.0057 0.02972,-0.0028 0.05183,-0.0057 0.125056,-0.0057 h 5.000212 c 2.310203,0 4.200777,1.889065 4.200777,4.199225 v 0.79892 h 0.798918 c 1.024565,0 1.800923,-0.77429 1.800923,-1.79886 v -8.000025 c 0,-1.02453 -0.776675,-1.800924 -1.800923,-1.800924 z"
          style="display:inline;opacity:1;fill:url(#linearGradient16990);fill-opacity:1;stroke:none;stroke-width:0.50006247;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke" />
     </g>
+    <circle
+       style="fill:#0e6977;fill-opacity:1;stroke-width:0.21341462;paint-order:markers fill stroke"
+       id="circle8625"
+       r="0.74999994"
+       cx="12.75"
+       cy="290.20001" />
   </g>
 </svg>

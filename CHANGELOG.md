@@ -15,7 +15,7 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 
 ### Changed
 
-- [CHANGE] All modules: Small changes to the visual design of the pushbuttons.
+- [CHANGE] All modules: Small changes to the visual design of various widgets. Includes improvements in accessibility to users with tritanopia.
 
 ## NOT YET LOL
 

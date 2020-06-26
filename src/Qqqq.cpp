@@ -25,7 +25,7 @@ struct Qqqq : Module {
         ENUMS(TRANSPOSE_MODE_PARAM, 4), 
         ENUMS(SHTH_MODE_PARAM, 4),
         ENUMS(VISUALIZE_PARAM, 4),
-        ENUMS(SLOT_BUTTON_PARAM, 16),
+        ENUMS(SCENE_BUTTON_PARAM, 16),
         KEY_PARAM,
         SCALE_PARAM,
         PASTE_CLIPBOARD_PARAM,
@@ -36,7 +36,7 @@ struct Qqqq : Module {
         ENUMS(CV_INPUT, 4),
         ENUMS(SHTH_INPUT, 4),
         EXT_SCALE_INPUT,
-        SLOT_INPUT,
+        SCENE_INPUT,
         NUM_INPUTS
     };
     enum OutputIds {
@@ -75,6 +75,16 @@ struct Qqqq : Module {
         configParam(NOTE_PARAM + 11, 0.f, 1.f, 0.f, "B");
         configParam(KEY_PARAM, 0.f, 11.f, 0.f, "Key");
         configParam(SCALE_PARAM, 0.f, (float) Quantizer::NUM_SCALES - 1, 2.f, "Scale");
+        for (int i = 0; i < 4; i++){
+            configParam(SCALING_PARAM + i, -100.f, 300.f, 100.f, "Scaling", "%");
+            configParam(OFFSET_PARAM + i, -10.f, 10.f, 0.f, "Offset", "V");
+            configParam(TRANSPOSE_PARAM + i, -12.f, 12.f, 0.f, "Transpose");
+            configParam(TRANSPOSE_MODE_PARAM + i, 0.f, 2.f, 0.f, "Transpose Mode");
+            configParam(SHTH_MODE_PARAM + i, 0.f, 1.f, 0.f, "S&H / T&H Toggle");
+            configParam(VISUALIZE_PARAM + i, 0.f, 1.f, 0.f, "Visualize on Piano");
+        }
+        configParam(SCENE_BUTTON_PARAM, 0.f, 1.f, 0.f, "Scene #1");
+        for (int i = 1; i < 16; i++) configParam(SCENE_BUTTON_PARAM + i, 0.f, 1.f, 0.f, "Scene #" + std::to_string(i + 1));
         refreshScaleDivider.setDivision(REFRESHSCALEDIVIDER);
         lcdStatus.lcdPage = Lcd::TEXT1_PAGE;
     }
@@ -169,6 +179,7 @@ struct AriaKnob820Scale : AriaKnob820 {
 
 
 // To represent the piano, only 6 distinct key graphics are required: C, E, F, B, White with notch on each side, Black
+// FIXME: SvgSwitchUnshadowed causes framebuffer errors
 struct AriaPianoC : SvgSwitchUnshadowed {
     Qqqq* module;
     AriaPianoC(Qqqq* module) {
@@ -231,12 +242,12 @@ struct AriaPianoBlack : SvgSwitchUnshadowed {
 };
 
 // Keyboard, clipboard
-
 struct AriaPushButtonKeyboard : SvgSwitchUnshadowed {
     AriaPushButtonKeyboard() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/button-keyboard.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/button-keyboard-pressed.svg")));
         momentary = true;
+        SvgSwitchUnshadowed();
     }
 };
 struct AriaPushButtonClipboard : SvgSwitchUnshadowed {
@@ -244,6 +255,14 @@ struct AriaPushButtonClipboard : SvgSwitchUnshadowed {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/button-clipboard.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/button-clipboard-pressed.svg")));
         momentary = true;
+        SvgSwitchUnshadowed();
+    }
+};
+
+// Scene buttons, we'll give them frames later.
+struct AriaSceneButton : SvgSwitchUnshadowed {
+    AriaSceneButton() {
+        SvgSwitch();
     }
 };
 
@@ -281,13 +300,35 @@ struct QqqqWidget : ModuleWidget {
         addParam(createParam<AriaKnob820>(mm2px(Vec(xOffset + 0.f, yOffset + 20.f)), module, Qqqq::OFFSET_PARAM + col));
         addParam(createParam<AriaKnob820>(mm2px(Vec(xOffset + 0.f, yOffset + 30.f)), module, Qqqq::TRANSPOSE_PARAM + col));
 
-        addParam(createParam<AriaPushButton500>(mm2px(Vec(xOffset + 3.5f, yOffset + 40.f)), module, Qqqq::SHTH_MODE_PARAM + col));
-        addParam(createParam<AriaPushButton500>(mm2px(Vec(xOffset + -0.5f, yOffset + 42.5f)), module, Qqqq::TRANSPOSE_MODE_PARAM + col));
+        addParam(createParam<AriaPushButton500>(mm2px(Vec(xOffset + 3.5f, yOffset + 40.f)), module, Qqqq::TRANSPOSE_MODE_PARAM + col));
+        addParam(createParam<AriaPushButton500>(mm2px(Vec(xOffset + -0.5f, yOffset + 42.5f)), module, Qqqq::SHTH_MODE_PARAM + col));
 
         addInput(createInput<AriaJackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 50.f)), module, Qqqq::SHTH_INPUT + col));
         addParam(createParam<AriaPushButton820Pink>(mm2px(Vec(xOffset + 0.f, yOffset + 60.f)), module, Qqqq::VISUALIZE_PARAM + col));
         addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 0.f, yOffset + 70.f)), module, Qqqq::CV_OUTPUT + col));
+    }
 
+    void drawSceneSlots(float xOffset, float yOffset, Qqqq* module) {
+        int i = 0;
+        std::string scene;
+        for (int y = 0; y < 4; y++){
+            for (int x = 0; x < 4; x++){
+                if (i < 9) {
+                    scene = "0" + std::to_string(i + 1);
+                } else {
+                    scene = std::to_string(i + 1);
+                }
+                AriaSceneButton* o = new AriaSceneButton;
+                o->box.pos = mm2px(Vec(xOffset + x * 8.f, yOffset - y * 8.f));
+                if (module) {
+                    o->paramQuantity = module->paramQuantities[Qqqq::SCENE_BUTTON_PARAM + i];
+                    o->addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/" + scene + ".svg")));
+                    o->addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/" + scene + "-lit.svg")));
+                }
+                addParam(o);
+                i++;
+            }
+        }
     }
 
     QqqqWidget(Qqqq* module) {
@@ -308,8 +349,9 @@ struct QqqqWidget : ModuleWidget {
         addInput(createInput<AriaJackIn>(mm2px(Vec(45.f, 29.f)), module, Qqqq::EXT_SCALE_INPUT));
         addOutput(createOutput<AriaJackOut>(mm2px(Vec(55.f, 29.f)), module, Qqqq::EXT_SCALE_OUTPUT));
 
-        // Step programmer will go there
-        addInput(createInput<AriaJackIn>(mm2px(Vec(84.f, 53.f)), module, Qqqq::SLOT_INPUT));
+        // Scene programmer
+        drawSceneSlots(67.5f, 42.5f, module);
+        addInput(createInput<AriaJackIn>(mm2px(Vec(84.f, 53.f)), module, Qqqq::SCENE_INPUT));
 
         // Keyboard/Clipboard inputs
         addParam(createParam<AriaPushButtonKeyboard>(mm2px(Vec(83.f, 64.f)), module, Qqqq::KEYBOARD_INPUT_PARAM));

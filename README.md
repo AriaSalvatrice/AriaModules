@@ -3,9 +3,9 @@ Aria Salvatrice Signature Series Synthesizer Modules
 
 Hiya hello hey hi. These here are a few cool and nice modules what for [VCV Rack](https://vcvrack.com/). You can download them from [its built-in library](library.vcvrack.com/).
 
-I am some sort of multimedia artist interested in generative processes, creating [music](https://ariasalvatrice.bandcamp.com/releases) in genres I've come to call "Gay Baroque Technopop" and "Pastoral Industrial". All these synthesizer modules were designed for my own use first. I will not create yet another ADSR or VCO unless they do something unique. With this collection, I aim to create an integrated, coherent system of opinionated modules focused on the live performance of aleatoric techno. Nonetheless, they are versatile, and do their best to play nice with the wider module ecosystem. Many people enjoyed using my modules in all sorts of music, and I hope you will like them too.
+I am some persuasion of multimedia artist interested in generative processes, creating [music](https://ariasalvatrice.bandcamp.com/releases) in genres I've come to call "_Gay Baroque Technopop_" and "_Pastoral Industrial_". All these synthesizer modules were designed for my own use first. With this collection, I aim to create an integrated, coherent system of opinionated, unique modules, primarily concerned with the live performance of aleatoric techno. Despite their focus, these modules are versatile, and integrate well with the wider VCV ecosystem. Many people enjoyed using my modules in all sorts of music, and I hope you will like them too.
 
-FIXME: **If you wish to show your support for my synthesizer modules, tips are accepted:**
+FIXME: **If you wish to show your support for my synthesizer modules, tips are accepted:**    
 
 
 ----
@@ -90,17 +90,17 @@ In the TODO:**LCD Area** at the top of the device:
     - **Major** - The white keys of the piano! I'm not really sure why we need anything else, but hey, your call if you want something exotic.
     - **Natural Minor** - It is the exact same thing as the major scale, but it has a different "tonic" making it more suitable for being sad.
     - **Melodic Minor** - You can use it to write melodies! Before this scale was invented, music had no melodies.
-    - **Harmonic Minor** - This is the fancy, high-culture, bourgeois minor scale, used by refined individuals. That shit slaps.
-    - **Pentatonic Major** - It's the guitar scale! It has only 5 notes. Yet guitars have 6 strings. How does it even work? Theory makes my head hurt.
+    - **Harmonic Minor** - The fancy, high-culture, bourgeois minor scale, used by refined individuals. That shit slaps.
+    - **Pentatonic Major** - It's the guitar scale! And it has only 5 notes! Yet guitars have 6 strings. How does it even work? Theory peeps must feel really stupid right now.
     - **Pentatonic Minor** - Same scam as with natural minor: it's the exact same notes as major, just with their order shuffled around a bit.
     - **Whole Tone** - This one has structure! It is for fans of symmetry and kaleidoscopes and fractals and putting a fibonacci spiral overlay on a renaissance painting. 
     - **Blues Major** - It's for when you got the blues, but aren't that sad about it.
-    - **Blues Minor** - That is for special occasions.
+    - **Blues Minor** - That one is for special occasions.
     - **Dominant Diminished** - That bad boy makes Honked up Hot Jazz .
-    - **Bebop Major** - This one has a "blue note", like those albums with the cool typography on the cover.
+    - **Bebop Major** - This one has a "blue note", like those albums with the cool fonts on the cover.
     - **Bebop Minor** - This one is for fans of animé. You're welcome.
-    - **Double Harmonic** - It's so harmonic, cultures from all over the world claim this one as theirs!
-    - **Eight Tone Spanish** - When I tried to find more useful info about it, I found a forum post from 2003, where a posted said indignantly that scales "[are] not a democracy, but a hierarchy".
+    - **Double Harmonic** - It's so harmonic, cultures from all over the world claim this one as theirs. Maybe some day they will come up with a triple harmonic one.
+    - **Eight Tone Spanish** - When I tried to find more useful info about it, I found a forum post from 2003, where a poster said indignantly that scales "[are] not a democracy, but a hierarchy".
     - **Hirajōshi** - It's all you need to rip a sick shamisen solo. Anything more is for poseur kids.
     - **In Sen** - That one was originally used for Japanese wind chimes. Instantly become the most original dark ambient modular artist around by feeding it to [Rings and Clouds](https://vcvrack.com/AudibleInstruments) for 3 hours.
 - **External Scale**: This input and output express the scale current as a 12-channel polyphonic cable, where enabled notes have a continuous 10V signal, and disabled notes, 0V. This way of expressing a scale is supported by my other modules, such as **Arcane** and **Darius**. Try it out with my splitters and mergers! 
@@ -138,7 +138,7 @@ To the center of the module are the four quantizer columns, through which signal
 - TODO:**Output** - The quantized signal! Polyphony is defined by the **CV Input**. You only pay the CPU cost of the features you use: if left unplugged, unused columns avoid doing unecessary math.
 
 
-**Protip for cool kids only:** Did you know that there are a few people out there who do not use Quantizers, and instead choose to spend years to learn something called "Music Theory"? Those people do all their music by thinking really hard about maths! It's true - check out your library for more information.
+**Protip for cool kids only:** Did you know that there are a few people out there who do not use Quantizers, and instead choose to spend years to learn something called "Music Theory"? Those people do all their music by reading books and thinking really hard about maths! It's true - check out your local library for more information.
 
 
 
