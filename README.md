@@ -3,9 +3,9 @@ Aria Salvatrice Signature Series Synthesizer Modules
 
 Hiya hello hey hi. These here are a few cool and nice modules what for [VCV Rack](https://vcvrack.com/). You can download them from [its built-in library](library.vcvrack.com/).
 
-I am some sort of multimedia artist interested in generative processes, creating [music](https://ariasalvatrice.bandcamp.com/releases) in genres I've come to call "Gay Baroque Technopop" and "Pastoral Industrial". All these synthesizer modules were designed for my own use first. I will not create yet another ADSR or VCO unless they do something unique. With this collection, I aim to create an integrated system of opinionated modules focused on the live performance of aleatoric techno. Nonetheless, they are versatile, and many people enjoyed using them in all sorts of music. I hope you will like them too.
+I am some sort of multimedia artist interested in generative processes, creating [music](https://ariasalvatrice.bandcamp.com/releases) in genres I've come to call "Gay Baroque Technopop" and "Pastoral Industrial". All these synthesizer modules were designed for my own use first. I will not create yet another ADSR or VCO unless they do something unique. With this collection, I aim to create an integrated, coherent system of opinionated modules focused on the live performance of aleatoric techno. Nonetheless, they are versatile, and do their best to play nice with the wider module ecosystem. Many people enjoyed using my modules in all sorts of music, and I hope you will like them too.
 
-FIXME: **If you wish to show your support for my synthesizer modules, tips are accepted, but not required:**
+FIXME: **If you wish to show your support for my synthesizer modules, tips are accepted:**
 
 
 ----
@@ -28,8 +28,9 @@ Other thingies
 - [Acknowledgements & Credits](#acknowledgements--credits)
 - [Lawyer's corner](#lawyers-corner)
 - [Contact](#contact)
-- [How to contribute](CONTRIBUTING.md)
 - [Design language of the modules](doc/design.md)
+- [Future plans for the collection](doc/plans.md)
+- [How to contribute](CONTRIBUTING.md)
 - [Beta / pre-release thread on VCV forums](https://community.vcvrack.com/t/arias-cool-and-nice-thread-of-barely-working-betas-and-bug-squashing/8208)
 
 
@@ -64,7 +65,7 @@ Quatherina the Quantum Duck presents Quatherina's Quality Quad Quantizer
 ![QQQQ](/doc/QQQQ.png)
 
 Quatherina the Quantum Duck is best known for her aventures in the Quartz Quasar, in the Quaint Quarry, in the Quarrelsome Quahaug Quagmire, in the Quarantined Quaestor Quadripoint, and in Canada (the canonicity of that last adventure being a point of debate amongst Quatherina's fans that I wish to remain neutral about).    
-To finance her adventuring lifestyle, she has graciously accepted a payment (in the form of an undisclosed tonnage of Quaker Oats) to lend her name and likeness in endorsement of my synthesizer modules.
+To finance her adventuring lifestyle, she has graciously accepted payment (in the form of an undisclosed tonnage of Quaker Oats) to lend her name and likeness in endorsement of my synthesizer modules.
 
 **Quatherina the Quantum Duck presents Quatherina's Quality Quad Quantizer** is a quantizer: it coerces any input signal into the closest pitch of the scale, and outputs it as a V/Oct signal. It only works with Twelve-tone Equal Temperament, the usual Western tuning system. It provides four separate quantizer lines, each with a built-in scaler and offsetter to change the range of the signal, the ability to transpose the signal, and sample & hold. You can save scales and chords in 16 slots.
 
@@ -74,19 +75,18 @@ There are three different form factors available of the same underlying module:
 - TODO: **Quack**: This smaller 7hp version only include piano buttons, and a single polyphonic quantizer column from QQQQ.
 - TODO: **Q<**: 3hp. 1 column. External input. Tiny.
 
-Those modules are all expanders of each other: the left one sets the scale to the one on the right, which forwards it. For example, if you only require two quantizer lines and no sequencer, you can use **Quack** on the left and **Q<** on the right, to use only half the size of **QQQQ**. If expander behavior is not desired, you can leave a gap between the instances, or TODO: disable expander features from the right-click menu.
+Those modules are all TODO: expanders of each other: the left one sets the scale to the one on the right, which forwards it. For example, if you only require two quantizer lines and no sequencer, you can use **Quack** on the left and **Q<** on the right, to use only half the size of **QQQQ**. If expander behavior is not desired, you can leave a gap between the instances, or TODO: disable expander features from the right-click menu.
 
-The scale of the device can be set from multiple sources, and **the last source to make a change always has the last word what's the scale**. All the quantizer lines on a module follow the same scale. And while in this documentation, I call them scales for simplicity, **QQQQ** also works with chords, and can be a fantasatic arpeggiator. 
+The scale of the device can be set from multiple sources, and **the last source to make a change always has the last word what's the scale**. All the quantizer lines on a module follow the same scale. And while in this documentation, I call them scales for simplicity, **QQQQ** also works with chords (albeit, without knowledge of their voicing), and can be a fantasatic arpeggiator. 
 
+Let's look at the controls of **QQQQ** in detail. Once you understand them, you'll also understand what the smaller form factors do.
 
-Let's look at the controls of **QQQQ** in detail. If you understand them, you'll also understand what the smaller form factors do.
+- **Piano keys**: They always show you the current scale. Keys lit in yellow are parts of the scale, while unlit keys are disallowed. You can also click on the keys to change which notes are allowed. TODO: When you click the **visualize** button of a quantizer line, the notes currently playing on that line are lit pink.
 
-- **Piano keys**: They always show you the current scale. Keys lit in yellow are parts of the scale, while unlit keys are disallowed. You can also click on the keys to change which notes are allowed. When you click the **visualize** button of a quantizer line, the notes currently playing on that line are lit pink.
+In the TODO:**LCD Area** at the top of the device:
 
-In the **LCD Area at the top of the device**:
-
-- **Scale** and **Key**: Selects the scale, and its key. The available scales were curated for ease of use and instant satisfaction rather than for comprehensiveness, avoiding duplication in the form of scales that can be expressed as modes of another (for your convenience, an exception is made for Natural Minor and Pentatonic Minor). The following scales, along with my qualified opinion about them, are available:
-    - **Chromatic** - All the notes, all the time! It's a great deal if you like every note!
+- **Scale** and **Key**: Selects a preset scale, and its key. The available scales were curated for ease of use and instant satisfaction rather than for comprehensiveness, avoiding duplication in the form of scales that can be expressed as modes of another (for your convenience, an exception is made for Natural Minor and Pentatonic Minor). The following scales, along with my qualified opinion about them, are available:
+    - **Chromatic** - All the notes, all the time! It's a great deal if you like every note.
     - **Major** - The white keys of the piano! I'm not really sure why we need anything else, but hey, your call if you want something exotic.
     - **Natural Minor** - It is the exact same thing as the major scale, but it has a different "tonic" making it more suitable for being sad.
     - **Melodic Minor** - You can use it to write melodies! Before this scale was invented, music had no melodies.
@@ -96,28 +96,28 @@ In the **LCD Area at the top of the device**:
     - **Whole Tone** - This one has structure! It is for fans of symmetry and kaleidoscopes and fractals and putting a fibonacci spiral overlay on a renaissance painting. 
     - **Blues Major** - It's for when you got the blues, but aren't that sad about it.
     - **Blues Minor** - That is for special occasions.
-    - **Dominant Diminished** - That bad boy makes Honked up Hot Jazz 
+    - **Dominant Diminished** - That bad boy makes Honked up Hot Jazz .
     - **Bebop Major** - This one has a "blue note", like those albums with the cool typography on the cover.
     - **Bebop Minor** - This one is for fans of animé. You're welcome.
     - **Double Harmonic** - It's so harmonic, cultures from all over the world claim this one as theirs!
     - **Eight Tone Spanish** - When I tried to find more useful info about it, I found a forum post from 2003, where a posted said indignantly that scales "[are] not a democracy, but a hierarchy".
-    - **Hirajōshi** - It's all you need to rip a sick shamisen solo. Anything else is for poseur kids.
+    - **Hirajōshi** - It's all you need to rip a sick shamisen solo. Anything more is for poseur kids.
     - **In Sen** - That one was originally used for Japanese wind chimes. Instantly become the most original dark ambient modular artist around by feeding it to [Rings and Clouds](https://vcvrack.com/AudibleInstruments) for 3 hours.
 - **External Scale**: This input and output express the scale current as a 12-channel polyphonic cable, where enabled notes have a continuous 10V signal, and disabled notes, 0V. This way of expressing a scale is supported by my other modules, such as **Arcane** and **Darius**. Try it out with my splitters and mergers! 
 
 To the top right of the module:
 
-- **Scene slot**: Those 16 buttons allow you to save 16 different scales. Navigating to a slot loads it, and changing the scale while a slot is active saves the scale to that slot. You can right-click on those buttons to copy and paste scales. You can map those buttons via MIDI!
-- **Scene input**: Navigates the scenes via CV. Useful with a step sequencer! Accepts 0V~10V. When plugged in, buttons can't be operated manually anymore.
+- TODO:**Scene slot**: Those 16 buttons allow you to save 16 different scales. Navigating to a slot loads it, and changing the scale while a slot is active saves the scale to that slot. You can right-click on those buttons to copy and paste scales. You can map those buttons via MIDI!
+- TODO:**Scene input**: Navigates the scenes via CV. Useful with a step sequencer! Accepts 0V~10V. When plugged in, buttons can't be operated manually anymore.
 
 To the right, below the **Scene slots**:
 
-- **Keyboard** and **Paste** input. They allow you to write down or paste input from the clipboard, and have it transformed to chords. The three following notations are supported (which you're using is automatically detected):
+- TODO:**Keyboard** and **Paste** input. They allow you to write down or paste input from the clipboard, and have it transformed to chords. The three following notations are supported (which you're using is automatically detected):
     - **Lead sheet notation**: Chord symbols, separated with spaces, commas, or hyphens. It's pretty liberal in what it accepts! For example, this is a valid input: `G am C B, E/G# Bb A,Fsus2  Csus2`
     - **Roman numeral notation**: FIXME: 
     - **Portable Sequence**: Simultaneous notes from a [portable sequence](https://github.com/squinkylabs/SquinkyVCV/blob/master/docs/clipboard-format.md) are interpreted as a new scale.
 
-Note that **QQQQ** only thinks in scales, not in chords. After you import a chord progression, **QQQQ** doesn't care about the voicing of the chord. It's all folded back to a single octave. 
+If your input isn't recognized, nothing happens, that simple. And remember that **QQQQ** only thinks in scales, not in chords. After you import a chord progression, **QQQQ** doesn't care about the voicing of the chord. It's all folded back to a single octave. 
 
 Next, to the bottom-right of the module:
 
@@ -125,17 +125,17 @@ Next, to the bottom-right of the module:
 
 To the center of the module are the four quantizer columns, through which signal flows from top to bottom.
 
-- **CV Input**: Each input jack is forwarded to the columns to its right, if you want to process the same signal in different ways. Inputs are polyphonic.
-- **% Scale**: Attenuates, amplifies, or inverts the input.
-- **Offset**: Adds or remove a fixed voltage to the input.
-- **Transpose**: Transposes the signal according to one of the three rules, set by the transpose mode button under the knob.
-- **Transpose mode**: Selects one of the three transposition rules for the knob directly above it. Each transposition rules results in output that remains in harmony. The rules are:
+- TODO:**CV Input**: Each input jack is forwarded to the columns to its right, if you want to process the same signal in different ways. Inputs are polyphonic.
+- TODO:**% Scale**: Attenuates, amplifies, or inverts the input.
+- TODO:**Offset**: Adds or remove a fixed voltage to the input.
+- TODO:**Transpose**: Transposes the signal according to one of the three rules, set by the transpose mode button under the knob.
+- TODO:**Transpose mode**: Selects one of the three transposition rules for the knob directly above it. Each transposition rules results in output that remains in harmony. The rules are:
     - **Unlit** - _Octaves Mode_: Quantizes the signal first, then transposes it up or down by full octaves.
     - **Yellow** - _Semitones Mode_: Transposes the signal up or down by a few semitones first, then quantizes it. 
-    - **Pink** - _Scale degrees Mode_: Quantizes the signal first, then transposes the signal by a specific amount of scale degrees.
-- **Sample & Hold / Track & Hold toggle**: Swaps between the two modes for the input directly below it. Unlit is Sample & Hold, lit is Track & Hold.
-- **Sample & Hold / Track & Hold input**: When plugged in, instead of operating continuously, the quantizer will Sample & Hold or Track & Hold the signal. When you're quantizing a noisy source of modulation, it's useful to send it the same gate you'd send to the envelope that will play the note in question. If the **CV input** is polyphonic, send it the same amount of channels.
-- **Output** - The quantized signal! Polyphony is defined by the **CV Input**. You only pay the CPU cost of the features you use: if left unplugged, unused columns avoid doing unecessary math.
+    - TODO:**Pink** - _Scale degrees Mode_: Quantizes the signal first, then transposes the signal by a specific amount of scale degrees.
+- TODO:**Sample & Hold / Track & Hold toggle**: Swaps between the two modes for the input directly below it. Unlit is Sample & Hold, lit is Track & Hold.
+- TODO:**Sample & Hold / Track & Hold input**: When plugged in, instead of operating continuously, the quantizer will Sample & Hold or Track & Hold the signal. When you're quantizing a noisy source of modulation, it's useful to send it the same gate you'd send to the envelope that will play the note in question. If the **CV input** is polyphonic, send it the same amount of channels.
+- TODO:**Output** - The quantized signal! Polyphony is defined by the **CV Input**. You only pay the CPU cost of the features you use: if left unplugged, unused columns avoid doing unecessary math.
 
 
 **Protip for cool kids only:** Did you know that there are a few people out there who do not use Quantizers, and instead choose to spend years to learn something called "Music Theory"? Those people do all their music by thinking really hard about maths! It's true - check out your library for more information.
