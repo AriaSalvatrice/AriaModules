@@ -10,7 +10,12 @@
 
 enum LcdModes {
     INIT_MODE,
-    SCALE_MODE
+    SCALE_MODE,
+    SCALING_MODE,
+    OFFSET_MODE,
+    TRANSPOSE_MODE,
+    SHTH_MODE,
+    TRANSPOSETYPE_MODE,
 };
 
 // Start high, lower if people complain.
@@ -49,11 +54,15 @@ struct Qqqq : Module {
         NUM_LIGHTS
     };
 
+    bool lastExtInConnected = false;
+    bool sceneChanged = false;
     int lcdMode = INIT_MODE;
+    int scene = 0;
+    int lastScene = 0;
     float lcdLastInteraction = 0.f;
     float lastKeyKnob = 0.f;
     float lastScaleKnob = 2.f;
-    std::array<bool, 12> scale;
+    std::array<std::array<bool, 12>, 16> scale;
     std::array<bool, 12> lastExternalScale;
     Lcd::LcdStatus lcdStatus;
     dsp::ClockDivider refreshScaleDivider;
@@ -86,59 +95,118 @@ struct Qqqq : Module {
         configParam(SCENE_BUTTON_PARAM, 0.f, 1.f, 0.f, "Scene #1");
         for (int i = 1; i < 16; i++) configParam(SCENE_BUTTON_PARAM + i, 0.f, 1.f, 0.f, "Scene #" + std::to_string(i + 1));
         refreshScaleDivider.setDivision(REFRESHSCALEDIVIDER);
+        lcdStatus.lcdText1 = " Q< Quack~";
         lcdStatus.lcdPage = Lcd::TEXT1_PAGE;
+        // Initialize
+        for (int i = 0; i < 16; i++) { for (int j = 0; j < 12; j++) { scale[i][j] = false; }}
+        // C Minor in scene 1
+        scale[0][0] = true; scale[0][2] = true; scale[0][3] = true; scale[0][5] = true; scale[0][7] = true; scale[0][8] = true; scale[0][10] = true;
+        
     }
 
     ~Qqqq(){
     }
 
-    // Update the piano display to match the state of the internal scale
+    // Sets the scene. The CV input overrides the buttons.
+    void updateScene() {
+        if (inputs[SCENE_INPUT].isConnected()) {
+            scene = 0; // FIXME: do something lol
+        } else {
+            for (int i = 0; i < 16; i++) {
+                if ( params[SCENE_BUTTON_PARAM + i].getValue() == 1.f && i != lastScene ) {
+                    scene = i;
+                    sceneChanged = true;
+                    for (int j = 0; j < 16; j++) {
+                        // Turn off the other buttons
+                        if (j != scene) params[SCENE_BUTTON_PARAM + j].setValue(0.f);
+                    }
+                }
+            }
+        }
+        // You shouldn't be able to turn off the current step
+        if (params[SCENE_BUTTON_PARAM + scene].getValue() == 0.f) params[SCENE_BUTTON_PARAM + scene].setValue(1.f);
+        lastScene = scene;
+    }
+
+
+    // Update the piano display to match the state of the internal scale if necessary
     void scaleToPiano() {
-        for (int i = 0; i < 12; i++) params[NOTE_PARAM + i].setValue( (scale[i]) ? 1.f : 0.f );
+        for (int i = 0; i < 12; i++) {
+            // This explicit check is required to avoid short glitches
+            // bool currentStatus = (params[NOTE_PARAM + i].getValue() == 1.f) ? true : false;
+            // if (scale[scene][i] != currentStatus) params[NOTE_PARAM + i].setValue((scale[scene][i]) ? 1.f : 0.f);
+
+            params[NOTE_PARAM + i].setValue((scale[scene][i]) ? 1.f : 0.f);
+        }
     }
 
     // Update the internal scale to match the state of the piano display
     void pianoToScale() {
-        
+        for (int i = 0; i < 12; i++) scale[scene][i] = (params[NOTE_PARAM + i].getValue() == 1.f)  ? true : false;
     }
 
 
-    // The piano buttons are the canonical source of truth.
-    // When the External input changes, or the knobs are moved, they override the piano buttons.
-    // When an External input is present, the knobs do nothing.
-    // These priorities might seem weird, but they're intentional.
-    void updateScale() {
+// FIXME: Setting the scale ALWAYS sets scene 5's G# to true. Doesn't happen if set from external. WHY??
+// The problem is in updateScale().
 
-        // External scale
+    // The piano buttons are the canonical source of truth.
+    // The last control touched has the last word.
+    void updateScale() {
+        // Scene: has it changed?
+        if (sceneChanged) {
+            scaleToPiano();
+            sceneChanged = false;
+        }
+
+        // FIXME: Expander: has it sent something?
+
+        // External scale: was it just connected?
+        // FIXME: It causes a small glitch no matter what I try.
+        if (!lastExtInConnected && inputs[EXT_SCALE_INPUT].isConnected()) {
+            for (int i = 0; i < 12; i++){
+                scale[scene][i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.f) ? true : false;
+            } 
+            scaleToPiano();
+        }
+
+        // External scale: has it changed?
         std::array<bool, 12> currentExternalScale;
         if (inputs[EXT_SCALE_INPUT].isConnected()) {
             for (int i = 0; i < 12; i++) currentExternalScale[i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.f) ? true : false;
             if (currentExternalScale != lastExternalScale) {
                 lastExternalScale = currentExternalScale;
-                scale = currentExternalScale;
+                scale[scene] = currentExternalScale;
                 scaleToPiano();
             }
         }
+        lastExtInConnected = inputs[EXT_SCALE_INPUT].isConnected();
 
-        // Knobs
+        // Knobs: have they moved?
+        // FIXME: This code is NOT responsible for the G# bug... HOWEVER, turning a knob causes it.
         if ( (lastKeyKnob != params[KEY_PARAM].getValue()) || (lastScaleKnob != params[SCALE_PARAM].getValue()) ) {
             if (! inputs[EXT_SCALE_INPUT].isConnected()) {
-                scale = Quantizer::validNotesInScaleKey(params[SCALE_PARAM].getValue(), params[KEY_PARAM].getValue());
+                scale[scene] = Quantizer::validNotesInScaleKey(params[SCALE_PARAM].getValue(), params[KEY_PARAM].getValue());
                 scaleToPiano();
             }
         }
         lastKeyKnob = params[KEY_PARAM].getValue();
         lastScaleKnob = params[SCALE_PARAM].getValue();
+
+        // Piano display: has it changed?
+        pianoToScale();
     }
 
+
     void updateExternalOutput() {
-        for (int i = 0; i < 12; i++) outputs[EXT_SCALE_OUTPUT].setVoltage( (scale[i]) ? 10.f : 0.f, i);
+        for (int i = 0; i < 12; i++) outputs[EXT_SCALE_OUTPUT].setVoltage( (scale[scene][i]) ? 10.f : 0.f, i);
         outputs[EXT_SCALE_OUTPUT].setChannels(12);
     }
+
 
     void process(const ProcessArgs& args) override {
 
         if (refreshScaleDivider.process()) {
+            updateScene();
             updateScale();
             updateExternalOutput();
         }
@@ -175,6 +243,21 @@ struct AriaKnob820Scale : AriaKnob820 {
         AriaKnob820::onDragMove(e);
     }
 };
+
+struct AriaKnob820Temp : AriaKnob820 {
+    AriaKnob820Temp() {
+        snap = true;
+        AriaKnob820();
+    }
+
+    void onDragMove(const event::DragMove& e) override {
+        // module->lcdMode = SCALE_MODE;
+        // module->lcdLastInteraction = 0.f;
+        // module->lcdStatus.lcdDirty = true;
+        AriaKnob820::onDragMove(e);
+    }
+};
+
 
 
 
@@ -344,13 +427,19 @@ struct QqqqWidget : ModuleWidget {
         // The LCD will go around here
 
         // Scale, Key, External
-        addParam(createModuleParam<AriaKnob820Scale, Qqqq>(mm2px(Vec(25.f, 29.f)), module, Qqqq::SCALE_PARAM));
-        addParam(createModuleParam<AriaKnob820Scale, Qqqq>(mm2px(Vec(35.f, 29.f)), module, Qqqq::KEY_PARAM));
+
+        // FIXME: This causes the G# bug!!
+        // addParam(createModuleParam<AriaKnob820Scale, Qqqq>(mm2px(Vec(25.f, 29.f)), module, Qqqq::SCALE_PARAM));
+        // addParam(createModuleParam<AriaKnob820Scale, Qqqq>(mm2px(Vec(35.f, 29.f)), module, Qqqq::KEY_PARAM));
+
+
+        addParam(createParam<AriaKnob820Temp>(mm2px(Vec(25.f, 29.f)), module, Qqqq::SCALE_PARAM));
+        addParam(createParam<AriaKnob820Temp>(mm2px(Vec(35.f, 29.f)), module, Qqqq::KEY_PARAM));
         addInput(createInput<AriaJackIn>(mm2px(Vec(45.f, 29.f)), module, Qqqq::EXT_SCALE_INPUT));
         addOutput(createOutput<AriaJackOut>(mm2px(Vec(55.f, 29.f)), module, Qqqq::EXT_SCALE_OUTPUT));
 
-        // Scene programmer
-        drawSceneSlots(67.5f, 42.5f, module);
+        // Scene programmer. Offset by 0.1mm because it looks better that way
+        drawSceneSlots(67.6f, 42.5f, module);
         addInput(createInput<AriaJackIn>(mm2px(Vec(84.f, 53.f)), module, Qqqq::SCENE_INPUT));
 
         // Keyboard/Clipboard inputs

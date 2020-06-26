@@ -71,6 +71,7 @@
         "regex": "cpp",
         "iomanip": "cpp",
         "mutex": "cpp",
-        "shared_mutex": "cpp"
+        "shared_mutex": "cpp",
+        "*.xxx": "cpp"
     }
 }

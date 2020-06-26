@@ -108,7 +108,7 @@ In the TODO:**LCD Area** at the top of the device:
 To the top right of the module:
 
 - TODO:**Scene slot**: Those 16 buttons allow you to save 16 different scales. Navigating to a slot loads it, and changing the scale while a slot is active saves the scale to that slot. You can right-click on those buttons to copy and paste scales. You can map those buttons via MIDI!
-- TODO:**Scene input**: Navigates the scenes via CV. Useful with a step sequencer! Accepts 0V~10V. When plugged in, buttons can't be operated manually anymore.
+- TODO:**Scene input**: Navigates the scenes via CV. Useful with a step sequencer! Accepts 0V~10V. When plugged in, the buttons can't be operated manually anymore.
 
 To the right, below the **Scene slots**:
 

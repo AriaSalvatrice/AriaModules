@@ -159,18 +159,19 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.4018795"
-     inkscape:cx="256.64302"
-     inkscape:cy="271.86317"
+     inkscape:zoom="13.587082"
+     inkscape:cx="201.83588"
+     inkscape:cy="457.86499"
      inkscape:document-units="mm"
-     inkscape:current-layer="layer3"
+     inkscape:current-layer="layer5"
      showgrid="false"
      inkscape:window-width="1920"
      inkscape:window-height="1019"
      inkscape:window-x="1076"
      inkscape:window-y="442"
      inkscape:window-maximized="1"
-     showguides="false" />
+     showguides="true"
+     inkscape:guide-bbox="true" />
   <metadata
      id="metadata885">
     <rdf:RDF>
@@ -1683,11 +1684,11 @@
     <rect
        style="display:inline;fill:#0e6977;fill-opacity:1;stroke:none;stroke-width:1.24120104;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="rect1238-6-5-3"
-       width="33"
-       height="33.599998"
-       x="67"
-       y="17.700001"
-       ry="1.0181818"
+       width="34"
+       height="33.799999"
+       x="66.5"
+       y="17.5"
+       ry="1"
        rx="1" />
     <rect
        rx="3"
