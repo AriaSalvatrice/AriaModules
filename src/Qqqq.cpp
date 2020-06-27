@@ -27,7 +27,7 @@ struct Qqqq : Module {
         ENUMS(SCALING_PARAM, 4),
         ENUMS(OFFSET_PARAM, 4),
         ENUMS(TRANSPOSE_PARAM, 4),
-        ENUMS(TRANSPOSE_MODE_PARAM, 4), 
+        ENUMS(TRANSPOSE_MODE_PARAM, 4),
         ENUMS(SHTH_MODE_PARAM, 4),
         ENUMS(VISUALIZE_PARAM, 4),
         ENUMS(SCENE_BUTTON_PARAM, 16),
@@ -99,7 +99,7 @@ struct Qqqq : Module {
         lcdStatus.lcdPage = Lcd::TEXT1_PAGE;
         // Initialize
         for (int i = 0; i < 16; i++) { for (int j = 0; j < 12; j++) { scale[i][j] = false; }}
-        // C Minor in scene 1
+        // C Minor in first scene
         scale[0][0] = true; scale[0][2] = true; scale[0][3] = true; scale[0][5] = true; scale[0][7] = true; scale[0][8] = true; scale[0][10] = true;
         
     }
@@ -110,7 +110,9 @@ struct Qqqq : Module {
     // Sets the scene. The CV input overrides the buttons.
     void updateScene() {
         if (inputs[SCENE_INPUT].isConnected()) {
-            scene = 0; // FIXME: do something lol
+            scene = (int) rescale(inputs[SCENE_INPUT].getVoltageSum(), 0.f, 10.f, 0.f, 15.2f);
+            if (scene != lastScene) sceneChanged = true;
+            for (int i = 0; i < 16; i++) params[SCENE_BUTTON_PARAM + i].setValue( (i == scene) ? 1.f : 0.f );
         } else {
             for (int i = 0; i < 16; i++) {
                 if ( params[SCENE_BUTTON_PARAM + i].getValue() == 1.f && i != lastScene ) {
@@ -122,9 +124,9 @@ struct Qqqq : Module {
                     }
                 }
             }
+            // You shouldn't be able to turn off the current scene
+            if (params[SCENE_BUTTON_PARAM + scene].getValue() == 0.f) params[SCENE_BUTTON_PARAM + scene].setValue(1.f);
         }
-        // You shouldn't be able to turn off the current step
-        if (params[SCENE_BUTTON_PARAM + scene].getValue() == 0.f) params[SCENE_BUTTON_PARAM + scene].setValue(1.f);
         lastScene = scene;
     }
 
@@ -132,10 +134,6 @@ struct Qqqq : Module {
     // Update the piano display to match the state of the internal scale if necessary
     void scaleToPiano() {
         for (int i = 0; i < 12; i++) {
-            // This explicit check is required to avoid short glitches
-            // bool currentStatus = (params[NOTE_PARAM + i].getValue() == 1.f) ? true : false;
-            // if (scale[scene][i] != currentStatus) params[NOTE_PARAM + i].setValue((scale[scene][i]) ? 1.f : 0.f);
-
             params[NOTE_PARAM + i].setValue((scale[scene][i]) ? 1.f : 0.f);
         }
     }
@@ -146,11 +144,7 @@ struct Qqqq : Module {
     }
 
 
-// FIXME: Setting the scale ALWAYS sets scene 5's G# to true. Doesn't happen if set from external. WHY??
-// The problem is in updateScale().
-
-    // The piano buttons are the canonical source of truth.
-    // The last control touched has the last word.
+    // The last control touched always has the last word.
     void updateScale() {
         // Scene: has it changed?
         if (sceneChanged) {
@@ -161,8 +155,8 @@ struct Qqqq : Module {
         // FIXME: Expander: has it sent something?
 
         // External scale: was it just connected?
-        // FIXME: It causes a small glitch no matter what I try.
         if (!lastExtInConnected && inputs[EXT_SCALE_INPUT].isConnected()) {
+            // After it's connected, we want to wait one more cycle to give it time to sync with slow inputs.
             for (int i = 0; i < 12; i++){
                 scale[scene][i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.f) ? true : false;
             } 
@@ -182,12 +176,9 @@ struct Qqqq : Module {
         lastExtInConnected = inputs[EXT_SCALE_INPUT].isConnected();
 
         // Knobs: have they moved?
-        // FIXME: This code is NOT responsible for the G# bug... HOWEVER, turning a knob causes it.
         if ( (lastKeyKnob != params[KEY_PARAM].getValue()) || (lastScaleKnob != params[SCALE_PARAM].getValue()) ) {
-            if (! inputs[EXT_SCALE_INPUT].isConnected()) {
-                scale[scene] = Quantizer::validNotesInScaleKey(params[SCALE_PARAM].getValue(), params[KEY_PARAM].getValue());
-                scaleToPiano();
-            }
+            scale[scene] = Quantizer::validNotesInScaleKey(params[SCALE_PARAM].getValue(), params[KEY_PARAM].getValue());
+            scaleToPiano();
         }
         lastKeyKnob = params[KEY_PARAM].getValue();
         lastScaleKnob = params[SCALE_PARAM].getValue();
@@ -198,19 +189,19 @@ struct Qqqq : Module {
 
 
     void updateExternalOutput() {
-        for (int i = 0; i < 12; i++) outputs[EXT_SCALE_OUTPUT].setVoltage( (scale[scene][i]) ? 10.f : 0.f, i);
-        outputs[EXT_SCALE_OUTPUT].setChannels(12);
+        if (outputs[EXT_SCALE_OUTPUT].isConnected()){
+            for (int i = 0; i < 12; i++) outputs[EXT_SCALE_OUTPUT].setVoltage( (scale[scene][i]) ? 10.f : 0.f, i);
+            outputs[EXT_SCALE_OUTPUT].setChannels(12);
+        }
     }
 
 
     void process(const ProcessArgs& args) override {
-
         if (refreshScaleDivider.process()) {
             updateScene();
             updateScale();
-            updateExternalOutput();
         }
-
+        updateExternalOutput();
     }
 };
 
@@ -227,6 +218,7 @@ struct Qqqq : Module {
 
 
 // The LCD knobs
+// FIXME: They cause the G# Bug.
 struct AriaKnob820Scale : AriaKnob820 {
     Qqqq *module;
 

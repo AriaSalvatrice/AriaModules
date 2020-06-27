@@ -3,7 +3,7 @@ Aria Salvatrice Signature Series Synthesizer Modules
 
 Hiya hello hey hi. These here are a few cool and nice modules what for [VCV Rack](https://vcvrack.com/). You can download them from [its built-in library](library.vcvrack.com/).
 
-I am some persuasion of multimedia artist interested in generative processes, creating [music](https://ariasalvatrice.bandcamp.com/releases) in genres I've come to call "_Gay Baroque Technopop_" and "_Pastoral Industrial_". All these synthesizer modules were designed for my own use first. With this collection, I aim to create an integrated, coherent system of opinionated, unique modules, primarily concerned with the live performance of aleatoric techno. Despite their focus, these modules are versatile, and integrate well with the wider VCV ecosystem. Many people enjoyed using my modules in all sorts of music, and I hope you will like them too.
+I am some persuasion of multimedia artist interested in generative processes, creating [music](https://ariasalvatrice.bandcamp.com/releases) in genres I've come to call "_Gay Baroque Technopop_" and "_Pastoral Industrial_". All these synthesizer modules were designed for my own use first. With this collection, I aim to create an integrated, coherent system of opinionated, unique modules, primarily concerned with the live performance of aleatoric techno. Despite their focus, these modules are versatile, and integrate well with the wider VCV ecosystem. Many artists enjoyed using my modules in all sorts of music, and I hope you will like them too.
 
 FIXME: **If you wish to show your support for my synthesizer modules, tips are accepted:**    
 
@@ -77,7 +77,9 @@ There are three different form factors available of the same underlying module:
 
 Those modules are all TODO: expanders of each other: the left one sets the scale to the one on the right, which forwards it. For example, if you only require two quantizer lines and no sequencer, you can use **Quack** on the left and **Q<** on the right, to use only half the size of **QQQQ**. If expander behavior is not desired, you can leave a gap between the instances, or TODO: disable expander features from the right-click menu.
 
-The scale of the device can be set from multiple sources, and TODO: **the last source to make a change always has the last word what's the scale**. All the quantizer lines on a module follow the same scale. And while in this documentation I call them scales for simplicity, **QQQQ** also works with chords (albeit, without knowledge of their voicing), and can be a fantasatic arpeggiator. 
+The scale of the device can be set from multiple sources, and TODO: **the last source to make a change always has the last word what's the scale**. If you edit the settings after patching in an unchanging external scale, just unplug and replug the jack to reload it. 
+
+All the quantizer columns on a module follow the same scale. And while in this documentation I call them scales for simplicity, **QQQQ** also works with chords (albeit, without knowledge of their intended voicing), and can be a fantasatic arpeggiator. 
 
 Let's look at the controls of **QQQQ** in detail. Once you understand them, you'll also understand what the smaller form factors do.
 
@@ -103,12 +105,12 @@ In the TODO:**LCD Area** at the top of the device:
     - **Eight Tone Spanish** - When I tried to find more useful info about it, I found a forum post from 2003, where a poster said indignantly that scales "[are] not a democracy, but a hierarchy".
     - **Hirajōshi** - It's all you need to rip a sick shamisen solo. Anything more is for poseur kids.
     - **In Sen** - That one was originally used for Japanese wind chimes. Instantly become the most original dark ambient modular artist around by feeding it to [Rings and Clouds](https://vcvrack.com/AudibleInstruments) for 3 hours.
-- **External Scale**: This input and output express the scale current as a 12-channel polyphonic cable, where enabled notes have a continuous 10V signal, and disabled notes, 0V. This way of expressing a scale is supported by my other modules, such as **Arcane** and **Darius**. Try it out with my splitters and mergers! 
+- **External Scale**: This pair of input and output can encode a scale as a 12-channel polyphonic cable, where enabled notes have a continuous 10V signal, and disabled notes, 0V. This way of expressing a scale is supported by my other modules, such as **Arcane** and **Darius**. Try it out with my splitters and mergers! 
 
 To the top right of the module:
 
-- TODO:**Scene slot**: Those 16 buttons allow you to save 16 different scales. Navigating to a scene slot loads that scale, and changes from any source to the scale save it to the active scene. TODO:You can right-click on those buttons to copy and paste scales. You can map those buttons via MIDI!
-- TODO:**Scene input**: Navigates the scenes via CV. Useful with a step sequencer! Accepts 0V~10V. When plugged in, the buttons can't be operated manually anymore.
+- **Scene slot**: Those 16 buttons allow you to save 16 different scales. Navigating to a scene slot loads that scale, and changes to the scale from any source are saved to the active scene. TODO:You can right-click on those buttons to copy and paste scales. You can map those buttons via MIDI!
+- **Scene input**: Navigates the scenes via CV. Useful with a step sequencer! Accepts 0V~10V. When plugged in, the buttons can't be operated manually anymore.
 
 To the right, below the **Scene slots**:
 
@@ -117,19 +119,23 @@ To the right, below the **Scene slots**:
     - **Roman numeral notation**: FIXME: 
     - **Portable Sequence**: Simultaneous notes from a [portable sequence](https://github.com/squinkylabs/SquinkyVCV/blob/master/docs/clipboard-format.md) are interpreted as a new scale.
 
-Input is always imported starting from the first scene. And if your input isn't recognized, nothing happens, that simple. And remember: **QQQQ** only thinks in scales, not in chords. After you import a chord progression, **QQQQ** doesn't care about the voicing of the chord. It's all folded back to a single octave. 
+Input is always imported starting from the first scene. And remember: **QQQQ** only thinks in scales, not in chords. After you import a chord progression, **QQQQ** doesn't care about the voicing of the chord. It's all folded back to a single octave. 
 
-Next, to the bottom-right of the module:
+If your input isn't recognized, the Lcd just says "Error" for a few seconds. 
+
+Under the hood, **QQQQ** makes use of [Tonal.js](https://github.com/tonaljs/tonal)' knowledge of chords. Yup, this module is so bloated, it even runs javascript! Same [QuickJS](https://bellard.org/quickjs/) engine as [VCV Prototype](https://vcvrack.com/Prototype).
+
+Let's continue. To the bottom-right of the module:
 
 - **Likeness of Quatherina**: Increases the appeal of the module through co-branding.
 
 To the center of the module are the four quantizer columns, through which signal flows from top to bottom.
 
-- TODO:**CV Input**: Each input jack is forwarded to the columns to its right, if you want to process the same signal in different ways. Inputs are polyphonic.
-- TODO:**% Scale**: Attenuates, amplifies, or inverts the input.
-- TODO:**Offset**: Adds or remove a fixed voltage to the input.
+- TODO:**CV Input**: Each input jack is forwarded to the columns to its right within the same module, if you want to process the same signal in different ways. Inputs are polyphonic.
+- TODO:**% Scale**: Attenuates, inverts, or amplifies the input.
+- TODO:**Offset**: Adds or removes a fixed voltage to the input.
 - TODO:**Transpose**: Transposes the signal according to one of the three rules, set by the transpose mode button under the knob.
-- TODO:**Transpose mode**: Selects one of the three transposition rules for the knob directly above it. Each transposition rules results in output that remains in harmony. The rules are:
+- TODO:**Transpose mode**: Selects one of the three transposition rules for the knob directly above it. Each transposition rule results in output that remains in harmony. The rules are:
     - TODO:**Unlit** - _Octaves Mode_: Quantizes the signal first, then transposes it up or down by full octaves.
     - TODO:**Yellow** - _Semitones Mode_: Transposes the signal up or down by a few semitones first, then quantizes it. 
     - TODO:**Pink** - _Scale degrees Mode_: Quantizes the signal first, then transposes the signal by a specific amount of scale degrees.
