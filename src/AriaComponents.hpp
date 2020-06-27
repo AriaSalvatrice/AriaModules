@@ -3,23 +3,10 @@
 using namespace rack;
 extern Plugin* pluginInstance;
 
-// Widgets are only added to my library as the need arises.
+// Widgets are only added to my library as the need arises and are pruned if no longer used.
+// Widgets are only moved to my library once used in more than a single module.
 
 // - TODO: Remove every single dependency on the component library, since it is not open-source. 
-
-//////////////////////////////// Helpers
-
-// Passes the module to the created knobs
-// FIXME: - it causes bugs and there are cleaner ways to do it. Phase out its usage.
-template <class TParamWidget, class TModule>
-TParamWidget* createModuleParam(math::Vec pos, TModule* module, int paramId) {
-    TParamWidget* o = new TParamWidget(module);
-    o->box.pos = pos;
-    if (module) {
-        o->paramQuantity = module->paramQuantities[paramId];
-    }
-    return o;
-}
 
 
 //////////////////////////////// Base
