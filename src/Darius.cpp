@@ -1212,12 +1212,8 @@ struct DariusWidget : ModuleWidget {
 
         // Output area //////////////////
 
-        // Lcd
-        Lcd::LcdFramebufferWidget<Darius> *lfb = new Lcd::LcdFramebufferWidget<Darius>(module);
-        Lcd::LcdDrawWidget<Darius> *ldw = new Lcd::LcdDrawWidget<Darius>(module);
-        lfb->box.pos = mm2px(Vec(10.3, 106.7));
-        lfb->addChild(ldw);
-        addChild(lfb);
+        // LCD
+        addChild(Lcd::createLcd<Darius>(mm2px(Vec(10.3, 106.7)), module));
 
         // Quantizer toggle
         addParam(createModuleParam<AriaRockerSwitchHorizontal800ModeReset, Darius>(mm2px(Vec(11.1, 99.7)), module, Darius::QUANTIZE_TOGGLE_PARAM));

@@ -4,6 +4,7 @@ using namespace rack;
 extern Plugin* pluginInstance;
 
 // This LCD widget is only concerned with displaying data. 
+// Its size is currently fixed to 36*10mm - 2 lines of 11 characters, could be easily changed.
 //
 // The LCD PAGE is the layout, e.g., two lines of text, or a piano and a line of text.
 // The LCD MODE is the internal state of the LCD as tracked by each module
@@ -11,7 +12,7 @@ extern Plugin* pluginInstance;
 // 
 // On Arcane and Darius, the SVG of the LCD is a little bit too small to display
 // descenders on the second line of text, so uppercase is mostly used.
-// Future modules will have a slightly larger LCD to fit descenders. 
+// Future modules will have a slightly larger LCD to fit descenders if desired.
 //
 // If you like this widget, it's probably reasonably easy to re-use in your own module. 
 // However, it's not very generic yet, since it has not been used much. And it's
@@ -19,7 +20,7 @@ extern Plugin* pluginInstance;
 // profiled its performance impact in detail.
 // 
 // If you're gonna reuse this code despite the warnings, please change my signature
-// color scheme to your own.
+// color scheme to your own. You can recolor the letters in batch with a text editor.
 
 namespace Lcd {
 
@@ -56,10 +57,10 @@ struct LcdStatus {
 };
 
 // The framebuffer holding the Draw widget.
-template <typename T>
+template <typename TModule>
 struct LcdFramebufferWidget : FramebufferWidget{
-    T *module;
-    LcdFramebufferWidget(T *m){
+    TModule *module;
+    LcdFramebufferWidget(TModule *m){
         module = m;
     }
 
@@ -75,15 +76,15 @@ struct LcdFramebufferWidget : FramebufferWidget{
 };
 
 // The draw widget.
-template <class T>
+template <class TModule>
 struct LcdDrawWidget : TransparentWidget {
-    T *module;
+    TModule *module;
     std::array<std::shared_ptr<Svg>, 95> asciiSvg; // 32 to 126, the printable range
     std::array<std::shared_ptr<Svg>, 24> pianoSvg; // 0..11: Unlit, 12..23 = Lit
     std::string lcdText1;
     std::string lcdText2;
 
-    LcdDrawWidget(T *module) {
+    LcdDrawWidget(TModule *module) {
         this->module = module;
         if (module) {
             box.size = mm2px(Vec(36.0, 10.0));
@@ -163,5 +164,14 @@ struct LcdDrawWidget : TransparentWidget {
     }
 
 }; // LcdDrawWidget
+
+template <class TModule>
+Lcd::LcdFramebufferWidget<TModule>* createLcd(math::Vec pos, TModule *module) {
+    Lcd::LcdFramebufferWidget<TModule> *lfb = new Lcd::LcdFramebufferWidget<TModule>(module);
+    Lcd::LcdDrawWidget<TModule> *ldw = new Lcd::LcdDrawWidget<TModule>(module);
+    lfb->box.pos = pos;
+    lfb->addChild(ldw);
+    return lfb;
+}
 
 } // Lcd

@@ -33,6 +33,8 @@ When labels call for a stroke to make them easier to distinguish from the backgr
   - Dark (text and arrows):     #0e6977ff
   - Darkest (jacks):            #083d45ff
 
+These shades of yellow and pink are almost indistinguishable to people with tritanopia (about 1% of the population), so they should never be the only design cue provided to convey information. When a widget can be lit both pink and yellow, the pink version should have a Dark notch in the center. 
+
 
 ## Alignment
 

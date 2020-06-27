@@ -798,12 +798,8 @@ struct ArcaneWidget : ModuleWidget {
         addChild(cfb);
         
         // LCD
-        Lcd::LcdFramebufferWidget<Arcane> *lfb = new Lcd::LcdFramebufferWidget<Arcane>(module);
-        Lcd::LcdDrawWidget<Arcane> *ldw = new Lcd::LcdDrawWidget<Arcane>(module);
-        lfb->box.pos = mm2px(Vec(83.6, 41.4));
-        lfb->addChild(ldw);
-        addChild(lfb);
-                    
+        addChild(Lcd::createLcd<Arcane>(mm2px(Vec(83.6, 41.4)), module));
+
         // Quantizer
         addInput(createInput<AriaJackIn>(   mm2px(Vec(x + 00.0, y + 00.0)), module, Arcane::QNT_INPUT));
         addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 32.0, y + 00.0)), module, Arcane::QNT_OUTPUT));
@@ -882,11 +878,7 @@ struct AtoutWidget : ModuleWidget {
         addChild(createWidget<AriaSignature>(mm2px(Vec(31.06, 114.5))));
         
         // LCD	
-        Lcd::LcdFramebufferWidget<Arcane> *fb = new Lcd::LcdFramebufferWidget<Arcane>(module);
-        Lcd::LcdDrawWidget<Arcane> *ldw = new Lcd::LcdDrawWidget<Arcane>(module);
-        fb->box.pos = mm2px(Vec(6.44, 41.4));
-        fb->addChild(ldw);
-        addChild(fb);
+        addChild(Lcd::createLcd<Arcane>(mm2px(Vec(6.44, 41.4)), module));
         
         // Screws
         addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));

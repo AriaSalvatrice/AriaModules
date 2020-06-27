@@ -79,8 +79,6 @@ struct AriaJackTransparent : SVGPort {
 
 /////////////// Old style lights - TODO: Remove dependency on component library
 
-// Still used for a few things! 
-// FIXME: Are they still used?
 template <typename TBase = GrayModuleLightWidget>
 struct TOutputLight : TBase {
     TOutputLight() {
