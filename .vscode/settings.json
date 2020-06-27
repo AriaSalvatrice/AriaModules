@@ -72,6 +72,8 @@
         "iomanip": "cpp",
         "mutex": "cpp",
         "shared_mutex": "cpp",
-        "*.xxx": "cpp"
+        "*.xxx": "cpp",
+        "fstream": "cpp",
+        "cfenv": "cpp"
     }
 }

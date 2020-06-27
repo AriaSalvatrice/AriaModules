@@ -10,7 +10,7 @@ extern Plugin* pluginInstance;
 //////////////////////////////// Helpers
 
 // Passes the module to the created knobs
-// FIXME: - is there a cleaner way to go about it?
+// FIXME: - it causes bugs and there are cleaner ways to do it. Phase out its usage.
 template <class TParamWidget, class TModule>
 TParamWidget* createModuleParam(math::Vec pos, TModule* module, int paramId) {
     TParamWidget* o = new TParamWidget(module);
@@ -26,11 +26,7 @@ TParamWidget* createModuleParam(math::Vec pos, TModule* module, int paramId) {
 
 struct SvgSwitchUnshadowed : SvgSwitch {
     SvgSwitchUnshadowed() {
-        fb = new widget::FramebufferWidget;
-        addChild(fb);
-
-        sw = new widget::SvgWidget;
-        fb->addChild(sw);
+        shadow->opacity = 0.f;
         SvgSwitch();
     }
 };

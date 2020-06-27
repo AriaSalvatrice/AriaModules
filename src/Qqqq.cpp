@@ -19,7 +19,7 @@ enum LcdModes {
 };
 
 // Start high, lower if people complain.
-const int REFRESHSCALEDIVIDER = 512;
+const int DISPLAYDIVIDER = 512;
 
 struct Qqqq : Module {
     enum ParamIds {
@@ -64,8 +64,10 @@ struct Qqqq : Module {
     float lastScaleKnob = 2.f;
     std::array<std::array<bool, 12>, 16> scale;
     std::array<bool, 12> lastExternalScale;
+    std::array<bool, 12> litKeys;
     Lcd::LcdStatus lcdStatus;
     dsp::ClockDivider refreshScaleDivider;
+    dsp::ClockDivider litKeysDivider;
     
     Qqqq() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -94,8 +96,9 @@ struct Qqqq : Module {
         }
         configParam(SCENE_BUTTON_PARAM, 0.f, 1.f, 0.f, "Scene #1");
         for (int i = 1; i < 16; i++) configParam(SCENE_BUTTON_PARAM + i, 0.f, 1.f, 0.f, "Scene #" + std::to_string(i + 1));
-        refreshScaleDivider.setDivision(REFRESHSCALEDIVIDER);
-        lcdStatus.lcdText1 = " Q< Quack~";
+        refreshScaleDivider.setDivision(DISPLAYDIVIDER);
+        litKeysDivider.setDivision(20000);
+        lcdStatus.lcdText1 = " Q< quack~";
         lcdStatus.lcdPage = Lcd::TEXT1_PAGE;
         // Initialize
         for (int i = 0; i < 16; i++) { for (int j = 0; j < 12; j++) { scale[i][j] = false; }}
@@ -195,6 +198,10 @@ struct Qqqq : Module {
         }
     }
 
+    void updateLitKeys() {
+        for (int i =  0; i < 12; i++) litKeys[i] = (random::uniform() > 0.5) ? true : false; 
+    }
+
 
     void process(const ProcessArgs& args) override {
         if (refreshScaleDivider.process()) {
@@ -202,6 +209,9 @@ struct Qqqq : Module {
             updateScale();
         }
         updateExternalOutput();
+        if (litKeysDivider.process()) {
+            updateLitKeys();
+        }
     }
 };
 
@@ -252,67 +262,97 @@ struct AriaKnob820Temp : AriaKnob820 {
 
 
 
+// The piano display
+// https://community.vcvrack.com/t/whats-the-best-way-to-implement-a-pushbutton-with-three-visual-states-but-only-two-user-controllable-states/10351/8?u=aria_salvatrice
+struct AriaPianoKey : SvgSwitchUnshadowed {
+    bool lastPianoDisplay;
+    int note = 0;
 
-// To represent the piano, only 6 distinct key graphics are required: C, E, F, B, White with notch on each side, Black
-// FIXME: SvgSwitchUnshadowed causes framebuffer errors
-struct AriaPianoC : SvgSwitchUnshadowed {
-    Qqqq* module;
-    AriaPianoC(Qqqq* module) {
-        this-> module = module;
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/unlit-C.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/yellow-C.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/pink-C.svg")));
-        SvgSwitchUnshadowed();
+    void step() override {
+        if (paramQuantity){
+            if (dynamic_cast<Qqqq*>(paramQuantity->module)->litKeys[note] == true) {
+                sw->setSvg(frames[2]);
+                fb->dirty = true;
+            } else {
+                int index = (int) std::round(paramQuantity->getValue() - paramQuantity->getMinValue());
+                index = math::clamp(index, 0, (int) frames.size() - 1);
+                sw->setSvg(frames[index]);
+                fb->dirty = true; 
+            }
+        }
+        SvgSwitchUnshadowed::step();
+    }
+
+    void onChange(const event::Change& e) override {
+        if (!frames.empty() && paramQuantity) {
+            int index = (int) std::round(paramQuantity->getValue() - paramQuantity->getMinValue());
+            index = math::clamp(index, 0, (int) frames.size() - 1);
+            sw->setSvg(frames[index]);
+            fb->dirty = true;
+        }
+        ParamWidget::onChange(e);
     }
 };
-struct AriaPianoE : SvgSwitchUnshadowed {
-    Qqqq* module;
-    AriaPianoE(Qqqq* module) {
-        this-> module = module;
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/unlit-E.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/yellow-E.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/pink-E.svg")));
-        SvgSwitchUnshadowed();
-    }
-};
-struct AriaPianoF : SvgSwitchUnshadowed {
-    Qqqq* module;
-    AriaPianoF(Qqqq* module) {
-        this-> module = module;
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/unlit-F.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/yellow-F.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/pink-F.svg")));
-        SvgSwitchUnshadowed();
-    }
-};
-struct AriaPianoB : SvgSwitchUnshadowed {
-    Qqqq* module;
-    AriaPianoB(Qqqq* module) {
-        this-> module = module;
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/unlit-B.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/yellow-B.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/pink-B.svg")));
-        SvgSwitchUnshadowed();
-    }
-};
-struct AriaPianoWhite : SvgSwitchUnshadowed {
-    Qqqq* module;
-    AriaPianoWhite(Qqqq* module) {
-        this-> module = module;
+
+// To represent an octave, only 6 distinct key graphics are required: C, E, F, B, White with notch on each side, Black
+struct AriaPianoWhiteKey : AriaPianoKey {
+    AriaPianoWhiteKey() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/unlit-white.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/yellow-white.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/pink-white.svg")));
-        SvgSwitchUnshadowed();
+        AriaPianoKey();
     }
 };
-struct AriaPianoBlack : SvgSwitchUnshadowed {
-    Qqqq* module;
-    AriaPianoBlack(Qqqq* module) {
-        this-> module = module;
+struct AriaPianoBlackKey : AriaPianoKey {
+    AriaPianoBlackKey() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/unlit-black.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/yellow-black.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/pink-black.svg")));
-        SvgSwitchUnshadowed();
+        AriaPianoKey();
+    }
+};
+struct AriaPianoC : AriaPianoKey {
+    AriaPianoC() {
+        note = 0;
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/unlit-C.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/yellow-C.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/pink-C.svg")));
+        AriaPianoKey();
+    }
+};
+struct AriaPianoCSharp : AriaPianoBlackKey { AriaPianoCSharp() { note = 1; AriaPianoBlackKey();} };
+struct AriaPianoD : AriaPianoWhiteKey { AriaPianoD () { note = 2; AriaPianoWhiteKey(); } };
+struct AriaPianoDSharp : AriaPianoBlackKey { AriaPianoDSharp() { note = 3; AriaPianoBlackKey();} };
+struct AriaPianoE : AriaPianoKey {
+    AriaPianoE() {
+        note = 4;
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/unlit-E.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/yellow-E.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/pink-E.svg")));
+        AriaPianoKey();
+    }
+};
+struct AriaPianoF : AriaPianoKey {
+    AriaPianoF() {
+        note = 5;
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/unlit-F.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/yellow-F.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/pink-F.svg")));
+        AriaPianoKey();
+    }
+};
+struct AriaPianoFSharp : AriaPianoBlackKey { AriaPianoFSharp() { note = 6; AriaPianoBlackKey();} };
+struct AriaPianoG : AriaPianoWhiteKey { AriaPianoG () { note = 7; AriaPianoWhiteKey(); } };
+struct AriaPianoGSharp : AriaPianoBlackKey { AriaPianoGSharp() { note = 8; AriaPianoBlackKey();} };
+struct AriaPianoA : AriaPianoWhiteKey { AriaPianoA () { note = 9; AriaPianoWhiteKey(); } };
+struct AriaPianoASharp : AriaPianoBlackKey { AriaPianoASharp() { note = 10; AriaPianoBlackKey();} };
+struct AriaPianoB : AriaPianoKey {
+    AriaPianoB() {
+        note = 11;
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/unlit-B.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/yellow-B.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/piano-buttons/pink-B.svg")));
+        AriaPianoKey();
     }
 };
 
@@ -354,19 +394,19 @@ struct QqqqWidget : ModuleWidget {
 
     void drawPianoKeys(float xOffset, float yOffset, Qqqq* module) {
         // First we create the white keys only.
-        addParam(createModuleParam<AriaPianoC, Qqqq>(    mm2px(Vec(xOffset, yOffset -  0.f)), module, Qqqq::NOTE_PARAM +  0)); // C
-        addParam(createModuleParam<AriaPianoWhite, Qqqq>(mm2px(Vec(xOffset, yOffset - 14.f)), module, Qqqq::NOTE_PARAM +  2)); // D
-        addParam(createModuleParam<AriaPianoE, Qqqq>(    mm2px(Vec(xOffset, yOffset - 28.f)), module, Qqqq::NOTE_PARAM +  4)); // E
-        addParam(createModuleParam<AriaPianoF, Qqqq>(    mm2px(Vec(xOffset, yOffset - 42.f)), module, Qqqq::NOTE_PARAM +  5)); // F
-        addParam(createModuleParam<AriaPianoWhite, Qqqq>(mm2px(Vec(xOffset, yOffset - 56.f)), module, Qqqq::NOTE_PARAM +  7)); // G
-        addParam(createModuleParam<AriaPianoWhite, Qqqq>(mm2px(Vec(xOffset, yOffset - 70.f)), module, Qqqq::NOTE_PARAM +  9)); // A
-        addParam(createModuleParam<AriaPianoB, Qqqq>(    mm2px(Vec(xOffset, yOffset - 84.f)), module, Qqqq::NOTE_PARAM + 11)); // B
+        addParam(createParam<AriaPianoC>(mm2px(Vec(xOffset, yOffset -  0.f)), module, Qqqq::NOTE_PARAM +  0)); // C
+        addParam(createParam<AriaPianoD>(mm2px(Vec(xOffset, yOffset - 14.f)), module, Qqqq::NOTE_PARAM +  2)); // D
+        addParam(createParam<AriaPianoE>(mm2px(Vec(xOffset, yOffset - 28.f)), module, Qqqq::NOTE_PARAM +  4)); // E
+        addParam(createParam<AriaPianoF>(mm2px(Vec(xOffset, yOffset - 42.f)), module, Qqqq::NOTE_PARAM +  5)); // F
+        addParam(createParam<AriaPianoG>(mm2px(Vec(xOffset, yOffset - 56.f)), module, Qqqq::NOTE_PARAM +  7)); // G
+        addParam(createParam<AriaPianoA>(mm2px(Vec(xOffset, yOffset - 70.f)), module, Qqqq::NOTE_PARAM +  9)); // A
+        addParam(createParam<AriaPianoB>(mm2px(Vec(xOffset, yOffset - 84.f)), module, Qqqq::NOTE_PARAM + 11)); // B
         // Then, the black keys, so they overlap the clickable area of the white keys, avoiding the need he need for a custom widget.
-        addParam(createModuleParam<AriaPianoBlack, Qqqq>(mm2px(Vec(xOffset, yOffset -  5.f)), module, Qqqq::NOTE_PARAM +  1)); // C#
-        addParam(createModuleParam<AriaPianoBlack, Qqqq>(mm2px(Vec(xOffset, yOffset - 19.f)), module, Qqqq::NOTE_PARAM +  3)); // D#
-        addParam(createModuleParam<AriaPianoBlack, Qqqq>(mm2px(Vec(xOffset, yOffset - 47.f)), module, Qqqq::NOTE_PARAM +  6)); // F#
-        addParam(createModuleParam<AriaPianoBlack, Qqqq>(mm2px(Vec(xOffset, yOffset - 61.f)), module, Qqqq::NOTE_PARAM +  8)); // G#
-        addParam(createModuleParam<AriaPianoBlack, Qqqq>(mm2px(Vec(xOffset, yOffset - 75.f)), module, Qqqq::NOTE_PARAM + 10)); // A#
+        addParam(createParam<AriaPianoCSharp>(mm2px(Vec(xOffset, yOffset -  5.f)), module, Qqqq::NOTE_PARAM +  1)); // C#
+        addParam(createParam<AriaPianoDSharp>(mm2px(Vec(xOffset, yOffset - 19.f)), module, Qqqq::NOTE_PARAM +  3)); // D#
+        addParam(createParam<AriaPianoFSharp>(mm2px(Vec(xOffset, yOffset - 47.f)), module, Qqqq::NOTE_PARAM +  6)); // F#
+        addParam(createParam<AriaPianoGSharp>(mm2px(Vec(xOffset, yOffset - 61.f)), module, Qqqq::NOTE_PARAM +  8)); // G#
+        addParam(createParam<AriaPianoASharp>(mm2px(Vec(xOffset, yOffset - 75.f)), module, Qqqq::NOTE_PARAM + 10)); // A#
     }
 
     void drawQuantizerColumn(float xOffset, float yOffset, Qqqq* module, int col) {
