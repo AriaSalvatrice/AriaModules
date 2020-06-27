@@ -33,6 +33,7 @@ enum LcdPage {
     PIANO_AND_TEXT2_PAGE
 };
 
+// FIXME: lcdLastInteraction should be a property of it
 // The LCD's status.
 struct LcdStatus {
     // The first line, not displayed on every page. 

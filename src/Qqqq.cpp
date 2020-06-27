@@ -97,7 +97,9 @@ struct Qqqq : Module {
         configParam(SCENE_BUTTON_PARAM, 0.f, 1.f, 0.f, "Scene #1");
         for (int i = 1; i < 16; i++) configParam(SCENE_BUTTON_PARAM + i, 0.f, 1.f, 0.f, "Scene #" + std::to_string(i + 1));
         refreshScaleDivider.setDivision(DISPLAYDIVIDER);
-        litKeysDivider.setDivision(20000);
+        litKeysDivider.setDivision(8000);
+        lcdMode = INIT_MODE;
+        lcdLastInteraction = 0.f;
         lcdStatus.lcdText1 = " Q< quack~";
         lcdStatus.lcdPage = Lcd::TEXT1_PAGE;
         // Initialize
@@ -199,15 +201,32 @@ struct Qqqq : Module {
     }
 
     void updateLitKeys() {
-        for (int i =  0; i < 12; i++) litKeys[i] = (random::uniform() > 0.5) ? true : false; 
+        // Test
+        for (int i =  0; i < 12; i++) litKeys[i] = (random::uniform() > 0.8) ? true : false; 
     }
 
+
+    void processQuantizerColumn(int col){
+        std::array<float, 16> voltage;
+        int channels = inputs[CV_INPUT + col].getChannels();
+        
+        // Stop if no input
+        if (channels == 0) return;
+
+        // Get input
+        for (int i = 0; i < channels; i++) voltage[i] = inputs[CV_INPUT].getVoltage(i);
+
+        // Output
+        for (int i = 0; i < channels; i++) outputs[CV_OUTPUT + col].setVoltage(voltage[i]);
+        outputs[CV_OUTPUT + col].setChannels(channels);
+    }
 
     void process(const ProcessArgs& args) override {
         if (refreshScaleDivider.process()) {
             updateScene();
             updateScale();
         }
+        for(int i = 0; i < 4; i++) processQuantizerColumn(i);
         updateExternalOutput();
         if (litKeysDivider.process()) {
             updateLitKeys();
@@ -224,73 +243,49 @@ struct Qqqq : Module {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-
-
-
 // The LCD knobs
-// FIXME: They cause the G# Bug.
-struct AriaKnob820Scale : AriaKnob820 {
-    Qqqq *module;
+// FIXME: LOTS OF NAMESPACE ISSUES. I should namespace everything.
+// FIXME: dynamic_cast isn't working here. I dunno why!!
+// FIXME: THEY CRASH! Possible for a different reason than I expect.
 
-    AriaKnob820Scale(Qqqq* module) {
-        this->module = module;
+struct AriaKnob820ScaleQqqq : AriaKnob820 {
+    AriaKnob820ScaleQqqq() {
         snap = true;
         AriaKnob820();
     }
 
     void onDragMove(const event::DragMove& e) override {
-        module->lcdMode = SCALE_MODE;
-        module->lcdLastInteraction = 0.f;
-        module->lcdStatus.lcdDirty = true;
+        dynamic_cast<Qqqq*>(paramQuantity->module)->lcdMode = SCALE_MODE;
+        dynamic_cast<Qqqq*>(paramQuantity->module)->lcdLastInteraction = 0.f;
+        dynamic_cast<Qqqq*>(paramQuantity->module)->lcdStatus.lcdDirty = true;
         AriaKnob820::onDragMove(e);
     }
 };
-
-struct AriaKnob820Temp : AriaKnob820 {
-    AriaKnob820Temp() {
-        snap = true;
-        AriaKnob820();
-    }
-
-    void onDragMove(const event::DragMove& e) override {
-        // module->lcdMode = SCALE_MODE;
-        // module->lcdLastInteraction = 0.f;
-        // module->lcdStatus.lcdDirty = true;
-        AriaKnob820::onDragMove(e);
-    }
-};
-
 
 
 // The piano display
 // https://community.vcvrack.com/t/whats-the-best-way-to-implement-a-pushbutton-with-three-visual-states-but-only-two-user-controllable-states/10351/8?u=aria_salvatrice
 struct AriaPianoKey : SvgSwitchUnshadowed {
-    bool lastPianoDisplay;
+    bool lastPianoDisplay = false;
+    bool currentPianoDisplay = false;
     int note = 0;
 
     void step() override {
         if (paramQuantity){
-            if (dynamic_cast<Qqqq*>(paramQuantity->module)->litKeys[note] == true) {
+            currentPianoDisplay = dynamic_cast<Qqqq*>(paramQuantity->module)->litKeys[note];
+            if (currentPianoDisplay == true && currentPianoDisplay != lastPianoDisplay) {
                 sw->setSvg(frames[2]);
                 fb->dirty = true;
-            } else {
+            }
+            if (currentPianoDisplay == false && currentPianoDisplay != lastPianoDisplay) {
                 int index = (int) std::round(paramQuantity->getValue() - paramQuantity->getMinValue());
                 index = math::clamp(index, 0, (int) frames.size() - 1);
                 sw->setSvg(frames[index]);
                 fb->dirty = true; 
             }
+            lastPianoDisplay = currentPianoDisplay;
         }
         SvgSwitchUnshadowed::step();
-    }
-
-    void onChange(const event::Change& e) override {
-        if (!frames.empty() && paramQuantity) {
-            int index = (int) std::round(paramQuantity->getValue() - paramQuantity->getMinValue());
-            index = math::clamp(index, 0, (int) frames.size() - 1);
-            sw->setSvg(frames[index]);
-            fb->dirty = true;
-        }
-        ParamWidget::onChange(e);
     }
 };
 
@@ -457,16 +452,11 @@ struct QqqqWidget : ModuleWidget {
         drawPianoKeys(4.7f, 102.8f, module);
 
         // The LCD will go around here
+        addChild(Lcd::createLcd<Qqqq>(mm2px(Vec(27.6f, 21.2f)), module));
 
         // Scale, Key, External
-
-        // FIXME: This causes the G# bug!!
-        // addParam(createModuleParam<AriaKnob820Scale, Qqqq>(mm2px(Vec(25.f, 29.f)), module, Qqqq::SCALE_PARAM));
-        // addParam(createModuleParam<AriaKnob820Scale, Qqqq>(mm2px(Vec(35.f, 29.f)), module, Qqqq::KEY_PARAM));
-
-
-        addParam(createParam<AriaKnob820Temp>(mm2px(Vec(25.f, 29.f)), module, Qqqq::SCALE_PARAM));
-        addParam(createParam<AriaKnob820Temp>(mm2px(Vec(35.f, 29.f)), module, Qqqq::KEY_PARAM));
+        addParam(createParam<AriaKnob820ScaleQqqq>(mm2px(Vec(25.f, 29.f)), module, Qqqq::SCALE_PARAM));
+        addParam(createParam<AriaKnob820ScaleQqqq>(mm2px(Vec(35.f, 29.f)), module, Qqqq::KEY_PARAM));
         addInput(createInput<AriaJackIn>(mm2px(Vec(45.f, 29.f)), module, Qqqq::EXT_SCALE_INPUT));
         addOutput(createOutput<AriaJackOut>(mm2px(Vec(55.f, 29.f)), module, Qqqq::EXT_SCALE_OUTPUT));
 

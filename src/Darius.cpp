@@ -979,9 +979,7 @@ struct Darius : Module {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-
-
-
+// FIXME: Namespace, addModuleWidget. Use dynamic cast instead!
 
 
 struct AriaKnob820Snap : AriaKnob820 {
