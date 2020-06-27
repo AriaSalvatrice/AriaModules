@@ -77,13 +77,13 @@ There are three different form factors available of the same underlying module:
 
 Those modules are all TODO: expanders of each other: the left one sets the scale to the one on the right, which forwards it. For example, if you only require two quantizer lines and no sequencer, you can use **Quack** on the left and **Q<** on the right, to use only half the size of **QQQQ**. If expander behavior is not desired, you can leave a gap between the instances, or TODO: disable expander features from the right-click menu.
 
-The scale of the device can be set from multiple sources, and TODO: **the last source to make a change always has the last word what's the scale**. If you edit the settings after patching in an unchanging external scale, just unplug and replug the jack to reload it. 
+The scale of the device can be set from multiple sources, and **the last source to make a change always has the last word what's the scale**. If you edit the settings after patching in an unchanging external scale, just unplug and replug the jack to reload it. 
 
 All the quantizer columns on a module follow the same scale. And while in this documentation I call them scales for simplicity, **QQQQ** also works with chords (albeit, without knowledge of their intended voicing), and can be a fantasatic arpeggiator. 
 
 Let's look at the controls of **QQQQ** in detail. Once you understand them, you'll also understand what the smaller form factors do.
 
-- **Piano keys**: They always show you the current scale. Keys lit in yellow are parts of the scale, while unlit keys are disallowed. You can click on the keys to change which notes are allowed. TODO: When you click the **visualize** button of a quantizer line, the notes currently playing on that line are lit pink.
+- **Piano keys**: They always show you the current scale. Keys lit in yellow are parts of the scale, while unlit keys are disallowed. You can click on the keys to change which notes are allowed. When you click the **visualize** button of a quantizer line, the notes currently playing on that line are lit pink.
 
 In the TODO:**LCD Area** at the top of the device:
 
@@ -131,18 +131,20 @@ Let's continue. To the bottom-right of the module:
 
 To the center of the module are the four quantizer columns, through which signal flows from top to bottom.
 
-- TODO:**CV Input**: Each input jack is forwarded to the columns to its right within the same module, if you want to process the same signal in different ways. Inputs are polyphonic.
-- TODO:**% Scale**: Attenuates, inverts, or amplifies the input.
-- TODO:**Offset**: Adds or removes a fixed voltage to the input.
-- TODO:**Transpose**: Transposes the signal according to one of the three rules, set by the transpose mode button under the knob.
-- TODO:**Transpose mode**: Selects one of the three transposition rules for the knob directly above it. Each transposition rule results in output that remains in harmony. The rules are:
-    - TODO:**Unlit** - _Octaves Mode_: Quantizes the signal first, then transposes it up or down by full octaves.
-    - TODO:**Yellow** - _Semitones Mode_: Transposes the signal up or down by a few semitones first, then quantizes it. 
+- **CV Input**: Each input jack is forwarded to the columns to its right within the same module, if you want to process the same signal in different ways. Inputs are polyphonic.
+- **% Scale**: Attenuates, inverts, or amplifies the input.
+- **Offset**: Adds or removes a fixed voltage to the input.
+- **Transpose**: Transposes the signal according to one of the three rules, set by the transpose mode button under the knob.
+- **Transpose mode**: Selects one of the three transposition rules for the knob directly above it. Each transposition rule results in output that remains in harmony. The rules are:
+    - **Unlit** - _Octaves Mode_: Quantizes the signal first, then transposes it up or down by full octaves.
+    - **Yellow** - _Semitones Mode_: Transposes the signal up or down by a few semitones first, then quantizes it. 
     - TODO:**Pink** - _Scale degrees Mode_: Quantizes the signal first, then transposes the signal by a specific amount of scale degrees.
 - TODO:**Sample & Hold / Track & Hold toggle**: Swaps between the two modes for the input directly below it. Unlit is Sample & Hold, lit is Track & Hold.
 - TODO:**Sample & Hold / Track & Hold input**: When plugged in, instead of operating continuously, the quantizer will Sample & Hold or Track & Hold the signal. When you're quantizing a noisy source of modulation, it's useful to send it the same gate you'd send to the envelope that will play the note in question. If the **CV input** is polyphonic, send it the same amount of channels.
-- TODO:**Output** - The quantized signal! Polyphony is defined by the **CV Input**. You only pay the CPU cost of the features you use: if left unplugged, unused columns avoid doing unecessary math.
+- **Visualize**: Shows the quantized output on the piano display.
+- **Output** - The quantized signal! Polyphony is defined by the **CV Input**. 
 
+The CPU usage of **Qqqq** scales with the amount of channels and columns used. When inputs are unplugged, or outputs are unplugged while visualization isn't enabled, then the column in question stops processing, and consumes almost no CPU. But if you attempt to quantize 4×16 signals at once, your CPU will burn down your house. 
 
 **Protip for cool kids only:** Did you know that there are a few people out there who do not use Quantizers, and instead choose to spend years to learn something called "Music Theory"? Those people do all their music by reading books and thinking really hard about maths! It's true - check out your local library for more information.
 

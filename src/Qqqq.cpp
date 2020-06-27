@@ -110,6 +110,8 @@ struct Qqqq : Module {
     ~Qqqq(){
     }
 
+    // FIXME: JSON!
+
     // Sets the scene. The CV input overrides the buttons.
     void updateScene() {
         if (inputs[SCENE_INPUT].isConnected()) {
