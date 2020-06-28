@@ -70,8 +70,8 @@
       "name": "Quatherina's Quality Quad Quantizer",
       "description": "Quatherina the Quantum Duck's Quantizer with custom & external scales, 16 scenes, offset, sample and hold,\ntransposition, lead sheet chords parsing, and a licensed illustration of Quatherina",
       "tags": [
-        "Polyphonic",
         "Quantizer",
+        "Polyphonic",
         "Quad",
         "Expander"
       ]
@@ -82,6 +82,7 @@
       "description": "Quatherina the Quantum Duck's smaller quantizer",
       "tags": [
         "Quantizer",
+        "Polyphonic",
         "Expander"
       ]
     },
@@ -91,6 +92,7 @@
       "description": "Quatherina the Quantum Duck's tiny quantizer",
       "tags": [
         "Quantizer",
+        "Polyphonic",
         "Expander"
       ]
     },

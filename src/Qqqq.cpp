@@ -60,7 +60,9 @@ struct Qqqq : Module {
     bool lastExtInConnected = false;
     bool sceneChanged = false;
     bool highCpu = false;
-    bool leftMessages[2][12]; // FIXME: IDK how to use a std::array for this
+    // FIXME: I am supposed to free it manually but didn't figure out how.
+    // FIXME: IDK how to use a std::array for this - assuming I even can
+    bool leftMessages[2][12];
     bool isExpander = false;
     bool lastIsExpander = false;
     int lcdMode = INIT_MODE;
@@ -121,6 +123,37 @@ struct Qqqq : Module {
         // Expander
         leftExpander.producerMessage = leftMessages[0];
         leftExpander.consumerMessage = leftMessages[1];
+    }
+
+
+    json_t* dataToJson() override {
+        json_t* rootJ = json_object();
+        json_t* scenesJ = json_array();
+        for (int i = 0; i < 16; i++) {
+            json_t* sceneJ = json_array();
+            for (int j = 0; j < 12; j++) {
+                json_array_append_new(sceneJ, json_boolean(scale[i][j]));
+            }
+            json_array_append_new(scenesJ, sceneJ);
+        }
+        json_object_set_new(rootJ, "scenes", scenesJ);
+        
+        return rootJ;
+    }
+
+    void dataFromJson(json_t* rootJ) override {
+        json_t* scenesJ = json_object_get(rootJ, "scenes");
+        if (scenesJ){
+            for (int i = 0; i < 16; i++) {
+                json_t* sceneJ = json_array_get(scenesJ, i);
+                if (sceneJ) {
+                    for (int j = 0; j < 12; j++) {
+                        json_t* noteJ = json_array_get(sceneJ, j);
+                        scale[i][j] = json_boolean_value(noteJ);
+                    }
+                }
+            }
+        }
     }
 
     // FIXME: JSON!
