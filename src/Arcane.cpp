@@ -857,7 +857,7 @@ struct ArcaneWidget : ModuleWidget {
         // Pulse width
         addParam(createParam<AriaKnob820>(mm2px(Vec(x + 3.8, y + 98.0)), module, Arcane::PULSE_WIDTH_PARAM));	
         
-        // Expander light
+        // Expander light (3.5mm from edge)
         addChild(createLight<SmallLight<OutputLight>>(mm2px(Vec(x + 38.1, 125.2)), module, Arcane::EXPANDER_LIGHT));
     }
 }; // ArcaneWidget
@@ -1011,7 +1011,7 @@ struct AleisterWidget : ModuleWidget {
         }
         
         // Expander light
-        addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(1.4, 125.2)), module, Aleister::EXPANDER_LIGHT));		
+        addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(1.4, 125.2)), module, Aleister::EXPANDER_LIGHT));
     }
 }; // AleisterWidget
 

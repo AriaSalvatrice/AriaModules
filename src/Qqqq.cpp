@@ -52,12 +52,17 @@ struct Qqqq : Module {
         NUM_OUTPUTS
     };
     enum LightIds {
+        EXPANDER_IN_LIGHT,
+        EXPANDER_OUT_LIGHT,
         NUM_LIGHTS
     };
 
     bool lastExtInConnected = false;
     bool sceneChanged = false;
     bool highCpu = false;
+    bool leftMessages[2][12]; // FIXME: IDK how to use a std::array for this
+    bool isExpander = false;
+    bool lastIsExpander = false;
     int lcdMode = INIT_MODE;
     int scene = 0;
     int lastScene = 0;
@@ -67,6 +72,8 @@ struct Qqqq : Module {
     std::array<std::array<bool, 12>, 16> scale;
     std::array<bool, 12> lastExternalScale;
     std::array<bool, 12> litKeys;
+    std::array<bool, 12> receivedExpanderScale;
+    std::array<bool, 12> lastReceivedExpanderScale;
     std::array<std::array<float, 16>, 4> inputVoltage;
     std::array<std::array<float, 16>, 4> shVoltage;
     std::array<int, 4> inputChannels;
@@ -111,11 +118,45 @@ struct Qqqq : Module {
         for (int i = 0; i < 16; i++) { for (int j = 0; j < 12; j++) { scale[i][j] = false; }}
         // C Minor in first scene
         scale[0][0] = true; scale[0][2] = true; scale[0][3] = true; scale[0][5] = true; scale[0][7] = true; scale[0][8] = true; scale[0][10] = true;
+        // Expander
+        leftExpander.producerMessage = leftMessages[0];
+        leftExpander.consumerMessage = leftMessages[1];
     }
 
     // FIXME: JSON!
     // FIXME: On Reset
     // FIXME: Randomize
+
+    void updateExpander(){
+        if ((leftExpander.module and leftExpander.module->model == modelQqqq)
+        ||  (leftExpander.module and leftExpander.module->model == modelQuack)
+        ||  (leftExpander.module and leftExpander.module->model == modelQ)) {
+            // We are an expander
+            lights[EXPANDER_IN_LIGHT].setBrightness(1.f);
+            bool *message = (bool*) leftExpander.consumerMessage;
+            for (int i = 0; i < 12; i++) receivedExpanderScale[i] = message[i];
+            isExpander = true;
+        } else {
+            // We are not an expander
+            lights[EXPANDER_IN_LIGHT].setBrightness(0.f);
+            isExpander = false;
+        }
+
+        if ((rightExpander.module and rightExpander.module->model == modelQqqq)
+        ||  (rightExpander.module and rightExpander.module->model == modelQuack)
+        ||  (rightExpander.module and rightExpander.module->model == modelQ)) {
+            // We have an expander
+            lights[EXPANDER_OUT_LIGHT].setBrightness(1.f);
+            bool *message = (bool*) rightExpander.module->leftExpander.producerMessage;			
+            for (int i = 0; i < 12; i++) message[i] = scale[scene][i];
+            rightExpander.module->leftExpander.messageFlipRequested = true;
+        } else {
+            // We have no expander
+            lights[EXPANDER_OUT_LIGHT].setBrightness(0.f);
+        }
+
+    }
+
 
     // Sets the scene. The CV input overrides the buttons.
     void updateScene() {
@@ -162,7 +203,15 @@ struct Qqqq : Module {
             sceneChanged = false;
         }
 
-        // FIXME: Expander: has it sent something?
+        // Expander: has it just been connected, or sent something new?
+        if (isExpander) {
+            if ((receivedExpanderScale != lastReceivedExpanderScale) || !lastIsExpander) {
+                scale[scene] = receivedExpanderScale;
+                scaleToPiano();
+            }
+        }
+        lastIsExpander = isExpander;
+        lastReceivedExpanderScale = receivedExpanderScale;
 
         // External scale: was it just connected?
         if (!lastExtInConnected && inputs[EXT_SCALE_INPUT].isConnected()) {
@@ -286,7 +335,7 @@ struct Qqqq : Module {
                 litKeys[n] = true;
             }
 
-            // Output
+            // Output!
             outputs[CV_OUTPUT + col].setVoltage(voltage[i], i);
         }
 
@@ -295,6 +344,7 @@ struct Qqqq : Module {
 
     void process(const ProcessArgs& args) override {
         if (processDivider.process()) {
+            updateExpander();
             updateScene();
             updateScale();
             cleanLitKeys();
@@ -566,6 +616,10 @@ struct QqqqWidget : ModuleWidget {
         drawQuantizerColumn(35.f, 43.f, module, 1);
         drawQuantizerColumn(45.f, 43.f, module, 2);
         drawQuantizerColumn(55.f, 43.f, module, 3);
+
+        // Expander lights (right is 3.5mm from edge)
+        addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(1.4, 125.2)), module, Qqqq::EXPANDER_IN_LIGHT));
+        addChild(createLight<SmallLight<OutputLight>>(mm2px(Vec(98.1, 125.2)), module, Qqqq::EXPANDER_OUT_LIGHT));
     }
 };
 
