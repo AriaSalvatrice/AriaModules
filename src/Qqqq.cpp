@@ -16,7 +16,9 @@ enum LcdModes {
     SCALING_MODE,
     OFFSET_MODE,
     TRANSPOSE_MODE,
-    SH_MODE
+    TRANSPOSE_TYPE_MODE,
+    SH_MODE,
+    VISUALIZE_MODE
 };
 
 // Nope, not gonna give you a placebo "HIGH CPU" right click option unless people
@@ -70,9 +72,13 @@ struct Qqqq : Module {
     bool lcdHasReadExternal = false;
     bool lcdHasEditedScale = false;
     int lcdMode = INIT_MODE;
-    int lastLcdMode = INIT_MODE;
     int scene = 0;
     int lastScene = 0;
+    int lastScalingKnobTouchedId = 0;
+    int lastOffsetKnobTouchedId = 0;
+    int lastTransposeKnobTouchedId = 0;
+    int lastTransposeModeTouchedId = 0;
+    int lastShTouchedId = 0;
     float lcdLastInteraction = 0.f;
     float lastKeyKnob = 0.f;
     float lastScaleKnob = 2.f;
@@ -370,7 +376,7 @@ struct Qqqq : Module {
         for (int i = 0; i < channels; i++) {
 
             // Only process if S&H this sample
-            if (sh) {           
+            if (sh) {
                 // Scale and offset
                 voltage[i] = voltage[i] * params[SCALING_PARAM + col].getValue() / 100.f;
                 voltage[i] = voltage[i] + params[OFFSET_PARAM + col].getValue();
@@ -429,16 +435,12 @@ struct Qqqq : Module {
             }
         }
 
-        // Buttons don't send ongoing events and can't set the LCD to dirty in time
-        if (lcdMode != lastLcdMode) lcdStatus.lcdDirty = true;
-        lastLcdMode = lcdMode;
-
         if (lcdMode == LOAD_MODE) {
             lcdStatus.lcdText1 = " Q< Quack!";
         }
 
         if (lcdMode == READY_MODE) {
-            lcdStatus.lcdText1 = " Q-";
+            lcdStatus.lcdText1 = " Q<";
         }
 
         if (lcdMode == SCALE_MODE) {
@@ -452,14 +454,46 @@ struct Qqqq : Module {
             lcdStatus.lcdText1 = text;
         }
 
+        if (lcdMode == SCALING_MODE) {
+            text = std::to_string((int) params[lastScalingKnobTouchedId].getValue());
+            text.append("%");
+            lcdStatus.lcdText1 = text;
+        }
+
+        if (lcdMode == OFFSET_MODE) {
+            text = std::to_string(params[lastOffsetKnobTouchedId].getValue());
+            text.resize(5);
+            text.append("V");
+            lcdStatus.lcdText1 = text;
+        }
+
         if (lcdMode == TRANSPOSE_MODE) {
-            text = "TRANSPOSE";
+            text = std::to_string((int) params[lastTransposeKnobTouchedId].getValue());
+            // Nasty hack that depends on NEVER changing the order or number of the params
+            if (params[lastTransposeKnobTouchedId + 4].getValue() == 0.f) text.append(" Oct.");
+            if (params[lastTransposeKnobTouchedId + 4].getValue() == 1.f) text.append(" St.");
+            if (params[lastTransposeKnobTouchedId + 4].getValue() == 2.f) text.append(" S.D.");
+            lcdStatus.lcdText1 = text;
+        }
+
+        // Button operated are set to dirty while the mode shows, for simplicity of processing.
+        if (lcdMode == TRANSPOSE_TYPE_MODE) {
+            text = "";
+            if (params[lastTransposeModeTouchedId].getValue() == 0.f) text = ("Octaves");
+            if (params[lastTransposeModeTouchedId].getValue() == 1.f) text = ("Semitones");
+            if (params[lastTransposeModeTouchedId].getValue() == 2.f) text = ("Scale Deg.");
             lcdStatus.lcdText1 = text;
             lcdStatus.lcdDirty = true;
         }
 
         if (lcdMode == SH_MODE) {
-            text = "S&H / T&H";
+            lcdStatus.lcdText1 = (params[lastShTouchedId].getValue() == 0.f) ? "Sample & H." : "Track  & H.";
+            lcdStatus.lcdDirty = true;
+        }
+
+        if (lcdMode == VISUALIZE_MODE) {
+            lcdStatus.lcdText1 = "<-Visualize";
+            lcdStatus.lcdDirty = true;
         }
 
     }
@@ -509,6 +543,20 @@ struct ScaleKnob : LcdKnob {
         LcdKnob::onDragMove(e);
     }
 };
+struct ScalingKnob : LcdKnob {
+    void onDragMove(const event::DragMove& e) override {
+        dynamic_cast<Qqqq*>(paramQuantity->module)->lcdMode = SCALING_MODE;
+        dynamic_cast<Qqqq*>(paramQuantity->module)->lastScalingKnobTouchedId = paramQuantity->paramId;
+        LcdKnob::onDragMove(e);
+    }
+};
+struct OffsetKnob : LcdKnob {
+    void onDragMove(const event::DragMove& e) override {
+        dynamic_cast<Qqqq*>(paramQuantity->module)->lcdMode = OFFSET_MODE;
+        dynamic_cast<Qqqq*>(paramQuantity->module)->lastOffsetKnobTouchedId = paramQuantity->paramId;
+        LcdKnob::onDragMove(e);
+    }
+};
 struct TransposeKnob : LcdKnob {
     TransposeKnob() {
         snap = true;
@@ -516,26 +564,32 @@ struct TransposeKnob : LcdKnob {
     }
     void onDragMove(const event::DragMove& e) override {
         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdMode = TRANSPOSE_MODE;
+        dynamic_cast<Qqqq*>(paramQuantity->module)->lastTransposeKnobTouchedId = paramQuantity->paramId;
         LcdKnob::onDragMove(e);
     }
 };
-// The LCD buttons. No point setting dirty from here, race condition means they rarely work.
-struct LcdButton : AriaPushButton500 {
+// The LCD buttons. They're not sending ongoing events so no point setting Lcd dirty from here.
+struct TransposeButton : AriaPushButton500 {
     void onDragStart(const event::DragStart& e) override {
-         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdLastInteraction = 0.f;
+        dynamic_cast<Qqqq*>(paramQuantity->module)->lcdLastInteraction = 0.f;
+        dynamic_cast<Qqqq*>(paramQuantity->module)->lcdMode = TRANSPOSE_TYPE_MODE;
+        dynamic_cast<Qqqq*>(paramQuantity->module)->lastTransposeModeTouchedId = paramQuantity->paramId;
         AriaPushButton500::onDragStart(e);
     }
 };
-struct TransposeButton : LcdButton {
+struct ShButton : AriaPushButton500 {
     void onDragStart(const event::DragStart& e) override {
-        dynamic_cast<Qqqq*>(paramQuantity->module)->lcdMode = TRANSPOSE_MODE;
-        LcdButton::onDragStart(e);
+        dynamic_cast<Qqqq*>(paramQuantity->module)->lcdLastInteraction = 0.f;
+        dynamic_cast<Qqqq*>(paramQuantity->module)->lcdMode = SH_MODE;
+        dynamic_cast<Qqqq*>(paramQuantity->module)->lastShTouchedId = paramQuantity->paramId;
+        AriaPushButton500::onDragStart(e);
     }
 };
-struct ShButton : LcdButton {
+struct VisualizeButton : AriaPushButton820Pink {
     void onDragStart(const event::DragStart& e) override {
-        dynamic_cast<Qqqq*>(paramQuantity->module)->lcdMode = SH_MODE;
-        LcdButton::onDragStart(e);
+        dynamic_cast<Qqqq*>(paramQuantity->module)->lcdLastInteraction = 0.f;
+        dynamic_cast<Qqqq*>(paramQuantity->module)->lcdMode = VISUALIZE_MODE;
+        AriaPushButton820Pink::onDragStart(e);
     }
 };
 
@@ -693,15 +747,15 @@ struct QqqqWidget : ModuleWidget {
 
     void drawQuantizerColumn(float xOffset, float yOffset, Qqqq* module, int col) {
         addInput(createInput<AriaJackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 0.f)), module, Qqqq::CV_INPUT + col));
-        addParam(createParam<AriaKnob820>(mm2px(Vec(xOffset + 0.f, yOffset + 10.f)), module, Qqqq::SCALING_PARAM + col));
-        addParam(createParam<AriaKnob820>(mm2px(Vec(xOffset + 0.f, yOffset + 20.f)), module, Qqqq::OFFSET_PARAM + col));
+        addParam(createParam<QqqqWidgets::ScalingKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 10.f)), module, Qqqq::SCALING_PARAM + col));
+        addParam(createParam<QqqqWidgets::OffsetKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 20.f)), module, Qqqq::OFFSET_PARAM + col));
         addParam(createParam<QqqqWidgets::TransposeKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 30.f)), module, Qqqq::TRANSPOSE_PARAM + col));
 
         addParam(createParam<QqqqWidgets::TransposeButton>(mm2px(Vec(xOffset + 3.5f, yOffset + 40.f)), module, Qqqq::TRANSPOSE_MODE_PARAM + col));
         addParam(createParam<QqqqWidgets::ShButton>(mm2px(Vec(xOffset + -0.5f, yOffset + 42.5f)), module, Qqqq::SH_MODE_PARAM + col));
 
         addInput(createInput<AriaJackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 50.f)), module, Qqqq::SH_INPUT + col));
-        addParam(createParam<AriaPushButton820Pink>(mm2px(Vec(xOffset + 0.f, yOffset + 60.f)), module, Qqqq::VISUALIZE_PARAM + col));
+        addParam(createParam<QqqqWidgets::VisualizeButton>(mm2px(Vec(xOffset + 0.f, yOffset + 60.f)), module, Qqqq::VISUALIZE_PARAM + col));
         addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 0.f, yOffset + 70.f)), module, Qqqq::CV_OUTPUT + col));
     }
 
