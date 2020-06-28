@@ -18,8 +18,9 @@ enum LcdModes {
     TRANSPOSETYPE_MODE,
 };
 
-// Start high, lower if people complain.
-const int DISPLAYDIVIDER = 512;
+// Nope, not gonna give you a placebo "HIGH CPU" right click option unless people
+// raise valid complaints about this divider. 
+const int PROCESSDIVIDER = 32;
 
 struct Qqqq : Module {
     enum ParamIds {
@@ -56,6 +57,7 @@ struct Qqqq : Module {
 
     bool lastExtInConnected = false;
     bool sceneChanged = false;
+    bool highCpu = false;
     int lcdMode = INIT_MODE;
     int scene = 0;
     int lastScene = 0;
@@ -70,7 +72,7 @@ struct Qqqq : Module {
     std::array<int, 4> inputChannels;
     std::array<int, 4> shChannels;
     Lcd::LcdStatus lcdStatus;
-    dsp::ClockDivider refreshScaleDivider;
+    dsp::ClockDivider processDivider;
     dsp::SchmittTrigger shTrigger[4];
     
     Qqqq() {
@@ -100,7 +102,7 @@ struct Qqqq : Module {
         }
         configParam(SCENE_BUTTON_PARAM, 0.f, 1.f, 0.f, "Scene #1");
         for (int i = 1; i < 16; i++) configParam(SCENE_BUTTON_PARAM + i, 0.f, 1.f, 0.f, "Scene #" + std::to_string(i + 1));
-        refreshScaleDivider.setDivision(DISPLAYDIVIDER);
+        processDivider.setDivision(PROCESSDIVIDER);
         lcdMode = INIT_MODE;
         lcdLastInteraction = 0.f;
         lcdStatus.lcdText1 = " Q< quack~";
@@ -224,7 +226,7 @@ struct Qqqq : Module {
     }
 
     void processQuantizerColumn(int col){
-        std::array<float, 16> voltage = inputVoltage[col]; // FIXME: Don't copy!
+        std::array<float, 16> voltage = inputVoltage[col];
         int channels = inputChannels[col];
         bool sh = false;
         
@@ -244,6 +246,8 @@ struct Qqqq : Module {
             // No S&H input means that in effect we T&H every sample
             sh = true;
         }
+
+        if (sh) shChannels[col] = channels;
 
         // Iterate channels
         for (int i = 0; i < channels; i++) {
@@ -288,19 +292,20 @@ struct Qqqq : Module {
             outputs[CV_OUTPUT + col].setVoltage(voltage[i], i);
         }
 
-        outputs[CV_OUTPUT + col].setChannels(channels);
+        outputs[CV_OUTPUT + col].setChannels( (sh) ? channels : shChannels[col]);
     }
 
     void process(const ProcessArgs& args) override {
-        if (refreshScaleDivider.process()) {
+        if (processDivider.process()) {
             updateScene();
             updateScale();
+            cleanLitKeys();
+            processInputs();
+            for(int i = 0; i < 4; i++) processQuantizerColumn(i);
+            updateExternalOutput();
         }
-        cleanLitKeys();
-        processInputs();
-        for(int i = 0; i < 4; i++) processQuantizerColumn(i);
-        updateExternalOutput();
     }
+
 };
 
 

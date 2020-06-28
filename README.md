@@ -131,7 +131,7 @@ Let's continue. To the bottom-right of the module:
 
 To the center of the module are the four quantizer columns, through which signal flows from top to bottom.
 
-- **CV Input**: Each input jack is forwarded to the columns to its right within the same module, if you want to process the same signal in different ways. Inputs are polyphonic.
+- **CV Input**: Each input jack is forwarded to the columns to its right within the same module, if you want to process the same signal in different ways. It is not forwarded across expanders. Inputs are polyphonic.
 - **% Scale**: Attenuates, inverts, or amplifies the input.
 - **Offset**: Adds or removes a fixed voltage to the input.
 - **Transpose**: Transposes the signal according to one of the three rules, set by the transpose mode button under the knob.
@@ -144,7 +144,10 @@ To the center of the module are the four quantizer columns, through which signal
 - **Visualize**: Shows the quantized output on the piano display.
 - **Output** - The quantized signal! Polyphony is defined by the **CV Input**. 
 
-While there are more lightweight quantizers available than **QQQQ** in the VCV library, you will find that Qqqq is nonetheless faster than some options with fewer features. The CPU usage of **QQQQ** scales proprotionally with the amount of signals quantized (whether polyphonically, or in terms of columns used). When the output of a column is unplugged, and visualization is not enabled, the column in question does not process input, and thus consumes almost no CPU.
+While there are smaller and simpler quantizers than **QQQQ** available in the VCV library, you will find that **QQQQ** is nonetheless faster than many options with fewer features, thanks to its aggressive sub-sampling and culling of unused outputs: 
+
+- **Sub-sampling**: For almost every single use case, there is no reason for a quantizer to operate at audio rates (which most VCV modules do). Every 32 samples is plenty - that's still faster than once per millisecond at 44,100Hz, making artifacts inaudible.
+- **Culling**: When the output of a column is unplugged and its visualization disabled, the column in question does not process input, and thus consumes almost no CPU. Unnecessary calculations are also skipped when Sample & Hold is used.
 
 **Protip for cool kids only:** Did you know that there are a few people out there who do not use Quantizers, and instead choose to spend years to learn something called "Music Theory"? Those people do all their music by reading books and thinking really hard about maths! It's true - check out your local library for more information.
 
