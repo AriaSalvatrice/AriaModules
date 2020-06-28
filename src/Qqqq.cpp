@@ -10,17 +10,19 @@
 
 enum LcdModes {
     INIT_MODE,
+    LOAD_MODE,
+    READY_MODE,
     SCALE_MODE,
     SCALING_MODE,
     OFFSET_MODE,
     TRANSPOSE_MODE,
-    SH_MODE,
-    TRANSPOSETYPE_MODE,
+    SH_MODE
 };
 
 // Nope, not gonna give you a placebo "HIGH CPU" right click option unless people
 // raise valid complaints about this divider. 
 const int PROCESSDIVIDER = 32;
+const int LCDDIVIDER = 512;
 
 struct Qqqq : Module {
     enum ParamIds {
@@ -65,7 +67,10 @@ struct Qqqq : Module {
     bool leftMessages[2][12];
     bool isExpander = false;
     bool lastIsExpander = false;
+    bool lcdHasReadExternal = false;
+    bool lcdHasEditedScale = false;
     int lcdMode = INIT_MODE;
+    int lastLcdMode = INIT_MODE;
     int scene = 0;
     int lastScene = 0;
     float lcdLastInteraction = 0.f;
@@ -82,6 +87,7 @@ struct Qqqq : Module {
     std::array<int, 4> shChannels;
     Lcd::LcdStatus lcdStatus;
     dsp::ClockDivider processDivider;
+    dsp::ClockDivider lcdDivider;
     dsp::SchmittTrigger shTrigger[4];
     
     Qqqq() {
@@ -112,9 +118,10 @@ struct Qqqq : Module {
         configParam(SCENE_BUTTON_PARAM, 0.f, 1.f, 0.f, "Scene #1");
         for (int i = 1; i < 16; i++) configParam(SCENE_BUTTON_PARAM + i, 0.f, 1.f, 0.f, "Scene #" + std::to_string(i + 1));
         processDivider.setDivision(PROCESSDIVIDER);
+        lcdDivider.setDivision(LCDDIVIDER);
         lcdMode = INIT_MODE;
         lcdLastInteraction = 0.f;
-        lcdStatus.lcdText1 = " Q< quack~";
+        lcdStatus.lcdText1 = " Q- ...";
         lcdStatus.lcdPage = Lcd::TEXT1_PAGE;
         // Initialize
         for (int i = 0; i < 16; i++) { for (int j = 0; j < 12; j++) { scale[i][j] = false; }}
@@ -156,9 +163,38 @@ struct Qqqq : Module {
         }
     }
 
-    // FIXME: JSON!
-    // FIXME: On Reset
-    // FIXME: Randomize
+    void onReset() override {
+        for (int i = 1; i < 16; i++) {
+            for (int j = 0; j < 12; j++) {
+                scale[i][j] = false;
+            }
+            params[SCENE_BUTTON_PARAM + i].setValue(0.f);
+        }
+        scene = 0;
+        params[SCENE_BUTTON_PARAM + 0].setValue(1.f);
+        // C Minor in first scene
+        scale[0][0] = true; scale[0][2] = true; scale[0][3] = true; scale[0][5] = true; scale[0][7] = true; scale[0][8] = true; scale[0][10] = true;
+        lcdStatus.lcdText1 = " Q- ???";
+        lcdLastInteraction = 0.f;
+        lcdMode = INIT_MODE;
+        lcdStatus.lcdDirty = true;
+    }
+
+    void onRandomize() override {
+        for (int i = 0; i < 16; i++) {
+            for (int j = 0; j < 12; j++) {
+                // Should produce about 7 notes per scale
+                scale[i][j] = (random::uniform() > 0.42f) ? true : false;
+            }
+            params[SCENE_BUTTON_PARAM + i].setValue(0.f);
+        }
+        scene = 0;
+        params[SCENE_BUTTON_PARAM + 0].setValue(1.f);
+        lcdStatus.lcdText1 = " Q- !!!";
+        lcdLastInteraction = 0.f;
+        lcdMode = INIT_MODE;
+        lcdStatus.lcdDirty = true;
+    }
 
     void updateExpander(){
         if ((leftExpander.module and leftExpander.module->model == modelQqqq)
@@ -248,10 +284,9 @@ struct Qqqq : Module {
 
         // External scale: was it just connected?
         if (!lastExtInConnected && inputs[EXT_SCALE_INPUT].isConnected()) {
-            // After it's connected, we want to wait one more cycle to give it time to sync with slow inputs.
             for (int i = 0; i < 12; i++){
                 scale[scene][i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.f) ? true : false;
-            } 
+            }
             scaleToPiano();
         }
 
@@ -375,6 +410,60 @@ struct Qqqq : Module {
         outputs[CV_OUTPUT + col].setChannels( (sh) ? channels : shChannels[col]);
     }
 
+
+    void updateLcd(const ProcessArgs& args){
+        std::string text;
+
+        // Reset after 3 seconds since the last interactive input was touched
+        if (lcdLastInteraction < (3.f / LCDDIVIDER) ) {
+            lcdLastInteraction += args.sampleTime;
+            if(lcdLastInteraction >= (3.f / LCDDIVIDER) ) {
+                if (lcdMode == INIT_MODE) {
+                    // This module has 2 load messages
+                    lcdMode = LOAD_MODE;
+                    lcdLastInteraction = 0.f;
+                } else {
+                    lcdMode = READY_MODE;
+                }
+                lcdStatus.lcdDirty = true;
+            }
+        }
+
+        // Buttons don't send ongoing events and can't set the LCD to dirty in time
+        if (lcdMode != lastLcdMode) lcdStatus.lcdDirty = true;
+        lastLcdMode = lcdMode;
+
+        if (lcdMode == LOAD_MODE) {
+            lcdStatus.lcdText1 = " Q< Quack!";
+        }
+
+        if (lcdMode == READY_MODE) {
+            lcdStatus.lcdText1 = " Q-";
+        }
+
+        if (lcdMode == SCALE_MODE) {
+            if(params[SCALE_PARAM].getValue() == 0.f) {
+                text = "CHROMATIC";
+            } else {
+                text = Quantizer::noteLcdName((int)params[KEY_PARAM].getValue());
+                text.append(" ");
+                text.append(Quantizer::scaleLcdName((int)params[SCALE_PARAM].getValue()));
+            }
+            lcdStatus.lcdText1 = text;
+        }
+
+        if (lcdMode == TRANSPOSE_MODE) {
+            text = "TRANSPOSE";
+            lcdStatus.lcdText1 = text;
+            lcdStatus.lcdDirty = true;
+        }
+
+        if (lcdMode == SH_MODE) {
+            text = "S&H / T&H";
+        }
+
+    }
+
     void process(const ProcessArgs& args) override {
         if (processDivider.process()) {
             updateExpander();
@@ -384,6 +473,9 @@ struct Qqqq : Module {
             processInputs();
             for(int i = 0; i < 4; i++) processQuantizerColumn(i);
             updateExternalOutput();
+        }
+        if (lcdDivider.process()) {
+            updateLcd(args);
         }
     }
 
@@ -425,6 +517,25 @@ struct TransposeKnob : LcdKnob {
     void onDragMove(const event::DragMove& e) override {
         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdMode = TRANSPOSE_MODE;
         LcdKnob::onDragMove(e);
+    }
+};
+// The LCD buttons. No point setting dirty from here, race condition means they rarely work.
+struct LcdButton : AriaPushButton500 {
+    void onDragStart(const event::DragStart& e) override {
+         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdLastInteraction = 0.f;
+        AriaPushButton500::onDragStart(e);
+    }
+};
+struct TransposeButton : LcdButton {
+    void onDragStart(const event::DragStart& e) override {
+        dynamic_cast<Qqqq*>(paramQuantity->module)->lcdMode = TRANSPOSE_MODE;
+        LcdButton::onDragStart(e);
+    }
+};
+struct ShButton : LcdButton {
+    void onDragStart(const event::DragStart& e) override {
+        dynamic_cast<Qqqq*>(paramQuantity->module)->lcdMode = SH_MODE;
+        LcdButton::onDragStart(e);
     }
 };
 
@@ -586,8 +697,8 @@ struct QqqqWidget : ModuleWidget {
         addParam(createParam<AriaKnob820>(mm2px(Vec(xOffset + 0.f, yOffset + 20.f)), module, Qqqq::OFFSET_PARAM + col));
         addParam(createParam<QqqqWidgets::TransposeKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 30.f)), module, Qqqq::TRANSPOSE_PARAM + col));
 
-        addParam(createParam<AriaPushButton500>(mm2px(Vec(xOffset + 3.5f, yOffset + 40.f)), module, Qqqq::TRANSPOSE_MODE_PARAM + col));
-        addParam(createParam<AriaPushButton500>(mm2px(Vec(xOffset + -0.5f, yOffset + 42.5f)), module, Qqqq::SH_MODE_PARAM + col));
+        addParam(createParam<QqqqWidgets::TransposeButton>(mm2px(Vec(xOffset + 3.5f, yOffset + 40.f)), module, Qqqq::TRANSPOSE_MODE_PARAM + col));
+        addParam(createParam<QqqqWidgets::ShButton>(mm2px(Vec(xOffset + -0.5f, yOffset + 42.5f)), module, Qqqq::SH_MODE_PARAM + col));
 
         addInput(createInput<AriaJackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 50.f)), module, Qqqq::SH_INPUT + col));
         addParam(createParam<AriaPushButton820Pink>(mm2px(Vec(xOffset + 0.f, yOffset + 60.f)), module, Qqqq::VISUALIZE_PARAM + col));
