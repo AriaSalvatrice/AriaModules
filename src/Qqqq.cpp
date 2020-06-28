@@ -257,21 +257,20 @@ struct Qqqq : Module {
                 // Scale and offset
                 voltage[i] = voltage[i] * params[SCALING_PARAM + col].getValue() / 100.f;
                 voltage[i] = voltage[i] + params[OFFSET_PARAM + col].getValue();
-                // Quantize in transpose mode 0: Octaves
                 if (params[TRANSPOSE_MODE_PARAM + col].getValue() == 0.f) {
+                    // Quantize in transpose mode 0: Octaves
                     voltage[i] = Quantizer::quantize(voltage[i], scale[scene]);
                     voltage[i] = voltage[i] + params[TRANSPOSE_PARAM + col].getValue();
                     voltage[i] = clamp(voltage[i], -10.f, 10.f);
                 }
-                // Quantize in transpose mode 1: Semitones
                 if (params[TRANSPOSE_MODE_PARAM + col].getValue() == 1.f) {
+                    // Quantize in transpose mode 1: Semitones
                     voltage[i] = voltage[i] + params[TRANSPOSE_PARAM + col].getValue() * 1.f / 12.f;
                     voltage[i] = Quantizer::quantize(voltage[i], scale[scene]);
                 }
-                // Quantize in transpose mode 2: Scale degrees
-                // FIXME: This one gonna be hard!!!!!
                 if (params[TRANSPOSE_MODE_PARAM + col].getValue() == 2.f) {
-                    voltage[i] = Quantizer::quantize(voltage[i], scale[scene]);
+                    // Quantize in transpose mode 2: Scale degrees
+                    voltage[i] = Quantizer::quantize(voltage[i], scale[scene], (int) params[TRANSPOSE_PARAM + col].getValue());
                 }
                 shVoltage[col][i] = voltage[i];
             } else {
@@ -279,11 +278,10 @@ struct Qqqq : Module {
                 voltage[i] = shVoltage[col][i];
             }
 
-            // FIXME: S&H
-
             // Piano display
             if (params[VISUALIZE_PARAM + col].getValue() == 1.f) {
-                float v = voltage[i] * 12.f + 60.f; // Must be positive to work
+                 // Must be positive to work. The 0.01f is to fudge float math in transpose mode 2.
+                float v = voltage[i] * 12.f + 60.01f;
                 int n = (int) v % 12;
                 litKeys[n] = true;
             }
