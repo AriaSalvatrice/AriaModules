@@ -14,7 +14,7 @@ enum LcdModes {
     SCALING_MODE,
     OFFSET_MODE,
     TRANSPOSE_MODE,
-    SHTH_MODE,
+    SH_MODE,
     TRANSPOSETYPE_MODE,
 };
 
@@ -28,7 +28,7 @@ struct Qqqq : Module {
         ENUMS(OFFSET_PARAM, 4),
         ENUMS(TRANSPOSE_PARAM, 4),
         ENUMS(TRANSPOSE_MODE_PARAM, 4),
-        ENUMS(SHTH_MODE_PARAM, 4),
+        ENUMS(SH_MODE_PARAM, 4),
         ENUMS(VISUALIZE_PARAM, 4),
         ENUMS(SCENE_BUTTON_PARAM, 16),
         KEY_PARAM,
@@ -39,7 +39,7 @@ struct Qqqq : Module {
     };
     enum InputIds {
         ENUMS(CV_INPUT, 4),
-        ENUMS(SHTH_INPUT, 4),
+        ENUMS(SH_INPUT, 4),
         EXT_SCALE_INPUT,
         SCENE_INPUT,
         NUM_INPUTS
@@ -65,8 +65,13 @@ struct Qqqq : Module {
     std::array<std::array<bool, 12>, 16> scale;
     std::array<bool, 12> lastExternalScale;
     std::array<bool, 12> litKeys;
+    std::array<std::array<float, 16>, 4> inputVoltage;
+    std::array<std::array<float, 16>, 4> shVoltage;
+    std::array<int, 4> inputChannels;
+    std::array<int, 4> shChannels;
     Lcd::LcdStatus lcdStatus;
     dsp::ClockDivider refreshScaleDivider;
+    dsp::SchmittTrigger shTrigger[4];
     
     Qqqq() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -90,7 +95,7 @@ struct Qqqq : Module {
             configParam(OFFSET_PARAM + i, -10.f, 10.f, 0.f, "Offset", "V");
             configParam(TRANSPOSE_PARAM + i, -12.f, 12.f, 0.f, "Transpose");
             configParam(TRANSPOSE_MODE_PARAM + i, 0.f, 2.f, 0.f, "Transpose Mode");
-            configParam(SHTH_MODE_PARAM + i, 0.f, 1.f, 0.f, "S&H / T&H Toggle");
+            configParam(SH_MODE_PARAM + i, 0.f, 1.f, 0.f, "S&H / T&H Toggle");
             configParam(VISUALIZE_PARAM + i, 0.f, 1.f, 0.f, "Visualize on Piano");
         }
         configParam(SCENE_BUTTON_PARAM, 0.f, 1.f, 0.f, "Scene #1");
@@ -104,13 +109,11 @@ struct Qqqq : Module {
         for (int i = 0; i < 16; i++) { for (int j = 0; j < 12; j++) { scale[i][j] = false; }}
         // C Minor in first scene
         scale[0][0] = true; scale[0][2] = true; scale[0][3] = true; scale[0][5] = true; scale[0][7] = true; scale[0][8] = true; scale[0][10] = true;
-        
-    }
-
-    ~Qqqq(){
     }
 
     // FIXME: JSON!
+    // FIXME: On Reset
+    // FIXME: Randomize
 
     // Sets the scene. The CV input overrides the buttons.
     void updateScene() {
@@ -204,44 +207,75 @@ struct Qqqq : Module {
         for (int i =  0; i < 12; i++) litKeys[i] = false; 
     }
 
-    void updateLitKeys() {
-        // Test
-        // for (int i =  0; i < 12; i++) litKeys[i] = (random::uniform() > 0.8) ? true : false; 
+    // When there is no CV input, use the column to the left instead.
+    void processInputs() {
+        inputChannels[0] = inputs[CV_INPUT + 0].getChannels();
+        for (int i = 0; i < inputChannels[0]; i++) inputVoltage[0][i] = inputs[CV_INPUT + 0].getVoltage(i);
+
+        for (int i = 1; i < 4; i++) {
+            inputChannels[i] = inputs[CV_INPUT + i].getChannels();
+            if (inputChannels[i] > 0) {
+                for (int j = 0; j < inputChannels[i]; j++) inputVoltage[i][j] = inputs[CV_INPUT + i].getVoltage(j);
+            } else {
+                inputChannels[i] = inputChannels[i - 1];
+                inputVoltage[i] = inputVoltage[i - 1];
+            }
+        }
     }
 
-
     void processQuantizerColumn(int col){
-        std::array<float, 16> voltage;
-        int channels = inputs[CV_INPUT + col].getChannels();
+        std::array<float, 16> voltage = inputVoltage[col]; // FIXME: Don't copy!
+        int channels = inputChannels[col];
+        bool sh = false;
         
-        // Stop if no input
-        if (channels == 0) return;
         // Stop if no output while visualization is not enabled
         if (! outputs[CV_OUTPUT + col].isConnected() && params[VISUALIZE_PARAM + col].getValue() == 0.f ) return;
 
+        // S&H
+        if (inputs[SH_INPUT + col].isConnected()){
+            if (params[SH_MODE_PARAM].getValue() == 0.f) {
+                // S&H mode
+                if (shTrigger[col].process(inputs[SH_INPUT + col].getVoltageSum())) sh = true;
+            } else {
+                // T&H mode
+                if (inputs[SH_INPUT + col].getVoltageSum() > 1.0f) sh = true;
+            }
+        } else {
+            // No S&H input means that in effect we T&H every sample
+            sh = true;
+        }
+
+        // Iterate channels
         for (int i = 0; i < channels; i++) {
-            // Read input
+
+            // Only process if S&H this sample
+            if (sh) {           
+                // Scale and offset
+                voltage[i] = voltage[i] * params[SCALING_PARAM + col].getValue() / 100.f;
+                voltage[i] = voltage[i] + params[OFFSET_PARAM + col].getValue();
+                // Quantize in transpose mode 0: Octaves
+                if (params[TRANSPOSE_MODE_PARAM + col].getValue() == 0.f) {
+                    voltage[i] = Quantizer::quantize(voltage[i], scale[scene]);
+                    voltage[i] = voltage[i] + params[TRANSPOSE_PARAM + col].getValue();
+                    voltage[i] = clamp(voltage[i], -10.f, 10.f);
+                }
+                // Quantize in transpose mode 1: Semitones
+                if (params[TRANSPOSE_MODE_PARAM + col].getValue() == 1.f) {
+                    voltage[i] = voltage[i] + params[TRANSPOSE_PARAM + col].getValue() * 1.f / 12.f;
+                    voltage[i] = Quantizer::quantize(voltage[i], scale[scene]);
+                }
+                // Quantize in transpose mode 2: Scale degrees
+                // FIXME: This one gonna be hard!!!!!
+                if (params[TRANSPOSE_MODE_PARAM + col].getValue() == 2.f) {
+                    voltage[i] = Quantizer::quantize(voltage[i], scale[scene]);
+                }
+                shVoltage[col][i] = voltage[i];
+            } else {
+                // No S&H
+                voltage[i] = shVoltage[col][i];
+            }
+
             // FIXME: S&H
-            voltage[i] = inputs[CV_INPUT + col].getVoltage(i);
-            // Scale and offset
-            voltage[i] = voltage[i] * params[SCALING_PARAM + col].getValue() / 100.f;
-            voltage[i] = voltage[i] + params[OFFSET_PARAM + col].getValue();
-            // Quantize in transpose mode 0: Octaves
-            if (params[TRANSPOSE_MODE_PARAM + col].getValue() == 0.f) {
-                voltage[i] = Quantizer::quantize(voltage[i], scale[scene]);
-                voltage[i] = voltage[i] + params[TRANSPOSE_PARAM + col].getValue();
-                voltage[i] = clamp(voltage[i], -10.f, 10.f);
-            }
-            // Quantize in transpose mode 1: Semitones
-            if (params[TRANSPOSE_MODE_PARAM + col].getValue() == 1.f) {
-                voltage[i] = voltage[i] + params[TRANSPOSE_PARAM + col].getValue() * 1.f / 12.f;
-                voltage[i] = Quantizer::quantize(voltage[i], scale[scene]);
-            }
-            // Quantize in transpose mode 2: Scale degrees
-            // FIXME: This one gonna be hard!!!!!
-            if (params[TRANSPOSE_MODE_PARAM + col].getValue() == 2.f) {
-                voltage[i] = Quantizer::quantize(voltage[i], scale[scene]);
-            }
 
             // Piano display
             if (params[VISUALIZE_PARAM + col].getValue() == 1.f) {
@@ -263,6 +297,7 @@ struct Qqqq : Module {
             updateScale();
         }
         cleanLitKeys();
+        processInputs();
         for(int i = 0; i < 4; i++) processQuantizerColumn(i);
         updateExternalOutput();
     }
@@ -466,9 +501,9 @@ struct QqqqWidget : ModuleWidget {
         addParam(createParam<QqqqWidgets::TransposeKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 30.f)), module, Qqqq::TRANSPOSE_PARAM + col));
 
         addParam(createParam<AriaPushButton500>(mm2px(Vec(xOffset + 3.5f, yOffset + 40.f)), module, Qqqq::TRANSPOSE_MODE_PARAM + col));
-        addParam(createParam<AriaPushButton500>(mm2px(Vec(xOffset + -0.5f, yOffset + 42.5f)), module, Qqqq::SHTH_MODE_PARAM + col));
+        addParam(createParam<AriaPushButton500>(mm2px(Vec(xOffset + -0.5f, yOffset + 42.5f)), module, Qqqq::SH_MODE_PARAM + col));
 
-        addInput(createInput<AriaJackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 50.f)), module, Qqqq::SHTH_INPUT + col));
+        addInput(createInput<AriaJackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 50.f)), module, Qqqq::SH_INPUT + col));
         addParam(createParam<AriaPushButton820Pink>(mm2px(Vec(xOffset + 0.f, yOffset + 60.f)), module, Qqqq::VISUALIZE_PARAM + col));
         addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 0.f, yOffset + 70.f)), module, Qqqq::CV_OUTPUT + col));
     }

@@ -140,11 +140,11 @@ To the center of the module are the four quantizer columns, through which signal
     - **Yellow** - _Semitones Mode_: Transposes the signal up or down by a few semitones first, then quantizes it. 
     - TODO:**Pink** - _Scale degrees Mode_: Quantizes the signal first, then transposes the signal by a specific amount of scale degrees.
 - TODO:**Sample & Hold / Track & Hold toggle**: Swaps between the two modes for the input directly below it. Unlit is Sample & Hold, lit is Track & Hold.
-- TODO:**Sample & Hold / Track & Hold input**: When plugged in, instead of operating continuously, the quantizer will Sample & Hold or Track & Hold the signal. When you're quantizing a noisy source of modulation, it's useful to send it the same gate you'd send to the envelope that will play the note in question. If the **CV input** is polyphonic, send it the same amount of channels.
+- TODO:**Sample & Hold / Track & Hold input**: When plugged in, instead of operating continuously, the quantizer will Sample & Hold or Track & Hold the signal. When you're quantizing a noisy source of modulation, it's useful to send it the same gate you'd send to the envelope that will play the note in question. The Sample & Hold is not polyphonic: a monophonic gate can drive a polyphonic column. And remember, signals move from top to bottom through the columns: the Sample & Hold only happens after processing everything above it.
 - **Visualize**: Shows the quantized output on the piano display.
 - **Output** - The quantized signal! Polyphony is defined by the **CV Input**. 
 
-The CPU usage of **Qqqq** scales with the amount of channels and columns used. When inputs are unplugged, or outputs are unplugged while visualization isn't enabled, then the column in question stops processing, and consumes almost no CPU. But if you attempt to quantize 4×16 signals at once, your CPU will burn down your house. 
+While there are more lightweight quantizers available than **QQQQ** in the VCV library, you will find that Qqqq is nonetheless faster than some options with fewer features. The CPU usage of **QQQQ** scales proprotionally with the amount of signals quantized (whether polyphonically, or in terms of columns used). When the output of a column is unplugged, and visualization is not enabled, the column in question does not process input, and thus consumes almost no CPU.
 
 **Protip for cool kids only:** Did you know that there are a few people out there who do not use Quantizers, and instead choose to spend years to learn something called "Music Theory"? Those people do all their music by reading books and thinking really hard about maths! It's true - check out your local library for more information.
 
@@ -256,7 +256,7 @@ Try to combine it with the [Split and Merge series](#split-and-merge-splort-smer
 - **Melody**: Polyphonic ports sending every note of the scale on the fourth octave (0V~0.9166667V), in the order of the 8 note pattern. It sends as many notes as there are in the scale (between 5 and 8).
 - **Padded**: Like **Melody**, sends the entire 8 note pattern, with any repeated note being one octave higher than normal.
 If you combine them with [ML_modules sequential switch 8->1](https://github.com/martin-lueders/ML_modules/wiki/Sequential-Switches), they can become a melody.
-- **External Scale**: Sends the scale in a format my other modules use: as a 12-channel polyphonic cable, where enabled notes have a continuous 10V signal, and disabled notes, 0V. Try it with **Darius**!
+- **External Scale**: Sends the scale in the format my quantizer and other modules uses: as a 12-channel polyphonic cable, where enabled notes have a continuous 10V signal, and disabled notes, 0V. Try it with **Qqqq** or **Darius**!
 - **_Arcane Majeur_**: The number of the arcana, divided by 10.    
 Thus, _The Fool_ is 0V, _The Magician_ is 0.1V, and so on up to 2.1V for _The World_. Following the conventions of the Tarot of Marseilles, the 8th arcana is Justice, and the 11th is Strength, unlike the ordering popularized by the Rider-Waite-Smith deck, which swaps those two arcana around.    
 You can multiply this signal by 4.76 with an offsetter such as [Bogaudio's](https://github.com/bogaudio/BogaudioModules#offset) to obtain a 0V~9.99V signal, if you wish.
