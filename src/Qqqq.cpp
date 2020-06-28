@@ -119,8 +119,12 @@ struct Qqqq : Module {
             configParam(TRANSPOSE_PARAM + i, -12.f, 12.f, 0.f, "Transpose");
             configParam(TRANSPOSE_MODE_PARAM + i, 0.f, 2.f, 0.f, "Transpose Mode");
             configParam(SH_MODE_PARAM + i, 0.f, 1.f, 0.f, "S&H / T&H Toggle");
-            configParam(VISUALIZE_PARAM + i, 0.f, 1.f, 0.f, "Visualize on Piano");
         }
+        // This is a ugly hack to ensure Quack gets visualized, as it lacks a toggle.
+        configParam(VISUALIZE_PARAM + 0, 0.f, 1.f, 1.f, "Visualize on Piano");
+        configParam(VISUALIZE_PARAM + 1, 0.f, 1.f, 0.f, "Visualize on Piano");
+        configParam(VISUALIZE_PARAM + 2, 0.f, 1.f, 0.f, "Visualize on Piano");
+        configParam(VISUALIZE_PARAM + 3, 0.f, 1.f, 0.f, "Visualize on Piano");
         configParam(SCENE_BUTTON_PARAM, 0.f, 1.f, 0.f, "Scene #1");
         for (int i = 1; i < 16; i++) configParam(SCENE_BUTTON_PARAM + i, 0.f, 1.f, 0.f, "Scene #" + std::to_string(i + 1));
         processDivider.setDivision(PROCESSDIVIDER);
@@ -792,7 +796,7 @@ struct QqqqWidget : ModuleWidget {
         drawScrews();
         drawPianoKeys(4.7f, 102.8f, module);
 
-        // The LCD will go around here
+        // The LCD
         addChild(Lcd::createLcd<Qqqq>(mm2px(Vec(27.6f, 21.2f)), module));
 
         // Scale, Key, External
@@ -821,6 +825,135 @@ struct QqqqWidget : ModuleWidget {
     }
 };
 
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+struct QuackWidget : ModuleWidget {
+
+    void drawScrews() {
+        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+    }
+
+    void drawPianoKeys(float xOffset, float yOffset, Qqqq* module) {
+        // First we create the white keys only.
+        addParam(createParam<QqqqWidgets::PianoC>(mm2px(Vec(xOffset, yOffset -  0.f)), module, Qqqq::NOTE_PARAM +  0)); // C
+        addParam(createParam<QqqqWidgets::PianoD>(mm2px(Vec(xOffset, yOffset - 14.f)), module, Qqqq::NOTE_PARAM +  2)); // D
+        addParam(createParam<QqqqWidgets::PianoE>(mm2px(Vec(xOffset, yOffset - 28.f)), module, Qqqq::NOTE_PARAM +  4)); // E
+        addParam(createParam<QqqqWidgets::PianoF>(mm2px(Vec(xOffset, yOffset - 42.f)), module, Qqqq::NOTE_PARAM +  5)); // F
+        addParam(createParam<QqqqWidgets::PianoG>(mm2px(Vec(xOffset, yOffset - 56.f)), module, Qqqq::NOTE_PARAM +  7)); // G
+        addParam(createParam<QqqqWidgets::PianoA>(mm2px(Vec(xOffset, yOffset - 70.f)), module, Qqqq::NOTE_PARAM +  9)); // A
+        addParam(createParam<QqqqWidgets::PianoB>(mm2px(Vec(xOffset, yOffset - 84.f)), module, Qqqq::NOTE_PARAM + 11)); // B
+        // Then, the black keys, so they overlap the clickable area of the white keys, avoiding the need he need for a custom widget.
+        addParam(createParam<QqqqWidgets::PianoCSharp>(mm2px(Vec(xOffset, yOffset -  5.f)), module, Qqqq::NOTE_PARAM +  1)); // C#
+        addParam(createParam<QqqqWidgets::PianoDSharp>(mm2px(Vec(xOffset, yOffset - 19.f)), module, Qqqq::NOTE_PARAM +  3)); // D#
+        addParam(createParam<QqqqWidgets::PianoFSharp>(mm2px(Vec(xOffset, yOffset - 47.f)), module, Qqqq::NOTE_PARAM +  6)); // F#
+        addParam(createParam<QqqqWidgets::PianoGSharp>(mm2px(Vec(xOffset, yOffset - 61.f)), module, Qqqq::NOTE_PARAM +  8)); // G#
+        addParam(createParam<QqqqWidgets::PianoASharp>(mm2px(Vec(xOffset, yOffset - 75.f)), module, Qqqq::NOTE_PARAM + 10)); // A#
+    }
+
+    void drawQuantizerColumn(float xOffset, float yOffset, Qqqq* module, int col) {
+        addInput(createInput<AriaJackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 0.f)), module, Qqqq::CV_INPUT + col));
+        addParam(createParam<QqqqWidgets::ScalingKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 10.f)), module, Qqqq::SCALING_PARAM + col));
+        addParam(createParam<QqqqWidgets::OffsetKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 20.f)), module, Qqqq::OFFSET_PARAM + col));
+        addParam(createParam<QqqqWidgets::TransposeKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 30.f)), module, Qqqq::TRANSPOSE_PARAM + col));
+
+        addParam(createParam<QqqqWidgets::TransposeButton>(mm2px(Vec(xOffset + 3.5f, yOffset + 40.f)), module, Qqqq::TRANSPOSE_MODE_PARAM + col));
+        addParam(createParam<QqqqWidgets::ShButton>(mm2px(Vec(xOffset + -0.5f, yOffset + 42.5f)), module, Qqqq::SH_MODE_PARAM + col));
+
+        addInput(createInput<AriaJackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 50.f)), module, Qqqq::SH_INPUT + col));
+        addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 0.f, yOffset + 60.f)), module, Qqqq::CV_OUTPUT + col));
+    }
+
+    QuackWidget(Qqqq* module) {
+        setModule(module);
+        setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Quack.svg")));
+        
+        // Signature
+        addChild(createWidget<AriaSignature>(mm2px(Vec(20.0f, 114.5f))));
+
+        drawScrews();
+        drawPianoKeys(1.7f, 102.8f, module);
+
+        // Scale, Key, External
+        addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(18.1f, 20.f)), module, Qqqq::SCALE_PARAM));
+        addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(26.4f, 20.f)), module, Qqqq::KEY_PARAM));
+        addInput(createInput<AriaJackIn>(mm2px(Vec(18.1f, 30.f)), module, Qqqq::EXT_SCALE_INPUT));
+        addOutput(createOutput<AriaJackOut>(mm2px(Vec(26.4f, 30.f)), module, Qqqq::EXT_SCALE_OUTPUT));
+
+        // The quantizer column
+        drawQuantizerColumn(22.f, 43.f, module, 0);
+
+        // Expander lights (right is 3.5mm from edge)
+        addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(1.4, 125.2)), module, Qqqq::EXPANDER_IN_LIGHT));
+        addChild(createLight<SmallLight<OutputLight>>(mm2px(Vec(32.06, 125.2)), module, Qqqq::EXPANDER_OUT_LIGHT));
+    }
+};
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+struct QWidget : ModuleWidget {
+
+    void drawScrews() {
+        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+    }
+
+    // No visualize button in this version
+    void drawQuantizerColumn(float xOffset, float yOffset, Qqqq* module, int col) {
+        addInput(createInput<AriaJackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 0.f)), module, Qqqq::CV_INPUT + col));
+        addParam(createParam<QqqqWidgets::ScalingKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 10.f)), module, Qqqq::SCALING_PARAM + col));
+        addParam(createParam<QqqqWidgets::OffsetKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 20.f)), module, Qqqq::OFFSET_PARAM + col));
+        addParam(createParam<QqqqWidgets::TransposeKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 30.f)), module, Qqqq::TRANSPOSE_PARAM + col));
+
+        addParam(createParam<QqqqWidgets::TransposeButton>(mm2px(Vec(xOffset + 3.5f, yOffset + 40.f)), module, Qqqq::TRANSPOSE_MODE_PARAM + col));
+        addParam(createParam<QqqqWidgets::ShButton>(mm2px(Vec(xOffset + -0.5f, yOffset + 42.5f)), module, Qqqq::SH_MODE_PARAM + col));
+
+        addInput(createInput<AriaJackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 50.f)), module, Qqqq::SH_INPUT + col));
+        addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 0.f, yOffset + 60.f)), module, Qqqq::CV_OUTPUT + col));
+    }
+
+    QWidget(Qqqq* module) {
+        setModule(module);
+        setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Q.svg")));
+        
+        // Signature
+        addChild(createWidget<AriaSignature>(mm2px(Vec(1.0f, 114.5f))));
+
+        drawScrews();
+
+        // External
+        addInput(createInput<AriaJackIn>(mm2px(Vec(3.52f, 29.f)), module, Qqqq::EXT_SCALE_INPUT));
+
+        // Quantizer column
+        drawQuantizerColumn(3.52f, 43.f, module, 0);
+
+        // Expander lights (right is 3.5mm from edge)
+        addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(1.4, 125.2)), module, Qqqq::EXPANDER_IN_LIGHT));
+        addChild(createLight<SmallLight<OutputLight>>(mm2px(Vec(11.74, 125.2)), module, Qqqq::EXPANDER_OUT_LIGHT));
+    }
+};
+
+
 Model* modelQqqq = createModel<Qqqq, QqqqWidget>("Qqqq");
-Model* modelQuack = createModel<Qqqq, QqqqWidget>("Quack");
-Model* modelQ = createModel<Qqqq, QqqqWidget>("Q");
+Model* modelQuack = createModel<Qqqq, QuackWidget>("Quack");
+Model* modelQ = createModel<Qqqq, QWidget>("Q");
