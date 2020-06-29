@@ -202,6 +202,10 @@ inline std::array<bool, 12> validNotesInScaleKey(const int& scale, const int& ke
 // Quantizes the voltage to the scale, expressed as a bool[12] starting on C. 12TET only.
 // After quantizing, can optionally transpose up or down by scale degrees
 inline float quantize(float voltage, const std::array<bool, 12>& validNotes, int transposeSd = 0) {
+
+    // A little offset to fudge against rounding errors. FLoating point math is stupid.
+    voltage = voltage + 0.001f;
+
     float octave = floorf(voltage);
     float voltageOnFirstOctave = voltage - octave;
     float currentComparison;
