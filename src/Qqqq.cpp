@@ -13,6 +13,8 @@ You should have received a copy of the GNU General Public License along with thi
    All three modules are the same, with different widgets.
 */ 
 
+// FIXME: When bound via MIDI, the scene buttons flicker. They do work however.
+
 enum LcdModes {
     INIT_MODE,
     LOAD_MODE,
@@ -807,7 +809,7 @@ struct QqqqWidget : ModuleWidget {
         addInput(createInput<AriaJackIn>(mm2px(Vec(84.f, 53.f)), module, Qqqq::SCENE_INPUT));
 
         // Keyboard inputs
-        addParam(createParam<QqqqWidgets::PushButtonKeyboard>(mm2px(Vec(83.f, 68.f)), module, Qqqq::KEYBOARD_INPUT_PARAM));
+        addParam(createParam<QqqqWidgets::PushButtonKeyboard>(mm2px(Vec(83.f, 66.5f)), module, Qqqq::KEYBOARD_INPUT_PARAM));
 
         // The quantizer columns
         drawQuantizerColumn(25.f, 43.f, module, 0);

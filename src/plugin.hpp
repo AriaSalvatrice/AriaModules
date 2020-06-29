@@ -5,7 +5,7 @@ You should have received a copy of the GNU General Public License along with thi
 */
 #pragma once
 #include <rack.hpp>
-#include "AriaComponents.hpp"
+#include "components.hpp"
 // Explicit <array> include required on OS X
 #include <array> 
 

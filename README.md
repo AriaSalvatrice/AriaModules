@@ -132,7 +132,7 @@ You can save up to 16 scales in **QQQQ**. The slots are the top right of the mod
 - **Scene slot**: Those 16 buttons allow you to save 16 different scales. Navigating to a scene slot loads that scale, and changes to the scale from any source are saved to the active scene. TODO:You can right-click on those buttons to copy and paste scales. You can map those buttons via MIDI!
 - **Scene input**: Navigates the scenes via CV. Useful with a step sequencer! Accepts 0V~10V. When plugged in, the buttons can't be operated manually anymore.
 
-The scenes only save the scales: the position of the knobs are global.
+The scenes only save the scales: the positions of the knobs are global.
 
 
 ### Text input to scenes
@@ -429,6 +429,7 @@ GPL-3.0-only
 
 Not that the code is very good, but the following specific re-usable library source code files are licensed under the WTFPL:
 
+* [`src/components.hpp`](src/components.hpp)
 * [`src/javascript.hpp`](src/javascript.hpp)
 * [`src/lcd.hpp`](src/lcd.hpp)
 * [`src/portablesequence.hpp`](src/portablesequence.hpp)

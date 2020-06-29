@@ -28,6 +28,8 @@
 // FIXME: Both forms of this path are broken on OS X and Linux
 // #include <quickjs/quickjs.h>
 // #include "../dep/QuickJS/quickjs.h"
+
+// QuickJS always throws a warning here, but it works.
 #include "quickjs/quickjs.h"
 
 namespace Javascript {

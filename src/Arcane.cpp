@@ -623,7 +623,7 @@ struct Aleister : ArcaneBase {
             if ( outputs[PATTERN_E_OUTPUT + i].isConnected() ) polyERequested = false;
         }
 
-        // setChannels(16) throws warnings, but works normally. Ignoring the error to see only useful warnings.
+        // setChannels(16) throws warnings, but works normally.
         // https://github.com/VCVRack/Rack/issues/1524 - compiler bug
         if (polyBRequested) {
             for (int i = 0; i < 16; i++) outputs[PATTERN_B_OUTPUT].setVoltage(patternB[i] ? 10.f : 0.f, i);
