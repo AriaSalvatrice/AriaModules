@@ -1,0 +1,14 @@
+Copyright © 2019-2020 Aria Salvatrice. All rights reserved.
+
+If you edit my code to use my modules as a base for your own altered modules,
+remove my signature from your faceplates, even if you think your changes
+are trivial: I don't want to endorse and take credit for something I
+didn't vet or personally participate in. 
+
+If you are faithfully porting my code to a fork of VCV Rack, are compiling
+binaries for another platform, or are otherwise faithfully distributing my
+modules as I designed them, keep the signature. If unsure, just ask. 
+
+The easiest way to remove my signature from every module is by blanking or
+replacing the graphic in the signature.svg file, and removing it from the
+blank plate: res/faceplates/Blank.svg.

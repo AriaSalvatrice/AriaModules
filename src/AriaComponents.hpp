@@ -31,7 +31,7 @@ struct AriaScrew : SvgScrew {
 // My personal brand, featuring the Cool S.
 struct AriaSignature : SvgWidget {
     AriaSignature() {
-        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/signature.svg")));
+        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/signature/signature.svg")));
     }
 };
 

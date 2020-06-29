@@ -1,3 +1,8 @@
+/*  Copyright (C) 2019-2020 Aria Salvatrice
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 3.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
+*/
 #include "plugin.hpp"
 #include "quantizer.hpp"
 #include "lcd.hpp"
@@ -780,7 +785,7 @@ struct QqqqWidget : ModuleWidget {
 
     QqqqWidget(Qqqq* module) {
         setModule(module);
-        setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Qqqq.svg")));
+        setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Qqqq.svg")));
         
         // Signature
         addChild(createWidget<AriaSignature>(mm2px(Vec(65.f, 114.5f))));
@@ -867,7 +872,7 @@ struct QuackWidget : ModuleWidget {
 
     QuackWidget(Qqqq* module) {
         setModule(module);
-        setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Quack.svg")));
+        setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Quack.svg")));
         
         // Signature
         addChild(createWidget<AriaSignature>(mm2px(Vec(20.0f, 114.5f))));
@@ -925,7 +930,7 @@ struct QWidget : ModuleWidget {
 
     QWidget(Qqqq* module) {
         setModule(module);
-        setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Q.svg")));
+        setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Q.svg")));
         
         // Signature
         addChild(createWidget<AriaSignature>(mm2px(Vec(1.0f, 114.5f))));

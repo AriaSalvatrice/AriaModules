@@ -20,6 +20,7 @@ Modules documentation
 - [UnDuLaR Rack Scroller](#undular-rack-scroller)
 - [Signature Series Blank Plate](#signature-series-blank-plate)
 
+
 Other thingies
 --------------
 
@@ -406,19 +407,58 @@ The **UnDuLaR** module background uses the traditional yagasuri kimono pattern a
 Lawyer's corner
 ---------------
 
-The code of the Aria Salvatrice VCV Rack modules is distributed under the Do What The Fuck You Want To Public License version 2. They come without any warranty and might recklessly endanger life and limb, the usual.
+In general, the code of the Aria Salvatrice VCV Rack modules is distributed under the [GNU General Public License v3.0 only](https://spdx.org/licenses/GPL-3.0-only.html). The modules come without any warranty and might recklessly endanger life and limb, the usual.
 
-The graphics are also distributed under the WTFPL, save for the following exceptions:
+Some libraries I created for my own use are licensed, on a file-by-file basis, under the terms of the [Do What The Fuck You Want To Public License](https://spdx.org/licenses/WTFPL.html), to allow more VCV creators to do what the fuck they want.
 
-- My signature/logo remains copyrighted.
-  - If you edit my code to use my modules as a base for your own altered modules, remove my signature from your faceplates, even if you think your changes are trivial: I don't want to endorse and take credit for something I didn't vet or personally participate in.
-  - If you are faithfully porting my code to a fork of VCV Rack, are compiling binaries for another platform, or are otherwise faithfully distributing my modules as I designed them, keep the signature. If unsure, just ask.
-  - The easiest way to remove my signature from every module is by blanking or replacing the graphic in the [`res/components/signature.svg`](res/components/signature.svg) file, and removing it from the blank plate: [`res/Blank.svg`](res/Blank.svg).
-- The files in `res/Arcane` are all distributed under the [CC-BY-NC-SA](https://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_US) license, as they are a derivative work of the [CBD Tarot](https://www.cbdtarot.com/) released under that license.
-- The files in `res/components/lcd/Fixed_v01` were exported from the [Fixed_v01 font by Orgdot](http://www.orgdot.com/aliasfonts/index.htm), which is released under [a custom MIT-style license](res/components/lcd/Fixed_v01/LICENSE.txt), included in the source and in binary distributions.
+My graphics are generally distributed under the terms of the [CC-BY-SA-4.0](https://creativecommons.org/licenses/by-sa/4.0/) - with the exception of my signature logo, which is copyrighted.
 
-You may freely distribute alternate faceplates for my modules. You will find information about my design language and design process in [`doc/design.md`](doc/design.md).
+Each source code file contains a clear licensing boilerplate, and each `/res/` folder contains clear license information.
 
+**By sending me pull requests, you assign their copyright to me, allowing me, in perpetuity, to license your contributions however I see fit**.    
+Right now, that means a mix of GPL-3.0-only and WTFPL, but I reserve the right to relicense it or re-use code in proprietary projects in the future.     
+This is a small scale project and I don't expect external contributions to be any more complex than small bugfixes and feature additions, so I think that's reasonable, and lawyers are paid to be unreasonable so they need me to state the obvious instead of us assuming mutual good faith. If you think that's unreasonable, don't contribute. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for more information.
+
+Here's the breakdown of the rules for re-use:
+
+### Source code of invidivual modules
+
+GPL-3.0-only
+
+### Re-usable .hpp libraries
+
+Not that the code is very good, but the following specific re-usable library source code files are licensed under the WTFPL:
+
+* [`src/javascript.hpp`](src/javascript.hpp)
+* [`src/lcd.hpp`](src/lcd.hpp)
+* [`src/portablesequence.hpp`](src/portablesequence.hpp)
+* [`src/prng.hpp`](src/prng.hpp)
+* [`src/quantizer.hpp`](src/quantizer.hpp)
+
+### Faceplates 
+
+CC-BY-SA-4.0. You may freely distribute your faceplate edits to the VCV community.
+
+### Components (knobs, jacks, etc)
+
+CC-BY-SA-4.0. If you re-use them, I request that you do not re-use my signature color scheme in your own modules, but this request is not legally binding.
+
+### Signature / Logo
+Copyrighted. 
+
+If you edit my code to use my modules as a base for your own altered modules, remove my signature from your faceplates, even if you think your changes are trivial: I don't want to endorse and take credit for something I didn't vet or personally participate in. 
+
+If you are faithfully porting my code to a fork of VCV Rack, are compiling binaries for another platform, or are otherwise faithfully distributing my modules as I designed them, keep the signature. If unsure, just ask. 
+
+The easiest way to remove my signature from every module is by blanking or replacing the graphic in the [`res/components/signature.svg`](res/components/signature.svg) file, and removing it from the blank plate: [`res/faceplates/Blank.svg`](res/faceplates/Blank.svg).
+
+### Graphics for the **Arcane** module 
+
+[CC-BY-NC-SA](https://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_US) license, as they are a derivative work of the [CBD Tarot](https://www.cbdtarot.com/) released under that license.
+
+### LCD Font
+
+SVG export of the [Fixed_v01 font by Orgdot](http://www.orgdot.com/aliasfonts/index.htm), released under [a custom MIT-style license](res/components/lcd/Fixed_v01/LICENSE.txt).
 
 
 

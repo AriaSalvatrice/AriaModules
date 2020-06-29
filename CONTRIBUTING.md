@@ -1,7 +1,7 @@
 Hello, I barely know C++. I don't really know my way around git. Much less around github. I also know nothing about DSP. Also, music theory makes my head hurt. Nice to meet you. I'm your project maintainer. I just sort of do things until my modules happen to work.
 
 Let's get the lawyer stuff out of the way first: **by sending me pull requests, you assign their copyright to me, allowing me, in perpetuity, to license your contributions however I see fit**.     
-Right now, that means WTFPL, but I reserve the right to relicense it or re-use code in proprietary projects in the future.     
+Right now, that means a mix of GPL-3.0-only and WTFPL, but I reserve the right to relicense it or re-use code in proprietary projects in the future.     
 This is a small scale project and I don't expect external contributions to be any more complex than small bugfixes and feature additions, so I think that's reasonable, and lawyers are paid to be unreasonable so they need me to state the obvious instead of us assuming mutual good faith. If you think that's unreasonable, don't contribute. 
 
 Also I'm not big on acting all professional like in a hobby project. IDGAF about American open-source as unpaid internship github punchard bullshit decorum, go to hell if that's your vibe.
