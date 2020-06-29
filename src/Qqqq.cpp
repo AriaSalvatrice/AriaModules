@@ -686,19 +686,11 @@ struct PianoB : PianoKey {
     }
 };
 
-// Keyboard, clipboard
+// Keyboard
 struct PushButtonKeyboard : SvgSwitchUnshadowed {
     PushButtonKeyboard() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/button-keyboard.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/button-keyboard-pressed.svg")));
-        momentary = true;
-        SvgSwitchUnshadowed();
-    }
-};
-struct PushButtonClipboard : SvgSwitchUnshadowed {
-    PushButtonClipboard() {
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/button-clipboard.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/button-clipboard-pressed.svg")));
         momentary = true;
         SvgSwitchUnshadowed();
     }
@@ -809,9 +801,8 @@ struct QqqqWidget : ModuleWidget {
         drawSceneSlots(67.6f, 42.5f, module);
         addInput(createInput<AriaJackIn>(mm2px(Vec(84.f, 53.f)), module, Qqqq::SCENE_INPUT));
 
-        // Keyboard/Clipboard inputs
-        addParam(createParam<QqqqWidgets::PushButtonKeyboard>(mm2px(Vec(83.f, 64.f)), module, Qqqq::KEYBOARD_INPUT_PARAM));
-        addParam(createParam<QqqqWidgets::PushButtonClipboard>(mm2px(Vec(83.f, 73.f)), module, Qqqq::PASTE_CLIPBOARD_PARAM));
+        // Keyboard inputs
+        addParam(createParam<QqqqWidgets::PushButtonKeyboard>(mm2px(Vec(83.f, 68.f)), module, Qqqq::KEYBOARD_INPUT_PARAM));
 
         // The quantizer columns
         drawQuantizerColumn(25.f, 43.f, module, 0);

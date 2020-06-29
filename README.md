@@ -131,14 +131,16 @@ You can save up to 16 scales in **QQQQ**. The slots are the top right of the mod
 - **Scene slot**: Those 16 buttons allow you to save 16 different scales. Navigating to a scene slot loads that scale, and changes to the scale from any source are saved to the active scene. TODO:You can right-click on those buttons to copy and paste scales. You can map those buttons via MIDI!
 - **Scene input**: Navigates the scenes via CV. Useful with a step sequencer! Accepts 0V~10V. When plugged in, the buttons can't be operated manually anymore.
 
+The scenes only save the scales: the position of the knobs are global.
+
 
 ### Text input to scenes
 
-TODO:You can write down or paste chords from the clipboard, and have it transformed to **QQQQ** scenes! The **Keyboard** button lets you type them in, and the **Paste** button reads them from the clipboard. The three following notations are supported (which you're using is automatically detected):
+TODO:With the **Keyboard** button, you can write down or paste chords from the clipboard, and have it transformed to **QQQQ** scenes! The three following notations are supported:
 
-- **Lead sheet notation**: Chord symbols, separated with spaces, commas, or hyphens. It's pretty liberal in what it accepts! For example, this is a valid input: `G am C B, E/G# Bb A,Fsus2  Csus2`
-- **Roman numeral notation**: FIXME: 
-- **Portable Sequence**: Simultaneous notes from a [portable sequence](https://github.com/squinkylabs/SquinkyVCV/blob/master/docs/clipboard-format.md) are interpreted as a new scale. Other devices lets you export those sequences to the clipboard, but you can also choose to type down all the JSON manually - it builds character.
+- **Lead sheet notation**: Chord symbols, separated with spaces, commas, or hyphens. It's pretty liberal in what it accepts. For example, this is a valid input: `G am B, E/G# Bb - A,Fsus2  Csus2 D(add9)`
+- **Roman numeral notation**: Roman numerals, separated with spaces, commas, or hyphens. The tonic will be set to the current position of the **Key** knob. To denote minor chords, rather than use lowercase, you need an explicit `m` after the numeral: `III im7 VIsus4` rather than `III im VIsus4`. It's a lot more fiddly than lead sheet notation and will only recognize basic progressions. 
+- **Portable Sequence**: Simultaneous notes from a [portable sequence](https://github.com/squinkylabs/SquinkyVCV/blob/master/docs/clipboard-format.md) are interpreted as a scale. You can also export the  as such.
 
 The LCD will tell you whether the import worked. 
 
@@ -153,7 +155,7 @@ Below the two text input buttons, you will find a high-definition **Likeness of 
 
 There's four of them, and the signal flows through them from top to bottom. Essentially, between input and output, you'll find the sort of small utilities you're likely to want to use with a quantizer.
 
-- **CV Input**: Each input jack is forwarded to the columns to its right within the same module, if you want to process the same signal in different ways. It is not forwarded across expanders. Inputs are polyphonic.
+- **CV Input**: Each input jack is forwarded to the jack to its right if it's unplugged. Useful to process the same signal in different ways. It is not forwarded across expanders. Inputs are polyphonic.
 - **% Scale**: Attenuates, inverts, or amplifies the input, from -100% to 300%.
 - **Offset**: Adds or removes a fixed voltage to the input, from -10V to 10V.
 - **Transpose**: Transposes the signal according to one of the three rules, set by the transpose mode button under the knob.
