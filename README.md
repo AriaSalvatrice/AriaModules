@@ -69,71 +69,93 @@ To finance her adventuring lifestyle, she has graciously accepted payment (in th
 
 **Quatherina the Quantum Duck presents Quatherina's Quality Quad Quantizer** is a quantizer: it coerces any input signal into the closest pitch of the scale, and outputs it as a V/Oct signal. It only works with Twelve-tone Equal Temperament, the usual Western tuning system. It provides four separate quantizer lines, each with a built-in scaler and offsetter to change the range of the signal, the ability to transpose the signal, and sample & hold. You can save scales and chords in 16 slots.
 
+
+### Form factors
+
 There are three different form factors available of the same underlying module:
 
-- **Quatherina's Quality Quad Quantizer**  (or **QQQQ**): The full 20hp version, featuring piano buttons, 4 polyphonic quantizer columns, and 16 scenes memory.
-- **Quack**: This smaller 7hp version only includes piano buttons, and a single polyphonic quantizer column from QQQQ.
-- **Q<**: 3hp. 1 column. External input. Tiny.
+- **Quatherina's Quality Quad Quantizer**  (or **QQQQ**): The full 20hp version, featuring piano buttons, a helpful LCD, 4 polyphonic quantizer columns, 16 scenes memory, and a high definition portrait of Quatherina.
+- **Quack**: This smaller 7hp version only includes piano buttons, scale/key knobs, and a single polyphonic quantizer column from **QQQQ**.
+- **Q<**: 3hp. External input. Tiny.
 
-Those modules are all expanders of each other: the left one sets the scale to the one on the right, which forwards it. For example, if you only require two quantizer lines and no sequencer, you can use **Quack** on the left and **Q<** on the right, to use only half the size of **QQQQ**. If expander behavior is not desired, you can leave a gap between the instances, or TODO: disable expander features from the right-click menu.
+Those modules are all expanders of each other: the left one sends the scale to the right one, which forwards it to its own right. So if you only require two quantizer lines and no sequencer, you can use **Quack** on the left and **Q<** on the right, to use only half the size of **QQQQ**. If expander behavior is not desired, you can leave a gap between the instances, or TODO: disable expander features from the right-click menu.
 
-The scale of the device can be set from multiple sources, and **the last source to make a change always has the last word what's the scale**. If you edit the settings after patching in an unchanging external scale, just unplug and replug the jack to reload it. 
+In this documentation, we're focusing on **QQQQ**: once you understand it, you'll immediately understand how to operate the smaller versions.
+
+
+### Setting the scale
+
+The scale of the device can be set from multiple sources, and **the last source to make a change always has the last word what's the scale**.     
+The possible sources are:
+
+- The Piano display
+- The Scale/Key knob
+- Receiving a scale from the device on the left
+- Receiving a scale from the external input
+- Changing the scene
 
 All the quantizer columns on a module follow the same scale. And while in this documentation I call them scales for simplicity, **QQQQ** also works with chords (albeit, without knowledge of their intended voicing), and can be a fantasatic arpeggiator. 
 
-Let's look at the controls of **QQQQ** in detail. Once you understand them, you'll also understand what the smaller form factors do.
+The **Piano keys** always show you the current scale. Keys lit in yellow are parts of the scale, while unlit keys are disallowed. You can click on the keys to change which notes are allowed. When you click the **visualize** button of a quantizer line, the notes currently playing on that line are lit pink.
 
-- **Piano keys**: They always show you the current scale. Keys lit in yellow are parts of the scale, while unlit keys are disallowed. You can click on the keys to change which notes are allowed. When you click the **visualize** button of a quantizer line, the notes currently playing on that line are lit pink.
+In the **LCD Area** at the top of the device, the **Scale** and **Key** knobs select a preset scale, and its key.     
+The available scales were curated for ease of use and instant satisfaction rather than for comprehensiveness, avoiding duplication in the form of scales that can be expressed as a mode of another scale (for your convenience, an exception is made for Natural Minor and Pentatonic Minor). The following scales, along with my qualified opinion about them, are available:
 
-In the **LCD Area** at the top of the device:
+- **Chromatic** - All the notes, all the time! It's a great deal if you like every note.
+- **Major** - The white keys of the piano! I'm not really sure why we need anything else, but hey, your call if you want something daring and spicy.
+- **Natural Minor** - It is the exact same thing as the major scale, but it has a different "tonic" making it more suitable for being sad.
+- **Melodic Minor** - You can use it to write melodies! Before this scale was invented, music had no melodies.
+- **Harmonic Minor** - The fancy, high-culture, bourgeois minor scale, used by refined individuals. That shit slaps.
+- **Pentatonic Major** - It's the guitar scale! And it has only 5 notes! Yet guitars have 6 strings. How does it even work? Theory peeps must have felt really stupid after they came up with that one.
+- **Pentatonic Minor** - Same scam as with natural minor: it's the exact same notes as major, just with their order shuffled around a bit.
+- **Whole Tone** - This one has structure! It is for fans of symmetry and kaleidoscopes and fractals and putting a fibonacci spiral overlay on a renaissance painting. 
+- **Blues Major** - It's for when you got the blues, but aren't that sad about it.
+- **Blues Minor** - That one is for special occasions.
+- **Dominant Diminished** - That bad boy makes Honked up Hot Jazz .
+- **Bebop Major** - This one has a "blue note", like those albums with the cool fonts on the cover.
+- **Bebop Minor** - This one is for fans of animé. You're welcome.
+- **Double Harmonic** - It's so harmonic, cultures from all over the world claim this one as theirs. Maybe some day France will come up with a triple harmonic one.
+- **Eight Tone Spanish** - When I tried to find more useful info about it, I found a forum post from 2003, where a poster said indignantly that scales "[are] not a democracy, but a hierarchy".
+- **Hirajōshi** - It's all you need to rip a sick shamisen solo. Anything more is for poseur kids.
+- **In Sen** - That one was originally used for Japanese wind chimes. Instantly become the most original dark ambient modular artist around by feeding it to [Rings and Clouds](https://vcvrack.com/AudibleInstruments) for 3 hours.
 
-- **Scale** and **Key**: Selects a preset scale, and its key. The available scales were curated for ease of use and instant satisfaction rather than for comprehensiveness, avoiding duplication in the form of scales that can be expressed as a mode of another scale (for your convenience, an exception is made for Natural Minor and Pentatonic Minor). The following scales, along with my qualified opinion about them, are available:
-    - **Chromatic** - All the notes, all the time! It's a great deal if you like every note.
-    - **Major** - The white keys of the piano! I'm not really sure why we need anything else, but hey, your call if you want something daring and spicy.
-    - **Natural Minor** - It is the exact same thing as the major scale, but it has a different "tonic" making it more suitable for being sad.
-    - **Melodic Minor** - You can use it to write melodies! Before this scale was invented, music had no melodies.
-    - **Harmonic Minor** - The fancy, high-culture, bourgeois minor scale, used by refined individuals. That shit slaps.
-    - **Pentatonic Major** - It's the guitar scale! And it has only 5 notes! Yet guitars have 6 strings. How does it even work? Theory peeps must have felt really stupid after they came up with that one.
-    - **Pentatonic Minor** - Same scam as with natural minor: it's the exact same notes as major, just with their order shuffled around a bit.
-    - **Whole Tone** - This one has structure! It is for fans of symmetry and kaleidoscopes and fractals and putting a fibonacci spiral overlay on a renaissance painting. 
-    - **Blues Major** - It's for when you got the blues, but aren't that sad about it.
-    - **Blues Minor** - That one is for special occasions.
-    - **Dominant Diminished** - That bad boy makes Honked up Hot Jazz .
-    - **Bebop Major** - This one has a "blue note", like those albums with the cool fonts on the cover.
-    - **Bebop Minor** - This one is for fans of animé. You're welcome.
-    - **Double Harmonic** - It's so harmonic, cultures from all over the world claim this one as theirs. Maybe some day France will come up with a triple harmonic one.
-    - **Eight Tone Spanish** - When I tried to find more useful info about it, I found a forum post from 2003, where a poster said indignantly that scales "[are] not a democracy, but a hierarchy".
-    - **Hirajōshi** - It's all you need to rip a sick shamisen solo. Anything more is for poseur kids.
-    - **In Sen** - That one was originally used for Japanese wind chimes. Instantly become the most original dark ambient modular artist around by feeding it to [Rings and Clouds](https://vcvrack.com/AudibleInstruments) for 3 hours.
-- **External Scale**: This pair of input and output can encode a scale as a 12-channel polyphonic cable, where enabled notes have a continuous 10V signal, and disabled notes, 0V. This way of expressing a scale is supported by my other modules, such as **Arcane** and **Darius**. Try it out with my splitters and mergers! 
+The **External Scale** input and output can encode a scale as a 12-channel polyphonic cable, where enabled notes have a continuous 10V signal, and disabled notes, 0V. This way of expressing a scale is supported by my other modules, such as **Arcane** and **Darius**. Try it out with my splitters and mergers! 
 
-To the top right of the module:
+If you edit the settings after patching in an unchanging **external scale**, you can unplug and replug the jack to reload it. 
+
+
+### Scene memory
+
+You can save up to 16 scales in **QQQQ**. The slots are the top right of the module:
 
 - **Scene slot**: Those 16 buttons allow you to save 16 different scales. Navigating to a scene slot loads that scale, and changes to the scale from any source are saved to the active scene. TODO:You can right-click on those buttons to copy and paste scales. You can map those buttons via MIDI!
 - **Scene input**: Navigates the scenes via CV. Useful with a step sequencer! Accepts 0V~10V. When plugged in, the buttons can't be operated manually anymore.
 
-To the right, below the **Scene slots**:
 
-- TODO:**Keyboard** and **Paste** input. They allow you to write down or paste input from the clipboard, and have it transformed to chords. The three following notations are supported (which you're using is automatically detected):
-    - **Lead sheet notation**: Chord symbols, separated with spaces, commas, or hyphens. It's pretty liberal in what it accepts! For example, this is a valid input: `G am C B, E/G# Bb A,Fsus2  Csus2`
-    - **Roman numeral notation**: FIXME: 
-    - **Portable Sequence**: Simultaneous notes from a [portable sequence](https://github.com/squinkylabs/SquinkyVCV/blob/master/docs/clipboard-format.md) are interpreted as a new scale.
+### Text input to scenes
 
-Input is always imported starting from the first scene. And remember: **QQQQ** only thinks in scales, not in chords. After you import a chord progression, **QQQQ** doesn't care about the voicing of the chord. It's all folded back to a single octave. 
+TODO:You can write down or paste chords from the clipboard, and have it transformed to **QQQQ** scenes! The **Keyboard** button lets you type them in, and the **Paste** button reads them from the clipboard. The three following notations are supported (which you're using is automatically detected):
 
-If your input isn't recognized, the Lcd just says "Error" for a few seconds. 
+- **Lead sheet notation**: Chord symbols, separated with spaces, commas, or hyphens. It's pretty liberal in what it accepts! For example, this is a valid input: `G am C B, E/G# Bb A,Fsus2  Csus2`
+- **Roman numeral notation**: FIXME: 
+- **Portable Sequence**: Simultaneous notes from a [portable sequence](https://github.com/squinkylabs/SquinkyVCV/blob/master/docs/clipboard-format.md) are interpreted as a new scale. Other devices lets you export those sequences to the clipboard, but you can also choose to type down all the JSON manually - it builds character.
 
-Under the hood, **QQQQ** makes use of [Tonal.js](https://github.com/tonaljs/tonal)' knowledge of chords. Yup, this module is so bloated, it even runs javascript! Same [QuickJS](https://bellard.org/quickjs/) engine as [VCV Prototype](https://vcvrack.com/Prototype).
+The LCD will tell you whether the import worked. 
 
-Let's continue. To the bottom-right of the module:
+Text input is always imported starting from the first scene. And remember: **QQQQ** only thinks in scales, not in chords. After you import a chord progression, **QQQQ** doesn't care about the voicing of the chord. It's all folded back to a single octave. 
 
-- **Likeness of Quatherina**: Increases the appeal of the module through co-branding.
+Under the hood, **QQQQ** makes use of [Tonal.js](https://github.com/tonaljs/tonal)' knowledge of chords. Yup, this module runs javascript! Same [QuickJS](https://bellard.org/quickjs/) engine as [VCV Prototype](https://vcvrack.com/Prototype). Of course, the number crunching is efficient C++, javascript usage is limited to what it does best - fuzzy text parsing.
 
-To the center of the module are the four quantizer columns, through which signal flows from top to bottom.
+Below the two text input buttons, you will find a high-definition **Likeness of Quatherina**, increasing the appeal of the module through co-branding.
+
+
+### Quantizer columns
+
+There's four of them, and the signal flows through them from top to bottom. Essentially, between input and output, you'll find the sort of small utilities you're likely to want to use with a quantizer.
 
 - **CV Input**: Each input jack is forwarded to the columns to its right within the same module, if you want to process the same signal in different ways. It is not forwarded across expanders. Inputs are polyphonic.
-- **% Scale**: Attenuates, inverts, or amplifies the input.
-- **Offset**: Adds or removes a fixed voltage to the input.
+- **% Scale**: Attenuates, inverts, or amplifies the input, from -100% to 300%.
+- **Offset**: Adds or removes a fixed voltage to the input, from -10V to 10V.
 - **Transpose**: Transposes the signal according to one of the three rules, set by the transpose mode button under the knob.
 - **Transpose mode**: Selects one of the three transposition rules for the knob directly above it. Each transposition rule results in output that remains in harmony. The rules are:
     - **Unlit** - _Octaves Mode_: Quantizes the signal first, then transposes it up or down by full octaves.
@@ -142,7 +164,9 @@ To the center of the module are the four quantizer columns, through which signal
 - **Sample & Hold / Track & Hold toggle**: Swaps between the two modes for the input directly below it. Unlit is Sample & Hold, lit is Track & Hold.
 - **Sample & Hold / Track & Hold input**: When plugged in, instead of operating continuously, the quantizer will Sample & Hold or Track & Hold the signal. When you're quantizing a noisy source of modulation, it's useful to send it the same gate you'd send to the envelope that will play the note in question. The Sample & Hold is not polyphonic: a monophonic gate can drive a polyphonic column. And remember, signals move from top to bottom through the columns: the Sample & Hold only happens after processing everything above it.
 - **Visualize**: Shows the quantized output on the piano display.
-- **Output** - The quantized signal! Polyphony is defined by the **CV Input**. 
+- **Output** - The quantized signal! Polyphony is defined by the **CV Input**.
+
+### Performance
 
 While there are smaller and simpler quantizers than **QQQQ** available in the VCV library, you will find that **QQQQ** is nonetheless faster than many options with fewer features, thanks to its aggressive sub-sampling and culling of unused outputs: 
 
