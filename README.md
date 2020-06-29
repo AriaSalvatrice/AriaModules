@@ -88,8 +88,8 @@ In this documentation, we're focusing on **QQQQ**: once you understand it, you'l
 The scale of the device can be set from multiple sources, and **the last source to make a change always has the last word what's the scale**.     
 The possible sources are:
 
-- The Piano display
-- The Scale/Key knob
+- The Piano keys
+- The Scale/Key knobs
 - Receiving a scale from the device on the left
 - Receiving a scale from the external input
 - Changing the scene
@@ -103,11 +103,11 @@ The available scales were curated for ease of use and instant satisfaction rathe
 
 - **Chromatic** - All the notes, all the time! It's a great deal if you like every note.
 - **Major** - The white keys of the piano! I'm not really sure why we need anything else, but hey, your call if you want something daring and spicy.
-- **Natural Minor** - It is the exact same thing as the major scale, but it has a different "tonic" making it more suitable for being sad.
+- **Natural Minor** - It is the exact same thing as the major scale, but it has a different "tonic" making it more suitable for being sad. Sounds like a scam to me but ok.
 - **Melodic Minor** - You can use it to write melodies! Before this scale was invented, music had no melodies.
 - **Harmonic Minor** - The fancy, high-culture, bourgeois minor scale, used by refined individuals. That shit slaps.
 - **Pentatonic Major** - It's the guitar scale! And it has only 5 notes! Yet guitars have 6 strings. How does it even work? Theory peeps must have felt really stupid after they came up with that one.
-- **Pentatonic Minor** - Same scam as with natural minor: it's the exact same notes as major, just with their order shuffled around a bit.
+- **Pentatonic Minor** - Same hustle as with natural minor: it's the exact same notes as major, but their order shuffled around a bit, repackaged with an edgy sad brand.
 - **Whole Tone** - This one has structure! It is for fans of symmetry and kaleidoscopes and fractals and putting a fibonacci spiral overlay on a renaissance painting. 
 - **Blues Major** - It's for when you got the blues, but aren't that sad about it.
 - **Blues Minor** - That one is for special occasions.
@@ -119,9 +119,9 @@ The available scales were curated for ease of use and instant satisfaction rathe
 - **Hirajōshi** - It's all you need to rip a sick shamisen solo. Anything more is for poseur kids.
 - **In Sen** - That one was originally used for Japanese wind chimes. Instantly become the most original dark ambient modular artist around by feeding it to [Rings and Clouds](https://vcvrack.com/AudibleInstruments) for 3 hours.
 
-The **External Scale** input and output can encode a scale as a 12-channel polyphonic cable, where enabled notes have a continuous 10V signal, and disabled notes, 0V. This way of expressing a scale is supported by my other modules, such as **Arcane** and **Darius**. Try it out with my splitters and mergers! 
+The **External Scale** input and output can encode a scale as a 12-channel polyphonic cable, where enabled notes have a continuous 10V signal (anything above 0V works), and disabled notes, 0V. This way of expressing a scale is supported by my other modules, such as **Arcane** and **Darius**. Try out hacking this data bus with my splitters and mergers!
 
-If you edit the settings after patching in an unchanging **external scale**, you can unplug and replug the jack to reload it. 
+After patching in an unchanging **external scale**, if you edit the settings from another sources (e.g., turning the scale knob), you can unplug and replug the **external scale jack to reload it.
 
 
 ### Scene memory
