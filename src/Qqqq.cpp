@@ -47,7 +47,6 @@ struct Qqqq : Module {
         ENUMS(SCENE_BUTTON_PARAM, 16),
         KEY_PARAM,
         SCALE_PARAM,
-        PASTE_CLIPBOARD_PARAM,
         KEYBOARD_INPUT_PARAM,
         NUM_PARAMS
     };
@@ -762,8 +761,9 @@ struct PastePortableSequenceItem : MenuItem {
     }
 };
 
-// FIXME: Double right click menu
 struct PushButtonKeyboard : SvgSwitchUnshadowed {
+    Qqqq *module;
+
     PushButtonKeyboard() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/button-keyboard.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/button-keyboard-pressed.svg")));
@@ -772,7 +772,7 @@ struct PushButtonKeyboard : SvgSwitchUnshadowed {
     }
 
     void onDragStart(const event::DragStart& e) override {
-        Qqqq *module = dynamic_cast<Qqqq*>(paramQuantity->module);
+    	if (e.button != GLFW_MOUSE_BUTTON_LEFT) return;
 
         ui::Menu* menu = createMenu();
 
@@ -801,7 +801,7 @@ struct PushButtonKeyboard : SvgSwitchUnshadowed {
 };
 
 // Scene buttons, we'll give them frames later.
-// FIXME: They don't show up! I should instead make them all manually, welp.
+// FIXME: They don't show up in the browser! I should instead make them all manually, welp.
 struct SceneButton : SvgSwitchUnshadowed {
     SceneButton() {
         SvgSwitch();

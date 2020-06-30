@@ -87,13 +87,14 @@ In this documentation, we're focusing on **QQQQ**: once you understand it, you'l
 ### Setting the scale
 
 The scale of the device can be set from multiple sources, and **the last source to make a change always has the last word what's the scale**.     
-The possible sources are:
+The possible sources of change are:
 
-- The Piano keys
-- The Scale/Key knobs
-- Receiving a scale from the device on the left
+- Pressing the Piano keys
+- Turning the Scale/Key knobs
+- Receiving a scale from the device immediately to the left
 - Receiving a scale from the external input
 - Changing the scene
+- Importing a chord progression or portable sequence with the keyboard button
 
 All the quantizer columns on a module follow the same scale. And while in this documentation I call them scales for simplicity, **QQQQ** also works with chords (albeit, without knowledge of their intended voicing), and can be a fantasatic arpeggiator. 
 
@@ -407,7 +408,7 @@ The **UnDuLaR** module background uses the traditional yagasuri kimono pattern a
 Lawyer's corner
 ---------------
 
-Strap on, here's the breakdown of the rules:
+Yeah, the rules are a bit complicated, but here goes the breakdown:
 
 ### Source code of invidivual modules
 
