@@ -104,7 +104,7 @@ The available scales were curated for ease of use and instant satisfaction rathe
 
 - **Chromatic** - All the notes, all the time! It's a great deal if you like every note.
 - **Major** - The white keys of the piano! I'm not really sure why we need anything else, but hey, your call if you want something daring and spicy.
-- **Natural Minor** - It is the exact same thing as the major scale, but it has a different "tonic" making it more suitable for being sad. Sounds like a scam to me but ok.
+- **Natural Minor** - It is the exact same thing as the major scale, but it has a different "tonic" making it more suitable for being sad. Yup, just a scam to sell you the same stuff as something new.
 - **Melodic Minor** - You can use it to write melodies! Before this scale was invented, music had no melodies.
 - **Harmonic Minor** - The fancy, high-culture, bourgeois minor scale, used by refined individuals. That shit slaps.
 - **Pentatonic Major** - It's the guitar scale! And it has only 5 notes! Yet guitars have 6 strings. How does it even work? Theory peeps must have felt really stupid after they came up with that one.
@@ -122,15 +122,15 @@ The available scales were curated for ease of use and instant satisfaction rathe
 
 The **External Scale** input and output can encode a scale as a 12-channel polyphonic cable, where enabled notes have a continuous 10V signal (anything above 0V works), and disabled notes, 0V. This way of expressing a scale is supported by my other modules, such as **Arcane** and **Darius**. Try out hacking this data bus with my splitters and mergers!
 
-After patching in an unchanging **external scale**, if you edit the settings from another sources (e.g., turning the scale knob), you can unplug and replug the **external scale jack to reload it.
+After patching in an unchanging **External Scale**, if you edit the settings from another sources (e.g., turning the scale knob), you can unplug and replug the **External Scale** jack to reload it.
 
 
 ### Scene memory
 
 You can save up to 16 scales in **QQQQ**. The slots are the top right of the module:
 
-- **Scene slot**: Those 16 buttons allow you to save 16 different scales. Navigating to a scene slot loads that scale, and changes to the scale from any source are saved to the active scene. TODO:You can right-click on those buttons to copy and paste scales. You can map those buttons via MIDI!
-- **Scene input**: Navigates the scenes via CV. Useful with a step sequencer! Accepts 0V~10V. When plugged in, the buttons can't be operated manually anymore.
+- **Scene slot**: Those 16 buttons allow you to save 16 different scales. Navigating to a scene slot loads that scale, and changes to the scale from any source are saved to the active scene. TODO:You can right-click on those buttons to copy and paste scales. Currently, mapping the scene slots via MIDI doesn't work well.
+- **Scene input**: Navigates the scenes via CV. Useful with a step sequencer! Accepts 0V~10V by default, FIXME:but you can change it to notes in the C2~E3 range from the right-click menu. When plugged in, the buttons can't be operated manually anymore.
 
 The scenes only save the scales: the positions of the knobs are global.
 
@@ -407,60 +407,47 @@ The **UnDuLaR** module background uses the traditional yagasuri kimono pattern a
 Lawyer's corner
 ---------------
 
-In general, the code of the Aria Salvatrice VCV Rack modules is distributed under the [GNU General Public License v3.0 only](https://spdx.org/licenses/GPL-3.0-only.html). The modules come without any warranty and might recklessly endanger life and limb, the usual.
-
-Some libraries I created for my own use are licensed, on a file-by-file basis, under the terms of the [Do What The Fuck You Want To Public License](https://spdx.org/licenses/WTFPL.html), to allow more VCV creators to do what the fuck they want.
-
-My graphics are generally distributed under the terms of the [CC-BY-SA-4.0](https://creativecommons.org/licenses/by-sa/4.0/) - with the exception of my signature logo, which is copyrighted.
-
-Each source code file contains a clear licensing boilerplate, and each `/res/` folder contains clear license information.
-
-**By sending me pull requests, you assign their copyright to me, allowing me, in perpetuity, to license your contributions however I see fit**.    
-Right now, that means a mix of GPL-3.0-only and WTFPL, but I reserve the right to relicense it or re-use code in proprietary projects in the future.     
-This is a small scale project and I don't expect external contributions to be any more complex than small bugfixes and feature additions, so I think that's reasonable, and lawyers are paid to be unreasonable so they need me to state the obvious instead of us assuming mutual good faith. If you think that's unreasonable, don't contribute. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for more information.
-
-Here's the breakdown of the rules for re-use:
+Strap on, here's the breakdown of the rules:
 
 ### Source code of invidivual modules
 
-GPL-3.0-only
+The code of the Aria Salvatrice Signature Series Synthesizer Modules is distributed under the [GNU General Public License v3.0 only](https://spdx.org/licenses/GPL-3.0-only.html). The modules come without any warranty and might recklessly endanger life and limb, the usual.
 
 ### Re-usable .hpp libraries
 
-Not that the code is very good, but the following specific re-usable library source code files are licensed under the WTFPL:
-
-* [`src/components.hpp`](src/components.hpp)
-* [`src/javascript.hpp`](src/javascript.hpp)
-* [`src/lcd.hpp`](src/lcd.hpp)
-* [`src/portablesequence.hpp`](src/portablesequence.hpp)
-* [`src/prng.hpp`](src/prng.hpp)
-* [`src/quantizer.hpp`](src/quantizer.hpp)
+Not that the code is very good, but some libraries I created for my own use are available under the less restrictive terms of the [Do What The Fuck You Want To Public License](https://spdx.org/licenses/WTFPL.html), to allow every VCV creator to do what the fuck they want. The files in question are [`src/components.hpp`](src/components.hpp), [`src/javascript.hpp`](src/javascript.hpp), [`src/lcd.hpp`](src/lcd.hpp), [`src/portablesequence.hpp`](src/portablesequence.hpp) [`src/prng.hpp`](src/prng.hpp), and [`src/quantizer.hpp`](src/quantizer.hpp).
 
 ### Faceplates 
 
-CC-BY-SA-4.0. You may freely distribute your faceplate edits to the VCV community.
+ [CC-BY-SA-4.0](https://creativecommons.org/licenses/by-sa/4.0/), with the exception of my signature logo, which is copyrighted. You may freely distribute your faceplate edits to the VCV community.
 
 ### Components (knobs, jacks, etc)
 
-CC-BY-SA-4.0. If you re-use them, I request that you do not re-use my signature color scheme in your own modules, but this request is not legally binding.
+CC-BY-SA-4.0. If you re-use them, I request that you do not entirely re-use my signature color scheme in your own modules, but this request is not legally binding. Because I use a limited palette, it's easy to replace most colors in my SVG files using search and replace in a text editor.
 
 ### Signature / Logo
-Copyrighted. 
 
-If you edit my code to use my modules as a base for your own altered modules, remove my signature from your faceplates, even if you think your changes are trivial: I don't want to endorse and take credit for something I didn't vet or personally participate in. 
+Copyrighted. It's mine.
 
-If you are faithfully porting my code to a fork of VCV Rack, are compiling binaries for another platform, or are otherwise faithfully distributing my modules as I designed them, keep the signature. If unsure, just ask. 
+**If you edit my code to use my modules as a base for your own altered modules, remove my signature from your faceplates**, even if you think your changes are trivial: I don't want to endorse and take credit for something I didn't vet or personally participate in. 
+
+If you are faithfully porting my code to a fork of VCV Rack, are compiling binaries for another platform, or are otherwise distributing my modules as I designed them, keep the signature. If unsure, just ask.
 
 The easiest way to remove my signature from every module is by blanking or replacing the graphic in the [`res/components/signature.svg`](res/components/signature.svg) file, and removing it from the blank plate: [`res/faceplates/Blank.svg`](res/faceplates/Blank.svg).
 
 ### Graphics for the **Arcane** module 
 
-[CC-BY-NC-SA](https://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_US) license, as they are a derivative work of the [CBD Tarot](https://www.cbdtarot.com/) released under that license.
+[CC-BY-NC-SA](https://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_US), as they are a derivative work of the [CBD Tarot](https://www.cbdtarot.com/) released under that license. That includes the faceplate, as it uses a pattern taken from that tarot deck.
 
 ### LCD Font
 
 SVG export of the [Fixed_v01 font by Orgdot](http://www.orgdot.com/aliasfonts/index.htm), released under [a custom MIT-style license](res/components/lcd/Fixed_v01/LICENSE.txt).
 
+### Copyright assignment
+
+**By sending me pull requests, you assign their copyright to me, allowing me, in perpetuity, to license your contributions however I see fit**.    
+Right now, that means a mix of GPL-3.0-only and WTFPL, but I reserve the right to relicense it or re-use code in proprietary projects in the future.     
+This is a personal project where I don't expect external contributions to be any more complex than small-scale bugfixes and feature additions, so I think that's reasonable. If you think that's unreasonable, don't contribute. You will be asked to acknowledge this policy the first time you send me a pull request. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for more information.
 
 
 Contact

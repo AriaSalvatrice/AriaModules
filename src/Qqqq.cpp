@@ -14,6 +14,8 @@ You should have received a copy of the GNU General Public License along with thi
 */ 
 
 // FIXME: When bound via MIDI, the scene buttons flicker. They do work however.
+// FIXME: On startup, it doesn't highlight notes
+
 
 enum LcdModes {
     INIT_MODE,
@@ -213,6 +215,27 @@ struct Qqqq : Module {
         lcdStatus.lcdDirty = true;
     }
 
+    // Widget calls this directly
+    void importLeadSheet(std::string text){
+        //
+    }
+
+    // Widget calls this directly
+    void importRomanNumeral(std::string text){
+        //
+    }
+
+    // Widget calls this directly
+    void copyPortableSequence(){
+        //
+    }
+
+    // Widget calls this directly
+    void pastePortableSequence(){
+
+    }
+
+
     void updateExpander(){
         if ((leftExpander.module and leftExpander.module->model == modelQqqq)
         ||  (leftExpander.module and leftExpander.module->model == modelQuack)
@@ -274,6 +297,7 @@ struct Qqqq : Module {
             params[NOTE_PARAM + i].setValue((scale[scene][i]) ? 1.f : 0.f);
         }
     }
+
 
     // Update the internal scale to match the state of the piano display
     void pianoToScale() {
@@ -339,9 +363,11 @@ struct Qqqq : Module {
         }
     }
 
+
     void cleanLitKeys() {
         for (int i =  0; i < 12; i++) litKeys[i] = false; 
     }
+
 
     // When there is no CV input, use the column to the left instead.
     void processInputs() {
@@ -358,6 +384,7 @@ struct Qqqq : Module {
             }
         }
     }
+
 
     void processQuantizerColumn(int col){
         std::array<float, 16> voltage = inputVoltage[col];
@@ -508,6 +535,7 @@ struct Qqqq : Module {
         }
 
     }
+
 
     void process(const ProcessArgs& args) override {
         if (processDivider.process()) {
@@ -694,6 +722,47 @@ struct PianoB : PianoKey {
 };
 
 // Keyboard
+struct LeadSheetField : ui::TextField {
+    Qqqq* module;
+    LeadSheetField() {
+        box.size.x = 100.f;
+        placeholder = "dm/C em A7 G7sus4 Eb G/D G7sus4 Cmaj7";
+    }
+    void onAction(const event::Action& e) override {
+        // DEBUG("%s", text.c_str());
+        module->importLeadSheet(rack::string::trim(text));
+        TextField::onAction(e);
+        getAncestorOfType<ui::MenuOverlay>()->requestDelete();
+    }
+};
+
+struct RomanNumeralField : ui::TextField {
+    Qqqq* module;
+    RomanNumeralField() {
+        box.size.x = 100.f;
+        placeholder = "I V vim7 V bVI bIII bVII IV";
+    }
+    void onAction(const event::Action& e) override {
+        module->importRomanNumeral(rack::string::trim(text));
+        TextField::onAction(e);
+        getAncestorOfType<ui::MenuOverlay>()->requestDelete();
+    }
+};
+
+struct CopyPortableSequenceItem : MenuItem {
+    Qqqq *module;
+    void onAction(const event::Action &e) override {
+        module->copyPortableSequence();
+    }
+};
+struct PastePortableSequenceItem : MenuItem {
+    Qqqq *module;
+    void onAction(const event::Action &e) override {
+        module->pastePortableSequence();
+    }
+};
+
+// FIXME: Double right click menu
 struct PushButtonKeyboard : SvgSwitchUnshadowed {
     PushButtonKeyboard() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/button-keyboard.svg")));
@@ -701,9 +770,38 @@ struct PushButtonKeyboard : SvgSwitchUnshadowed {
         momentary = true;
         SvgSwitchUnshadowed();
     }
+
+    void onDragStart(const event::DragStart& e) override {
+        Qqqq *module = dynamic_cast<Qqqq*>(paramQuantity->module);
+
+        ui::Menu* menu = createMenu();
+
+        LeadSheetField* lsf = new LeadSheetField();
+        lsf->module = module;
+        menu->addChild(createMenuLabel("Import chords (lead sheet notation):"));
+        menu->addChild(lsf);
+        menu->addChild(new MenuSeparator());
+
+        RomanNumeralField* rnf = new RomanNumeralField();
+        rnf->module = module;
+        menu->addChild(createMenuLabel("Import chords (roman numeral notation):"));
+        menu->addChild(rnf);
+        menu->addChild(new MenuSeparator());
+
+        CopyPortableSequenceItem *copyPortableSequenceItem = createMenuItem<CopyPortableSequenceItem>("Copy Scenes as Portable Sequence");
+        copyPortableSequenceItem->module = module;
+        menu->addChild(copyPortableSequenceItem);
+
+        PastePortableSequenceItem *pastePortableSequenceItem = createMenuItem<PastePortableSequenceItem>("Paste Portable Sequence as Scenes");
+        pastePortableSequenceItem->module = module;
+        menu->addChild(pastePortableSequenceItem);
+
+        SvgSwitchUnshadowed::onDragStart(e);
+    }
 };
 
 // Scene buttons, we'll give them frames later.
+// FIXME: They don't show up! I should instead make them all manually, welp.
 struct SceneButton : SvgSwitchUnshadowed {
     SceneButton() {
         SvgSwitch();
@@ -718,8 +816,6 @@ struct SceneButton : SvgSwitchUnshadowed {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 
 
 struct QqqqWidget : ModuleWidget {

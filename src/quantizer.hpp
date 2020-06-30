@@ -203,7 +203,9 @@ inline std::array<bool, 12> validNotesInScaleKey(const int& scale, const int& ke
 // After quantizing, can optionally transpose up or down by scale degrees
 inline float quantize(float voltage, const std::array<bool, 12>& validNotes, int transposeSd = 0) {
 
-    // A little offset to fudge against rounding errors. FLoating point math is stupid.
+    // A little offset to fudge against rounding errors.
+    // Otherwise, quantizing a signal that's already a valid semitone might give
+    // inconsistent results depending on the octave. FLoating point math is stupid.
     voltage = voltage + 0.001f;
 
     float octave = floorf(voltage);
@@ -243,7 +245,7 @@ inline float quantize(float voltage, const std::array<bool, 12>& validNotes, int
     if (closestNoteDistance < 10.0) {
         // We found a match
         voltage = octave + closestNoteFound;
-        // Transpose it by scale degrees if necessary
+        // Transpose it by scale degrees if requested
         if (transposeSd != 0) {
             // Keep it to a sane range just in case
             transposeSd = clamp(transposeSd, -120, 120); 
@@ -253,6 +255,8 @@ inline float quantize(float voltage, const std::array<bool, 12>& validNotes, int
                     voltage += 1.f / 12.f;
                     closestNoteFoundNum++;
                     if (closestNoteFoundNum == 12) closestNoteFoundNum = 0;
+                    // Because we found a match earlier we know there are some validNotes,
+                    // so the loop should never get stuck.
                     if (validNotes[closestNoteFoundNum]) i++;
                 }
             } else {
