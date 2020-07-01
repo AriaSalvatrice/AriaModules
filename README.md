@@ -403,7 +403,9 @@ The **Arcane** module uses Tarot cards altered from [Yoav Ben-Dov's CBD Tarot](h
 
 The **UnDuLaR** module background uses the traditional yagasuri kimono pattern as provided by [ULOCO, UOTOMIZU](https://forallcreators.com/yagasuri-background/).
 
-**TonalJS** is used in some modules under the terns of the [MIT license](doc/LICENSE_TonalJs.md) FIXME: Bundle when packaged for compliance
+**[QuickJS](https://github.com/tonaljs/tonal)** is used in some modules under the terns of the [MIT license](doc/LICENSE_TonalJs.txt)
+
+**[TonalJS](https://bellard.org/quickjs/)** is used in some modules under the terns of the [MIT license](doc/LICENSE_QuickJS.txt)
 
 
 

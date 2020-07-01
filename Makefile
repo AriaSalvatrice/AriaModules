@@ -17,8 +17,7 @@ SOURCES += $(wildcard src/*.cpp)
 # The compiled plugin and "plugin.json" are automatically added.
 DISTRIBUTABLES += res
 DISTRIBUTABLES += $(wildcard LICENSE*)
-
-
+DISTRIBUTABLES += $(wildcard doc/LICENSE*)
 
 
 # Testing Prototype's makefile to try out QuickJS & LuaJIT stuff

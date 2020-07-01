@@ -27,7 +27,7 @@
 // Spinning up a new runtime on demand is basically instant, but this stuff is
 // just to do one-off data processing. Don't go around writing an oscillator with it.
 // 
-// Jerry Sievert's fork (and advice!) is used: https://github.com/JerrySievert/QuickJS
+// Jerry Sievert's fork of Quickjs (and advice!) were used: https://github.com/JerrySievert/QuickJS
 // See makefile for how to add it to a project.
 
 #pragma once
