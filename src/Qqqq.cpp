@@ -17,6 +17,9 @@ You should have received a copy of the GNU General Public License along with thi
 // FIXME: When bound via MIDI, the scene buttons flicker. They do work however.
 // FIXME: On startup, it doesn't highlight notes
 // FIXME: It's possible to crash/lock by sending wrong data to scene (negative)? I did it via weird self-patching.
+// TODO: Right-click menu: scene range
+// TODO: Right-click on scene buttons
+// TODO: The COOL feature
 
 
 enum LcdModes {
@@ -323,7 +326,7 @@ struct Qqqq : Module {
                 scale[i][j] = false;
             }
         }
-        
+
         int position = 0;
         for (int i = 0; i < 16; i++) {
             float start = sequence.notes[position].start;
@@ -381,7 +384,7 @@ struct Qqqq : Module {
 
     // Sets the scene. The CV input overrides the buttons.
     void updateScene() {
-        if (inputs[SCENE_INPUT].isConnected()) {
+        if (inputs[SCENE_INPUT].getVoltageSum() > 0.f) {
             scene = (int) rescale(inputs[SCENE_INPUT].getVoltageSum(), 0.f, 10.f, 0.f, 15.2f);
             if (scene != lastScene) sceneChanged = true;
             for (int i = 0; i < 16; i++) params[SCENE_BUTTON_PARAM + i].setValue( (i == scene) ? 1.f : 0.f );

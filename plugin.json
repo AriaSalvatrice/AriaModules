@@ -145,7 +145,7 @@
     {
       "slug": "Undular",
       "name": "Signature Series Undular",
-      "description": "Scroll the rack via CV for live performance. If locked by mistake: Engine > Sample Rate > Pause",
+      "description": "Scroll the rack via CV for live performance. After initialization, waits 10 seconds before processing signals.\nIf locked out by mistake, save your patch and reload it, you will have 10 seconds to unplug UnDuLaR.",
       "tags": [
         "Controller",
     		"Visual"

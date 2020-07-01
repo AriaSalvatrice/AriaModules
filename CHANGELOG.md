@@ -16,6 +16,7 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 ### Changed
 
 - [CHANGE] All modules: Small changes to the visual design of various widgets. Includes improvements in accessibility to users with tritanopia.
+- [CHANGE] UnDuLaR: For the first 10 seconds after being initialized, UnDuLaR does nothing. This is a simpler way to remove a misconfigured instance than stopping the sample rate. 
 
 ## NOT YET LOL
 

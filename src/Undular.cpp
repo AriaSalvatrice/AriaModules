@@ -14,6 +14,8 @@ You should have received a copy of the GNU General Public License along with thi
 // No, I will not debug race conditions with multiple instances
 static bool ariaSalvatriceUndularSingletonOwned = false;
 
+const int DIVISION = 32;
+
 struct Undular : Module {
     enum ParamIds {
         PADDING_PARAM,
@@ -67,6 +69,7 @@ struct Undular : Module {
     float lastTensionInput = 0.f;
     float lockX = 0.f;
     float lockY = 0.f;
+    float startupTimer = 0.f;
     dsp::SchmittTrigger uTrigger;
     dsp::SchmittTrigger dTrigger;
     dsp::SchmittTrigger lTrigger;
@@ -95,7 +98,7 @@ struct Undular : Module {
         
         // Feels just as fast as without a divider and saves noticeable CPU
         // NO, reducing this will NOT fix the jitter when locked.
-        scrollDivider.setDivision(32);
+        scrollDivider.setDivision(DIVISION);
     }
 
     // Do not save the status of the locks
@@ -254,13 +257,17 @@ struct Undular : Module {
     void process(const ProcessArgs& args) override {
         if (scrollDivider.process()){
             if (owningSingleton) {
-                position = APP->scene->rackScroll->offset;
-                updateScrollOffsets(args);
-                processJumpInputs(args);
-                processXYZInputs(args);
-                processCableInputs(args);
-                processLocks(args);
-                initialized = true; // On load, memorize last input but do not act upon it
+                if (startupTimer < (10.f / DIVISION)) {
+                    startupTimer += args.sampleTime;
+                } else {
+                    position = APP->scene->rackScroll->offset;
+                    updateScrollOffsets(args);
+                    processJumpInputs(args);
+                    processXYZInputs(args);
+                    processCableInputs(args);
+                    processLocks(args);
+                    initialized = true; // On load, memorize last input but do not act upon it
+                }
             }
         }
     }
