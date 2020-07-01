@@ -278,7 +278,7 @@ struct AriaPushButtonPadlock820 : SvgSwitch {
 struct UndularWidget : ModuleWidget {
     UndularWidget(Undular* module) {
         setModule(module);
-        setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Undular.svg")));
+        setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Undular.svg")));
         
         // Signature 
         addChild(createWidget<AriaSignature>(mm2px(Vec(5.9, 114.538))));

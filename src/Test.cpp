@@ -37,56 +37,26 @@ struct Test : Module {
         Javascript::Runtime js;
 
         js.evaluateString(JavascriptLibraries::TONALJS);
-        js.evaluateString("progression = Tonal.Progression.fromRomanNumerals('C', ['IMaj7', 'IIm7', 'V7'])");
-        const char* progression = js.readVariableAsChar("progression");
-        DEBUG("JS progression = %s", progression);
-        // [6.049 debug src/Test.cpp:37] JS progression = CMaj7,Dm7,G7
+        js.evaluateString(JavascriptLibraries::TOKENIZE);
+        js.evaluateString(JavascriptLibraries::TOVOCT);
+        js.evaluateString(JavascriptLibraries::PARSEASLEADSHEET);
+        js.evaluateString(JavascriptLibraries::LEADSHEETTOQQQQ);
+        js.evaluateString("results = leadsheetToQqqq('C D7 Esus2')");
+        const char* results = js.readVariableAsChar("results");
+        DEBUG("JS results = %s", results);
 
-        js.evaluateString("number = '5' + '0'");
-        int32_t number = js.readVariableAsInt32("number");
-        DEBUG("JS number = %d", number);
-        // [6.049 debug src/Test.cpp:41] JS number = 50
+        // js.evaluateString("progression = Tonal.Progression.fromRomanNumerals('C', ['IMaj7', 'IIm7', 'V7'])");
+        // // [6.049 debug src/Test.cpp:37] JS progression = CMaj7,Dm7,G7
+
+        // js.evaluateString("number = '5' + '0'");
+        // int32_t number = js.readVariableAsInt32("number");
+        // DEBUG("JS number = %d", number);
+        // // [6.049 debug src/Test.cpp:41] JS number = 50
         
-
-
-        // rt = JS_NewRuntime();
-        // ctx = JS_NewContext(rt);
-
-        // static const std::string& script = R"END(
-        //     function hello() {
-        //         var z = 777;
-        //         return z;
-        //     }
-
-        //     stuff = "Henlo from Javascript lol";
-        // )END";
-
-        // JSValue whocareslol = JS_NewObject(ctx);
-        // JSValue global_obj = JS_GetGlobalObject(ctx);
-        // JSValue idek = JS_Eval(ctx, script.c_str(), script.size(), "test", 0);
-        // JS_FreeValue(ctx, idek);
-
-        // JSValue function = JS_GetPropertyStr(ctx, global_obj, "hello");
-        // JSValue val = JS_Call(ctx, function, JS_UNDEFINED, 1, &whocareslol);
-        // JSValue stuff = JS_GetPropertyStr(ctx, global_obj, "stuff");
-
-        // int32_t num = 0;
-        // JS_ToInt32(ctx, &num, val);
-        // size_t plen;
-        // const char *string = JS_ToCStringLen(ctx, &plen, stuff);
-        // DEBUG("%s", string);
-        // DEBUG("Lucky number: %u", num);
-
-        // JS_FreeValue(ctx, stuff);
-        // JS_FreeValue(ctx, val);
-        // JS_FreeValue(ctx, function);
-        // JS_FreeValue(ctx, global_obj);
-        // JS_FreeValue(ctx, whocareslol);
     }
 
     ~Test(){
-        // if (ctx) JS_FreeContext(ctx);
-        // if (rt) JS_FreeRuntime(rt);
+
     }
 
     void process(const ProcessArgs& args) override {

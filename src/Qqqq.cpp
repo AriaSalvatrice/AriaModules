@@ -216,7 +216,15 @@ struct Qqqq : Module {
 
     // Widget calls this directly
     void importLeadSheet(std::string text){
-        //
+        Javascript::Runtime js;
+        js.evaluateString(JavascriptLibraries::TONALJS);
+        js.evaluateString(JavascriptLibraries::TOKENIZE);
+        js.evaluateString(JavascriptLibraries::TOVOCT);
+        js.evaluateString(JavascriptLibraries::PARSEASLEADSHEET);
+        js.evaluateString(JavascriptLibraries::LEADSHEETTOQQQQ);
+        js.evaluateString("results = leadsheetToQqqq('" + text + "')");
+        const char* results = js.readVariableAsChar("results");
+        DEBUG("JS results = %s", results);
     }
 
     // Widget calls this directly
@@ -725,7 +733,7 @@ struct LeadSheetField : ui::TextField {
     Qqqq* module;
     LeadSheetField() {
         box.size.x = 100.f;
-        placeholder = "dm/C em A7 G7sus4 Eb G/D G7sus4 Cmaj7";
+        placeholder = "C em A7 G7sus4 Eb G/D G7sus4 Cmaj7";
     }
     void onAction(const event::Action& e) override {
         // DEBUG("%s", text.c_str());

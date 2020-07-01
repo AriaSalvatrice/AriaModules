@@ -140,8 +140,8 @@ The scenes only save the scales: the positions of the knobs are global.
 
 TODO:With the **Keyboard** button, you can write down or paste chords from the clipboard, and have it transformed to **QQQQ** scenes! The three following notations are supported:
 
-- **Lead sheet notation**: Chord symbols, separated with spaces, commas, or hyphens. It's pretty liberal in what it accepts. For example, this is a valid input: `G am B, E/G# Bb - A,Fsus2  Csus2 D(add9)`
-- **Roman numeral notation**: Roman numerals, separated with spaces, commas, or hyphens. The tonic will be set to the current position of the **Key** knob. To denote minor chords, rather than use lowercase, you need an explicit `m` after the numeral: `III im7 VIsus4` rather than `III im VIsus4`. It's a lot more fiddly than lead sheet notation and will only recognize basic progressions. 
+- **Lead sheet notation**: Chord symbols, separated with spaces, commas, or hyphens. It's rather liberal in what it accepts, but kinda chokes on slash chords and crazy jazz combos. Still, it should get you close. For example, this is a valid input: `G am B, E/G# Bb - A,Fsus2  Csus2 D(add9)`
+- **Roman numeral notation**: Roman numerals, separated with spaces, commas, or hyphens. The tonic will be set to the current position of the **Key** knob. To denote minor chords, rather than use lowercase, you need an explicit `m` after the numeral: `III im7 VIsus4` rather than `III im VIsus4`. It's a lot more fiddly than lead sheet notation and will only recognize rather basic progressions. 
 - **Portable Sequence**: Simultaneous notes from a [portable sequence](https://github.com/squinkylabs/SquinkyVCV/blob/master/docs/clipboard-format.md) are interpreted as a scale. You can also export the  as such.
 
 The LCD will tell you whether the import worked. 
@@ -403,6 +403,8 @@ The **Arcane** module uses Tarot cards altered from [Yoav Ben-Dov's CBD Tarot](h
 
 The **UnDuLaR** module background uses the traditional yagasuri kimono pattern as provided by [ULOCO, UOTOMIZU](https://forallcreators.com/yagasuri-background/).
 
+**TonalJS** is used in some modules under the terns of the [MIT license](doc/LICENSE_TonalJs.md) FIXME: Bundle when packaged for compliance
+
 
 
 Lawyer's corner
@@ -456,7 +458,7 @@ Contact
 
 You can send me comments on the [VCV Rack community forums](https://community.vcvrack.com/).    
 You can send me bug reports and feature requests on [my GitHub project page](https://github.com/AriaSalvatrice/AriaVCVModules/issues).    
-You can send me dontations to FIXME: .    
+You can send me donations to FIXME: .    
 You can send me dog gifs to <woof@aria.dog>. 
 
 ttyl,

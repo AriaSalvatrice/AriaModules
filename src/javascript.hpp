@@ -18,16 +18,20 @@
 // since the documentation of quickjs is mostly "Just read the uncommented headers lol".
 //
 // I plan to keep it this simple until I run into an obvious pain point.
+//
+// In general, the big idea is to load snippets from javascript-libraries,
+// craft a string to call a function and assign it to a variable, 
+// read that variable, and use JSON for interchange because eh that's as
+// far as I'm willing to figure out this thing.
+//
+// Spinning up a new runtime on demand is basically instant, but this stuff is
+// just to do one-off data processing. Don't go around writing an oscillator with it.
 // 
 // Jerry Sievert's fork (and advice!) is used: https://github.com/JerrySievert/QuickJS
 // See makefile for how to add it to a project.
 
 #pragma once
 #include <rack.hpp>
-
-// FIXME: Both forms of this path are broken on OS X and Linux
-// #include <quickjs/quickjs.h>
-// #include "../dep/QuickJS/quickjs.h"
 
 // QuickJS always throws a warning here, but it works.
 #include "quickjs/quickjs.h"
