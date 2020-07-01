@@ -914,12 +914,110 @@ struct PushButtonKeyboard : SvgSwitchUnshadowed {
 };
 
 // Scene buttons, we'll give them frames later.
-// FIXME: They don't show up in the browser! I should instead make them all manually, welp.
+// Automating it breaks the module browser so you know what, I'm not even gonna bother being clever about this.
 struct SceneButton : SvgSwitchUnshadowed {
     SceneButton() {
         SvgSwitch();
     }
 };
+struct SceneButton01 : SceneButton {
+    SceneButton01() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/01.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/01-lit.svg")));
+    }
+};
+struct SceneButton02 : SceneButton {
+    SceneButton02() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/02.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/02-lit.svg")));
+    }
+};
+struct SceneButton03 : SceneButton {
+    SceneButton03() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/03.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/03-lit.svg")));
+    }
+};
+struct SceneButton04 : SceneButton {
+    SceneButton04() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/04.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/04-lit.svg")));
+    }
+};
+struct SceneButton05 : SceneButton {
+    SceneButton05() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/05.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/05-lit.svg")));
+    }
+};
+struct SceneButton06 : SceneButton {
+    SceneButton06() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/06.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/06-lit.svg")));
+    }
+};
+struct SceneButton07 : SceneButton {
+    SceneButton07() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/07.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/07-lit.svg")));
+    }
+};
+struct SceneButton08 : SceneButton {
+    SceneButton08() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/08.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/08-lit.svg")));
+    }
+};
+struct SceneButton09 : SceneButton {
+    SceneButton09() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/09.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/09-lit.svg")));
+    }
+};
+struct SceneButton10 : SceneButton {
+    SceneButton10() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/10.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/10-lit.svg")));
+    }
+};
+struct SceneButton11 : SceneButton {
+    SceneButton11() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/11.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/11-lit.svg")));
+    }
+};
+struct SceneButton12 : SceneButton {
+    SceneButton12() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/12.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/12-lit.svg")));
+    }
+};
+struct SceneButton13 : SceneButton {
+    SceneButton13() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/13.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/13-lit.svg")));
+    }
+};
+struct SceneButton14 : SceneButton {
+    SceneButton14() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/14.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/14-lit.svg")));
+    }
+};
+struct SceneButton15 : SceneButton {
+    SceneButton15() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/15.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/15-lit.svg")));
+    }
+};
+struct SceneButton16 : SceneButton {
+    SceneButton16() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/16.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/16-lit.svg")));
+    }
+};
+
+
 
 } // namespace QqqqWidgets
 
@@ -972,26 +1070,22 @@ struct QqqqWidget : ModuleWidget {
     }
 
     void drawSceneSlots(float xOffset, float yOffset, Qqqq* module) {
-        int i = 0;
-        std::string scene;
-        for (int y = 0; y < 4; y++){
-            for (int x = 0; x < 4; x++){
-                if (i < 9) {
-                    scene = "0" + std::to_string(i + 1);
-                } else {
-                    scene = std::to_string(i + 1);
-                }
-                QqqqWidgets::SceneButton* o = new QqqqWidgets::SceneButton;
-                o->box.pos = mm2px(Vec(xOffset + x * 8.f, yOffset - y * 8.f));
-                if (module) {
-                    o->paramQuantity = module->paramQuantities[Qqqq::SCENE_BUTTON_PARAM + i];
-                    o->addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/" + scene + ".svg")));
-                    o->addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/numbered-buttons/" + scene + "-lit.svg")));
-                }
-                addParam(o);
-                i++;
-            }
-        }
+        addParam(createParam<QqqqWidgets::SceneButton01>(mm2px(Vec(xOffset +  0.f, yOffset -  0.f)), module, Qqqq::SCENE_BUTTON_PARAM +  0));
+        addParam(createParam<QqqqWidgets::SceneButton02>(mm2px(Vec(xOffset +  8.f, yOffset -  0.f)), module, Qqqq::SCENE_BUTTON_PARAM +  1));
+        addParam(createParam<QqqqWidgets::SceneButton03>(mm2px(Vec(xOffset + 16.f, yOffset -  0.f)), module, Qqqq::SCENE_BUTTON_PARAM +  2));
+        addParam(createParam<QqqqWidgets::SceneButton04>(mm2px(Vec(xOffset + 24.f, yOffset -  0.f)), module, Qqqq::SCENE_BUTTON_PARAM +  3));
+        addParam(createParam<QqqqWidgets::SceneButton05>(mm2px(Vec(xOffset +  0.f, yOffset -  8.f)), module, Qqqq::SCENE_BUTTON_PARAM +  4));
+        addParam(createParam<QqqqWidgets::SceneButton06>(mm2px(Vec(xOffset +  8.f, yOffset -  8.f)), module, Qqqq::SCENE_BUTTON_PARAM +  5));
+        addParam(createParam<QqqqWidgets::SceneButton07>(mm2px(Vec(xOffset + 16.f, yOffset -  8.f)), module, Qqqq::SCENE_BUTTON_PARAM +  6));
+        addParam(createParam<QqqqWidgets::SceneButton08>(mm2px(Vec(xOffset + 24.f, yOffset -  8.f)), module, Qqqq::SCENE_BUTTON_PARAM +  7));
+        addParam(createParam<QqqqWidgets::SceneButton09>(mm2px(Vec(xOffset +  0.f, yOffset - 16.f)), module, Qqqq::SCENE_BUTTON_PARAM +  8));
+        addParam(createParam<QqqqWidgets::SceneButton10>(mm2px(Vec(xOffset +  8.f, yOffset - 16.f)), module, Qqqq::SCENE_BUTTON_PARAM +  9));
+        addParam(createParam<QqqqWidgets::SceneButton11>(mm2px(Vec(xOffset + 16.f, yOffset - 16.f)), module, Qqqq::SCENE_BUTTON_PARAM + 10));
+        addParam(createParam<QqqqWidgets::SceneButton12>(mm2px(Vec(xOffset + 24.f, yOffset - 16.f)), module, Qqqq::SCENE_BUTTON_PARAM + 11));
+        addParam(createParam<QqqqWidgets::SceneButton13>(mm2px(Vec(xOffset +  0.f, yOffset - 24.f)), module, Qqqq::SCENE_BUTTON_PARAM + 12));
+        addParam(createParam<QqqqWidgets::SceneButton14>(mm2px(Vec(xOffset +  8.f, yOffset - 24.f)), module, Qqqq::SCENE_BUTTON_PARAM + 13));
+        addParam(createParam<QqqqWidgets::SceneButton15>(mm2px(Vec(xOffset + 16.f, yOffset - 24.f)), module, Qqqq::SCENE_BUTTON_PARAM + 14));
+        addParam(createParam<QqqqWidgets::SceneButton16>(mm2px(Vec(xOffset + 24.f, yOffset - 24.f)), module, Qqqq::SCENE_BUTTON_PARAM + 15));
     }
 
     QqqqWidget(Qqqq* module) {
