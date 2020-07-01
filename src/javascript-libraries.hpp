@@ -65,6 +65,15 @@ function leadsheetToQqqq(input) {
 }
 )END";
 
+static const std::string& ROMANTOQQQQ = R"END(
+function romanToQqqq(tonic, input) {
+    input = tokenize(input)
+    progression = Tonal.Progression.fromRomanNumerals(tonic, input)
+    results = parseAsLeadsheet(progression)
+    results = results.map(chord => chord.map(pitch => toScalePosition(pitch)))
+    return JSON.stringify(results)
+}
+)END";
 
 
 

@@ -242,6 +242,12 @@ struct Qqqq : Module {
             lcdLastInteraction = 0.f;
             lcdMode = INIT_MODE;
             lcdStatus.lcdDirty = true;
+            for (int i = 1; i < 16; i++) {
+                params[SCENE_BUTTON_PARAM + i].setValue(0.f);
+            }
+            scene = 0;
+            params[SCENE_BUTTON_PARAM + 0].setValue(1.f);
+            scaleToPiano();
         }
     }
 
@@ -260,7 +266,15 @@ struct Qqqq : Module {
 
     // Widget calls this directly
     void importRomanNumeral(std::string text){
-
+        Javascript::Runtime js;
+        js.evaluateString(JavascriptLibraries::TONALJS);
+        js.evaluateString(JavascriptLibraries::TOKENIZE);
+        js.evaluateString(JavascriptLibraries::TOSCALEPOSITION);
+        js.evaluateString(JavascriptLibraries::PARSEASLEADSHEET);
+        js.evaluateString(JavascriptLibraries::ROMANTOQQQQ);
+        js.evaluateString("results = romanToQqqq('C', '" + text + "')");
+        const char* results = js.readVariableAsChar("results");
+        importJson(results);
     }
 
     // Widget calls this directly

@@ -144,8 +144,6 @@ TODO:With the **Keyboard** button, you can write down or paste chords from the c
 - **Roman numeral notation**: Roman numerals, separated with spaces, commas, or hyphens. The tonic will be set to the current position of the **Key** knob. To denote minor chords, rather than use lowercase, you need an explicit `m` after the numeral: `III im7 VIsus4` rather than `III im VIsus4`. It's a lot more fiddly than lead sheet notation and will only recognize rather basic progressions. 
 - **Portable Sequence**: Simultaneous notes from a [portable sequence](https://github.com/squinkylabs/SquinkyVCV/blob/master/docs/clipboard-format.md) are interpreted as a scale. You can also export the  as such.
 
-The LCD will tell you whether the import worked. 
-
 Text input is always imported starting from the first scene. And remember: **QQQQ** only thinks in scales, not in chords. After you import a chord progression, **QQQQ** doesn't care about the voicing of the chord. It's all folded back to a single octave. 
 
 Under the hood, **QQQQ** makes use of [Tonal.js](https://github.com/tonaljs/tonal)' knowledge of chords. Yup, this module runs javascript! Same [QuickJS](https://bellard.org/quickjs/) engine as [VCV Prototype](https://vcvrack.com/Prototype). Of course, the number crunching is efficient C++, javascript usage is limited to what it does best - fuzzy text parsing.
