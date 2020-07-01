@@ -267,12 +267,13 @@ struct Qqqq : Module {
     // Widget calls this directly
     void importRomanNumeral(std::string text){
         Javascript::Runtime js;
+        std::string tonic = Quantizer::noteLcdName((int) params[KEY_PARAM].getValue());
         js.evaluateString(JavascriptLibraries::TONALJS);
         js.evaluateString(JavascriptLibraries::TOKENIZE);
         js.evaluateString(JavascriptLibraries::TOSCALEPOSITION);
         js.evaluateString(JavascriptLibraries::PARSEASLEADSHEET);
         js.evaluateString(JavascriptLibraries::ROMANTOQQQQ);
-        js.evaluateString("results = romanToQqqq('C', '" + text + "')");
+        js.evaluateString("results = romanToQqqq('" + tonic + "', '" + text + "')");
         const char* results = js.readVariableAsChar("results");
         importJson(results);
     }
