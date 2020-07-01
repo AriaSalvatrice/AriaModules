@@ -35,6 +35,8 @@ The module takes and outputs a poly cable. It can sort it by value (ASC, DESC), 
 
 # Controllers that spring back
 
+Currently working on this one!
+
 Think pitchbend wheel. A series of controllers that can spring back, and can be used as pitchbend/modulation, with all sorts of neat features.
 
 - Meant to be operated with the mouse or touch, not from CV or MIDI. 
@@ -44,18 +46,6 @@ Think pitchbend wheel. A series of controllers that can spring back, and can be 
 - In pitchbend mode, you can set bend up and down range separately.
 - You can quantize input, and you can tell the pitchbend to aim for _n_ scale degrees above/below within the current scale/chord.
 - You can also quantize output for a stepped glissando.
-
-
-
-
-# Quantizer / chord sequencer
-
-Currently working on this one!
-
-A quantizer system with scene support, allowing you to create and use external scales (c.f. Darius), making use of the code I already have. Scene support to quickly change the tonality of the piece. You can use it to program chords and scales. 
-
-You can click a button to open a text field, where you can write down a chord progression. It should be very liberal in what it accepts: weird-ass rare jazz chords, inversions, roman numeral notation.
-
 
 
 

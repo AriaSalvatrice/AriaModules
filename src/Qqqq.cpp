@@ -8,6 +8,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include "lcd.hpp"
 #include "javascript.hpp"
 #include "javascript-libraries.hpp"
+#include "portablesequence.hpp"
 
 /* Quatherina's Quality Quad Quantizer, Quack, Q<
    All three modules are the same, with different widgets.
@@ -15,6 +16,7 @@ You should have received a copy of the GNU General Public License along with thi
 
 // FIXME: When bound via MIDI, the scene buttons flicker. They do work however.
 // FIXME: On startup, it doesn't highlight notes
+// FIXME: It's possible to crash/lock by sending wrong data to scene (negative)? I did it via weird self-patching.
 
 
 enum LcdModes {
@@ -185,10 +187,11 @@ struct Qqqq : Module {
             }
             params[SCENE_BUTTON_PARAM + i].setValue(0.f);
         }
-        scene = 0;
         params[SCENE_BUTTON_PARAM + 0].setValue(1.f);
         // C Minor in first scene
         scale[0][0] = true; scale[0][2] = true; scale[0][3] = true; scale[0][5] = true; scale[0][7] = true; scale[0][8] = true; scale[0][10] = true;
+        scene = 0;
+        scaleToPiano();
         lcdStatus.lcdText1 = " Q- ???";
         lcdLastInteraction = 0.f;
         lcdMode = INIT_MODE;
@@ -251,6 +254,16 @@ struct Qqqq : Module {
         }
     }
 
+    // Returns the last non-empty scene
+    int getLastScene() {
+        for (int i = 15; i >=0; i--) {
+            for (int j = 0; j < 12; j++) {
+                if (scale[i][j] == true) return i;
+            }
+        }
+        return 0;
+    }
+
     // Widget calls this directly
     void importLeadSheet(std::string text){
         Javascript::Runtime js;
@@ -280,12 +293,58 @@ struct Qqqq : Module {
 
     // Widget calls this directly
     void copyPortableSequence(){
-        //
+        PortableSequence::Sequence sequence;
+        sequence.length = (float) getLastScene() + 1;
+        for (int i = 0; i <= getLastScene(); i++) {
+            for (int j = 0; j < 12; j++) {
+                if (scale[i][j] == true) {
+                    PortableSequence::Note note;
+                    note.length = 1.f;
+                    note.start = (float) i;
+                    note.pitch = (float) j * 1.f / 12.f;
+                    sequence.addNote(note);
+                }
+            }
+        }
+        sequence.toClipboard();
     }
 
     // Widget calls this directly
     void pastePortableSequence(){
+        PortableSequence::Sequence sequence;
+        sequence.fromClipboard();
+        sequence.sort();
 
+        if (sequence.notes.size() < 1) return;
+
+        // Reset scales
+        for (int i = 0; i < 16; i++) {
+            for (int j = 0; j < 12; j++) {
+                scale[i][j] = false;
+            }
+        }
+        
+        int position = 0;
+        for (int i = 0; i < 16; i++) {
+            float start = sequence.notes[position].start;
+            int remaining = sequence.notes.size() - position;
+            if (remaining > 0) {
+                for (size_t j = 0; j < sequence.notes.size(); j++ ) {
+                    if (sequence.notes[j].start == start) {
+                        int note = (int) (sequence.notes[j].pitch * 12.f + 60.f) % 12;
+                        scale[i][note] = true;
+                        position++;
+                    }
+                }
+            }
+        }
+        scene = 0;
+        params[SCENE_BUTTON_PARAM + 0].setValue(1.f);
+        scaleToPiano();
+        lcdStatus.lcdText1 = " Imported!";
+        lcdLastInteraction = 0.f;
+        lcdMode = INIT_MODE;
+        lcdStatus.lcdDirty = true;
     }
 
 

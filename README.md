@@ -136,13 +136,13 @@ You can save up to 16 scales in **QQQQ**. The slots are the top right of the mod
 The scenes only save the scales: the positions of the knobs are global.
 
 
-### Text input to scenes
+### Keyboard / Clipboard I/O
 
 TODO:With the **Keyboard** button, you can write down or paste chords from the clipboard, and have it transformed to **QQQQ** scenes! The three following notations are supported:
 
 - **Lead sheet notation**: Chord symbols, separated with spaces, commas, or hyphens. It's rather liberal in what it accepts, but kinda chokes on slash chords and crazy jazz combos. Still, it should get you close. For example, this is a valid input: `G am B, E/G# Bb - A,Fsus2  Csus2 D(add9)`
 - **Roman numeral notation**: Roman numerals, separated with spaces, commas, or hyphens. The tonic will be set to the current position of the **Key** knob. To denote minor chords, rather than use lowercase, you need an explicit `m` after the numeral: `III im7 VIsus4` rather than `III im VIsus4`. It's a lot more fiddly than lead sheet notation and will only recognize rather basic progressions. 
-- **Portable Sequence**: Simultaneous notes from a [portable sequence](https://github.com/squinkylabs/SquinkyVCV/blob/master/docs/clipboard-format.md) are interpreted as a scale. You can also export the  as such.
+- **Portable Sequence**: Simultaneous notes from a [**Portable Sequence**](https://github.com/squinkylabs/SquinkyVCV/blob/master/docs/clipboard-format.md) are interpreted as a scale. You can also export them as such. Note that when exporting and re-importing a portable sequence, empty scene slots will be skipped. How to make this feature useful is left as an exercise to **Portable Sequences** implementers.
 
 Text input is always imported starting from the first scene. And remember: **QQQQ** only thinks in scales, not in chords. After you import a chord progression, **QQQQ** doesn't care about the voicing of the chord. It's all folded back to a single octave. 
 
