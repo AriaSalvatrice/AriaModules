@@ -34,16 +34,16 @@ struct Test : Module {
     Test() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
-        Javascript::Runtime js;
+        // Javascript::Runtime js;
 
-        js.evaluateString(JavascriptLibraries::TONALJS);
-        js.evaluateString(JavascriptLibraries::TOKENIZE);
-        js.evaluateString(JavascriptLibraries::TOVOCT);
-        js.evaluateString(JavascriptLibraries::PARSEASLEADSHEET);
-        js.evaluateString(JavascriptLibraries::LEADSHEETTOQQQQ);
-        js.evaluateString("results = leadsheetToQqqq('C D7 Esus2')");
-        const char* results = js.readVariableAsChar("results");
-        DEBUG("JS results = %s", results);
+        // js.evaluateString(JavascriptLibraries::TONALJS);
+        // js.evaluateString(JavascriptLibraries::TOKENIZE);
+        // js.evaluateString(JavascriptLibraries::TOVOCT);
+        // js.evaluateString(JavascriptLibraries::PARSEASLEADSHEET);
+        // js.evaluateString(JavascriptLibraries::LEADSHEETTOQQQQ);
+        // js.evaluateString("results = leadsheetToQqqq('C D7 Esus2')");
+        // const char* results = js.readVariableAsChar("results");
+        // DEBUG("JS results = %s", results);
 
         // js.evaluateString("progression = Tonal.Progression.fromRomanNumerals('C', ['IMaj7', 'IIm7', 'V7'])");
         // // [6.049 debug src/Test.cpp:37] JS progression = CMaj7,Dm7,G7

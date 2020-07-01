@@ -24,6 +24,8 @@ See VCV forums: https://community.vcvrack.com/t/diy-marbles-based-physical-matri
 
 # Srot: sort & rotate polyphonic channels
 
+Currently working on this one!
+
 I need this for my split/merge/sort system to be complete, and for people to start understanding how to use it and pay attention to the potential of the LINK feature. 
 
 The module takes and outputs a poly cable. It can sort it by value (ASC, DESC), by absolute value (ASC, DESC). It can limit output to a certain range of values. It can randomize channel order on trigger. It can output fewer channels than there is input, or be set to have more channels than the last plugged in. It makes use of the LINK feature. 

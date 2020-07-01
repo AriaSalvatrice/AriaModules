@@ -71,14 +71,11 @@ struct Qqqq : Module {
 
     bool lastExtInConnected = false;
     bool sceneChanged = false;
-    bool highCpu = false;
     // FIXME: I am supposed to free it manually but didn't figure out how.
     // FIXME: IDK how to use a std::array for this - assuming I even can
     bool leftMessages[2][12];
     bool isExpander = false;
     bool lastIsExpander = false;
-    bool lcdHasReadExternal = false;
-    bool lcdHasEditedScale = false;
     int lcdMode = INIT_MODE;
     int scene = 0;
     int lastScene = 0;
@@ -214,22 +211,56 @@ struct Qqqq : Module {
         lcdStatus.lcdDirty = true;
     }
 
+    // Not portable sequences. Format is like:
+    // [[0,4,7],[2,6,9],[4,8,11],[5,9,12],[7,11,2],[9,1,4],[11,3,6]]
+    void importJson(const char* &jsonC) {
+        json_error_t error;
+        json_t* rootJ = json_loads(jsonC, 0, &error);
+        if (!rootJ) {
+            lcdStatus.lcdText1 = "!! ERROR !!";
+            lcdLastInteraction = 0.f;
+            lcdMode = INIT_MODE;
+            lcdStatus.lcdDirty = true;
+        } else {
+            for (int i = 0; i < 16; i++) {
+                for (int j = 0; j < 12; j++) {
+                    scale[i][j] = false;
+                }
+            }
+            size_t scenesJSize = json_array_size(rootJ);
+            for (size_t i = 0; i < scenesJSize; i++) {
+                json_t* scaleJ = json_array_get(rootJ, i);
+                size_t scaleJSize = json_array_size(scaleJ);
+                for (size_t j = 0; j < scaleJSize; j++) {
+                    json_t* noteJ = json_array_get(scaleJ, j);
+                    int note = json_integer_value(noteJ);
+                    scale[i][note] = true;
+                }
+            }
+            scaleToPiano();
+            lcdStatus.lcdText1 = " Imported!";
+            lcdLastInteraction = 0.f;
+            lcdMode = INIT_MODE;
+            lcdStatus.lcdDirty = true;
+        }
+    }
+
     // Widget calls this directly
     void importLeadSheet(std::string text){
         Javascript::Runtime js;
         js.evaluateString(JavascriptLibraries::TONALJS);
         js.evaluateString(JavascriptLibraries::TOKENIZE);
-        js.evaluateString(JavascriptLibraries::TOVOCT);
+        js.evaluateString(JavascriptLibraries::TOSCALEPOSITION);
         js.evaluateString(JavascriptLibraries::PARSEASLEADSHEET);
         js.evaluateString(JavascriptLibraries::LEADSHEETTOQQQQ);
         js.evaluateString("results = leadsheetToQqqq('" + text + "')");
         const char* results = js.readVariableAsChar("results");
-        DEBUG("JS results = %s", results);
+        importJson(results);
     }
 
     // Widget calls this directly
     void importRomanNumeral(std::string text){
-        //
+
     }
 
     // Widget calls this directly
@@ -736,7 +767,6 @@ struct LeadSheetField : ui::TextField {
         placeholder = "C em A7 G7sus4 Eb G/D G7sus4 Cmaj7";
     }
     void onAction(const event::Action& e) override {
-        // DEBUG("%s", text.c_str());
         module->importLeadSheet(rack::string::trim(text));
         TextField::onAction(e);
         getAncestorOfType<ui::MenuOverlay>()->requestDelete();
@@ -770,8 +800,6 @@ struct PastePortableSequenceItem : MenuItem {
 };
 
 struct PushButtonKeyboard : SvgSwitchUnshadowed {
-    Qqqq *module;
-
     PushButtonKeyboard() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/button-keyboard.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/button-keyboard-pressed.svg")));
@@ -785,23 +813,23 @@ struct PushButtonKeyboard : SvgSwitchUnshadowed {
         ui::Menu* menu = createMenu();
 
         LeadSheetField* lsf = new LeadSheetField();
-        lsf->module = module;
+        lsf->module = dynamic_cast<Qqqq*>(paramQuantity->module);
         menu->addChild(createMenuLabel("Import chords (lead sheet notation):"));
         menu->addChild(lsf);
         menu->addChild(new MenuSeparator());
 
         RomanNumeralField* rnf = new RomanNumeralField();
-        rnf->module = module;
+        rnf->module = dynamic_cast<Qqqq*>(paramQuantity->module);
         menu->addChild(createMenuLabel("Import chords (roman numeral notation):"));
         menu->addChild(rnf);
         menu->addChild(new MenuSeparator());
 
         CopyPortableSequenceItem *copyPortableSequenceItem = createMenuItem<CopyPortableSequenceItem>("Copy Scenes as Portable Sequence");
-        copyPortableSequenceItem->module = module;
+        copyPortableSequenceItem->module = dynamic_cast<Qqqq*>(paramQuantity->module);
         menu->addChild(copyPortableSequenceItem);
 
         PastePortableSequenceItem *pastePortableSequenceItem = createMenuItem<PastePortableSequenceItem>("Paste Portable Sequence as Scenes");
-        pastePortableSequenceItem->module = module;
+        pastePortableSequenceItem->module = dynamic_cast<Qqqq*>(paramQuantity->module);
         menu->addChild(pastePortableSequenceItem);
 
         SvgSwitchUnshadowed::onDragStart(e);

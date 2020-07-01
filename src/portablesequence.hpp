@@ -113,7 +113,7 @@ struct Sequence {
         json_error_t error;
         json_t* rootJ = json_loads(clipboard, 0, &error);
         if (!rootJ) {
-            WARN("Portable Sequence: Could not prase clipboard as JSON");
+            WARN("Portable Sequence: Could not parse clipboard as JSON");
             return false;
         }
         json_t* vcvrackSequenceJ = json_object_get(rootJ, "vcvrack-sequence");
