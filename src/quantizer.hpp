@@ -1,10 +1,25 @@
+/*             DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+                    Version 2, December 2004
+
+ Copyright (C) 2004 Sam Hocevar <sam@hocevar.net>
+
+ Everyone is permitted to copy and distribute verbatim or modified
+ copies of this license document, and changing it is allowed as long
+ as the name is changed.
+
+            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+
+  0. You just DO WHAT THE FUCK YOU WANT TO.
+*/
 #pragma once
 
 namespace Quantizer {
 
-// Except for Major/natural minor & pentatonic scales, I avoid scales that are modes of another.
-// I want the curation limited to interesting instant satisfaction presets that
+// Except for Major/natural minor & pentatonic scales, I avoided scales that are modes of another.
+// I wanted a curation limited to interesting instant satisfaction presets that
 // work well with generative patterns and sound good to average modern western ears.
+// This list is now set in stone forever to avoid breaking patches. It should never be changed.
 enum ScalesEnum {
     CHROMATIC,
     MAJOR,
@@ -28,7 +43,7 @@ enum ScalesEnum {
 
 
 // The name of the scale from the ScalesEnum, with proper capitalization
-inline std::string scaleDisplayName(int scale){
+inline std::string scaleDisplayName(const int& scale){
     switch(scale){
         case CHROMATIC: 			return "Chromatic";
         case MAJOR:	 				return "Major";
@@ -55,7 +70,7 @@ inline std::string scaleDisplayName(int scale){
 // The name of the scale from the ScalesEnum, fit to display on a LCD: 8 characters, uppercase or lowercase without descenders.
 // First scale being chromatic, an exception can be made in implentations to fit the whole word by removing the key.
 // When synonyms exist, names are generally chosen to fit on the LCD.
-inline std::string scaleLcdName(int scale){
+inline std::string scaleLcdName(const int& scale){
     switch(scale){
         case CHROMATIC: 			return "CHROMA. ";
         case MAJOR:	 				return "MAJOR   ";
@@ -80,7 +95,7 @@ inline std::string scaleLcdName(int scale){
 
 
 // The individual notes of the corresponding scale from the ScalesEnum, in the key of C
-inline std::array<bool, 12> validNotesInScale(int scale){
+inline std::array<bool, 12> validNotesInScale(const int& scale){
     switch(scale){
         case CHROMATIC: {
             std::array<bool, 12> s {true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true};
@@ -157,7 +172,7 @@ inline std::array<bool, 12> validNotesInScale(int scale){
 
 
 // The note/key name, two characters, sharp notation.
-inline std::string noteLcdName(int scale){
+inline std::string noteLcdName(const int& scale){
     switch(scale){
         case 0:  return "C ";
         case 1:  return "C#";
@@ -175,8 +190,9 @@ inline std::string noteLcdName(int scale){
     return "";
 }
 
+
 // The individual notes of the corresponding scale from the ScalesEnum, in the specified key
-inline std::array<bool, 12> validNotesInScaleKey(int scale, int key){
+inline std::array<bool, 12> validNotesInScaleKey(const int& scale, const int& key){
     std::array<bool, 12> notes = validNotesInScale(scale);
     std::rotate(notes.rbegin(), notes.rbegin() + key, notes.rend());
     return notes;
@@ -184,13 +200,21 @@ inline std::array<bool, 12> validNotesInScaleKey(int scale, int key){
 
 
 // Quantizes the voltage to the scale, expressed as a bool[12] starting on C. 12TET only.
-inline float quantize(float voltage, std::array<bool, 12> validNotes) {
+// After quantizing, can optionally transpose up or down by scale degrees
+inline float quantize(float voltage, const std::array<bool, 12>& validNotes, int transposeSd = 0) {
+
+    // A little offset to fudge against rounding errors.
+    // Otherwise, quantizing a signal that's already a valid semitone might give
+    // inconsistent results depending on the octave. FLoating point math is stupid.
+    voltage = voltage + 0.001f;
+
     float octave = floorf(voltage);
     float voltageOnFirstOctave = voltage - octave;
     float currentComparison;
     float currentDistance;
     float closestNoteFound = 10.0;
     float closestNoteDistance = 10.0;
+    int closestNoteFoundNum = 0;
     
     // Iterate notes and seek the closest match
     for (int note = 0; note < 12; note++) {
@@ -199,6 +223,7 @@ inline float quantize(float voltage, std::array<bool, 12> validNotes) {
             currentDistance = fabs(voltageOnFirstOctave - currentComparison);
             if (currentDistance < closestNoteDistance) { 
                 closestNoteFound = currentComparison;
+                closestNoteFoundNum = note;
                 closestNoteDistance = currentDistance;
             }
         }
@@ -210,17 +235,46 @@ inline float quantize(float voltage, std::array<bool, 12> validNotes) {
             currentDistance = fabs(voltageOnFirstOctave - currentComparison);
             if (currentDistance < closestNoteDistance) { 
                 closestNoteFound = currentComparison;
+                closestNoteFoundNum = note;
                 closestNoteDistance = currentDistance;
             }
             break;
         }
-    }	
-    // Return best match, or pass output as-is if nothing found.
+    }
+
     if (closestNoteDistance < 10.0) {
+        // We found a match
         voltage = octave + closestNoteFound;
+        // Transpose it by scale degrees if requested
+        if (transposeSd != 0) {
+            // Keep it to a sane range just in case
+            transposeSd = clamp(transposeSd, -120, 120); 
+            if (transposeSd > 0) {
+                // Add scale degrees
+                for (int i = 0; i < transposeSd;) {
+                    voltage += 1.f / 12.f;
+                    closestNoteFoundNum++;
+                    if (closestNoteFoundNum == 12) closestNoteFoundNum = 0;
+                    // Because we found a match earlier we know there are some validNotes,
+                    // so the loop should never get stuck.
+                    if (validNotes[closestNoteFoundNum]) i++;
+                }
+            } else {
+                // Subtract scale degrees
+                for (int i = 0; i < abs(transposeSd);) {
+                    voltage -= 1.f / 12.f;
+                    closestNoteFoundNum--;
+                    if (closestNoteFoundNum == -1) closestNoteFoundNum = 11;
+                    if (validNotes[closestNoteFoundNum]) i++;
+                }
+            }
+        }
+    } else {
+        // Pass output as-is when no match found (happens when there's no valid notes)
     }
     return clamp(voltage, -10.f, 10.f);
 }
+
 
 // Note name and octave
 inline std::string noteOctaveLcdName(float voltage) {
@@ -232,6 +286,7 @@ inline std::string noteOctaveLcdName(float voltage) {
     return noteName;
 }
 
+
 // Which note to light on the LCD
 inline std::array<bool, 12> pianoDisplay(float voltage) {
     std::array<bool, 12> notes;
@@ -242,4 +297,4 @@ inline std::array<bool, 12> pianoDisplay(float voltage) {
     return notes;
 }
 
-} // Quantizer
+} // namespace Quantizer

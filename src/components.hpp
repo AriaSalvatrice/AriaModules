@@ -1,9 +1,39 @@
+/*             DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+                    Version 2, December 2004
+
+ Copyright (C) 2004 Sam Hocevar <sam@hocevar.net>
+
+ Everyone is permitted to copy and distribute verbatim or modified
+ copies of this license document, and changing it is allowed as long
+ as the name is changed.
+
+            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+
+  0. You just DO WHAT THE FUCK YOU WANT TO.
+*/
+// Widgets are only added to my library as the need arises and are pruned if no longer used.
+// Widgets are only moved to my library once used in more than a single module.
+// If you want to re-use one of my one-off widgets covered by the GPL, but wish to receive
+// its code under the WTFPL, contact me. 
+
 #pragma once
 
 using namespace rack;
 extern Plugin* pluginInstance;
 
 // - TODO: Remove every single dependency on the component library, since it is not open-source. 
+// - TODO: Namespace instead of prefix
+
+//////////////////////////////// Base
+
+struct SvgSwitchUnshadowed : SvgSwitch {
+    SvgSwitchUnshadowed() {
+        shadow->opacity = 0.f;
+        SvgSwitch();
+    }
+};
+
 
 //////////////////////////////// Decorative
 
@@ -17,7 +47,7 @@ struct AriaScrew : SvgScrew {
 // My personal brand, featuring the Cool S.
 struct AriaSignature : SvgWidget {
     AriaSignature() {
-        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/signature.svg")));
+        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/signature/signature.svg")));
     }
 };
 
@@ -48,7 +78,6 @@ struct AriaJackTransparent : SVGPort {
 
 /////////////// Old style lights - TODO: Remove dependency on component library
 
-// Still used for a few things! 
 template <typename TBase = GrayModuleLightWidget>
 struct TOutputLight : TBase {
     TOutputLight() {
@@ -124,6 +153,7 @@ struct AriaPushButton500 : SvgSwitch {
     AriaPushButton500() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-500-off.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-500-on.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-500-pink.svg")));
     }
 };
 
@@ -140,6 +170,7 @@ struct AriaPushButton700 : SvgSwitch {
     AriaPushButton700() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-700-off.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-700-on.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-700-pink.svg")));
     }
 };
 
@@ -156,6 +187,7 @@ struct AriaPushButton820 : SvgSwitch {
     AriaPushButton820() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-820-off.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-820-on.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-820-pink.svg")));
     }
 };
 
@@ -167,8 +199,16 @@ struct AriaPushButton820Momentary : SvgSwitch {
     }
 };
 
+// You won't guess its color when you press it.
+struct AriaPushButton820Pink : SvgSwitch {
+    AriaPushButton820Pink() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-820-off.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-820-pink.svg")));
+    }
+};
+
 // Rocker siwtch, horizontal. Left is default
-struct AriaRockerSwitchHorizontal800 : SvgSwitch {
+struct AriaRockerSwitchHorizontal800 : SvgSwitchUnshadowed {
     AriaRockerSwitchHorizontal800() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-l.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-r.svg")));
@@ -176,14 +216,14 @@ struct AriaRockerSwitchHorizontal800 : SvgSwitch {
 };
 
 // Rocker siwtch, horizontal. Right is default
-struct AriaRockerSwitchHorizontal800Flipped : SvgSwitch {
+struct AriaRockerSwitchHorizontal800Flipped : SvgSwitchUnshadowed {
     AriaRockerSwitchHorizontal800Flipped() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-r.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-l.svg")));
     }
 };
 
-struct AriaRockerSwitchVertical800 : SvgSwitch {
+struct AriaRockerSwitchVertical800 : SvgSwitchUnshadowed {
     AriaRockerSwitchVertical800() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-u.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-d.svg")));

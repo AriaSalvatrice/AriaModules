@@ -1,3 +1,8 @@
+/*  Copyright (C) 2019-2020 Aria Salvatrice
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 3.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
+*/
 #include "plugin.hpp"
 
 struct Splort : Module {
@@ -111,7 +116,7 @@ struct Splort : Module {
 struct SplortWidget : ModuleWidget {
     SplortWidget(Splort* module) {
         setModule(module);
-        setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Splort.svg")));
+        setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Splort.svg")));
         
         // Signature 
         addChild(createWidget<AriaSignature>(mm2px(Vec(5.899, 114.538))));

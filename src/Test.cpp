@@ -1,9 +1,9 @@
+/*  Copyright (C) 2019-2020 Aria Salvatrice
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 3.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
+*/
 #include "plugin.hpp"
-#include <ctime>
-#include <thread>
-#include <iomanip>
-#include <random>
-#include "portablesequence.hpp"
 
 // This module is to make all sorts of tests without having to recompile too much or deal with complex code interactions.
 
@@ -24,43 +24,15 @@ struct Test : Module {
         ENUMS(TEST_LIGHT, 12),
         NUM_LIGHTS
     };
-    dsp::ClockDivider testDivider;
-
 
     
     Test() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        testDivider.setDivision(44);
-
-        PortableSequence::Sequence sequence;
-        PortableSequence::Note note1;
-        // note1.start = 12.f;
-        // note1.pitch = 1.15f;
-        // note1.length = 4.f;
-        // note1.velocity = 1.5f;
-        // PortableSequence::Note note2;
-        // note2.start = 7.f;
-        // note2.pitch = 9454.15f;
-        // note2.length = 0.05f;
-        // PortableSequence::Note note3;
-        // note3.start = 8.f;
-        // note3.pitch = -4.25f;
-        // note3.length = 2.0f;
-        // note3.playProbability = 0.6f;
-        // sequence.addNote(note1);
-        // sequence.addNote(note2);
-        // sequence.addNote(note3);
-        // sequence.clampValues();
-        // sequence.calculateLength();
-        // sequence.sort();
-        // sequence.toClipboard();
-        sequence.fromClipboard();
-        DEBUG("Pasted!");
-        sequence.toClipboard();
-        DEBUG("Copied!");
+        
     }
 
     ~Test(){
+
     }
 
     void process(const ProcessArgs& args) override {
@@ -72,7 +44,7 @@ struct Test : Module {
 struct TestWidget : ModuleWidget {
     TestWidget(Test* module) {
         setModule(module);
-        setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Test.svg")));
+        setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Test.svg")));
         
         addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
         addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));

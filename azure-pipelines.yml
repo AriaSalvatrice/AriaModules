@@ -65,6 +65,7 @@ stages:
     - bash: |
         export RACK_DIR=$AGENT_TEMPDIRECTORY/Rack-SDK
         export CC=gcc
+        make dep
         make azure-win-dist
         mkdir artifacts_win/
         cp dist/*zip artifacts_win/
@@ -72,6 +73,7 @@ stages:
       condition: variables.isWindows
     - bash: |
         export RACK_DIR=$AGENT_TEMPDIRECTORY/Rack-SDK
+        make dep
         make dist
         mkdir artifacts_mac/
         cp dist/*zip artifacts_mac/
@@ -80,6 +82,7 @@ stages:
     - bash: |
         sudo apt install -y libglu-dev
         export RACK_DIR=$AGENT_TEMPDIRECTORY/Rack-SDK
+        make dep
         make dist
         mkdir artifacts_lin/
         cp dist/*zip artifacts_lin/

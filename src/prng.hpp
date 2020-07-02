@@ -1,9 +1,25 @@
+/*             DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+                    Version 2, December 2004
+
+ Copyright (C) 2004 Sam Hocevar <sam@hocevar.net>
+
+ Everyone is permitted to copy and distribute verbatim or modified
+ copies of this license document, and changing it is allowed as long
+ as the name is changed.
+
+            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+
+  0. You just DO WHAT THE FUCK YOU WANT TO.
+*/
 #pragma once
 
 // Deterministic seedable PRNG
 // Using xoroshiro128+ like VCV does - gives me a better distribution than mersenne twister.
 // http://prng.di.unimi.it/
 // https://community.vcvrack.com/t/controlling-the-random-seed/8005
+// 
+// The original algorithm is in the public domain, this is just a tiny wrapper around it.
 //
 // Running an automated test on Darius, I'm obtaining a distribution of results that look sane, 
 // not skewed to either side, which was a problem with std's mersenne twister.

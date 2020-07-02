@@ -5,4 +5,4 @@
 /plugin.dylib
 /plugin.dll
 .DS_Store
-duktape-2.4.0.tar.xz
+LuaJIT-2.0.5.tar.gz

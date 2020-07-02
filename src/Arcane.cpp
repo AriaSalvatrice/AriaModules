@@ -1,3 +1,9 @@
+/*  Copyright (C) 2019-2020 Aria Salvatrice
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 3.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 #include "plugin.hpp"
 #include "network.hpp"
 #include "quantizer.hpp"
@@ -23,7 +29,7 @@ std::string getCurrentFortuneDate() {
 }
 
 
-// TODO - It'd be cleaner to move it within the struct, but I couldn't figure out how to make threading work if I do that.
+// TODO: It'd be cleaner to move it within the struct, but I couldn't figure out how to make threading work if I do that.
 void downloadTodaysFortune() {
     // Craft the URL and the filename. The URL is rate-limited, but users should never run into it.
     std::string url = "https://raw.githubusercontent.com/AriaSalvatrice/Arcane/master/v1/" + getCurrentFortuneDate() + ".json";
@@ -42,7 +48,7 @@ struct ArcaneBase : Module {
     // LCD stuff
     Lcd::LcdStatus lcdStatus;
     dsp::ClockDivider lcdDivider; 
-    int lcdMode = 0; // FIXME change it to mode for consistency
+    int lcdMode = 0;
     std::string todaysFortuneDate = getCurrentFortuneDate(); // Used to display on the LCD. Once set it changes only on reset.
     
     // These are read from JSON
@@ -617,7 +623,7 @@ struct Aleister : ArcaneBase {
             if ( outputs[PATTERN_E_OUTPUT + i].isConnected() ) polyERequested = false;
         }
 
-        // setChannels(16) throws warnings, but works normally. Ignoring the error to see only useful warnings.
+        // setChannels(16) throws warnings, but works normally.
         // https://github.com/VCVRack/Rack/issues/1524 - compiler bug
         if (polyBRequested) {
             for (int i = 0; i < 16; i++) outputs[PATTERN_B_OUTPUT].setVoltage(patternB[i] ? 10.f : 0.f, i);
@@ -798,12 +804,8 @@ struct ArcaneWidget : ModuleWidget {
         addChild(cfb);
         
         // LCD
-        Lcd::LcdFramebufferWidget<Arcane> *lfb = new Lcd::LcdFramebufferWidget<Arcane>(module);
-        Lcd::LcdDrawWidget<Arcane> *ldw = new Lcd::LcdDrawWidget<Arcane>(module);
-        lfb->box.pos = mm2px(Vec(83.6, 41.4));
-        lfb->addChild(ldw);
-        addChild(lfb);
-                    
+        addChild(Lcd::createLcd<Arcane>(mm2px(Vec(83.6, 41.4)), module));
+
         // Quantizer
         addInput(createInput<AriaJackIn>(   mm2px(Vec(x + 00.0, y + 00.0)), module, Arcane::QNT_INPUT));
         addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 32.0, y + 00.0)), module, Arcane::QNT_OUTPUT));
@@ -861,7 +863,7 @@ struct ArcaneWidget : ModuleWidget {
         // Pulse width
         addParam(createParam<AriaKnob820>(mm2px(Vec(x + 3.8, y + 98.0)), module, Arcane::PULSE_WIDTH_PARAM));	
         
-        // Expander light
+        // Expander light (3.5mm from edge)
         addChild(createLight<SmallLight<OutputLight>>(mm2px(Vec(x + 38.1, 125.2)), module, Arcane::EXPANDER_LIGHT));
     }
 }; // ArcaneWidget
@@ -882,11 +884,7 @@ struct AtoutWidget : ModuleWidget {
         addChild(createWidget<AriaSignature>(mm2px(Vec(31.06, 114.5))));
         
         // LCD	
-        Lcd::LcdFramebufferWidget<Arcane> *fb = new Lcd::LcdFramebufferWidget<Arcane>(module);
-        Lcd::LcdDrawWidget<Arcane> *ldw = new Lcd::LcdDrawWidget<Arcane>(module);
-        fb->box.pos = mm2px(Vec(6.44, 41.4));
-        fb->addChild(ldw);
-        addChild(fb);
+        addChild(Lcd::createLcd<Arcane>(mm2px(Vec(6.44, 41.4)), module));
         
         // Screws
         addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
@@ -950,7 +948,6 @@ struct AtoutWidget : ModuleWidget {
         addParam(createParam<AriaKnob820>(mm2px(Vec(x + 3.8, y + 96.0)), module, Arcane::PULSE_WIDTH_PARAM));	
         
         // On Atout, the Pulse/Ramp rocker is at the bottom
-        // FIXME - It has an ugly shadow!
         addParam(createParam<AriaRockerSwitchHorizontal800>(mm2px(Vec(x + 3.8, y + 105.5)), module, Arcane::PULSE_RAMP_PARAM));
         
         // Expander light
@@ -1020,7 +1017,7 @@ struct AleisterWidget : ModuleWidget {
         }
         
         // Expander light
-        addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(1.4, 125.2)), module, Aleister::EXPANDER_LIGHT));		
+        addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(1.4, 125.2)), module, Aleister::EXPANDER_LIGHT));
     }
 }; // AleisterWidget
 

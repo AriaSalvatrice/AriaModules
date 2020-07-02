@@ -13,18 +13,18 @@
    height="5mm"
    viewBox="0 0 5.0000005 5.0000008"
    version="1.1"
-   id="svg1009"
+   id="svg5251"
    sodipodi:docname="pushbutton-500-on.svg"
    inkscape:version="0.92.4 (5da689c313, 2019-01-14)">
   <metadata
-     id="metadata1013">
+     id="metadata5255">
     <rdf:RDF>
       <cc:Work
          rdf:about="">
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -39,106 +39,126 @@
      inkscape:pageshadow="2"
      inkscape:window-width="1920"
      inkscape:window-height="1019"
-     id="namedview1011"
+     id="namedview5253"
      showgrid="false"
-     inkscape:document-units="mm"
-     inkscape:zoom="19.212821"
-     inkscape:cx="25.477779"
-     inkscape:cy="-1.8737486"
-     inkscape:window-x="-4"
-     inkscape:window-y="387"
+     inkscape:zoom="43.33875"
+     inkscape:cx="9.4488188"
+     inkscape:cy="9.448819"
+     inkscape:window-x="1076"
+     inkscape:window-y="442"
      inkscape:window-maximized="1"
-     inkscape:current-layer="svg1009" />
+     inkscape:current-layer="svg5251" />
   <defs
-     id="defs991">
+     id="defs5243">
     <linearGradient
-       id="b">
+       inkscape:collect="always"
+       id="linearGradient7068">
       <stop
+         style="stop-color:#ffffff;stop-opacity:0.26666668"
          offset="0"
-         stop-color="#fff"
-         stop-opacity=".73232323"
-         id="stop977" />
+         id="stop7064" />
       <stop
+         style="stop-color:#ffffff;stop-opacity:0"
          offset="1"
-         stop-color="#fff"
-         stop-opacity="0"
-         id="stop979" />
+         id="stop7066" />
     </linearGradient>
     <linearGradient
-       id="a"
-       osb:paint="solid"
-       gradientTransform="translate(3.2334699,0.12816856)">
+       inkscape:collect="always"
+       id="linearGradient7060">
       <stop
+         style="stop-color:#ffe57e;stop-opacity:1"
          offset="0"
-         stop-color="#ffcc03"
-         id="stop982" />
+         id="stop7056" />
+      <stop
+         style="stop-color:#ffcc03;stop-opacity:1"
+         offset="1"
+         id="stop7058" />
     </linearGradient>
     <linearGradient
-       id="c"
+       id="linearGradient5849">
+      <stop
+         style="stop-color:#ff00ff;stop-opacity:1"
+         id="stop5845"
+         stop-opacity=".42424244"
+         stop-color="#fff"
+         offset="0" />
+      <stop
+         style="stop-color:#ff0000;stop-opacity:1"
+         id="stop5847"
+         stop-opacity="0"
+         stop-color="#fff"
+         offset="1" />
+    </linearGradient>
+    <linearGradient
+       id="b"
        osb:paint="solid"
        gradientTransform="matrix(1,0,0,0.8,2e-7,31.699973)">
       <stop
          offset="0"
          stop-color="#fcaebb"
-         id="stop985" />
+         id="stop5238" />
     </linearGradient>
     <linearGradient
        xlink:href="#a"
-       id="e"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(0.63379637,0,0,0.64286182,-2.3295765,-28.67856)" />
-    <linearGradient
-       xlink:href="#b"
-       id="f"
+       id="d"
        x1="2.474134"
        y1="16.287979"
        x2="2.4603302"
        y2="19.024151"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(1.4444799,0,0,1.4444799,-1.0132246,-23.020928)" />
+       gradientTransform="matrix(2.3833945,0,0,2.3833945,-1.6968203,-38.00954)" />
     <linearGradient
-       xlink:href="#c"
-       id="d"
+       xlink:href="#b"
+       id="c"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(0.70423075,0,0,0.71429229,-2.8661968,-32.142848)" />
+       gradientTransform="matrix(1.15494,0,0,1.17144,-4.700563,-52.714275)" />
+    <linearGradient
+       id="a-4"
+       osb:paint="solid"
+       gradientTransform="translate(3.2334699,0.12816856)">
+      <stop
+         offset="0"
+         stop-color="#ffcc03"
+         id="stop936" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient7060"
+       id="linearGradient7062"
+       x1="4.1877122"
+       y1="0.72966093"
+       x2="4.186017"
+       y2="7.4008484"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.60606064,0,0,0.60606064,0.01515145,0.01515226)" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient7068"
+       id="linearGradient7070"
+       x1="4.0322042"
+       y1="0.99110156"
+       x2="4.0288143"
+       y2="4.7783904"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.49999993,0,0,0.49999993,0.44999999,0.25000112)" />
   </defs>
-  <flowRoot
-     xml:space="preserve"
-     style="font-style:normal;font-variant:normal;font-weight:400;font-stretch:normal;font-size:40px;line-height:1.25;font-family:'Segoe UI Historic';-inkscape-font-specification:'Segoe UI Historic';letter-spacing:0;word-spacing:0;fill:#000000;fill-opacity:1;stroke:none"
-     font-style="normal"
-     font-variant="normal"
-     font-weight="400"
-     font-stretch="normal"
-     font-size="40"
-     letter-spacing="0"
-     word-spacing="0"
-     transform="translate(-147.43359,-129.91299)"
-     id="flowRoot999">
-    <flowRegion
-   id="flowRegion995">
-      <path
-   d="M 100.71429,71.383568 H 457.14285 V 342.09786 H 100.71429 Z"
-   id="path993"
-   inkscape:connector-curvature="0" />
-    </flowRegion>
-    <flowPara
-   id="flowPara997" />
-  </flowRoot>  <circle
-     style="fill:url(#d);stroke-width:0.99999994;paint-order:markers fill stroke"
-     id="circle1001"
-     r="2.5"
-     cx="2.5"
-     cy="2.5" />
   <circle
-     style="fill:url(#e);stroke-width:1;paint-order:markers fill stroke"
-     id="circle1003"
-     cx="2.5"
-     cy="2.5"
-     r="2.25" />
+     cx="2.5000002"
+     cy="2.5000002"
+     id="circle5245"
+     style="fill:#083d45;fill-opacity:1;stroke-width:0.60975617;paint-order:markers fill stroke"
+     r="2.5000002" />
   <circle
-     style="fill:url(#f);stroke-width:0.99999988;paint-order:markers fill stroke"
-     id="circle1005"
-     cy="2.5"
-     cx="2.5"
-     r="2" />
+     cy="2.5000002"
+     cx="2.5000002"
+     id="circle5249"
+     style="fill:url(#linearGradient7062);fill-opacity:1;stroke-width:0.56910574;paint-order:markers fill stroke"
+     r="2.0000002" />
+  <ellipse
+     style="opacity:1;fill:url(#linearGradient7070);fill-opacity:1;stroke:none;stroke-width:0.29197353;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
+     id="path7054"
+     cx="2.5000002"
+     cy="1.6750003"
+     rx="1.2500001"
+     ry="0.92500001" />
 </svg>

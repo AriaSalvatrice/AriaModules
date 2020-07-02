@@ -1,3 +1,8 @@
+/*  Copyright (C) 2019-2020 Aria Salvatrice
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 3.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
+*/
 #include "plugin.hpp"
 #include <settings.hpp>
 
@@ -8,6 +13,8 @@
 
 // No, I will not debug race conditions with multiple instances
 static bool ariaSalvatriceUndularSingletonOwned = false;
+
+const int DIVISION = 32;
 
 struct Undular : Module {
     enum ParamIds {
@@ -62,6 +69,7 @@ struct Undular : Module {
     float lastTensionInput = 0.f;
     float lockX = 0.f;
     float lockY = 0.f;
+    float startupTimer = 0.f;
     dsp::SchmittTrigger uTrigger;
     dsp::SchmittTrigger dTrigger;
     dsp::SchmittTrigger lTrigger;
@@ -90,7 +98,7 @@ struct Undular : Module {
         
         // Feels just as fast as without a divider and saves noticeable CPU
         // NO, reducing this will NOT fix the jitter when locked.
-        scrollDivider.setDivision(32);
+        scrollDivider.setDivision(DIVISION);
     }
 
     // Do not save the status of the locks
@@ -249,13 +257,17 @@ struct Undular : Module {
     void process(const ProcessArgs& args) override {
         if (scrollDivider.process()){
             if (owningSingleton) {
-                position = APP->scene->rackScroll->offset;
-                updateScrollOffsets(args);
-                processJumpInputs(args);
-                processXYZInputs(args);
-                processCableInputs(args);
-                processLocks(args);
-                initialized = true; // On load, memorize last input but do not act upon it
+                if (startupTimer < (10.f / DIVISION)) {
+                    startupTimer += args.sampleTime;
+                } else {
+                    position = APP->scene->rackScroll->offset;
+                    updateScrollOffsets(args);
+                    processJumpInputs(args);
+                    processXYZInputs(args);
+                    processCableInputs(args);
+                    processLocks(args);
+                    initialized = true; // On load, memorize last input but do not act upon it
+                }
             }
         }
     }
@@ -273,7 +285,7 @@ struct AriaPushButtonPadlock820 : SvgSwitch {
 struct UndularWidget : ModuleWidget {
     UndularWidget(Undular* module) {
         setModule(module);
-        setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Undular.svg")));
+        setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Undular.svg")));
         
         // Signature 
         addChild(createWidget<AriaSignature>(mm2px(Vec(5.9, 114.538))));

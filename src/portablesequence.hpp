@@ -1,3 +1,17 @@
+/*             DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+                    Version 2, December 2004
+
+ Copyright (C) 2004 Sam Hocevar <sam@hocevar.net>
+
+ Everyone is permitted to copy and distribute verbatim or modified
+ copies of this license document, and changing it is allowed as long
+ as the name is changed.
+
+            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+
+  0. You just DO WHAT THE FUCK YOU WANT TO.
+*/
 #pragma once
 #include "plugin.hpp"
 
@@ -76,12 +90,10 @@ struct Sequence {
         });
     }
 
-    // Can also set it explicitly instead
+    // Length is best set explicitly, but can be calculated if missing
     void calculateLength(){
-        int lastStartingNote = 0;
         for(std::size_t i = 0; i < notes.size() - 1; i++)
-            lastStartingNote = (notes[i].start > notes[i+1].start) ? i : i+1;
-        length = notes[lastStartingNote].start + notes[lastStartingNote].length;
+            length = ((notes[i].start + notes[i].length) > length) ? (notes[i].start + notes[i].length) : length;
     }
 
     json_t* toJson() {
@@ -101,7 +113,7 @@ struct Sequence {
         json_error_t error;
         json_t* rootJ = json_loads(clipboard, 0, &error);
         if (!rootJ) {
-            WARN("Portable Sequence: Could not prase clipboard as JSON");
+            WARN("Portable Sequence: Could not parse clipboard as JSON");
             return false;
         }
         json_t* vcvrackSequenceJ = json_object_get(rootJ, "vcvrack-sequence");

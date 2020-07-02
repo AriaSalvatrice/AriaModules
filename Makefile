@@ -2,7 +2,7 @@
 RACK_DIR ?= ../..
 
 # FLAGS will be passed to both the C and C++ compiler
-FLAGS +=
+FLAGS += -Idep/include
 CFLAGS +=
 CXXFLAGS +=
 
@@ -17,6 +17,29 @@ SOURCES += $(wildcard src/*.cpp)
 # The compiled plugin and "plugin.json" are automatically added.
 DISTRIBUTABLES += res
 DISTRIBUTABLES += $(wildcard LICENSE*)
+DISTRIBUTABLES += $(wildcard doc/LICENSE*)
+
+
+# Testing Prototype's makefile to try out QuickJS & LuaJIT stuff
+
+include $(RACK_DIR)/arch.mk
+
+# QuickJS
+quickjs := dep/lib/quickjs/libquickjs.a
+DEPS += $(quickjs)
+OBJECTS += $(quickjs)
+QUICKJS_MAKE_FLAGS += prefix="$(DEP_PATH)"
+ifdef ARCH_WIN
+	QUICKJS_MAKE_FLAGS += CONFIG_WIN32=y
+endif
+$(quickjs):
+	cd dep && git clone "https://github.com/JerrySievert/QuickJS.git"
+	cd dep/QuickJS && git checkout 807adc8ca9010502853d471bd8331cdc1d376b94
+	cd dep/QuickJS && $(MAKE) $(QUICKJS_MAKE_FLAGS)
+	cd dep/QuickJS && $(MAKE) $(QUICKJS_MAKE_FLAGS) install
+
+
+
 
 # Include the Rack plugin Makefile framework
 include $(RACK_DIR)/plugin.mk
@@ -24,7 +47,6 @@ include $(RACK_DIR)/plugin.mk
 ifdef ARCH_WIN
 # extra dist target for Azure CI Windows build, as there is only 7zip available and no zip command
 azure-win-dist: all
-	rm -rf dist
 	mkdir -p dist/$(SLUG)
 	@# Strip and copy plugin binary
 	cp $(TARGET) dist/$(SLUG)/

@@ -1,11 +1,14 @@
+/*  Copyright (C) 2019-2020 Aria Salvatrice
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 3.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
+*/
 #include "plugin.hpp"
 
 // Required on OSX
 #include <array> 
 
-// This will contain both Bendlet and Big Bend.
-// Old file, for reference, will redo from scratch.
-
+// This is an early experiment kept for future reference, will redo entirely from scratch.
 
 struct Bendlet : Module {
     enum ParamIds {
@@ -77,7 +80,7 @@ struct AriaPbSlider : SvgSlider {
 struct BendletWidget : ModuleWidget {
     BendletWidget(Bendlet* module) {
         setModule(module);
-        setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Bendlet.svg")));
+        setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Bendlet.svg")));
 
         // Signature
         addChild(createWidget<AriaSignature>(mm2px(Vec(1.0, 114.538))));

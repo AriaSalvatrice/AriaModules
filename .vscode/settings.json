@@ -1,4 +1,12 @@
 {
+
+  "terminal.integrated.shell.windows": "c:\\msys64\\usr\\bin\\bash.exe",
+  "terminal.integrated.shellArgs.windows": ["--login"],
+  "terminal.integrated.env.windows": {
+      "CHERE_INVOKING": "1",
+      "MSYSTEM": "MINGW64"
+  },
+
     "files.associations": {
         "array": "cpp",
         "atomic": "cpp",
@@ -63,6 +71,9 @@
         "regex": "cpp",
         "iomanip": "cpp",
         "mutex": "cpp",
-        "shared_mutex": "cpp"
+        "shared_mutex": "cpp",
+        "*.xxx": "cpp",
+        "fstream": "cpp",
+        "cfenv": "cpp"
     }
 }
