@@ -5,8 +5,7 @@ Hiya hello hey hi. These here are a few cool and nice modules what for [VCV Rack
 
 I am some persuasion of multimedia artist interested in generative processes, creating [music](https://ariasalvatrice.bandcamp.com/releases) in genres I've come to call "_Gay Baroque Technopop_" and "_Pastoral Industrial_". All these synthesizer modules were designed for my own use first. With this collection, I aim to create an integrated, coherent system of opinionated, unique modules, primarily concerned with the live performance of aleatoric techno. Despite their focus, these modules are versatile, and integrate well with the wider VCV ecosystem. Many artists enjoyed using my modules in all sorts of music, and I hope you will like them too.
 
-FIXME: **If you wish to show your support for my synthesizer modules, tips are accepted:**    
-
+If you wish to send me a tip for my modules, at this time, donations are only accepted in the form of [pay-what-you-want album purchases](https://ariasalvatrice.bandcamp.com/releases). I am looking into providing additional donation options in the future.
 
 ----
 
@@ -79,7 +78,7 @@ There are three different form factors available of the same underlying module:
 - **Quack**: This smaller 7hp version only includes piano buttons, scale/key knobs, and a single polyphonic quantizer column from **QQQQ**.
 - **Q<**: 3hp. External input. Tiny.
 
-Those modules are all expanders of each other: the left one sends the scale to the right one, which forwards it to its own right. So if you only require two quantizer lines and no sequencer, you can use **Quack** on the left and **Q<** on the right, to use only half the size of **QQQQ**. If expander behavior is not desired, you can leave a gap between the instances, or TODO: disable expander features from the right-click menu.
+Those modules are all expanders of each other: the left one sends the scale to the right one, which forwards it to its own right. So if you only require two quantizer lines and no sequencer, you can use **Quack** on the left and **Q<** on the right, to use only half the size of **QQQQ**. If expander behavior is not desired, you can leave a gap between the instances.
 
 In this documentation, we're focusing on **QQQQ**: once you understand it, you'll immediately understand how to operate the smaller versions.
 
@@ -130,15 +129,15 @@ After patching in an unchanging **External Scale**, if you edit the settings fro
 
 You can save up to 16 scales in **QQQQ**. The slots are the top right of the module:
 
-- **Scene slot**: Those 16 buttons allow you to save 16 different scales. Navigating to a scene slot loads that scale, and changes to the scale from any source are saved to the active scene. TODO:You can right-click on those buttons to copy and paste scales. Currently, mapping the scene slots via MIDI doesn't work well.
-- **Scene input**: Navigates the scenes via CV. Useful with a step sequencer! Accepts 0V~10V by default, FIXME:but you can change it to notes in the C2~E3 range from the right-click menu. When plugged in, the buttons can't be operated manually anymore.
+- **Scene slot**: Those 16 buttons allow you to save 16 different scales. Navigating to a scene slot loads that scale, and changes to the scale from any source are saved to the active scene. You can right-click on those buttons to copy and paste scales. Mapping the scene slots via MIDI doesn't work well with every mapping module, but you can use the **Scene input** jack if necessary.
+- **Scene input**: Navigates the scenes via CV. Useful with a step sequencer! Accepts 0V~10V by default. When plugged in, the buttons can't be operated manually anymore.
 
 The scenes only save the scales: the positions of the knobs are global.
 
 
 ### Keyboard / Clipboard I/O
 
-TODO:With the **Keyboard** button, you can write down or paste chords from the clipboard, and have it transformed to **QQQQ** scenes! The three following notations are supported:
+With the **Keyboard** button, you can write down or paste chords from the clipboard, and have it transformed to **QQQQ** scenes! The three following notations are supported:
 
 - **Lead sheet notation**: Chord symbols, separated with spaces, commas, or hyphens. It's rather liberal in what it accepts, but kinda chokes on slash chords and crazy jazz combos. Still, it should get you close. For example, this is a valid input: `G am B, E/G# Bb - A,Fsus2  Csus2 D(add9)`
 - **Roman numeral notation**: Roman numerals, separated with spaces, commas, or hyphens. The tonic will be set to the current position of the **Key** knob. To denote minor chords, rather than use lowercase, you need an explicit `m` after the numeral: `III im7 VIsus4` rather than `III im VIsus4`. It's a lot more fiddly than lead sheet notation and will only recognize rather basic progressions. 
@@ -460,7 +459,7 @@ Contact
 
 You can send me comments on the [VCV Rack community forums](https://community.vcvrack.com/).    
 You can send me bug reports and feature requests on [my GitHub project page](https://github.com/AriaSalvatrice/AriaVCVModules/issues).    
-You can send me donations to FIXME: .    
+You can send me donations by [purchasing my albums](https://ariasalvatrice.bandcamp.com/).
 You can send me dog gifs to <woof@aria.dog>. 
 
 ttyl,

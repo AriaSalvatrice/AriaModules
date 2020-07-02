@@ -14,14 +14,6 @@ You should have received a copy of the GNU General Public License along with thi
    All three modules are the same, with different widgets.
 */ 
 
-// FIXME: When bound via MIDI, the scene buttons flicker. They do work however.
-// FIXME: On startup, it doesn't highlight notes
-// FIXME: It's possible to crash/lock by sending wrong data to scene (negative)? I did it via weird self-patching.
-// TODO: Right-click menu: scene range
-// TODO: Right-click on scene buttons
-// TODO: The COOL feature
-
-
 enum LcdModes {
     INIT_MODE,
     LOAD_MODE,
@@ -310,6 +302,10 @@ struct Qqqq : Module {
             }
         }
         sequence.toClipboard();
+        lcdStatus.lcdText1 = "  Copied!";
+        lcdLastInteraction = 0.f;
+        lcdMode = INIT_MODE;
+        lcdStatus.lcdDirty = true;
     }
 
     // Widget calls this directly
@@ -344,12 +340,48 @@ struct Qqqq : Module {
         scene = 0;
         params[SCENE_BUTTON_PARAM + 0].setValue(1.f);
         scaleToPiano();
-        lcdStatus.lcdText1 = " Imported!";
+        lcdStatus.lcdText1 = "  Pasted!";
         lcdLastInteraction = 0.f;
         lcdMode = INIT_MODE;
         lcdStatus.lcdDirty = true;
     }
 
+    void copyScenePortableSequence(int slot){
+        DEBUG("COPY %d", slot);
+        PortableSequence::Sequence sequence;
+        sequence.length = 1.f;
+        for (int j = 0; j < 12; j++) {
+            if (scale[slot][j] == true) {
+                PortableSequence::Note note;
+                note.length = 1.f;
+                note.start = 0.f;
+                note.pitch = (float) j * 1.f / 12.f;
+                sequence.addNote(note);
+            }
+        }
+        sequence.toClipboard();
+        lcdStatus.lcdText1 = "  Copied!";
+        lcdLastInteraction = 0.f;
+        lcdMode = INIT_MODE;
+        lcdStatus.lcdDirty = true;
+    }
+
+    void pasteScenePortableSequence(int slot){
+        DEBUG("PASTE %d", slot);
+        PortableSequence::Sequence sequence;
+        sequence.fromClipboard();
+        if (sequence.notes.size() <= 0) return;
+        for (size_t i = 0; i < 12; i++) scale[slot][i] = false;
+        for (size_t i = 0; i < sequence.notes.size(); i++){
+            int note = (int) (sequence.notes[i].pitch * 12.f + 60.f) % 12;
+            scale[slot][note] = true;
+        }
+        scaleToPiano();
+        lcdStatus.lcdText1 = "  Pasted!";
+        lcdLastInteraction = 0.f;
+        lcdMode = INIT_MODE;
+        lcdStatus.lcdDirty = true;
+    }
 
     void updateExpander(){
         if ((leftExpander.module and leftExpander.module->model == modelQqqq)
@@ -665,6 +697,8 @@ struct Qqqq : Module {
         if (lcdDivider.process()) {
             updateLcd(args);
         }
+        // Fixes MIDI-MAP turning off buttons
+        params[SCENE_BUTTON_PARAM + scene].setValue(1.f);
     }
 
 };
@@ -884,8 +918,8 @@ struct PushButtonKeyboard : SvgSwitchUnshadowed {
         SvgSwitchUnshadowed();
     }
 
-    void onDragStart(const event::DragStart& e) override {
-    	if (e.button != GLFW_MOUSE_BUTTON_LEFT) return;
+    void onButton(const event::Button& e) override {
+    	if (e.button != GLFW_MOUSE_BUTTON_LEFT) return; // Skip context menu
 
         ui::Menu* menu = createMenu();
 
@@ -909,15 +943,48 @@ struct PushButtonKeyboard : SvgSwitchUnshadowed {
         pastePortableSequenceItem->module = dynamic_cast<Qqqq*>(paramQuantity->module);
         menu->addChild(pastePortableSequenceItem);
 
-        SvgSwitchUnshadowed::onDragStart(e);
+        e.consume(this);
     }
 };
 
 // Scene buttons, we'll give them frames later.
 // Automating it breaks the module browser so you know what, I'm not even gonna bother being clever about this.
+struct CopyScenePortableSequenceItem : MenuItem {
+    Qqqq *module;
+    int slot;
+    void onAction(const event::Action &e) override {
+        module->copyScenePortableSequence(slot);
+    }
+};
+struct PasteScenePortableSequenceItem : MenuItem {
+    Qqqq *module;
+    int slot;
+    void onAction(const event::Action &e) override {
+        module->pasteScenePortableSequence(slot);
+    }
+};
+
 struct SceneButton : SvgSwitchUnshadowed {
-    SceneButton() {
-        SvgSwitch();
+    void onButton(const event::Button& e) override {
+        if (e.button == GLFW_MOUSE_BUTTON_RIGHT) {
+            ui::Menu* menu = createMenu();
+
+            CopyScenePortableSequenceItem *copyScenePortableSequenceItem = new CopyScenePortableSequenceItem();
+            copyScenePortableSequenceItem->text = "Copy Scene";
+            copyScenePortableSequenceItem->slot = paramQuantity->paramId - Qqqq::SCENE_BUTTON_PARAM;
+            copyScenePortableSequenceItem->module = dynamic_cast<Qqqq*>(paramQuantity->module);
+            menu->addChild(copyScenePortableSequenceItem);
+
+            PasteScenePortableSequenceItem *pasteScenePortableSequenceItem = new PasteScenePortableSequenceItem();
+            pasteScenePortableSequenceItem->text = "Paste Scene";
+            pasteScenePortableSequenceItem->slot = paramQuantity->paramId - Qqqq::SCENE_BUTTON_PARAM;
+            pasteScenePortableSequenceItem->module = dynamic_cast<Qqqq*>(paramQuantity->module);
+            menu->addChild(pasteScenePortableSequenceItem);
+
+            e.consume(this);
+        } else {
+            SvgSwitchUnshadowed::onButton(e);
+        }
     }
 };
 struct SceneButton01 : SceneButton {
