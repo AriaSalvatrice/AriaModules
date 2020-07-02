@@ -416,7 +416,7 @@ struct Qqqq : Module {
 
     // Sets the scene. The CV input overrides the buttons.
     void updateScene() {
-        if (inputs[SCENE_INPUT].getVoltageSum() >= 0.f) {
+        if (inputs[SCENE_INPUT].isConnected() && inputs[SCENE_INPUT].getVoltageSum() >= 0.f) {
             scene = (int) rescale(inputs[SCENE_INPUT].getVoltageSum(), 0.f, 10.f, 0.f, 15.2f);
             if (scene != lastScene) sceneChanged = true;
             for (int i = 0; i < 16; i++) params[SCENE_BUTTON_PARAM + i].setValue( (i == scene) ? 1.f : 0.f );
