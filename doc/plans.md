@@ -24,8 +24,6 @@ See VCV forums: https://community.vcvrack.com/t/diy-marbles-based-physical-matri
 
 # Srot: sort & rotate polyphonic channels
 
-Currently working on this one!
-
 I need this for my split/merge/sort system to be complete, and for people to start understanding how to use it and pay attention to the potential of the LINK feature. 
 
 The module takes and outputs a poly cable. It can sort it by value (ASC, DESC), by absolute value (ASC, DESC). It can limit output to a certain range of values. It can randomize channel order on trigger. It can output fewer channels than there is input, or be set to have more channels than the last plugged in. It makes use of the LINK feature. 
@@ -34,8 +32,6 @@ The module takes and outputs a poly cable. It can sort it by value (ASC, DESC), 
 
 
 # Controllers that spring back
-
-Currently working on this one!
 
 Think pitchbend wheel. A series of controllers that can spring back, and can be used as pitchbend/modulation, with all sorts of neat features.
 
@@ -135,6 +131,7 @@ The processor gives meaning to the cells and provides outputs. Here's a possible
 
 
 
+
 # Alien communication device
 My very own take on the Turing machine. The spaceship of the alien princess leaves our solar system tomorrow. For now she graces earth with a song.
 
@@ -145,6 +142,8 @@ I want it to embrace repetitive, fractal, kaleidoscopic structures, without divi
 Keep the big knob. The big knob is great. When you turn it, you must hear it. And memory banks. 
 
 Build your own relationship to the intrument. It should be labeled in an alien language. The documentation should be absolutely worthless. Its buttons should have an obvious effect, but it should be impossible to explain what that effect is.
+
+
 
 
 # VVR - Voltage Voltage Rectification
@@ -158,6 +157,8 @@ If the player performs a step/hold perfectly, it gets passed to a specific group
 This project sounds fun, but it'd be a lot of work. I'd be much more eager to implement it if people are interested in doing something neat with it - especially if there's artists eager to turn it into some sort of participatory installation art. 
 
 And if someone's willing to help with that problem, we could use machine learning to parse the large corpus of existing Stepmania charts out there, and use it to generate stepcharts on the fly. 
+
+
 
 
 # Self-patched self-modifying step sequencer

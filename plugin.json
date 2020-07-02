@@ -10,7 +10,7 @@
   "pluginUrl": "https://github.com/AriaSalvatrice/AriaVCVModules",
   "manualUrl": "https://github.com/AriaSalvatrice/AriaVCVModules",
   "sourceUrl": "https://github.com/AriaSalvatrice/AriaVCVModules",
-  "donateUrl": "",
+  "donateUrl": "https://github.com/AriaSalvatrice/AriaVCVModules/blob/master/doc/donations.md",
   "changelogUrl": "https://github.com/AriaSalvatrice/AriaVCVModules/blob/master/CHANGELOG.md",
   "modules": [
     {
@@ -145,19 +145,10 @@
     {
       "slug": "Undular",
       "name": "Signature Series Undular",
-      "description": "Scroll the rack via CV for live performance. After initialization, waits 10 seconds before processing signals.\nIf locked out by mistake, save your patch and reload it, you will have 10 seconds to unplug UnDuLaR.",
+      "description": "Scroll the rack via CV for live performance. After initialization, waits 10 seconds before processing signals.\nIf locked out by mistake, save your patch and reload it, you will have 10 seconds to unplug UnDuLaR",
       "tags": [
         "Controller",
     		"Visual"
-      ]
-    },
-    {
-      "slug": "Test",
-      "name": "Test",
-      "description": "-",
-      "tags": [
-        "Controller",
-		    "Visual"
       ]
     },
     {

@@ -5,7 +5,7 @@ Hiya hello hey hi. These here are a few cool and nice modules what for [VCV Rack
 
 I am some persuasion of multimedia artist interested in generative processes, creating [music](https://ariasalvatrice.bandcamp.com/releases) in genres I've come to call "_Gay Baroque Technopop_" and "_Pastoral Industrial_". All these synthesizer modules were designed for my own use first. With this collection, I aim to create an integrated, coherent system of opinionated, unique modules, primarily concerned with the live performance of aleatoric techno. Despite their focus, these modules are versatile, and integrate well with the wider VCV ecosystem. Many artists enjoyed using my modules in all sorts of music, and I hope you will like them too.
 
-If you wish to send me a tip for my modules, at this time, donations are only accepted in the form of [pay-what-you-want album purchases](https://ariasalvatrice.bandcamp.com/releases). I am looking into providing additional donation options in the future.
+This module collection is free software. If you wish to send me a tip for my modules, at this time, donations can only be accepted in the form of [pay-what-you-want album purchases](https://ariasalvatrice.bandcamp.com/releases). I am looking into providing additional donation options in the future.
 
 ----
 
@@ -74,7 +74,7 @@ To finance her adventuring lifestyle, she has graciously accepted payment (in th
 
 There are three different form factors available of the same underlying module:
 
-- **Quatherina's Quality Quad Quantizer**  (or **QQQQ**): The full 20hp version, featuring piano buttons, a helpful LCD, 4 polyphonic quantizer columns, 16 scenes memory, and a high definition portrait of Quatherina.
+- **Quatherina's Quality Quad Quantizer** (or **QQQQ**): The full 20hp version, featuring piano buttons, a helpful LCD, 4 polyphonic quantizer columns, 16 scenes memory, and a high definition portrait of Quatherina.
 - **Quack**: This smaller 7hp version only includes piano buttons, scale/key knobs, and a single polyphonic quantizer column from **QQQQ**.
 - **Q<**: 3hp. External input. Tiny.
 
@@ -419,7 +419,7 @@ The code of the Aria Salvatrice Signature Series Synthesizer Modules is distribu
 
 ### Re-usable .hpp libraries
 
-Not that the code is very good, but some libraries I created for my own use are available under the less restrictive terms of the [Do What The Fuck You Want To Public License](https://spdx.org/licenses/WTFPL.html), to allow every VCV creator to do what the fuck they want. The files in question are [`src/components.hpp`](src/components.hpp), [`src/javascript.hpp`](src/javascript.hpp), [`src/lcd.hpp`](src/lcd.hpp), [`src/portablesequence.hpp`](src/portablesequence.hpp) [`src/prng.hpp`](src/prng.hpp), and [`src/quantizer.hpp`](src/quantizer.hpp).
+Not that the code is very good, but some libraries I created for my own use are available under the less restrictive terms of the [Do What The Fuck You Want To Public License](https://spdx.org/licenses/WTFPL.html), to allow every VCV creator to do what the fuck they want. The files in question are [`src/components.hpp`](src/components.hpp), [`src/javascript.hpp`](src/javascript.hpp), [`src/lcd.hpp`](src/lcd.hpp), [`src/portablesequence.hpp`](src/portablesequence.hpp), [`src/prng.hpp`](src/prng.hpp), and [`src/quantizer.hpp`](src/quantizer.hpp).
 
 ### Faceplates 
 
@@ -459,8 +459,8 @@ Contact
 
 You can send me comments on the [VCV Rack community forums](https://community.vcvrack.com/).    
 You can send me bug reports and feature requests on [my GitHub project page](https://github.com/AriaSalvatrice/AriaVCVModules/issues).    
-You can send me donations by [purchasing my albums](https://ariasalvatrice.bandcamp.com/).
-You can send me dog gifs to <woof@aria.dog>. 
+You can send me tips by [purchasing my albums](https://ariasalvatrice.bandcamp.com/).    
+You can send me dog gifs to <woof@aria.dog>.
 
 ttyl,
 

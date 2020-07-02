@@ -8,9 +8,7 @@ You should have received a copy of the GNU General Public License along with thi
 // Required on OSX
 #include <array> 
 
-// This will contain both Bendlet and Big Bend.
-// Old file, for reference, will redo from scratch.
-
+// This is an early experiment kept for future reference, will redo entirely from scratch.
 
 struct Bendlet : Module {
     enum ParamIds {

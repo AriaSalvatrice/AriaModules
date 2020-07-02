@@ -18,6 +18,8 @@
 // Using xoroshiro128+ like VCV does - gives me a better distribution than mersenne twister.
 // http://prng.di.unimi.it/
 // https://community.vcvrack.com/t/controlling-the-random-seed/8005
+// 
+// The original algorithm is in the public domain, this is just a tiny wrapper around it.
 //
 // Running an automated test on Darius, I'm obtaining a distribution of results that look sane, 
 // not skewed to either side, which was a problem with std's mersenne twister.

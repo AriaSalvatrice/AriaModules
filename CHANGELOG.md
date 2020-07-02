@@ -3,9 +3,10 @@ Changelog
 
 The versioning follows this standard: the first number corresponds to the VCV rack version used. The second number is increased any time a new module is added. The third number is increased when something is added or fixed without adding any new module.
 
-## UNRELEASED
 
-- Nothing
+
+
+## [1.5.0] - 2020-07-02
 
 ### Added
 
@@ -18,7 +19,6 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 - [CHANGE] All modules: Small changes to the visual design of various widgets. Includes improvements in accessibility to users with tritanopia.
 - [CHANGE] UnDuLaR: For the first 10 seconds after being initialized, UnDuLaR does nothing. This is a simpler way to remove a misconfigured instance than stopping the sample rate. 
 
-## NOT YET LOL
 
 
 
