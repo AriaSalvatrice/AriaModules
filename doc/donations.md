@@ -1,4 +1,4 @@
-This module collection of modules is free software. 
+This collection of modules is free software. 
 
 If you wish to send me a tip for my modules, at this time, donations can only be accepted in the form of [pay-what-you-want album purchases](https://ariasalvatrice.bandcamp.com/releases). Feel free to send me a message along with the donation: <woof@aria.dog>!
 
