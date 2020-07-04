@@ -382,6 +382,8 @@ Installation
 
 Those modules are part of the [VCV plugin library](https://vcvrack.com/plugins.html). This is the easiest way to install them and keep them up to date. You can also do things the hard way and [build them yourself](https://vcvrack.com/manual/Building#building-rack-plugins) if you have a good reason to do so, for example, if you hate yourself, or if you enjoy building random C++ projects off github as a hobby.
 
+If you build my plugin locally, you have to `make dep` before you `make dist`. 
+
 
 
 
@@ -411,9 +413,9 @@ The **UnDuLaR** module background uses the traditional yagasuri kimono pattern a
 Lawyer's corner
 ---------------
 
-Yeah, the rules are a bit complicated, but here goes the breakdown:
+Yeah, the rules are a bit complicated. If they cause licensing incompatibilities (besides the intended virality of the GPL) lemme know. Here goes the breakdown:
 
-### Source code of invidivual modules
+### Source code of individual modules
 
 The code of the Aria Salvatrice Signature Series Synthesizer Modules is distributed under the [GNU General Public License v3.0 only](https://spdx.org/licenses/GPL-3.0-only.html). The modules come without any warranty and might recklessly endanger life and limb, the usual.
 
@@ -423,7 +425,7 @@ Not that the code is very good, but some libraries I created for my own use are 
 
 ### Faceplates 
 
- [CC-BY-SA-4.0](https://creativecommons.org/licenses/by-sa/4.0/), with the exception of my signature logo, which is copyrighted. You may freely distribute your faceplate edits to the VCV community.
+ [CC-BY-SA-4.0](https://creativecommons.org/licenses/by-sa/4.0/), with the exception of my signature logo, which is copyrighted, and generally not part of my faceplates. You may freely distribute your faceplate edits to the VCV community.
 
 ### Components (knobs, jacks, etc)
 
@@ -433,7 +435,7 @@ CC-BY-SA-4.0. If you re-use them, I request that you do not entirely re-use my s
 
 Copyrighted. It's mine.
 
-**If you edit my code to use my modules as a base for your own altered modules, remove my signature from your faceplates**, even if you think your changes are trivial: I don't want to endorse and take credit for something I didn't vet or personally participate in. 
+**If you edit my code to use my modules as a base for your own altered modules, remove my signature from your faceplates**, even if you think your changes are trivial: I don't want to endorse and take credit for something I didn't vet or personally participate in.
 
 If you are faithfully porting my code to a fork of VCV Rack, are compiling binaries for another platform, or are otherwise distributing my modules as I designed them, keep the signature. If unsure, just ask.
 

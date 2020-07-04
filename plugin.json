@@ -152,6 +152,15 @@
       ]
     },
     {
+      "slug": "Test",
+      "name": "Test",
+      "description": "Scroll the rack via CV for live performance. After initialization, waits 10 seconds before processing signals.\nIf locked out by mistake, save your patch and reload it, you will have 10 seconds to unplug UnDuLaR",
+      "tags": [
+        "Controller",
+    		"Visual"
+      ]
+    },
+    {
       "slug": "Blank",
       "name": "Signature Series 8hp Blank Plate",
       "description": "A complimentary blank plate and ♥-head screwdriver are included with every Signature Series module purchase",
