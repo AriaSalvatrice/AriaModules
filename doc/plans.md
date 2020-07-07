@@ -15,6 +15,19 @@ There's no such thing as stealing ideas, but there is such a thing as duplicatio
 
 
 
+# Fader Controllers
+
+Faders for my own use with a drawing tablet.
+
+- Very tall faders, about 70% as high as the module itself
+- Unipolar/Bipolar + Attenuator
+- Individual Outs + Poly Outs
+- Can label faders
+- Assign colors from cables
+
+
+
+
 # Matrix mixer using computer vision & physical marbles
 
 See VCV forums: https://community.vcvrack.com/t/diy-marbles-based-physical-matrix-mixer-controller-project/10132
@@ -169,7 +182,7 @@ The sequencer is programmed through self-patching to self-modify a sequence, muc
 
 There are global step controls accepting trig/gates. Upon receiving any step control trig/gate, the module starts waiting a window of 1ms, then processes all the trigs in batch, to apply precedence and addition rules. This way, all sort of logic can be performed with external modules (as those add at least one sample of delay). Trigs sent to other parts of the module received outside the window have no effect. Here are the step control trigs from high to low precedence:
 
-- Go to a random queued step, then clear the queue. If queue empty and no other step trig is received, cancel the wait window.
+- Go to a random queued step, then clear the queue. If queue empty, ignore.
 - Random teleport to any step
 - Random walk (wrap around)
 - Go back a step (wrap around at the start)
@@ -188,7 +201,6 @@ Each step also has CV trigger inputs. Simultaneous trigs operating on scale degr
 - -3 scale degree
 - -1 octave
 - Queue this to be the next step, after the current trig wait window
-- Make this the current step after current trig wait window is over
 
 Each step has multiple trig outs:
 

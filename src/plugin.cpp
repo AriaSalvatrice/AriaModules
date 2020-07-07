@@ -23,8 +23,9 @@ void init(Plugin* p) {
     p->addModel(modelQuack);
     p->addModel(modelQ);
 
-    // Sequencer
+    // Sequencers
     p->addModel(modelDarius);
+    p->addModel(modelSolomon);
     
     // Arcane
     p->addModel(modelArcane);

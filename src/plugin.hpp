@@ -27,8 +27,9 @@ extern Model *modelQqqq;
 extern Model *modelQuack;
 extern Model *modelQ;
 
-// Sequencer
+// Sequencers
 extern Model *modelDarius;
+extern Model *modelSolomon;
 
 // Arcane
 extern Model *modelArcane;

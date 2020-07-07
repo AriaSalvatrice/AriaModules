@@ -40,24 +40,43 @@ struct Test : Module {
     }
 };
 
+struct AriaSegmentDisplayBuffer : FramebufferWidget {
+    Test* module;
+    AriaSegmentDisplayBuffer(){
+    }
 
+    void draw(const DrawArgs& args) override {
+        dirty = true;
+    }
+};
 
-struct BraidsDisplay : TransparentWidget {
+struct AriaSegmentDisplay : TransparentWidget {
 	Test* module;
 	std::shared_ptr<Font> font;
 
-	BraidsDisplay() {
+	AriaSegmentDisplay() {
 		font = APP->window->loadFont(asset::plugin(pluginInstance, "res/dseg/DSEG14ClassicMini-Italic.ttf"));
 	}
 
 	void draw(const DrawArgs& args) override {
+
+		NVGcolor backgroundColor = nvgRGB(0x38, 0x38, 0x38);
+		NVGcolor borderColor = nvgRGB(0x10, 0x10, 0x10);
+		nvgBeginPath(args.vg);
+		nvgRoundedRect(args.vg, 0.0, 0.0, box.size.x, box.size.y, 5.0);
+		nvgFillColor(args.vg, backgroundColor);
+		nvgFill(args.vg);
+		nvgStrokeWidth(args.vg, 1.0);
+		nvgStrokeColor(args.vg, borderColor);
+		nvgStroke(args.vg);
+
 		nvgFontSize(args.vg, 20);
 		nvgFontFaceId(args.vg, font->handle);
 		nvgTextLetterSpacing(args.vg, 2.0);
 		nvgFillColor(args.vg, nvgRGB(0x0b, 0x52, 0x5d));
 		nvgText(args.vg, 0, 0, "~~~~~~~~~~", NULL);
 		nvgFillColor(args.vg, nvgRGB(0xc1, 0xf0, 0xf2));
-		nvgText(args.vg, 0, 0, "hi!gamers", NULL);
+		nvgText(args.vg, 0, 0, "hi!hello", NULL);
 	}
 };
 
@@ -78,12 +97,16 @@ struct TestWidget : ModuleWidget {
             // addOutput(createOutput<AriaJackOut>(mm2px(Vec(20.0, 8.0 + i * 10.0)), module, Test::TEST_OUTPUT + i));
         }
 
-        BraidsDisplay* display = new BraidsDisplay();
-        display->box.pos = mm2px(Vec(5.0, 80.0));
-        display->box.size = mm2px(Vec(31.0, 10.0));
+        AriaSegmentDisplay* display = new AriaSegmentDisplay();
         display->module = module;
-        addChild(display);
-
+        // display->box.pos = mm2px(Vec(5.0, 80.0));
+        display->box.size = mm2px(Vec(31.0, 10.0));
+        AriaSegmentDisplayBuffer* fb = new AriaSegmentDisplayBuffer();
+        fb->box.pos = mm2px(Vec(5.0, 80.0));
+        // fb->box.size = mm2px(Vec(31.0, 10.0));
+        fb->addChild(display);
+        addChild(fb);
+        // addChild(display);
     }
 };
 
