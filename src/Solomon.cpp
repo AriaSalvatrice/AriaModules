@@ -8,6 +8,7 @@ You should have received a copy of the GNU General Public License along with thi
 // For now, only a 8-node version. If there is interest, other versions can be made later.
 
 // TODO: Portable sequences!
+// FIXME: Garbage data, way too much. Something's wrong, IDK what.
 
 
 #include "plugin.hpp"
@@ -86,6 +87,7 @@ struct Solomon : Module {
     // Global
     int stepType = -1;
     size_t currentNode = 0;
+    size_t lastNode = 0;
     size_t selectedQueueNode = 0;
     float readWindow = -1.f; // -1 when closed
     std::array<bool, 12> scale;
@@ -191,11 +193,27 @@ struct Solomon : Module {
     }
 
     void subOct(size_t node) {
-        // FIXME: Implement
+        // subSd(cv[node] , 6);
+        if(cv[node] > getMaxCv()) {
+            cv[node] = getMaxCv();
+        }
+        cv[node] -= 1.f;
+        if(cv[node] < getMinCv()) {
+            DEBUG("SUB"); // FIXME: implement for real
+            cv[node] += 10.f;
+        }
     }
 
     void addOct(size_t node) {
-        // FIXME: Implement
+        // addSd(cv[node] , 6);
+        if(cv[node] < getMinCv()) {
+            cv[node] = getMinCv();
+        }
+        cv[node] += 1.f;
+        if(cv[node] > getMaxCv()) {
+            cv[node] -= 10.f;
+            DEBUG("ADD");
+        }
     }
 
     // Each node has 2 manual - and + buttons that are processed whether in a window or not.
@@ -319,7 +337,7 @@ struct Solomon : Module {
 
     void applyStep() {
         if (stepType == STEP_QUEUE) {
-
+            currentNode = selectedQueueNode;
         }
         if (stepType == STEP_TELEPORT) {
             
@@ -328,10 +346,18 @@ struct Solomon : Module {
             
         }
         if (stepType == STEP_BACK) {
-            
+            if (currentNode == 0) {
+                currentNode = NODES;
+            } else {
+                currentNode--;
+            }
         }
         if (stepType == STEP_FORWARD) {
-            
+            if (currentNode == NODES - 1) {
+                currentNode = 0;
+            } else {
+                currentNode++;
+            }
         }
     }
 
@@ -344,6 +370,7 @@ struct Solomon : Module {
     void processStep() {
         applyTransposes();
         applyQueue();
+        lastNode = currentNode;
         applyStep();
         clearTransposes();
 
@@ -430,7 +457,6 @@ struct SlideKnob : AriaKnob820 {
 };
 
 // Per-node segment display
-// FIXME: Add a framebuffer. It's supposed to work.
 template <typename TModule>
 struct SegmentDisplay : TransparentWidget {
 	TModule* module;
@@ -904,8 +930,6 @@ struct SolomonWidget16 : ModuleWidget {
         }
     }
 };
-
-
 
 
 } // Namespace Solomon
