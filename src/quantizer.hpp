@@ -190,6 +190,26 @@ inline std::string keyLcdName(const int& key){
     return "";
 }
 
+// The note/key name, two characters, sharp notation.
+// ! is an empty space as large as a normal character on the segment display font
+// The font I use has no # symbol so I use * instead.
+inline std::string keySegmentName(const int& key){
+    switch(key){
+        case 0:  return "C!";
+        case 1:  return "C*";
+        case 2:  return "D!";
+        case 3:  return "D*";
+        case 4:  return "E!";
+        case 5:  return "F!";
+        case 6:  return "F*";
+        case 7:  return "G!";
+        case 8:  return "G*";
+        case 9:  return "A!";
+        case 10: return "A*";
+        case 11: return "B!";
+    }
+    return "";
+}
 
 // The individual notes of the corresponding scale from the ScalesEnum, in the specified key
 inline std::array<bool, 12> validNotesInScaleKey(const int& scale, const int& key){
@@ -276,7 +296,7 @@ inline float quantize(float voltage, const std::array<bool, 12>& validNotes, int
 }
 
 
-// Note name and octave
+// Note name and octave, for display on Lcd
 inline std::string noteOctaveLcdName(float voltage) {
     voltage = voltage * 12.f + 60.f;
     int octave = (int) voltage / 12 - 1;
@@ -286,6 +306,15 @@ inline std::string noteOctaveLcdName(float voltage) {
     return noteName;
 }
 
+// Note name and octave, for display on segment display fonts (spaces are ! symbols)
+inline std::string noteOctaveSegmentName(float voltage) {
+    voltage = voltage * 12.f + 60.f;
+    int octave = (int) voltage / 12 - 1;
+    int note = (int) voltage % 12;
+    std::string noteName = keySegmentName(note);
+    noteName.append(std::to_string(octave));
+    return noteName;
+}
 
 // Which note to light on the LCD
 inline std::array<bool, 12> pianoDisplay(float voltage) {
