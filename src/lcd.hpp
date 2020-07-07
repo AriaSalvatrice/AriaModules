@@ -29,9 +29,8 @@ extern Plugin* pluginInstance;
 // Future modules will have a slightly larger LCD to fit descenders if desired.
 //
 // If you like this widget, it's probably reasonably easy to re-use in your own module. 
-// However, it's not very generic yet, since it has not been used much. And it's
-// not a good or an idiomatic design, I'm new at C++ stuff. And I have not
-// profiled its performance impact in detail.
+// However, it's not very generic. And it's not a good or an idiomatic design, I'm new
+// at C++ stuff. And I have not profiled its performance impact in detail.
 // 
 // If you're gonna reuse this code despite the warnings, please change my signature
 // color scheme to your own. You can recolor the letters in batch with a text editor.
@@ -47,7 +46,7 @@ enum LcdPage {
     PIANO_AND_TEXT2_PAGE
 };
 
-// FIXME: lcdLastInteraction should be a property of it
+// FIXME: lcdLastInteraction & lcdMode should be moved from other modules.
 // The LCD's status.
 struct LcdStatus {
     // The first line, not displayed on every page. 
@@ -65,6 +64,12 @@ struct LcdStatus {
     // LCD-specific page: whether to draw two lines of text, a piano, etc.
     int lcdPage = OFF_PAGE;
 
+    // Module-specific mode: this widget has no knowledge what it means.
+    int lcdMode = 0;
+
+    // For any info on a timer in the module. This widget has no knowledge what it means.
+    float lcdLastInteraction = 0.f;
+
     LcdStatus() {
         for (int i = 0; i < 12; i++) pianoDisplay[i] = false;
     }
@@ -75,8 +80,9 @@ struct LcdStatus {
 template <typename TModule>
 struct LcdFramebufferWidget : FramebufferWidget{
     TModule *module;
-    LcdFramebufferWidget(TModule *m){
-        module = m;
+
+    LcdFramebufferWidget(TModule *_module){
+        module = _module;
     }
 
     void step() override{
@@ -99,8 +105,8 @@ struct LcdDrawWidget : TransparentWidget {
     std::string lcdText1;
     std::string lcdText2;
 
-    LcdDrawWidget(TModule *module) {
-        this->module = module;
+    LcdDrawWidget(TModule *_module) {
+        this->module = _module;
         if (module) {
             box.size = mm2px(Vec(36.0, 10.0));
             for (int i = 0; i < 12; i++) // Unlit
