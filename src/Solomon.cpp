@@ -190,6 +190,14 @@ struct Solomon : Module {
         }
     }
 
+    void subOct(size_t node) {
+        // FIXME: Implement
+    }
+
+    void addOct(size_t node) {
+        // FIXME: Implement
+    }
+
     // Each node has 2 manual - and + buttons that are processed whether in a window or not.
     void processSdButtons() {
         for (size_t i = 0; i < NODES; i++) {
@@ -203,10 +211,11 @@ struct Solomon : Module {
     }
 
     // Each node has a manual Q button that is processed whether in a window or not.
+    // Unlike the CV, it toggles.
     void processQueueButtons() {
         for (size_t i = 0; i < NODES; i++) {
             if(queueTrigger[i].process(params[NODE_QUEUE_PARAM + i].getValue())) {
-                queue[i] = true;
+                queue[i] = ! queue[i];
             }
         }
     }
@@ -299,12 +308,12 @@ struct Solomon : Module {
         for(size_t i = 0; i < NODES; i++) {
             if (sub1Sd[i] ) subSd(i, 1);
             if (sub2Sd[i] ) subSd(i, 2);
-            if (sub3Sd[i] ) subSd(i, 3); // FIXME: Octaves
-            if (sub1Oct[i]) subSd(i, 1);
+            if (sub3Sd[i] ) subSd(i, 3);
+            if (sub1Oct[i]) subOct(i);
             if (add1Sd[i] ) addSd(i, 1);
             if (add2Sd[i] ) addSd(i, 2);
             if (add3Sd[i] ) addSd(i, 3);
-            if (add1Oct[i]) addSd(i, 1);
+            if (add1Oct[i]) addOct(i);
         }
     }
 
@@ -329,7 +338,6 @@ struct Solomon : Module {
     void processReadWindow() {
         readWindowQueue();
         readTransposes();
-        // readFallback();
     }
 
     // A read window just elapsed, we move to the next step and send the outputs
@@ -422,14 +430,13 @@ struct SlideKnob : AriaKnob820 {
 };
 
 // Per-node segment display
-// FIXME: Adding a framebuffer doesn't seem to work for fonts.
+// FIXME: Add a framebuffer. It's supposed to work.
 template <typename TModule>
 struct SegmentDisplay : TransparentWidget {
 	TModule* module;
     size_t node;
 	std::shared_ptr<Font> font;
-    std::string text = "*!*";
-    float lastCv = -20.f;
+    std::string text = "";
 
 	SegmentDisplay() {
 		font = APP->window->loadFont(asset::plugin(pluginInstance, "res/dseg/DSEG14ClassicMini-Italic.ttf"));
@@ -439,17 +446,32 @@ struct SegmentDisplay : TransparentWidget {
 		nvgFontSize(args.vg, 20);
 		nvgFontFaceId(args.vg, font->handle);
 		nvgTextLetterSpacing(args.vg, 2.0);
+
+        Vec textPos = mm2px(Vec(0.f, 10.f));
 		nvgFillColor(args.vg, nvgRGB(0x0b, 0x57, 0x63));
-		nvgText(args.vg, 0, 0, "~~~", NULL);
+		nvgText(args.vg, textPos.x, textPos.y, "~~~", NULL);
 		nvgFillColor(args.vg, nvgRGB(0xc1, 0xf0, 0xf2));
         if(module) {
-            if (module->cv[node] != lastCv) {
-                text = Quantizer::noteOctaveSegmentName(module->cv[node]);
-            }
-            lastCv = module->cv[node];
-            nvgText(args.vg, 0, 0, text.c_str(), NULL);
+            text = Quantizer::noteOctaveSegmentName(module->cv[node]);
+            nvgText(args.vg, textPos.x, textPos.y, text.c_str(), NULL);
         }
 	}
+};
+
+template <typename TModule>
+struct SegmentDisplayFramebuffer : FramebufferWidget {
+    TModule* module;
+    size_t node;
+    float lastStatus = -20.f;
+
+    void step() override{
+        if (module) { 
+            if (module->cv[node] != lastStatus) {
+                dirty = true;
+            }
+            FramebufferWidget::step();
+        }
+    }
 };
 
 
@@ -611,11 +633,15 @@ struct SolomonWidget8 : ModuleWidget {
 
             // Segment Display
             SegmentDisplay<Solomon<8>>* display = new SegmentDisplay<Solomon<8>>();
+            SegmentDisplayFramebuffer<Solomon<8>>* framebuffer = new SegmentDisplayFramebuffer<Solomon<8>>();
             display->module = module;
             display->node = i;
+            framebuffer->module = module;
+            framebuffer->node = i;
             display->box.size = mm2px(Vec(20.f, 10.f));
-            display->box.pos = mm2px(Vec(xOffset + 0.f, yOffset + 58.f));
-            addChild(display);
+            framebuffer->box.pos = mm2px(Vec(xOffset + 0.f, yOffset + 48.f));
+            framebuffer->addChild(display);
+            addChild(framebuffer);
             QueueWidget<Solomon<8>>* queueWidget = new QueueWidget<Solomon<8>>;
             queueWidget->box.pos = mm2px(Vec(xOffset + 0.25f, yOffset + 59.0f));
             queueWidget->module = module;
@@ -723,11 +749,15 @@ struct SolomonWidget4 : ModuleWidget {
 
             // Segment Display
             SegmentDisplay<Solomon<4>>* display = new SegmentDisplay<Solomon<4>>();
+            SegmentDisplayFramebuffer<Solomon<4>>* framebuffer = new SegmentDisplayFramebuffer<Solomon<4>>();
             display->module = module;
             display->node = i;
+            framebuffer->module = module;
+            framebuffer->node = i;
             display->box.size = mm2px(Vec(20.f, 10.f));
-            display->box.pos = mm2px(Vec(xOffset + 0.f, yOffset + 58.f));
-            addChild(display);
+            framebuffer->box.pos = mm2px(Vec(xOffset + 0.f, yOffset + 48.f));
+            framebuffer->addChild(display);
+            addChild(framebuffer);
             QueueWidget<Solomon<4>>* queueWidget = new QueueWidget<Solomon<4>>;
             queueWidget->box.pos = mm2px(Vec(xOffset + 0.25f, yOffset + 59.0f));
             queueWidget->module = module;
@@ -833,11 +863,15 @@ struct SolomonWidget16 : ModuleWidget {
 
             // Segment Display
             SegmentDisplay<Solomon<16>>* display = new SegmentDisplay<Solomon<16>>();
+            SegmentDisplayFramebuffer<Solomon<16>>* framebuffer = new SegmentDisplayFramebuffer<Solomon<16>>();
             display->module = module;
             display->node = i;
+            framebuffer->module = module;
+            framebuffer->node = i;
             display->box.size = mm2px(Vec(20.f, 10.f));
-            display->box.pos = mm2px(Vec(xOffset + 0.f, yOffset + 58.f));
-            addChild(display);
+            framebuffer->box.pos = mm2px(Vec(xOffset + 0.f, yOffset + 48.f));
+            framebuffer->addChild(display);
+            addChild(framebuffer);
             QueueWidget<Solomon<16>>* queueWidget = new QueueWidget<Solomon<16>>;
             queueWidget->box.pos = mm2px(Vec(xOffset + 0.25f, yOffset + 59.0f));
             queueWidget->module = module;
