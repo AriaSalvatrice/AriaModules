@@ -780,7 +780,7 @@ struct Darius : Module {
             if(params[SCALE_PARAM].getValue() == 0.f) {
                 text = "CHROMATIC";
             } else {
-                text = Quantizer::noteLcdName((int)params[KEY_PARAM].getValue());
+                text = Quantizer::keyLcdName((int)params[KEY_PARAM].getValue());
                 text.append(" ");
                 text.append(Quantizer::scaleLcdName((int)params[SCALE_PARAM].getValue()));
             }

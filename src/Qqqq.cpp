@@ -275,7 +275,7 @@ struct Qqqq : Module {
     // Widget calls this directly
     void importRomanNumeral(std::string text){
         Javascript::Runtime js;
-        std::string tonic = Quantizer::noteLcdName((int) params[KEY_PARAM].getValue());
+        std::string tonic = Quantizer::keyLcdName((int) params[KEY_PARAM].getValue());
         js.evaluateString(JavascriptLibraries::TONALJS);
         js.evaluateString(JavascriptLibraries::TOKENIZE);
         js.evaluateString(JavascriptLibraries::TOSCALEPOSITION);
@@ -632,7 +632,7 @@ struct Qqqq : Module {
             if(params[SCALE_PARAM].getValue() == 0.f) {
                 text = "CHROMATIC";
             } else {
-                text = Quantizer::noteLcdName((int)params[KEY_PARAM].getValue());
+                text = Quantizer::keyLcdName((int)params[KEY_PARAM].getValue());
                 text.append(" ");
                 text.append(Quantizer::scaleLcdName((int)params[SCALE_PARAM].getValue()));
             }

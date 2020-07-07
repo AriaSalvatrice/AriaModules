@@ -172,8 +172,8 @@ inline std::array<bool, 12> validNotesInScale(const int& scale){
 
 
 // The note/key name, two characters, sharp notation.
-inline std::string noteLcdName(const int& scale){
-    switch(scale){
+inline std::string keyLcdName(const int& key){
+    switch(key){
         case 0:  return "C ";
         case 1:  return "C#";
         case 2:  return "D ";
@@ -281,7 +281,7 @@ inline std::string noteOctaveLcdName(float voltage) {
     voltage = voltage * 12.f + 60.f;
     int octave = (int) voltage / 12 - 1;
     int note = (int) voltage % 12;
-    std::string noteName = noteLcdName(note);
+    std::string noteName = keyLcdName(note);
     noteName.append(std::to_string(octave));
     return noteName;
 }
