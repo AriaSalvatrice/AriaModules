@@ -8,7 +8,8 @@ You should have received a copy of the GNU General Public License along with thi
 // For now, only a 8-node version. If there is interest, other versions can be made later.
 
 // TODO: Portable sequences!
-// FIXME: Garbage data, way too much. Something's wrong, IDK what.
+// FIXME: NEXT is a terrible name. Change it
+// FUXME: NEXT is delayed by two steps. Why?
 
 
 #include "plugin.hpp"
@@ -137,6 +138,19 @@ struct Solomon : Module {
         lcdStatus.lcdMode = INIT_MODE;
         lcdStatus.lcdText1 = "Summoning..";
         lcdStatus.lcdText2 = "-=-=-=-=-=-";
+        for(size_t i = 0; i < NODES; i++) {
+            queue[i] = false;
+            windowQueue[i] = false;
+            next[i] = false;
+            sub1Sd[i] = false;
+            sub2Sd[i] = false;
+            sub3Sd[i] = false;
+            sub1Oct[i] = false;
+            add1Sd[i] = false;
+            add2Sd[i] = false;
+            add3Sd[i] = false;
+            add1Oct[i] = false;
+        }
     }
 
     // How many nodes are enqueued
@@ -193,27 +207,27 @@ struct Solomon : Module {
     }
 
     void subOct(size_t node) {
-        // subSd(cv[node] , 6);
-        if(cv[node] > getMaxCv()) {
-            cv[node] = getMaxCv();
-        }
-        cv[node] -= 1.f;
-        if(cv[node] < getMinCv()) {
-            DEBUG("SUB"); // FIXME: implement for real
-            cv[node] += 10.f;
-        }
+        // subSd(cv[node] , Quantizer::scaleDegreeCountInScale(scale));
+        // if(cv[node] > getMaxCv()) {
+        //     cv[node] = getMaxCv();
+        // }
+        // cv[node] -= 1.f;
+        // if(cv[node] < getMinCv()) {
+        //     DEBUG("SUB"); // FIXME: implement for real
+        //     cv[node] += 10.f;
+        // }
     }
 
     void addOct(size_t node) {
-        // addSd(cv[node] , 6);
-        if(cv[node] < getMinCv()) {
-            cv[node] = getMinCv();
-        }
-        cv[node] += 1.f;
-        if(cv[node] > getMaxCv()) {
-            cv[node] -= 10.f;
-            DEBUG("ADD");
-        }
+        // addSd(cv[node], Quantizer::scaleDegreeCountInScale(scale));
+        // if(cv[node] < getMinCv()) {
+        //     cv[node] = getMinCv();
+        // }
+        // cv[node] += 1.f;
+        // if(cv[node] > getMaxCv()) {
+        //     cv[node] -= 10.f;
+        //     DEBUG("ADD");
+        // }
     }
 
     // Each node has 2 manual - and + buttons that are processed whether in a window or not.
@@ -264,7 +278,7 @@ struct Solomon : Module {
     // During Read Windows, see if we received queue messages.
     void readWindowQueue() {
         for(size_t i = 0; i < NODES; i++) {
-            if (inputs[NODE_QUEUE_INPUT + i].getVoltageSum() > 0.f) {
+            if (inputs[NODE_QUEUE_INPUT + i].getVoltageSum() > 0.1f) {
                 windowQueue[i] = true;
             }
         }
@@ -311,14 +325,14 @@ struct Solomon : Module {
     // Doesn't need to be proper triggers.
     void readTransposes() {
         for(size_t i = 0; i < NODES; i++) {
-            if (inputs[NODE_SUB_1_SD_INPUT  + i].getVoltageSum() > 0.f)  sub1Sd[i] = true;
-            if (inputs[NODE_SUB_2_SD_INPUT  + i].getVoltageSum() > 0.f)  sub2Sd[i] = true;
-            if (inputs[NODE_SUB_3_SD_INPUT  + i].getVoltageSum() > 0.f)  sub3Sd[i] = true;
-            if (inputs[NODE_SUB_1_OCT_INPUT + i].getVoltageSum() > 0.f) sub1Oct[i] = true;
-            if (inputs[NODE_ADD_1_SD_INPUT  + i].getVoltageSum() > 0.f)  add1Sd[i] = true;
-            if (inputs[NODE_ADD_2_SD_INPUT  + i].getVoltageSum() > 0.f)  add2Sd[i] = true;
-            if (inputs[NODE_ADD_3_SD_INPUT  + i].getVoltageSum() > 0.f)  add3Sd[i] = true;
-            if (inputs[NODE_ADD_1_OCT_INPUT + i].getVoltageSum() > 0.f) add1Oct[i] = true;
+            if (inputs[NODE_SUB_1_SD_INPUT  + i].getVoltageSum() > 0.1f)  sub1Sd[i] = true;
+            if (inputs[NODE_SUB_2_SD_INPUT  + i].getVoltageSum() > 0.1f)  sub2Sd[i] = true;
+            if (inputs[NODE_SUB_3_SD_INPUT  + i].getVoltageSum() > 0.1f)  sub3Sd[i] = true;
+            if (inputs[NODE_SUB_1_OCT_INPUT + i].getVoltageSum() > 0.1f) sub1Oct[i] = true;
+            if (inputs[NODE_ADD_1_SD_INPUT  + i].getVoltageSum() > 0.1f)  add1Sd[i] = true;
+            if (inputs[NODE_ADD_2_SD_INPUT  + i].getVoltageSum() > 0.1f)  add2Sd[i] = true;
+            if (inputs[NODE_ADD_3_SD_INPUT  + i].getVoltageSum() > 0.1f)  add3Sd[i] = true;
+            if (inputs[NODE_ADD_1_OCT_INPUT + i].getVoltageSum() > 0.1f) add1Oct[i] = true;
         }
     }
 
@@ -333,6 +347,7 @@ struct Solomon : Module {
             if (add3Sd[i] ) addSd(i, 3);
             if (add1Oct[i]) addOct(i);
         }
+        clearTransposes();
     }
 
     void applyStep() {
@@ -340,10 +355,10 @@ struct Solomon : Module {
             currentNode = selectedQueueNode;
         }
         if (stepType == STEP_TELEPORT) {
-            
+            currentNode = 0;
         }
         if (stepType == STEP_WALK) {
-            
+            currentNode = 0;
         }
         if (stepType == STEP_BACK) {
             if (currentNode == 0) {
@@ -361,6 +376,11 @@ struct Solomon : Module {
         }
     }
 
+    void applyNext() {
+        for(size_t i = 0; i < NODES; i++) next[i] = false;
+        next[lastNode] = true;
+    }
+
     void processReadWindow() {
         readWindowQueue();
         readTransposes();
@@ -370,10 +390,11 @@ struct Solomon : Module {
     void processStep() {
         applyTransposes();
         applyQueue();
+        applyNext();
         lastNode = currentNode;
         applyStep();
         clearTransposes();
-
+        stepType = -1;
     }
 
     void process(const ProcessArgs& args) override {

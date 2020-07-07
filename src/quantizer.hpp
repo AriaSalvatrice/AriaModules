@@ -326,4 +326,12 @@ inline std::array<bool, 12> pianoDisplay(float voltage) {
     return notes;
 }
 
+inline size_t scaleDegreeCountInScale(std::array<bool, 12> scale) {
+    size_t count = 0;
+    for (size_t i = 0; i < 12; i++) {
+        if (scale[i]) count++;
+    }
+    return count;
+}
+
 } // namespace Quantizer
