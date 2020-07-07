@@ -7,7 +7,6 @@ You should have received a copy of the GNU General Public License along with thi
 // Self-modifying sequencer. Internally, the slots are called "nodes", "step" refers to the movement.
 // For now, only a 8-node version. If there is interest, other versions can be made later.
 
-// TODO: Clear queue each step or not: toggle
 // TODO: Portable sequences!
 
 #include "plugin.hpp"
@@ -16,7 +15,7 @@ You should have received a copy of the GNU General Public License along with thi
 
 namespace Solomon {
 
-const float READWINDOWDURATION = 1.f; // Seconds
+const float READWINDOWDURATION = 0.001f; // Seconds
 
 enum StepTypes {
     STEP_QUEUE,
@@ -43,7 +42,7 @@ struct Solomon : Module {
         MAX_PARAM,
         SLIDE_PARAM,
         TOTAL_NODES_PARAM,
-        CLEAR_ON_STEP_PARAM,
+        QUEUE_CLEAR_MODE_PARAM,
         ENUMS(NODE_SUB_1_SD_PARAM, NODES),
         ENUMS(NODE_ADD_1_SD_PARAM, NODES),
         ENUMS(NODE_QUEUE_PARAM, NODES),
@@ -56,6 +55,7 @@ struct Solomon : Module {
         STEP_WALK_INPUT,
         STEP_BACK_INPUT,
         STEP_FORWARD_INPUT,
+        RESET_INPUT,
         ENUMS(NODE_SUB_1_SD_INPUT, NODES),
         ENUMS(NODE_SUB_2_SD_INPUT, NODES),
         ENUMS(NODE_SUB_3_SD_INPUT, NODES),
@@ -84,8 +84,9 @@ struct Solomon : Module {
 
     // Global
     int stepType = -1;
+    size_t currentNode = 0;
+    size_t selectedQueueNode = 0;
     float readWindow = -1.f; // -1 when closed
-    int currentNode = 0;
     std::array<bool, 12> scale;
     dsp::SchmittTrigger stepQueueTrigger;
     dsp::SchmittTrigger stepTeleportTrigger;
@@ -97,9 +98,19 @@ struct Solomon : Module {
     // Per node
     float cv[NODES];
     std::array<bool, NODES> queue;
+    std::array<bool, NODES> windowQueue;
     std::array<bool, NODES> next;
+    std::array<bool, NODES> sub1Sd;
+    std::array<bool, NODES> sub2Sd;
+    std::array<bool, NODES> sub3Sd;
+    std::array<bool, NODES> sub1Oct;
+    std::array<bool, NODES> add1Sd;
+    std::array<bool, NODES> add2Sd;
+    std::array<bool, NODES> add3Sd;
+    std::array<bool, NODES> add1Oct;
     dsp::SchmittTrigger sub1SdTrigger[NODES];
     dsp::SchmittTrigger add1SdTrigger[NODES];
+    dsp::SchmittTrigger queueTrigger[NODES];
 
     Solomon() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -114,13 +125,15 @@ struct Solomon : Module {
         scale = Quantizer::validNotesInScaleKey(Quantizer::NATURAL_MINOR, 0);
 
         clearQueue();
+        clearWindowQueue();
         clearNext();
-        // Default note is 0V - C4
+        // Default note is 0V - C4 - part of the default scale
         for(size_t i = 0; i < NODES; i++) cv[i] = 0.f;
 
-        lcdStatus.lcdPage = Lcd::TEXT1_PAGE;
+        lcdStatus.lcdPage = Lcd::TEXT1_AND_TEXT2_PAGE;
         lcdStatus.lcdMode = INIT_MODE;
         lcdStatus.lcdText1 = "Summoning..";
+        lcdStatus.lcdText2 = "-=-=-=-=-=-";
     }
 
     // How many nodes are enqueued
@@ -129,28 +142,32 @@ struct Solomon : Module {
         for(size_t i = 0; i < NODES; i++) {
             if (queue[i] == true) count++;
         }
-        DEBUG("QUEUE: %d", count);
         return count;
     }
 
+    // It's safe for users to swap Min and Max. Clamped to avoid C10.
     float getMinCv() {
         if(params[MIN_PARAM].getValue() <= params[MAX_PARAM].getValue()) {
-            return params[MIN_PARAM].getValue() - 4.f;
+            return clamp(params[MIN_PARAM].getValue() - 4.f, -4.f, 5.85f);
         } else {
-            return params[MAX_PARAM].getValue() - 4.f;
+            return clamp(params[MAX_PARAM].getValue() - 4.f, -4.f, 5.85f);
         }
     }
 
+    // It's safe for users to swap Min and Max. Clamped to avoid C10.
     float getMaxCv() {
         if(params[MIN_PARAM].getValue() <= params[MAX_PARAM].getValue()) {
-            return params[MAX_PARAM].getValue() - 4.f;
+            return clamp(params[MAX_PARAM].getValue() - 4.f, -4.f, 5.85f);
         } else {
-            return params[MIN_PARAM].getValue() - 4.f;
+            return clamp(params[MIN_PARAM].getValue() - 4.f, -4.f, 5.85f);
         }
     }
 
     // Subtracts scale degrees. Wraps around on overflow.
     void subSd(size_t node, size_t sd) {
+        if(cv[node] > getMaxCv()) {
+            cv[node] = getMaxCv();
+        }
         for (size_t i = 0; i < sd; i++) {
             cv[node] = Quantizer::quantize(cv[node], scale, - 1);
             if(cv[node] < getMinCv()) {
@@ -161,6 +178,9 @@ struct Solomon : Module {
 
     // Adds scale degrees. Wraps around on overflow.
     void addSd(size_t node, size_t sd) {
+        if(cv[node] < getMinCv()) {
+            cv[node] = getMinCv();
+        }
         for (size_t i = 0; i < sd; i++) {
             cv[node] = Quantizer::quantize(cv[node], scale, 1);
             if(cv[node] > getMaxCv()) {
@@ -181,9 +201,17 @@ struct Solomon : Module {
         }
     }
 
-    // Opens a window if a step input is reached, and remembers what type it is.
-    // If it's a queue input, something must be enqueued. 
-    int readStepInputs() {
+    // Each node has a manual Q button that is processed whether in a window or not.
+    void processQueueButtons() {
+        for (size_t i = 0; i < NODES; i++) {
+            if(queueTrigger[i].process(params[NODE_QUEUE_PARAM + i].getValue())) {
+                queue[i] = true;
+            }
+        }
+    }
+
+    // If it's a queue input, something must be already enqueued.
+    int getStepInput() {
         if (stepQueueTrigger.process(inputs[STEP_QUEUE_INPUT].getVoltageSum()) && queueCount() > 0) return STEP_QUEUE;
         if (stepTeleportTrigger.process(inputs[STEP_TELEPORT_INPUT].getVoltageSum()))               return STEP_TELEPORT;
         if (stepWalkTrigger.process(inputs[STEP_WALK_INPUT].getVoltageSum()))                       return STEP_WALK;
@@ -196,35 +224,131 @@ struct Solomon : Module {
         for(size_t i = 0; i < NODES; i++) queue[i] = false;
     }
 
+
+    void clearWindowQueue() {
+        for(size_t i = 0; i < NODES; i++) windowQueue[i] = false;
+    }
+
     void clearNext() {
         for(size_t i = 0; i < NODES; i++) next[i] = false;
     }
 
     // During Read Windows, see if we received queue messages.
-    void updateQueue() {
+    void readWindowQueue() {
         for(size_t i = 0; i < NODES; i++) {
             if (inputs[NODE_QUEUE_INPUT + i].getVoltageSum() > 0.f) {
-                queue[i] = true;
+                windowQueue[i] = true;
             }
         }
     }
 
+    // Store what we selected out of the queue, remove it from the queue, and reset the queue if switch set to reset.
+    void applyQueue() {
+
+        // Only select from the queue if we know we have something in it, or we crash.
+        if (stepType == STEP_QUEUE) {
+            std::vector<size_t> validSteps;
+            for (size_t i = 0; i < NODES; i++) {
+                if (queue[i]) validSteps.push_back(i);
+            }
+            std::random_shuffle(validSteps.begin(), validSteps.end());
+            selectedQueueNode = validSteps[0];
+            queue[selectedQueueNode] = false;
+        }
+        
+        // Clear queue if requested
+        if (params[QUEUE_CLEAR_MODE_PARAM].getValue() == 1.f) clearQueue();
+
+        // Add window queue triggers no matter the configuration        
+        for (size_t i = 0; i < NODES; i++) {
+            if (!queue[i]) queue[i] = windowQueue[i];
+        }
+        clearWindowQueue();
+    }
+
+
+    void clearTransposes() {
+        for(size_t i = 0; i < NODES; i++) {
+            sub1Sd[i]  = false;
+            sub2Sd[i]  = false;
+            sub3Sd[i]  = false;
+            sub1Oct[i] = false;
+            add1Sd[i]  = false;
+            add2Sd[i]  = false;
+            add3Sd[i]  = false;
+            add1Oct[i] = false;
+        }
+    }
+
+    // Doesn't need to be proper triggers.
+    void readTransposes() {
+        for(size_t i = 0; i < NODES; i++) {
+            if (inputs[NODE_SUB_1_SD_INPUT  + i].getVoltageSum() > 0.f)  sub1Sd[i] = true;
+            if (inputs[NODE_SUB_2_SD_INPUT  + i].getVoltageSum() > 0.f)  sub2Sd[i] = true;
+            if (inputs[NODE_SUB_3_SD_INPUT  + i].getVoltageSum() > 0.f)  sub3Sd[i] = true;
+            if (inputs[NODE_SUB_1_OCT_INPUT + i].getVoltageSum() > 0.f) sub1Oct[i] = true;
+            if (inputs[NODE_ADD_1_SD_INPUT  + i].getVoltageSum() > 0.f)  add1Sd[i] = true;
+            if (inputs[NODE_ADD_2_SD_INPUT  + i].getVoltageSum() > 0.f)  add2Sd[i] = true;
+            if (inputs[NODE_ADD_3_SD_INPUT  + i].getVoltageSum() > 0.f)  add3Sd[i] = true;
+            if (inputs[NODE_ADD_1_OCT_INPUT + i].getVoltageSum() > 0.f) add1Oct[i] = true;
+        }
+    }
+
+    void applyTransposes() {
+        for(size_t i = 0; i < NODES; i++) {
+            if (sub1Sd[i] ) subSd(i, 1);
+            if (sub2Sd[i] ) subSd(i, 2);
+            if (sub3Sd[i] ) subSd(i, 3); // FIXME: Octaves
+            if (sub1Oct[i]) subSd(i, 1);
+            if (add1Sd[i] ) addSd(i, 1);
+            if (add2Sd[i] ) addSd(i, 2);
+            if (add3Sd[i] ) addSd(i, 3);
+            if (add1Oct[i]) addSd(i, 1);
+        }
+    }
+
+    void applyStep() {
+        if (stepType == STEP_QUEUE) {
+
+        }
+        if (stepType == STEP_TELEPORT) {
+            
+        }
+        if (stepType == STEP_WALK) {
+            
+        }
+        if (stepType == STEP_BACK) {
+            
+        }
+        if (stepType == STEP_FORWARD) {
+            
+        }
+    }
+
     void processReadWindow() {
-        updateQueue();
+        readWindowQueue();
+        readTransposes();
+        // readFallback();
     }
 
     // A read window just elapsed, we move to the next step and send the outputs
     void processStep() {
+        applyTransposes();
+        applyQueue();
+        applyStep();
+        clearTransposes();
 
     }
 
     void process(const ProcessArgs& args) override {
         processSdButtons();
+        processQueueButtons();
 
         if (readWindow < 0.f) {
             // We are not in a Read Window
-            stepType = readStepInputs();
+            stepType = getStepInput();
             if (stepType >= 0) readWindow = 0.f;
+
         }
         if (readWindow >= 0.f && readWindow < READWINDOWDURATION) {
             // We are in a Read Window
@@ -335,7 +459,7 @@ struct QueueWidget : Widget {
     size_t node;
 	FramebufferWidget* framebuffer;
 	SvgWidget* svgWidget;
-    bool lastStatus; // Start on the wrong one to force a refresh
+    bool lastStatus;
 
     QueueWidget() {
         framebuffer = new widget::FramebufferWidget;
@@ -366,7 +490,7 @@ struct NextWidget : Widget {
     size_t node;
 	FramebufferWidget* framebuffer;
 	SvgWidget* svgWidget;
-    bool lastStatus; // Start on the wrong one to force a refresh
+    bool lastStatus;
 
     NextWidget() {
         framebuffer = new widget::FramebufferWidget;
@@ -390,6 +514,38 @@ struct NextWidget : Widget {
     }
 };
 
+// The PLAY arrow on the segment display
+template <typename TModule>
+struct PlayWidget : Widget {
+	TModule* module;
+    size_t node;
+	FramebufferWidget* framebuffer;
+	SvgWidget* svgWidget;
+    size_t lastStatus; 
+
+    PlayWidget() {
+        framebuffer = new widget::FramebufferWidget;
+        addChild(framebuffer);
+        svgWidget = new widget::SvgWidget;
+        svgWidget->setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/solomon-play-lit.svg")));
+        framebuffer->box.size = svgWidget->box.size;
+        box.size = svgWidget->box.size;
+        framebuffer->addChild(svgWidget);
+        lastStatus = true;
+    }
+
+    void step() override {
+        if(module) {
+            if (module->currentNode != lastStatus) {
+                framebuffer->visible = (module->currentNode == node) ? true : false;
+            }
+            lastStatus = module->currentNode;
+        }
+        Widget::step();
+    }
+};
+
+
 
 struct SolomonWidget8 : ModuleWidget {
 
@@ -404,7 +560,10 @@ struct SolomonWidget8 : ModuleWidget {
         addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
         // Signature
-        addChild(createWidget<AriaSignature>(mm2px(Vec(35.0, 114.5))));
+        addChild(createWidget<AriaSignature>(mm2px(Vec(39.0f, 55.f))));
+
+        // Queue clear mode
+        addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(28.4f, 17.1f)), module, Solomon<8>::QUEUE_CLEAR_MODE_PARAM));
 
         // Global step inputs. Ordered counterclockwise.
         addInput(createInput<AriaJackIn>(mm2px(Vec(20.f, 17.f)), module, Solomon<8>::STEP_QUEUE_INPUT));
@@ -417,7 +576,7 @@ struct SolomonWidget8 : ModuleWidget {
         addParam(createParam<MinMaxKnob<Solomon<8>>>(mm2px(Vec(20.f, 32.f)), module, Solomon<8>::TOTAL_NODES_PARAM));
 
         // LCD
-        addChild(Lcd::createLcd<Solomon<8>>(mm2px(Vec(7.7f, 71.6f)), module));
+        addChild(Lcd::createLcd<Solomon<8>>(mm2px(Vec(7.7f, 69.6f)), module));
 
         addParam(createParam<ScaleKnob<Solomon<8>>>(mm2px(Vec(8.f, 81.f)), module, Solomon<8>::KEY_PARAM));
         addParam(createParam<ScaleKnob<Solomon<8>>>(mm2px(Vec(20.f, 81.f)), module, Solomon<8>::SCALE_PARAM));
@@ -427,9 +586,12 @@ struct SolomonWidget8 : ModuleWidget {
         addParam(createParam<MinMaxKnob<Solomon<8>>>(mm2px(Vec(20.f, 94.f)), module, Solomon<8>::MAX_PARAM));
         addParam(createParam<SlideKnob<Solomon<8>>>(mm2px(Vec(32.f, 94.f)), module, Solomon<8>::SLIDE_PARAM));
 
+        // Reset
+        addInput(createInput<AriaJackIn>(mm2px(Vec(8.f, 107.f)), module, Solomon<8>::RESET_INPUT));
+
         // Global output
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(15.f, 110.f)), module, Solomon<8>::GATE_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(25.f, 110.f)), module, Solomon<8>::CV_OUTPUT));
+        addOutput(createOutput<AriaJackOut>(mm2px(Vec(20.f, 107.f)), module, Solomon<8>::GATE_OUTPUT));
+        addOutput(createOutput<AriaJackOut>(mm2px(Vec(32.f, 107.f)), module, Solomon<8>::CV_OUTPUT));
 
         // Nodes
         float xOffset = 53.f;
@@ -463,6 +625,11 @@ struct SolomonWidget8 : ModuleWidget {
             nextWidget->module = module;
             nextWidget->node = i;
             addChild(nextWidget);
+            PlayWidget<Solomon<8>>* playWidget = new PlayWidget<Solomon<8>>;
+            playWidget->box.pos = mm2px(Vec(xOffset - 3.31f, yOffset + 51.25f));
+            playWidget->module = module;
+            playWidget->node = i;
+            addChild(playWidget);
 
             // Buttons
             addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(xOffset +  0.f, yOffset + 64.f)), module, Solomon<8>::NODE_SUB_1_SD_PARAM + i));
@@ -483,4 +650,4 @@ struct SolomonWidget8 : ModuleWidget {
 
 } // Namespace Solomon
 
-Model* modelSolomon = createModel<Solomon::Solomon<8>, Solomon::SolomonWidget8>("Solomon");
+Model* modelSolomon8 = createModel<Solomon::Solomon<8>, Solomon::SolomonWidget8>("Solomon8");
