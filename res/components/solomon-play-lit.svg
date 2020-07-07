@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   sodipodi:docname="solomon-play-lit.svg"
+   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
+   id="svg2997"
+   version="1.1"
+   viewBox="0 0 3.397208 6.794415"
+   height="6.794415mm"
+   width="3.397208mm">
+  <defs
+     id="defs2991" />
+  <sodipodi:namedview
+     inkscape:window-maximized="0"
+     inkscape:window-y="446"
+     inkscape:window-x="1210"
+     inkscape:window-height="1198"
+     inkscape:window-width="1080"
+     showgrid="false"
+     inkscape:document-rotation="0"
+     inkscape:current-layer="layer1"
+     inkscape:document-units="mm"
+     inkscape:cy="215.69698"
+     inkscape:cx="303.56278"
+     inkscape:zoom="0.35"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     borderopacity="1.0"
+     bordercolor="#666666"
+     pagecolor="#ffffff"
+     id="base" />
+  <metadata
+     id="metadata2994">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     transform="translate(-25.515682,-91.09684)"
+     id="layer1"
+     inkscape:groupmode="layer"
+     inkscape:label="Layer 1">
+    <path
+       id="rect2975"
+       style="display:inline;fill:#c1f0f2;fill-opacity:1;stroke-width:0.184312"
+       d="m 25.515682,91.09684 v 6.794415 l 3.397208,-3.397207 z" />
+  </g>
+</svg>

@@ -30,6 +30,7 @@ enum LcdModes {
     INIT_MODE,
     SCALE_MODE,
     MINMAX_MODE,
+    TOTAL_NODES_MODE,
     SLIDE_MODE
 };
 
@@ -41,6 +42,7 @@ struct Solomon : Module {
         MIN_PARAM,
         MAX_PARAM,
         SLIDE_PARAM,
+        TOTAL_NODES_PARAM,
         CLEAR_ON_STEP_PARAM,
         ENUMS(NODE_SUB_1_SD_PARAM, NODES),
         ENUMS(NODE_ADD_1_SD_PARAM, NODES),
@@ -236,7 +238,6 @@ struct Solomon : Module {
         }
     }
 
-
 };
 
 
@@ -247,7 +248,16 @@ struct Solomon : Module {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-
+// Total nodes knobs
+template <typename TModule>
+struct TotalNodesKnob : AriaKnob820 {
+    void onDragMove(const event::DragMove& e) override {
+        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLastInteraction = 0.f;
+        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdDirty = true;
+        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdMode = TOTAL_NODES_MODE;
+        AriaKnob820::onDragMove(e);
+    }
+};
 
 // Scale/key knobs
 template <typename TModule>
@@ -394,7 +404,7 @@ struct SolomonWidget8 : ModuleWidget {
         addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
         // Signature
-        addChild(createWidget<AriaSignature>(mm2px(Vec(38.0, 114.5))));
+        addChild(createWidget<AriaSignature>(mm2px(Vec(35.0, 114.5))));
 
         // Global step inputs. Ordered counterclockwise.
         addInput(createInput<AriaJackIn>(mm2px(Vec(20.f, 17.f)), module, Solomon<8>::STEP_QUEUE_INPUT));
@@ -403,16 +413,19 @@ struct SolomonWidget8 : ModuleWidget {
         addInput(createInput<AriaJackIn>(mm2px(Vec(10.f, 47.f)), module, Solomon<8>::STEP_WALK_INPUT));
         addInput(createInput<AriaJackIn>(mm2px(Vec(30.f, 47.f)), module, Solomon<8>::STEP_BACK_INPUT));
 
+        // Total Steps
+        addParam(createParam<MinMaxKnob<Solomon<8>>>(mm2px(Vec(20.f, 32.f)), module, Solomon<8>::TOTAL_NODES_PARAM));
+
         // LCD
-        addChild(Lcd::createLcd<Solomon<8>>(mm2px(Vec(7.7f, 65.3f)), module));
+        addChild(Lcd::createLcd<Solomon<8>>(mm2px(Vec(7.7f, 71.6f)), module));
 
-        addParam(createParam<ScaleKnob<Solomon<8>>>(mm2px(Vec(8.f, 74.f)), module, Solomon<8>::SCALE_PARAM));
-        addParam(createParam<ScaleKnob<Solomon<8>>>(mm2px(Vec(20.f, 74.f)), module, Solomon<8>::KEY_PARAM));
-        addInput(createInput<AriaJackIn>(mm2px(Vec(32.f, 74.f)), module, Solomon<8>::EXT_SCALE_INPUT));
+        addParam(createParam<ScaleKnob<Solomon<8>>>(mm2px(Vec(8.f, 81.f)), module, Solomon<8>::KEY_PARAM));
+        addParam(createParam<ScaleKnob<Solomon<8>>>(mm2px(Vec(20.f, 81.f)), module, Solomon<8>::SCALE_PARAM));
+        addInput(createInput<AriaJackIn>(mm2px(Vec(32.f, 81.f)), module, Solomon<8>::EXT_SCALE_INPUT));
 
-        addParam(createParam<MinMaxKnob<Solomon<8>>>(mm2px(Vec(8.f, 84.f)), module, Solomon<8>::MIN_PARAM));
-        addParam(createParam<MinMaxKnob<Solomon<8>>>(mm2px(Vec(20.f, 84.f)), module, Solomon<8>::MAX_PARAM));
-        addParam(createParam<SlideKnob<Solomon<8>>>(mm2px(Vec(32.f, 84.f)), module, Solomon<8>::SLIDE_PARAM));
+        addParam(createParam<MinMaxKnob<Solomon<8>>>(mm2px(Vec(8.f, 94.f)), module, Solomon<8>::MIN_PARAM));
+        addParam(createParam<MinMaxKnob<Solomon<8>>>(mm2px(Vec(20.f, 94.f)), module, Solomon<8>::MAX_PARAM));
+        addParam(createParam<SlideKnob<Solomon<8>>>(mm2px(Vec(32.f, 94.f)), module, Solomon<8>::SLIDE_PARAM));
 
         // Global output
         addOutput(createOutput<AriaJackOut>(mm2px(Vec(15.f, 110.f)), module, Solomon<8>::GATE_OUTPUT));
@@ -457,11 +470,11 @@ struct SolomonWidget8 : ModuleWidget {
             addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(xOffset +  5.f, yOffset + 71.f)), module, Solomon<8>::NODE_QUEUE_PARAM + i));
 
             // Outputs
-            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 10.f, yOffset +  80.f)), module, Solomon<8>::REACHED_OUTPUT + i));
-            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset +  0.f, yOffset +  85.f)), module, Solomon<8>::CHANCE_OUTPUT  + i));
-            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 10.f, yOffset +  90.f)), module, Solomon<8>::LATCH_OUTPUT   + i));
-            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset +  0.f, yOffset +  95.f)), module, Solomon<8>::NEXT_OUTPUT    + i));
-            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 10.f, yOffset + 100.f)), module, Solomon<8>::NODE_CV_OUTPUT + i));
+            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset +  0.f, yOffset +  80.f)), module, Solomon<8>::REACHED_OUTPUT + i));
+            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 10.f, yOffset +  80.f)), module, Solomon<8>::CHANCE_OUTPUT  + i));
+            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset +  5.f, yOffset +  88.f)), module, Solomon<8>::NODE_CV_OUTPUT + i));
+            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset +  0.f, yOffset +  96.f)), module, Solomon<8>::LATCH_OUTPUT   + i));
+            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 10.f, yOffset +  96.f)), module, Solomon<8>::NEXT_OUTPUT    + i));
 
             xOffset += 25.f;
         }
