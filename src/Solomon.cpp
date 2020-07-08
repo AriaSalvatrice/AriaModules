@@ -7,7 +7,6 @@ You should have received a copy of the GNU General Public License along with thi
 // Self-modifying sequencer. Internally, the slots are called "nodes", "step" refers to the movement.
 // Templates are used to create multiple versions: 4, 8, and 16 steps.
 
-// TODO: Make Key/Scale work
 // TODO: Make Reset work
 // TODO: Implement Save/Load buttons
 // TODO: Implement Total Nodes knob
@@ -151,7 +150,7 @@ struct Solomon : Module {
 
         outputDivider.setDivision(OUTPUTDIVIDER);
 
-        lcdStatus.lcdPage = Lcd::TEXT1_AND_TEXT2_PAGE;
+        lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
         lcdStatus.lcdMode = INIT_MODE;
         lcdStatus.lcdText1 = "LEARNING...";
         lcdStatus.lcdText2 = "SUMMONING..";
@@ -343,7 +342,6 @@ struct Solomon : Module {
         }
         clearWindowQueue();
     }
-
 
     void clearTransposes() {
         for(size_t i = 0; i < NODES; i++) {
@@ -747,7 +745,9 @@ struct SolomonWidget8 : ModuleWidget {
         addParam(createParam<MinMaxKnob<Solomon<8>>>(mm2px(Vec(20.f, 32.f)), module, Solomon<8>::TOTAL_NODES_PARAM));
 
         // LCD
-        addChild(Lcd::createLcd<Solomon<8>>(mm2px(Vec(7.7f, 68.8f)), module));
+        Lcd::LcdWidget<Solomon<8>> *lcd = new Lcd::LcdWidget<Solomon<8>>(module);
+        lcd->box.pos = mm2px(Vec(7.7f, 68.8f));
+        addChild(lcd);
 
         addParam(createParam<ScaleKnob<Solomon<8>>>(mm2px(Vec(3.f, 81.f)), module, Solomon<8>::KEY_PARAM));
         addParam(createParam<ScaleKnob<Solomon<8>>>(mm2px(Vec(15.f, 81.f)), module, Solomon<8>::SCALE_PARAM));
@@ -867,7 +867,7 @@ struct SolomonWidget4 : ModuleWidget {
         addParam(createParam<MinMaxKnob<Solomon<4>>>(mm2px(Vec(20.f, 32.f)), module, Solomon<4>::TOTAL_NODES_PARAM));
 
         // LCD
-        addChild(Lcd::createLcd<Solomon<4>>(mm2px(Vec(7.7f, 68.8f)), module));
+        // addChild(Lcd::createLcd<Solomon<4>>(mm2px(Vec(7.7f, 68.8f)), module));
 
         addParam(createParam<ScaleKnob<Solomon<4>>>(mm2px(Vec(3.f, 81.f)), module, Solomon<4>::KEY_PARAM));
         addParam(createParam<ScaleKnob<Solomon<4>>>(mm2px(Vec(15.f, 81.f)), module, Solomon<4>::SCALE_PARAM));
@@ -985,7 +985,7 @@ struct SolomonWidget16 : ModuleWidget {
         addParam(createParam<MinMaxKnob<Solomon<16>>>(mm2px(Vec(20.f, 32.f)), module, Solomon<16>::TOTAL_NODES_PARAM));
 
         // LCD
-        addChild(Lcd::createLcd<Solomon<16>>(mm2px(Vec(7.7f, 68.8f)), module));
+        // addChild(Lcd::createLcd<Solomon<16>>(mm2px(Vec(7.7f, 68.8f)), module));
 
         addParam(createParam<ScaleKnob<Solomon<16>>>(mm2px(Vec(3.f, 81.f)), module, Solomon<16>::KEY_PARAM));
         addParam(createParam<ScaleKnob<Solomon<16>>>(mm2px(Vec(15.f, 81.f)), module, Solomon<16>::SCALE_PARAM));

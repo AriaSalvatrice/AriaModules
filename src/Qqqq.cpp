@@ -134,7 +134,7 @@ struct Qqqq : Module {
         lcdMode = INIT_MODE;
         lcdLastInteraction = 0.f;
         lcdStatus.lcdText1 = " Q- ...";
-        lcdStatus.lcdPage = Lcd::TEXT1_PAGE;
+        lcdStatus.lcdLayout = Lcd::TEXT1_LAYOUT;
         // Initialize
         for (int i = 0; i < 16; i++) { for (int j = 0; j < 12; j++) { scale[i][j] = false; }}
         // C Minor in first scene
@@ -1166,7 +1166,10 @@ struct QqqqWidget : ModuleWidget {
         drawPianoKeys(4.7f, 102.8f, module);
 
         // The LCD
-        addChild(Lcd::createLcd<Qqqq>(mm2px(Vec(27.6f, 21.2f)), module));
+        // addChild(Lcd::createLcd<Qqqq>(mm2px(Vec(27.6f, 21.2f)), module));
+        Lcd::LcdWidget<Qqqq> *lcd = new Lcd::LcdWidget<Qqqq>(module);
+        lcd->box.pos = mm2px(Vec(27.6f, 21.2f));
+        addChild(lcd);
 
         // Scale, Key, External
         addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(25.f, 29.f)), module, Qqqq::SCALE_PARAM));
