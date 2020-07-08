@@ -5,7 +5,7 @@ You should have received a copy of the GNU General Public License along with thi
 */
 
 // Self-modifying sequencer. Internally, the slots are called "nodes", "step" refers to the movement.
-// For now, only a 8-node version. If there is interest, other versions can be made later.
+// Templates are used to create multiple versions: 4, 8, and 16 steps.
 
 // TODO: Make Key/Scale work
 // TODO: Make Reset work
@@ -157,6 +157,14 @@ struct Solomon : Module {
         lcdStatus.lcdText2 = "SUMMONING..";
     }
 
+    void updateScale() {
+        if (inputs[EXT_SCALE_INPUT].isConnected() ) {
+            for (size_t i = 0; i < 12; i++) scale[i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.f) ? true : false;
+        } else {
+            scale = Quantizer::validNotesInScaleKey( (int) params[SCALE_PARAM].getValue(), (int) params[KEY_PARAM].getValue());
+        }
+    }
+
     // How many nodes are enqueued
     size_t queueCount() {
         size_t count = 0;
@@ -166,7 +174,7 @@ struct Solomon : Module {
         return count;
     }
 
-    // It's safe for users to swap Min and Max. Clamped to avoid C10.
+    // It's safe for users to swap Min and Max. Clamped to avoid C10 breaking the display.
     float getMinCv() {
         if(params[MIN_PARAM].getValue() <= params[MAX_PARAM].getValue()) {
             return clamp(params[MIN_PARAM].getValue() - 4.f, -4.f, 5.85f);
@@ -175,7 +183,7 @@ struct Solomon : Module {
         }
     }
 
-    // It's safe for users to swap Min and Max. Clamped to avoid C10.
+    // It's safe for users to swap Min and Max. Clamped to avoid C10 breaking the display.
     float getMaxCv() {
         if(params[MIN_PARAM].getValue() <= params[MAX_PARAM].getValue()) {
             return clamp(params[MAX_PARAM].getValue() - 4.f, -4.f, 5.85f);
@@ -306,7 +314,7 @@ struct Solomon : Module {
     // During Read Windows, see if we received queue messages.
     void readWindowQueue() {
         for(size_t i = 0; i < NODES; i++) {
-            if (inputs[NODE_QUEUE_INPUT + i].getVoltageSum() > 0.1f) {
+            if (inputs[NODE_QUEUE_INPUT + i].getVoltageSum() > 0.f) {
                 windowQueue[i] = true;
             }
         }
@@ -353,14 +361,14 @@ struct Solomon : Module {
     // Doesn't need to be proper triggers.
     void readTransposes() {
         for(size_t i = 0; i < NODES; i++) {
-            if (inputs[NODE_SUB_1_SD_INPUT  + i].getVoltageSum() > 0.1f)  sub1Sd[i] = true;
-            if (inputs[NODE_SUB_2_SD_INPUT  + i].getVoltageSum() > 0.1f)  sub2Sd[i] = true;
-            if (inputs[NODE_SUB_3_SD_INPUT  + i].getVoltageSum() > 0.1f)  sub3Sd[i] = true;
-            if (inputs[NODE_SUB_1_OCT_INPUT + i].getVoltageSum() > 0.1f) sub1Oct[i] = true;
-            if (inputs[NODE_ADD_1_SD_INPUT  + i].getVoltageSum() > 0.1f)  add1Sd[i] = true;
-            if (inputs[NODE_ADD_2_SD_INPUT  + i].getVoltageSum() > 0.1f)  add2Sd[i] = true;
-            if (inputs[NODE_ADD_3_SD_INPUT  + i].getVoltageSum() > 0.1f)  add3Sd[i] = true;
-            if (inputs[NODE_ADD_1_OCT_INPUT + i].getVoltageSum() > 0.1f) add1Oct[i] = true;
+            if (inputs[NODE_SUB_1_SD_INPUT  + i].getVoltageSum() > 0.f)  sub1Sd[i] = true;
+            if (inputs[NODE_SUB_2_SD_INPUT  + i].getVoltageSum() > 0.f)  sub2Sd[i] = true;
+            if (inputs[NODE_SUB_3_SD_INPUT  + i].getVoltageSum() > 0.f)  sub3Sd[i] = true;
+            if (inputs[NODE_SUB_1_OCT_INPUT + i].getVoltageSum() > 0.f) sub1Oct[i] = true;
+            if (inputs[NODE_ADD_1_SD_INPUT  + i].getVoltageSum() > 0.f)  add1Sd[i] = true;
+            if (inputs[NODE_ADD_2_SD_INPUT  + i].getVoltageSum() > 0.f)  add2Sd[i] = true;
+            if (inputs[NODE_ADD_3_SD_INPUT  + i].getVoltageSum() > 0.f)  add3Sd[i] = true;
+            if (inputs[NODE_ADD_1_OCT_INPUT + i].getVoltageSum() > 0.f) add1Oct[i] = true;
         }
     }
 
@@ -481,8 +489,11 @@ struct Solomon : Module {
     }
 
     void process(const ProcessArgs& args) override {
+        updateScale();
+
         processSdButtons();
         processQueueButtons();
+
 
         if (readWindow < 0.f) {
             // We are not in a Read Window
