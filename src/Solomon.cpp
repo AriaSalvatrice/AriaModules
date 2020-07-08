@@ -489,11 +489,6 @@ struct Solomon : Module {
     }
 
     void process(const ProcessArgs& args) override {
-        updateScale();
-
-        processSdButtons();
-        processQueueButtons();
-
 
         if (readWindow < 0.f) {
             // We are not in a Read Window
@@ -512,8 +507,14 @@ struct Solomon : Module {
             readWindow = -1.f;
         }
 
-        // No need to process this many outputs at audio rates
-        if (outputDivider.process()) sendOutputs(args);
+        // No need to process this many outputs at audio rates, or to refresh those
+        // inputs this often.
+        if (outputDivider.process()) {
+            sendOutputs(args);
+            updateScale();
+            processSdButtons();
+            processQueueButtons();
+        }
 
     }
 

@@ -32,6 +32,9 @@ extern Plugin* pluginInstance;
 // However, it's not very generic. And it's not a good or an idiomatic design, I'm new
 // at C++ stuff. I am trying to retrofit older modules to use it more intelligently, too.
 // And I have not profiled its performance impact in detail.
+//
+// To see how it works, analyze Solomon.cpp - older modules do not implement the LCD
+// as cleanly. They are slowly being retrofitted to do it better.
 // 
 // If you're gonna reuse this code despite the warnings, please change my signature
 // color scheme to your own. You can recolor the letters in batch with a text editor.
