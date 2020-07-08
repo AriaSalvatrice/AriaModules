@@ -461,8 +461,8 @@ struct Solomon : Module {
 
             if (i == currentNode) {
                 outputs[NODE_GATE_OUTPUT   + i].setVoltage(10.f);
-                outputs[NODE_RANDOM_OUTPUT + i].setVoltage(10.f);
-                outputs[NODE_LATCH_OUTPUT  + i].setVoltage( (latch[i] == true ) ? 10.f : 0.f);
+                outputs[NODE_RANDOM_OUTPUT + i].setVoltage( (randomGate) ? 10.f : 0.f);
+                outputs[NODE_LATCH_OUTPUT  + i].setVoltage( (latch[i]) ? 10.f : 0.f);
             } else {
                 outputs[NODE_GATE_OUTPUT   + i].setVoltage(0.f );
                 outputs[NODE_RANDOM_OUTPUT + i].setVoltage(0.f);
