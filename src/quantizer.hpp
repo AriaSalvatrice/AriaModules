@@ -16,6 +16,12 @@
 
 namespace Quantizer {
 
+// A little offset to fudge against rounding errors.
+// Otherwise, problem arise, for example quantizing a signal that's already a valid semitone 
+// might give inconsistent results depending on the octave. FLoating point math is stupid.
+const float FUDGEOFFSET = 0.001f;
+
+
 // Except for Major/natural minor & pentatonic scales, I avoided scales that are modes of another.
 // I wanted a curation limited to interesting instant satisfaction presets that
 // work well with generative patterns and sound good to average modern western ears.
@@ -223,10 +229,7 @@ inline std::array<bool, 12> validNotesInScaleKey(const int& scale, const int& ke
 // After quantizing, can optionally transpose up or down by scale degrees
 inline float quantize(float voltage, const std::array<bool, 12>& validNotes, int transposeSd = 0) {
 
-    // A little offset to fudge against rounding errors.
-    // Otherwise, quantizing a signal that's already a valid semitone might give
-    // inconsistent results depending on the octave. FLoating point math is stupid.
-    voltage = voltage + 0.001f;
+    voltage = voltage + FUDGEOFFSET;
 
     float octave = floorf(voltage);
     float voltageOnFirstOctave = voltage - octave;

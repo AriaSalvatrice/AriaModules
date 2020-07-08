@@ -7,9 +7,14 @@ You should have received a copy of the GNU General Public License along with thi
 // Self-modifying sequencer. Internally, the slots are called "nodes", "step" refers to the movement.
 // For now, only a 8-node version. If there is interest, other versions can be made later.
 
-// TODO: Portable sequences!
-// FIXME: NEXT is a terrible name. Change it
-// FUXME: NEXT is delayed by two steps. Why?
+// TODO: Make Key/Scale work
+// TODO: Make Reset work
+// TODO: Implement Total Nodes knob
+// TODO: Make notes flash upon trigger
+// TODO: On reset
+// TODO: On randomize
+// TODO: JSON I/O
+// TODO: Portable sequences
 
 
 #include "plugin.hpp"
@@ -71,12 +76,12 @@ struct Solomon : Module {
         NUM_INPUTS
     };
     enum OutputIds {
-        GATE_OUTPUT,
-        CV_OUTPUT,
-        ENUMS(REACHED_OUTPUT, NODES),
-        ENUMS(CHANCE_OUTPUT, NODES),
-        ENUMS(LATCH_OUTPUT, NODES),
-        ENUMS(NEXT_OUTPUT, NODES),
+        GLOBAL_TRIG_OUTPUT,
+        GLOBAL_CV_OUTPUT,
+        ENUMS(NODE_GATE_OUTPUT, NODES),
+        ENUMS(NODE_RANDOM_OUTPUT, NODES),
+        ENUMS(NODE_LATCH_OUTPUT, NODES),
+        ENUMS(NODE_DELAY_OUTPUT, NODES),
         ENUMS(NODE_CV_OUTPUT, NODES),
         NUM_OUTPUTS
     };
@@ -86,9 +91,9 @@ struct Solomon : Module {
     };
 
     // Global
+    bool randomGate = false;
     int stepType = -1;
     size_t currentNode = 0;
-    size_t lastNode = 0;
     size_t selectedQueueNode = 0;
     float readWindow = -1.f; // -1 when closed
     std::array<bool, 12> scale;
@@ -97,13 +102,14 @@ struct Solomon : Module {
     dsp::SchmittTrigger stepWalkTrigger;
     dsp::SchmittTrigger stepBackTrigger;
     dsp::SchmittTrigger stepForwardTrigger;
+    dsp::PulseGenerator globalTrig;
     Lcd::LcdStatus lcdStatus;
 
     // Per node
     float cv[NODES];
     std::array<bool, NODES> queue;
     std::array<bool, NODES> windowQueue;
-    std::array<bool, NODES> next;
+    std::array<bool, NODES> delay;
     std::array<bool, NODES> sub1Sd;
     std::array<bool, NODES> sub2Sd;
     std::array<bool, NODES> sub3Sd;
@@ -112,6 +118,7 @@ struct Solomon : Module {
     std::array<bool, NODES> add2Sd;
     std::array<bool, NODES> add3Sd;
     std::array<bool, NODES> add1Oct;
+    std::array<bool, NODES> latch;
     dsp::SchmittTrigger sub1SdTrigger[NODES];
     dsp::SchmittTrigger add1SdTrigger[NODES];
     dsp::SchmittTrigger queueTrigger[NODES];
@@ -127,30 +134,19 @@ struct Solomon : Module {
         configParam(KEY_PARAM, 0.f, 11.f, 0.f, "Key");
         configParam(SCALE_PARAM, 0.f, (float) Quantizer::NUM_SCALES - 1, 2.f, "Scale");
         scale = Quantizer::validNotesInScaleKey(Quantizer::NATURAL_MINOR, 0);
-
-        clearQueue();
-        clearWindowQueue();
-        clearNext();
         // Default note is 0V - C4 - part of the default scale
         for(size_t i = 0; i < NODES; i++) cv[i] = 0.f;
 
+        clearQueue();
+        clearWindowQueue();
+        clearDelay();
+        clearTransposes();
+        clearLatches();
+
         lcdStatus.lcdPage = Lcd::TEXT1_AND_TEXT2_PAGE;
         lcdStatus.lcdMode = INIT_MODE;
-        lcdStatus.lcdText1 = "Summoning..";
-        lcdStatus.lcdText2 = "-=-=-=-=-=-";
-        for(size_t i = 0; i < NODES; i++) {
-            queue[i] = false;
-            windowQueue[i] = false;
-            next[i] = false;
-            sub1Sd[i] = false;
-            sub2Sd[i] = false;
-            sub3Sd[i] = false;
-            sub1Oct[i] = false;
-            add1Sd[i] = false;
-            add2Sd[i] = false;
-            add3Sd[i] = false;
-            add1Oct[i] = false;
-        }
+        lcdStatus.lcdText1 = "LEARNING...";
+        lcdStatus.lcdText2 = "SUMMONING..";
     }
 
     // How many nodes are enqueued
@@ -182,7 +178,7 @@ struct Solomon : Module {
 
     // Subtracts scale degrees. Wraps around on overflow.
     void subSd(size_t node, size_t sd) {
-        if(cv[node] > getMaxCv()) {
+        if (cv[node] > getMaxCv()) {
             cv[node] = getMaxCv();
         }
         for (size_t i = 0; i < sd; i++) {
@@ -195,7 +191,7 @@ struct Solomon : Module {
 
     // Adds scale degrees. Wraps around on overflow.
     void addSd(size_t node, size_t sd) {
-        if(cv[node] < getMinCv()) {
+        if (cv[node] < getMinCv()) {
             cv[node] = getMinCv();
         }
         for (size_t i = 0; i < sd; i++) {
@@ -206,28 +202,49 @@ struct Solomon : Module {
         }
     }
 
-    void subOct(size_t node) {
-        // subSd(cv[node] , Quantizer::scaleDegreeCountInScale(scale));
-        // if(cv[node] > getMaxCv()) {
-        //     cv[node] = getMaxCv();
-        // }
-        // cv[node] -= 1.f;
-        // if(cv[node] < getMinCv()) {
-        //     DEBUG("SUB"); // FIXME: implement for real
-        //     cv[node] += 10.f;
-        // }
+    // Does nothing if there's no valid note to jump to
+    void subOct(size_t node) {       
+        if (cv[node] - 1.f >= getMinCv() - Quantizer::FUDGEOFFSET) {
+            // We can remove an octave and stay in bounds
+            cv[node] -= 1.f;
+        } else {
+            // Separate octave from note
+            float nodeOctave = floorf(cv[node]);
+            float nodeVoltageOnFirstOctave = cv[node] - nodeOctave;
+            float maxOctave = floorf(getMaxCv());
+            float candidate = maxOctave + nodeVoltageOnFirstOctave; 
+            if (candidate <= getMaxCv() + Quantizer::FUDGEOFFSET && candidate >= getMinCv() - Quantizer::FUDGEOFFSET) {
+                // We can wrap around on the max octave
+                cv[node] = candidate;
+            } else {
+                candidate -= 1.f;
+                if (candidate <= getMaxCv() + Quantizer::FUDGEOFFSET && candidate >= getMinCv() - Quantizer::FUDGEOFFSET) {
+                    // We can wrap around one octave lower than the max octave
+                    cv[node] = candidate;
+                }
+            }
+        }
     }
 
+    // Does nothing if there's no valid note to jump to
+    // Same code as above with + and - and min and max flipped flipways
     void addOct(size_t node) {
-        // addSd(cv[node], Quantizer::scaleDegreeCountInScale(scale));
-        // if(cv[node] < getMinCv()) {
-        //     cv[node] = getMinCv();
-        // }
-        // cv[node] += 1.f;
-        // if(cv[node] > getMaxCv()) {
-        //     cv[node] -= 10.f;
-        //     DEBUG("ADD");
-        // }
+        if (cv[node] + 1.f <= getMaxCv() + Quantizer::FUDGEOFFSET) {
+            cv[node] += 1.f;
+        } else {
+            float nodeOctave = floorf(cv[node]);
+            float nodeVoltageOnFirstOctave = cv[node] - nodeOctave;
+            float minOctave = floorf(getMinCv());
+            float candidate = minOctave + nodeVoltageOnFirstOctave; 
+            if (candidate >= getMinCv() - Quantizer::FUDGEOFFSET && candidate <= getMaxCv() + Quantizer::FUDGEOFFSET) {
+                cv[node] = candidate;
+            } else {
+                candidate += 1.f;
+                if (candidate >= getMinCv() - Quantizer::FUDGEOFFSET && candidate <= getMaxCv() + Quantizer::FUDGEOFFSET) {
+                    cv[node] = candidate;
+                }
+            }
+        }
     }
 
     // Each node has 2 manual - and + buttons that are processed whether in a window or not.
@@ -266,13 +283,16 @@ struct Solomon : Module {
         for(size_t i = 0; i < NODES; i++) queue[i] = false;
     }
 
-
     void clearWindowQueue() {
         for(size_t i = 0; i < NODES; i++) windowQueue[i] = false;
     }
 
-    void clearNext() {
-        for(size_t i = 0; i < NODES; i++) next[i] = false;
+    void clearDelay() {
+        for(size_t i = 0; i < NODES; i++) delay[i] = false;
+    }
+
+    void clearLatches() {
+        for(size_t i = 0; i < NODES; i++) latch[i] = false;
     }
 
     // During Read Windows, see if we received queue messages.
@@ -340,33 +360,66 @@ struct Solomon : Module {
         for(size_t i = 0; i < NODES; i++) {
             if (sub1Sd[i] ) subSd(i, 1);
             if (sub2Sd[i] ) subSd(i, 2);
-            if (sub3Sd[i] ) subSd(i, 3);
+            if (sub3Sd[i] ) subSd(i, 8);
             if (sub1Oct[i]) subOct(i);
             if (add1Sd[i] ) addSd(i, 1);
             if (add2Sd[i] ) addSd(i, 2);
-            if (add3Sd[i] ) addSd(i, 3);
+            if (add3Sd[i] ) addSd(i, 9);
             if (add1Oct[i]) addOct(i);
         }
         clearTransposes();
     }
 
+    void applyDelay() {
+        for(size_t i = 0; i < NODES; i++) delay[i] = false;
+        delay[currentNode] = true;
+    }
+
     void applyStep() {
+        // If we reach this, we already have a selectedQueueNode
         if (stepType == STEP_QUEUE) {
             currentNode = selectedQueueNode;
         }
+
+        // Teleport never brings back to the current step
         if (stepType == STEP_TELEPORT) {
-            currentNode = 0;
+            std::vector<size_t> validNodes;
+            for (size_t i = 0; i < NODES; i++) {
+                if (i != currentNode) validNodes.push_back(i);
+            }
+            std::random_shuffle(validNodes.begin(), validNodes.end());
+            currentNode = validNodes[0];
         }
+
+        // Random walk can warp around
         if (stepType == STEP_WALK) {
-            currentNode = 0;
+            if (random::uniform() >= 0.5f) {
+                // Walk forward
+                if (currentNode == NODES - 1) {
+                    currentNode = 0;
+                } else {
+                    currentNode++;
+                }
+            } else {
+                // Walk back
+                if (currentNode == 0) {
+                    currentNode = NODES - 1;
+                } else {
+                    currentNode--;
+                }
+            }
         }
+
+        // Step back can warp around
         if (stepType == STEP_BACK) {
             if (currentNode == 0) {
-                currentNode = NODES;
+                currentNode = NODES - 1;
             } else {
                 currentNode--;
             }
         }
+
+        // Step forward can warp around
         if (stepType == STEP_FORWARD) {
             if (currentNode == NODES - 1) {
                 currentNode = 0;
@@ -376,9 +429,8 @@ struct Solomon : Module {
         }
     }
 
-    void applyNext() {
-        for(size_t i = 0; i < NODES; i++) next[i] = false;
-        next[lastNode] = true;
+    void updateLatch() {
+        latch[currentNode] = !latch[currentNode];
     }
 
     void processReadWindow() {
@@ -390,11 +442,33 @@ struct Solomon : Module {
     void processStep() {
         applyTransposes();
         applyQueue();
-        applyNext();
-        lastNode = currentNode;
+        applyDelay();
         applyStep();
+        updateLatch();
         clearTransposes();
+        randomGate = ( random::uniform() >= 0.5f ) ? true : false;
+        globalTrig.trigger(1e-3f);
         stepType = -1;
+    }
+
+    void sendOutputs(const ProcessArgs& args) {
+        outputs[GLOBAL_TRIG_OUTPUT].setVoltage( globalTrig.process(args.sampleTime) ? 10.f : 0.f);
+        outputs[GLOBAL_CV_OUTPUT].setVoltage(cv[currentNode]); // TODO: Slide
+
+        for(size_t i = 0; i < NODES; i++) {
+            outputs[NODE_DELAY_OUTPUT + i].setVoltage( (delay[i]) ? 10.f : 0.f);
+            outputs[NODE_CV_OUTPUT    + i].setVoltage( cv[i] );
+
+            if (i == currentNode) {
+                outputs[NODE_GATE_OUTPUT   + i].setVoltage(10.f);
+                outputs[NODE_RANDOM_OUTPUT + i].setVoltage(10.f);
+                outputs[NODE_LATCH_OUTPUT  + i].setVoltage( (latch[i] == true ) ? 10.f : 0.f);
+            } else {
+                outputs[NODE_GATE_OUTPUT   + i].setVoltage(0.f );
+                outputs[NODE_RANDOM_OUTPUT + i].setVoltage(0.f);
+                outputs[NODE_LATCH_OUTPUT  + i].setVoltage(0.f);
+            }
+        }
     }
 
     void process(const ProcessArgs& args) override {
@@ -417,6 +491,8 @@ struct Solomon : Module {
             processStep();
             readWindow = -1.f;
         }
+
+        sendOutputs(args);
     }
 
 };
@@ -427,6 +503,8 @@ struct Solomon : Module {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
 
 // Total nodes knobs
@@ -553,20 +631,20 @@ struct QueueWidget : Widget {
     }
 };
 
-// The NEXT message on the segment display
+// The DELAY message on the segment display
 template <typename TModule>
-struct NextWidget : Widget {
+struct DelayWidget : Widget {
 	TModule* module;
     size_t node;
 	FramebufferWidget* framebuffer;
 	SvgWidget* svgWidget;
     bool lastStatus;
 
-    NextWidget() {
+    DelayWidget() {
         framebuffer = new widget::FramebufferWidget;
         addChild(framebuffer);
         svgWidget = new widget::SvgWidget;
-        svgWidget->setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/solomon-next-lit.svg")));
+        svgWidget->setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/solomon-delay-lit.svg")));
         framebuffer->box.size = svgWidget->box.size;
         box.size = svgWidget->box.size;
         framebuffer->addChild(svgWidget);
@@ -576,9 +654,9 @@ struct NextWidget : Widget {
     void step() override {
         if(module) {
             if (module->queue[node] != lastStatus) {
-                framebuffer->visible = (module->next[node] == true) ? true : false;
+                framebuffer->visible = (module->delay[node] == true) ? true : false;
             }
-            lastStatus = module->next[node];
+            lastStatus = module->delay[node];
         }
         Widget::step();
     }
@@ -646,7 +724,7 @@ struct SolomonWidget8 : ModuleWidget {
         addParam(createParam<MinMaxKnob<Solomon<8>>>(mm2px(Vec(20.f, 32.f)), module, Solomon<8>::TOTAL_NODES_PARAM));
 
         // LCD
-        addChild(Lcd::createLcd<Solomon<8>>(mm2px(Vec(7.7f, 69.6f)), module));
+        addChild(Lcd::createLcd<Solomon<8>>(mm2px(Vec(7.7f, 68.8f)), module));
 
         addParam(createParam<ScaleKnob<Solomon<8>>>(mm2px(Vec(8.f, 81.f)), module, Solomon<8>::KEY_PARAM));
         addParam(createParam<ScaleKnob<Solomon<8>>>(mm2px(Vec(20.f, 81.f)), module, Solomon<8>::SCALE_PARAM));
@@ -660,8 +738,8 @@ struct SolomonWidget8 : ModuleWidget {
         addInput(createInput<AriaJackIn>(mm2px(Vec(8.f, 107.f)), module, Solomon<8>::RESET_INPUT));
 
         // Global output
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(20.f, 107.f)), module, Solomon<8>::GATE_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(32.f, 107.f)), module, Solomon<8>::CV_OUTPUT));
+        addOutput(createOutput<AriaJackOut>(mm2px(Vec(20.f, 107.f)), module, Solomon<8>::GLOBAL_TRIG_OUTPUT));
+        addOutput(createOutput<AriaJackOut>(mm2px(Vec(32.f, 107.f)), module, Solomon<8>::GLOBAL_CV_OUTPUT));
 
         // Nodes
         float xOffset = 53.f;
@@ -694,11 +772,11 @@ struct SolomonWidget8 : ModuleWidget {
             queueWidget->module = module;
             queueWidget->node = i;
             addChild(queueWidget);
-            NextWidget<Solomon<8>>* nextWidget = new NextWidget<Solomon<8>>;
-            nextWidget->box.pos = mm2px(Vec(xOffset + 9.85f, yOffset + 59.0f));
-            nextWidget->module = module;
-            nextWidget->node = i;
-            addChild(nextWidget);
+            DelayWidget<Solomon<8>>* delayWidget = new DelayWidget<Solomon<8>>;
+            delayWidget->box.pos = mm2px(Vec(xOffset + 9.85f, yOffset + 59.0f));
+            delayWidget->module = module;
+            delayWidget->node = i;
+            addChild(delayWidget);
             PlayWidget<Solomon<8>>* playWidget = new PlayWidget<Solomon<8>>;
             playWidget->box.pos = mm2px(Vec(xOffset - 3.31f, yOffset + 51.25f));
             playWidget->module = module;
@@ -711,11 +789,11 @@ struct SolomonWidget8 : ModuleWidget {
             addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(xOffset +  5.f, yOffset + 71.f)), module, Solomon<8>::NODE_QUEUE_PARAM + i));
 
             // Outputs
-            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset +  0.f, yOffset +  80.f)), module, Solomon<8>::REACHED_OUTPUT + i));
-            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 10.f, yOffset +  80.f)), module, Solomon<8>::CHANCE_OUTPUT  + i));
+            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset +  0.f, yOffset +  80.f)), module, Solomon<8>::NODE_GATE_OUTPUT + i));
+            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 10.f, yOffset +  80.f)), module, Solomon<8>::NODE_RANDOM_OUTPUT  + i));
             addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset +  5.f, yOffset +  88.f)), module, Solomon<8>::NODE_CV_OUTPUT + i));
-            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset +  0.f, yOffset +  96.f)), module, Solomon<8>::LATCH_OUTPUT   + i));
-            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 10.f, yOffset +  96.f)), module, Solomon<8>::NEXT_OUTPUT    + i));
+            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset +  0.f, yOffset +  96.f)), module, Solomon<8>::NODE_LATCH_OUTPUT   + i));
+            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 10.f, yOffset +  96.f)), module, Solomon<8>::NODE_DELAY_OUTPUT    + i));
 
             xOffset += 25.f;
         }
@@ -762,7 +840,7 @@ struct SolomonWidget4 : ModuleWidget {
         addParam(createParam<MinMaxKnob<Solomon<4>>>(mm2px(Vec(20.f, 32.f)), module, Solomon<4>::TOTAL_NODES_PARAM));
 
         // LCD
-        addChild(Lcd::createLcd<Solomon<4>>(mm2px(Vec(7.7f, 69.6f)), module));
+        addChild(Lcd::createLcd<Solomon<4>>(mm2px(Vec(7.7f, 68.8f)), module));
 
         addParam(createParam<ScaleKnob<Solomon<4>>>(mm2px(Vec(8.f, 81.f)), module, Solomon<4>::KEY_PARAM));
         addParam(createParam<ScaleKnob<Solomon<4>>>(mm2px(Vec(20.f, 81.f)), module, Solomon<4>::SCALE_PARAM));
@@ -776,8 +854,8 @@ struct SolomonWidget4 : ModuleWidget {
         addInput(createInput<AriaJackIn>(mm2px(Vec(8.f, 107.f)), module, Solomon<4>::RESET_INPUT));
 
         // Global output
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(20.f, 107.f)), module, Solomon<4>::GATE_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(32.f, 107.f)), module, Solomon<4>::CV_OUTPUT));
+        addOutput(createOutput<AriaJackOut>(mm2px(Vec(20.f, 107.f)), module, Solomon<4>::GLOBAL_TRIG_OUTPUT));
+        addOutput(createOutput<AriaJackOut>(mm2px(Vec(32.f, 107.f)), module, Solomon<4>::GLOBAL_CV_OUTPUT));
 
         // Nodes
         float xOffset = 53.f;
@@ -810,11 +888,11 @@ struct SolomonWidget4 : ModuleWidget {
             queueWidget->module = module;
             queueWidget->node = i;
             addChild(queueWidget);
-            NextWidget<Solomon<4>>* nextWidget = new NextWidget<Solomon<4>>;
-            nextWidget->box.pos = mm2px(Vec(xOffset + 9.85f, yOffset + 59.0f));
-            nextWidget->module = module;
-            nextWidget->node = i;
-            addChild(nextWidget);
+            DelayWidget<Solomon<4>>* delayWidget = new DelayWidget<Solomon<4>>;
+            delayWidget->box.pos = mm2px(Vec(xOffset + 9.85f, yOffset + 59.0f));
+            delayWidget->module = module;
+            delayWidget->node = i;
+            addChild(delayWidget);
             PlayWidget<Solomon<4>>* playWidget = new PlayWidget<Solomon<4>>;
             playWidget->box.pos = mm2px(Vec(xOffset - 3.31f, yOffset + 51.25f));
             playWidget->module = module;
@@ -827,11 +905,11 @@ struct SolomonWidget4 : ModuleWidget {
             addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(xOffset +  5.f, yOffset + 71.f)), module, Solomon<4>::NODE_QUEUE_PARAM + i));
 
             // Outputs
-            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset +  0.f, yOffset +  80.f)), module, Solomon<4>::REACHED_OUTPUT + i));
-            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 10.f, yOffset +  80.f)), module, Solomon<4>::CHANCE_OUTPUT  + i));
+            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset +  0.f, yOffset +  80.f)), module, Solomon<4>::NODE_GATE_OUTPUT + i));
+            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 10.f, yOffset +  80.f)), module, Solomon<4>::NODE_RANDOM_OUTPUT  + i));
             addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset +  5.f, yOffset +  88.f)), module, Solomon<4>::NODE_CV_OUTPUT + i));
-            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset +  0.f, yOffset +  96.f)), module, Solomon<4>::LATCH_OUTPUT   + i));
-            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 10.f, yOffset +  96.f)), module, Solomon<4>::NEXT_OUTPUT    + i));
+            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset +  0.f, yOffset +  96.f)), module, Solomon<4>::NODE_LATCH_OUTPUT   + i));
+            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 10.f, yOffset +  96.f)), module, Solomon<4>::NODE_DELAY_OUTPUT    + i));
 
             xOffset += 25.f;
         }
@@ -876,7 +954,7 @@ struct SolomonWidget16 : ModuleWidget {
         addParam(createParam<MinMaxKnob<Solomon<16>>>(mm2px(Vec(20.f, 32.f)), module, Solomon<16>::TOTAL_NODES_PARAM));
 
         // LCD
-        addChild(Lcd::createLcd<Solomon<16>>(mm2px(Vec(7.7f, 69.6f)), module));
+        addChild(Lcd::createLcd<Solomon<16>>(mm2px(Vec(7.7f, 68.8f)), module));
 
         addParam(createParam<ScaleKnob<Solomon<16>>>(mm2px(Vec(8.f, 81.f)), module, Solomon<16>::KEY_PARAM));
         addParam(createParam<ScaleKnob<Solomon<16>>>(mm2px(Vec(20.f, 81.f)), module, Solomon<16>::SCALE_PARAM));
@@ -890,8 +968,8 @@ struct SolomonWidget16 : ModuleWidget {
         addInput(createInput<AriaJackIn>(mm2px(Vec(8.f, 107.f)), module, Solomon<16>::RESET_INPUT));
 
         // Global output
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(20.f, 107.f)), module, Solomon<16>::GATE_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(32.f, 107.f)), module, Solomon<16>::CV_OUTPUT));
+        addOutput(createOutput<AriaJackOut>(mm2px(Vec(20.f, 107.f)), module, Solomon<16>::GLOBAL_TRIG_OUTPUT));
+        addOutput(createOutput<AriaJackOut>(mm2px(Vec(32.f, 107.f)), module, Solomon<16>::GLOBAL_CV_OUTPUT));
 
         // Nodes
         float xOffset = 53.f;
@@ -924,11 +1002,11 @@ struct SolomonWidget16 : ModuleWidget {
             queueWidget->module = module;
             queueWidget->node = i;
             addChild(queueWidget);
-            NextWidget<Solomon<16>>* nextWidget = new NextWidget<Solomon<16>>;
-            nextWidget->box.pos = mm2px(Vec(xOffset + 9.85f, yOffset + 59.0f));
-            nextWidget->module = module;
-            nextWidget->node = i;
-            addChild(nextWidget);
+            DelayWidget<Solomon<16>>* delayWidget = new DelayWidget<Solomon<16>>;
+            delayWidget->box.pos = mm2px(Vec(xOffset + 9.85f, yOffset + 59.0f));
+            delayWidget->module = module;
+            delayWidget->node = i;
+            addChild(delayWidget);
             PlayWidget<Solomon<16>>* playWidget = new PlayWidget<Solomon<16>>;
             playWidget->box.pos = mm2px(Vec(xOffset - 3.31f, yOffset + 51.25f));
             playWidget->module = module;
@@ -941,11 +1019,11 @@ struct SolomonWidget16 : ModuleWidget {
             addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(xOffset +  5.f, yOffset + 71.f)), module, Solomon<16>::NODE_QUEUE_PARAM + i));
 
             // Outputs
-            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset +  0.f, yOffset +  80.f)), module, Solomon<16>::REACHED_OUTPUT + i));
-            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 10.f, yOffset +  80.f)), module, Solomon<16>::CHANCE_OUTPUT  + i));
+            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset +  0.f, yOffset +  80.f)), module, Solomon<16>::NODE_GATE_OUTPUT + i));
+            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 10.f, yOffset +  80.f)), module, Solomon<16>::NODE_RANDOM_OUTPUT  + i));
             addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset +  5.f, yOffset +  88.f)), module, Solomon<16>::NODE_CV_OUTPUT + i));
-            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset +  0.f, yOffset +  96.f)), module, Solomon<16>::LATCH_OUTPUT   + i));
-            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 10.f, yOffset +  96.f)), module, Solomon<16>::NEXT_OUTPUT    + i));
+            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset +  0.f, yOffset +  96.f)), module, Solomon<16>::NODE_LATCH_OUTPUT   + i));
+            addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 10.f, yOffset +  96.f)), module, Solomon<16>::NODE_DELAY_OUTPUT    + i));
 
             xOffset += 25.f;
         }

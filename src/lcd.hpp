@@ -30,7 +30,8 @@ extern Plugin* pluginInstance;
 //
 // If you like this widget, it's probably reasonably easy to re-use in your own module. 
 // However, it's not very generic. And it's not a good or an idiomatic design, I'm new
-// at C++ stuff. And I have not profiled its performance impact in detail.
+// at C++ stuff. I am trying to retrofit older modules to use it more intelligently, too.
+// And I have not profiled its performance impact in detail.
 // 
 // If you're gonna reuse this code despite the warnings, please change my signature
 // color scheme to your own. You can recolor the letters in batch with a text editor.
