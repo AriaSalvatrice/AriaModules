@@ -16,6 +16,12 @@
 
 namespace Quantizer {
 
+// A little offset to fudge against rounding errors.
+// Otherwise, problem arise, for example quantizing a signal that's already a valid semitone 
+// might give inconsistent results depending on the octave. FLoating point math is stupid.
+const float FUDGEOFFSET = 0.001f;
+
+
 // Except for Major/natural minor & pentatonic scales, I avoided scales that are modes of another.
 // I wanted a curation limited to interesting instant satisfaction presets that
 // work well with generative patterns and sound good to average modern western ears.
@@ -172,8 +178,8 @@ inline std::array<bool, 12> validNotesInScale(const int& scale){
 
 
 // The note/key name, two characters, sharp notation.
-inline std::string noteLcdName(const int& scale){
-    switch(scale){
+inline std::string keyLcdName(const int& key){
+    switch(key){
         case 0:  return "C ";
         case 1:  return "C#";
         case 2:  return "D ";
@@ -190,6 +196,26 @@ inline std::string noteLcdName(const int& scale){
     return "";
 }
 
+// The note/key name, two characters, sharp notation.
+// ! is an empty space as large as a normal character on the segment display font
+// The font I use has no # symbol so I use * instead.
+inline std::string keySegmentName(const int& key){
+    switch(key){
+        case 0:  return "C!";
+        case 1:  return "C*";
+        case 2:  return "D!";
+        case 3:  return "D*";
+        case 4:  return "E!";
+        case 5:  return "F!";
+        case 6:  return "F*";
+        case 7:  return "G!";
+        case 8:  return "G*";
+        case 9:  return "A!";
+        case 10: return "A*";
+        case 11: return "B!";
+    }
+    return "";
+}
 
 // The individual notes of the corresponding scale from the ScalesEnum, in the specified key
 inline std::array<bool, 12> validNotesInScaleKey(const int& scale, const int& key){
@@ -203,10 +229,7 @@ inline std::array<bool, 12> validNotesInScaleKey(const int& scale, const int& ke
 // After quantizing, can optionally transpose up or down by scale degrees
 inline float quantize(float voltage, const std::array<bool, 12>& validNotes, int transposeSd = 0) {
 
-    // A little offset to fudge against rounding errors.
-    // Otherwise, quantizing a signal that's already a valid semitone might give
-    // inconsistent results depending on the octave. FLoating point math is stupid.
-    voltage = voltage + 0.001f;
+    voltage = voltage + FUDGEOFFSET;
 
     float octave = floorf(voltage);
     float voltageOnFirstOctave = voltage - octave;
@@ -275,17 +298,32 @@ inline float quantize(float voltage, const std::array<bool, 12>& validNotes, int
     return clamp(voltage, -10.f, 10.f);
 }
 
+// C3 = 0, C#5 = 1, D8 = 2, etc.
+inline int quantizeToPositionInOctave(float voltage, const std::array<bool, 12>& validNotes) {
+    voltage = quantize(voltage, validNotes);
+    voltage = voltage * 12.f + 60.f;
+    return (int) voltage % 12;
+}
 
-// Note name and octave
+// Note name and octave, for display on Lcd
 inline std::string noteOctaveLcdName(float voltage) {
     voltage = voltage * 12.f + 60.f;
     int octave = (int) voltage / 12 - 1;
     int note = (int) voltage % 12;
-    std::string noteName = noteLcdName(note);
+    std::string noteName = keyLcdName(note);
     noteName.append(std::to_string(octave));
     return noteName;
 }
 
+// Note name and octave, for display on segment display fonts (spaces are ! symbols)
+inline std::string noteOctaveSegmentName(float voltage) {
+    voltage = voltage * 12.f + 60.f;
+    int octave = (int) voltage / 12 - 1;
+    int note = (int) voltage % 12;
+    std::string noteName = keySegmentName(note);
+    noteName.append(std::to_string(octave));
+    return noteName;
+}
 
 // Which note to light on the LCD
 inline std::array<bool, 12> pianoDisplay(float voltage) {
@@ -295,6 +333,14 @@ inline std::array<bool, 12> pianoDisplay(float voltage) {
     for (int i = 0; i < 12; i++)
         notes[i] = ( i == note ) ? true : false;
     return notes;
+}
+
+inline size_t scaleDegreeCountInScale(std::array<bool, 12> scale) {
+    size_t count = 0;
+    for (size_t i = 0; i < 12; i++) {
+        if (scale[i]) count++;
+    }
+    return count;
 }
 
 } // namespace Quantizer

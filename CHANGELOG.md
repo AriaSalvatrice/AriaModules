@@ -4,13 +4,24 @@ Changelog
 The versioning follows this standard: the first number corresponds to the VCV rack version used. The second number is increased any time a new module is added. The third number is increased when something is added or fixed without adding any new module.
 
 
+## [1.5.1] - 2020-07-10
+
+### New modules
+- [NEW] Quale: Convert chords to scales and scales to chords, using Quatherina's polyphonic scale representation.
+
+### Changed
+
+- [CHANGE] Darius: The position of the Key, Min, and Max knobs have been swapped for consistency across the module collection. This visual change will not break existing patches.
+- [CHANGE] Qqqq, Quack: The position of the Key and Scale knobs have been swapped for consistency across the module collection. This visual change will not break existing patches.
+
+
 
 
 ## [1.5.0] - 2020-07-02
 
-### Added
+### New modules
 
-- [NEW] Quatherine the Quantum Duck presents Quatherine's Quality Quad Quantizer (Qqqq): A quantizer with custom & external scales, 16 scenes, offset, sample and hold, transposition, and lead sheet chords parsing.
+- [NEW] Quatherina the Quantum Duck presents Quatherine's Quality Quad Quantizer (Qqqq): A quantizer with custom & external scales, 16 scenes, offset, sample and hold, transposition, and lead sheet chords parsing.
 - [NEW] Quack: Smaller version of Qqqq, with piano buttons, and a single polyphonic quantizer column.
 - [NEW] Q<: Tiny version of Qqqq, with a single polyphonic quantizer column.
 

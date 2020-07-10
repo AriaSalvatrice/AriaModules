@@ -4,6 +4,12 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
+// This contains Arcane, Atout, and Aleister.
+
+// The singleton owner downloads the the fortune from the repository.
+// Other modules look for the cached file.
+// Long name to avoid shared namespace collisions.
+
 #include "plugin.hpp"
 #include "network.hpp"
 #include "quantizer.hpp"
@@ -11,11 +17,8 @@ You should have received a copy of the GNU General Public License along with thi
 #include <ctime>
 #include <thread>
 
-// This contains Arcane, Atout, and Aleister.
+namespace Arcane {
 
-// The singleton owner downloads the the fortune from the repository.
-// Other modules look for the cached file.
-// Long name to avoid shared namespace collisions.
 static bool ariaSalvatriceArcaneSingletonOwned = false;
 
 // Fortunes are generated 10mn in advance to account for desync'd clocks. 
@@ -539,7 +542,7 @@ struct Arcane : ArcaneBase {
         configParam(PULSE_WIDTH_PARAM, 1.f, 99.f, 1.f, "Pulse width for all outputs", "%");
         configParam(PULSE_RAMP_PARAM, 0.f, 1.f, 0.f, "Clock Pulse/Ramp output");
         lcdDivider.setDivision(1000); // Gets changed on first tick
-        lcdStatus.lcdPage = Lcd::PIANO_AND_TEXT2_PAGE;
+        lcdStatus.lcdLayout = Lcd::PIANO_AND_TEXT2_LAYOUT;
     }
     
     void process(const ProcessArgs& args) override {
@@ -804,7 +807,10 @@ struct ArcaneWidget : ModuleWidget {
         addChild(cfb);
         
         // LCD
-        addChild(Lcd::createLcd<Arcane>(mm2px(Vec(83.6, 41.4)), module));
+        // addChild(Lcd::createLcd<Arcane>(mm2px(Vec(83.6, 41.4)), module));
+        Lcd::LcdWidget<Arcane> *lcd = new Lcd::LcdWidget<Arcane>(module);
+        lcd->box.pos = mm2px(Vec(83.6f, 41.4f));
+        addChild(lcd);
 
         // Quantizer
         addInput(createInput<AriaJackIn>(   mm2px(Vec(x + 00.0, y + 00.0)), module, Arcane::QNT_INPUT));
@@ -884,7 +890,10 @@ struct AtoutWidget : ModuleWidget {
         addChild(createWidget<AriaSignature>(mm2px(Vec(31.06, 114.5))));
         
         // LCD	
-        addChild(Lcd::createLcd<Arcane>(mm2px(Vec(6.44, 41.4)), module));
+        Lcd::LcdWidget<Arcane> *lcd = new Lcd::LcdWidget<Arcane>(module);
+        lcd->box.pos = mm2px(Vec(6.44f, 41.4f));
+        addChild(lcd);
+
         
         // Screws
         addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
@@ -1021,7 +1030,8 @@ struct AleisterWidget : ModuleWidget {
     }
 }; // AleisterWidget
 
+} // namespace Arcane
 
-Model* modelArcane   = createModel<Arcane, ArcaneWidget>("Arcane");
-Model* modelAtout    = createModel<Arcane, AtoutWidget>("Atout");
-Model* modelAleister = createModel<Aleister, AleisterWidget>("Aleister");
+Model* modelArcane   = createModel<Arcane::Arcane, Arcane::ArcaneWidget>("Arcane");
+Model* modelAtout    = createModel<Arcane::Arcane, Arcane::AtoutWidget>("Atout");
+Model* modelAleister = createModel<Arcane::Aleister, Arcane::AleisterWidget>("Aleister");

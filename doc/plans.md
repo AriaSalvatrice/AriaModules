@@ -15,6 +15,19 @@ There's no such thing as stealing ideas, but there is such a thing as duplicatio
 
 
 
+# Fader Controllers
+
+Faders for my own use with a drawing tablet.
+
+- Very tall faders, about 70% as high as the module itself
+- Unipolar/Bipolar + Attenuator
+- Individual Outs + Poly Outs
+- Can label faders
+- Assign colors from cables
+
+
+
+
 # Matrix mixer using computer vision & physical marbles
 
 See VCV forums: https://community.vcvrack.com/t/diy-marbles-based-physical-matrix-mixer-controller-project/10132
@@ -158,45 +171,3 @@ This project sounds fun, but it'd be a lot of work. I'd be much more eager to im
 
 And if someone's willing to help with that problem, we could use machine learning to parse the large corpus of existing Stepmania charts out there, and use it to generate stepcharts on the fly. 
 
-
-
-
-# Self-patched self-modifying step sequencer
-
-Monophonic step sequencer where you program individual pitches, quantized to a scale with external scale support (cf. Darius). The default range is 3 octaves, you can increase or decrease it with Min/Max knobs. You can change the amount of steps. The module would be offered in 8 steps form factor, maybe 16 too but it would be huge.
-
-The sequencer is programmed through self-patching to self-modify a sequence, much like Mog Network. Depending on your approach to patching, and which external modules you use, it can be very deterministic or completely chaotic. It aims to be fun to use rather than versatile in configuration options.
-
-There are global step controls accepting trig/gates. Upon receiving any step control trig/gate, the module starts waiting a window of 1ms, then processes all the trigs in batch, to apply precedence and addition rules. This way, all sort of logic can be performed with external modules (as those add at least one sample of delay). Trigs sent to other parts of the module received outside the window have no effect. Here are the step control trigs from high to low precedence:
-
-- Go to a random queued step, then clear the queue. If queue empty and no other step trig is received, cancel the wait window.
-- Random teleport to any step
-- Random walk (wrap around)
-- Go back a step (wrap around at the start)
-- Advance a step (wrap around at the end)
-
-The pitch for each step is shown on a LCD, and can be changed with an infinite knob per step. Internally, it saves the precise V/Oct, and quantizes it if the scale changes.
-
-Each step also has CV trigger inputs. Simultaneous trigs operating on scale degrees are additive. Operations that would make a pitch go out of bounds wrap around.
-
-- +1 scale degree
-- +2 scale degree
-- +3 scale degree
-- +1 octave
-- -1 scale degree
-- -2 scale degree
-- -3 scale degree
-- -1 octave
-- Queue this to be the next step, after the current trig wait window
-- Make this the current step after current trig wait window is over
-
-Each step has multiple trig outs:
-
-- Trig when reached
-- 50% chance trig when reached
-- Trig every 2nd time reached
-- Trig queued on next step when reached
-
-Outputs are just CV/Gate (forwarded from input). There is a slide knob and trig in, and slide is only enabled for a step if a trig is received. 
-
-Every trig is accepted polyphonically for ease of merging with external modules.

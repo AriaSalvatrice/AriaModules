@@ -18,6 +18,8 @@ You should have received a copy of the GNU General Public License along with thi
 */
 #include "plugin.hpp"
 
+namespace Srot {
+
 struct Srot : Module {
     enum ParamIds {
         NUM_PARAMS
@@ -62,4 +64,6 @@ struct SrotWidget : ModuleWidget {
 
 };
 
-Model* modelSrot = createModel<Srot, SrotWidget>("Srot");
+} // namespace Srot
+
+Model* modelSrot = createModel<Srot::Srot, Srot::SrotWidget>("Srot");

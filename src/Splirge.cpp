@@ -5,6 +5,8 @@ You should have received a copy of the GNU General Public License along with thi
 */
 #include "plugin.hpp"
 
+namespace Splirge {
+
 struct Splirge : Module {
     enum ParamIds {
         SORT_PARAM,
@@ -183,4 +185,6 @@ struct SplirgeWidget : ModuleWidget {
     }
 };
 
-Model* modelSplirge = createModel<Splirge, SplirgeWidget>("Splirge");
+} // namespace Splirge
+
+Model* modelSplirge = createModel<Splirge::Splirge, Splirge::SplirgeWidget>("Splirge");

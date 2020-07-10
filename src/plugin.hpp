@@ -26,9 +26,13 @@ extern Model *modelSplirge;
 extern Model *modelQqqq;
 extern Model *modelQuack;
 extern Model *modelQ;
+extern Model *modelQuale;
 
-// Sequencer
+// Sequencers
 extern Model *modelDarius;
+// extern Model *modelSolomon4;
+// extern Model *modelSolomon8;
+// extern Model *modelSolomon16;
 
 // Arcane
 extern Model *modelArcane;
@@ -42,4 +46,4 @@ extern Model *modelUndular;
 extern Model *modelBlank;
 
 // extern Model *modelBendlet;
-extern Model *modelTest;
+// extern Model *modelTest;

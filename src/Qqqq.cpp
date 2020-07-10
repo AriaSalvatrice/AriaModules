@@ -3,6 +3,12 @@ This program is free software: you can redistribute it and/or modify it under th
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
+
+/* Quatherina's Quality Quad Quantizer, Quack, Q<
+   All three modules are the same, with different widgets.
+   Yeah kinda wasteful but hey, still faster than most quantizers in the library.
+*/ 
+
 #include "plugin.hpp"
 #include "quantizer.hpp"
 #include "lcd.hpp"
@@ -10,9 +16,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include "javascript-libraries.hpp"
 #include "portablesequence.hpp"
 
-/* Quatherina's Quality Quad Quantizer, Quack, Q<
-   All three modules are the same, with different widgets.
-*/ 
+namespace Qqqq {
 
 enum LcdModes {
     INIT_MODE,
@@ -134,7 +138,7 @@ struct Qqqq : Module {
         lcdMode = INIT_MODE;
         lcdLastInteraction = 0.f;
         lcdStatus.lcdText1 = " Q- ...";
-        lcdStatus.lcdPage = Lcd::TEXT1_PAGE;
+        lcdStatus.lcdLayout = Lcd::TEXT1_LAYOUT;
         // Initialize
         for (int i = 0; i < 16; i++) { for (int j = 0; j < 12; j++) { scale[i][j] = false; }}
         // C Minor in first scene
@@ -275,7 +279,7 @@ struct Qqqq : Module {
     // Widget calls this directly
     void importRomanNumeral(std::string text){
         Javascript::Runtime js;
-        std::string tonic = Quantizer::noteLcdName((int) params[KEY_PARAM].getValue());
+        std::string tonic = Quantizer::keyLcdName((int) params[KEY_PARAM].getValue());
         js.evaluateString(JavascriptLibraries::TONALJS);
         js.evaluateString(JavascriptLibraries::TOKENIZE);
         js.evaluateString(JavascriptLibraries::TOSCALEPOSITION);
@@ -386,7 +390,8 @@ struct Qqqq : Module {
     void updateExpander(){
         if ((leftExpander.module and leftExpander.module->model == modelQqqq)
         ||  (leftExpander.module and leftExpander.module->model == modelQuack)
-        ||  (leftExpander.module and leftExpander.module->model == modelQ)) {
+        ||  (leftExpander.module and leftExpander.module->model == modelQ)
+        ||  (leftExpander.module and leftExpander.module->model == modelQuale)) {
             // We are an expander
             lights[EXPANDER_IN_LIGHT].setBrightness(1.f);
             bool *message = (bool*) leftExpander.consumerMessage;
@@ -400,7 +405,8 @@ struct Qqqq : Module {
 
         if ((rightExpander.module and rightExpander.module->model == modelQqqq)
         ||  (rightExpander.module and rightExpander.module->model == modelQuack)
-        ||  (rightExpander.module and rightExpander.module->model == modelQ)) {
+        ||  (rightExpander.module and rightExpander.module->model == modelQ)
+        ||  (rightExpander.module and rightExpander.module->model == modelQuale)) {
             // We have an expander
             lights[EXPANDER_OUT_LIGHT].setBrightness(1.f);
             bool *message = (bool*) rightExpander.module->leftExpander.producerMessage;			
@@ -632,7 +638,7 @@ struct Qqqq : Module {
             if(params[SCALE_PARAM].getValue() == 0.f) {
                 text = "CHROMATIC";
             } else {
-                text = Quantizer::noteLcdName((int)params[KEY_PARAM].getValue());
+                text = Quantizer::keyLcdName((int)params[KEY_PARAM].getValue());
                 text.append(" ");
                 text.append(Quantizer::scaleLcdName((int)params[SCALE_PARAM].getValue()));
             }
@@ -1166,11 +1172,14 @@ struct QqqqWidget : ModuleWidget {
         drawPianoKeys(4.7f, 102.8f, module);
 
         // The LCD
-        addChild(Lcd::createLcd<Qqqq>(mm2px(Vec(27.6f, 21.2f)), module));
+        // addChild(Lcd::createLcd<Qqqq>(mm2px(Vec(27.6f, 21.2f)), module));
+        Lcd::LcdWidget<Qqqq> *lcd = new Lcd::LcdWidget<Qqqq>(module);
+        lcd->box.pos = mm2px(Vec(27.6f, 21.2f));
+        addChild(lcd);
 
         // Scale, Key, External
-        addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(25.f, 29.f)), module, Qqqq::SCALE_PARAM));
-        addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(35.f, 29.f)), module, Qqqq::KEY_PARAM));
+        addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(25.f, 29.f)), module, Qqqq::KEY_PARAM));
+        addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(35.f, 29.f)), module, Qqqq::SCALE_PARAM));
         addInput(createInput<AriaJackIn>(mm2px(Vec(45.f, 29.f)), module, Qqqq::EXT_SCALE_INPUT));
         addOutput(createOutput<AriaJackOut>(mm2px(Vec(55.f, 29.f)), module, Qqqq::EXT_SCALE_OUTPUT));
 
@@ -1253,10 +1262,10 @@ struct QuackWidget : ModuleWidget {
         drawPianoKeys(1.7f, 102.8f, module);
 
         // Scale, Key, External
-        addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(18.1f, 20.f)), module, Qqqq::SCALE_PARAM));
-        addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(26.4f, 20.f)), module, Qqqq::KEY_PARAM));
-        addInput(createInput<AriaJackIn>(mm2px(Vec(18.1f, 30.f)), module, Qqqq::EXT_SCALE_INPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(26.4f, 30.f)), module, Qqqq::EXT_SCALE_OUTPUT));
+        addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(18.1f, 18.f)), module, Qqqq::KEY_PARAM));
+        addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(26.4f, 18.f)), module, Qqqq::SCALE_PARAM));
+        addInput(createInput<AriaJackIn>(mm2px(Vec(18.1f, 31.f)), module, Qqqq::EXT_SCALE_INPUT));
+        addOutput(createOutput<AriaJackOut>(mm2px(Vec(26.4f, 31.f)), module, Qqqq::EXT_SCALE_OUTPUT));
 
         // The quantizer column
         drawQuantizerColumn(22.f, 43.f, module, 0);
@@ -1321,7 +1330,8 @@ struct QWidget : ModuleWidget {
     }
 };
 
+} // namespace Qqqq
 
-Model* modelQqqq = createModel<Qqqq, QqqqWidget>("Qqqq");
-Model* modelQuack = createModel<Qqqq, QuackWidget>("Quack");
-Model* modelQ = createModel<Qqqq, QWidget>("Q");
+Model* modelQqqq = createModel<Qqqq::Qqqq, Qqqq::QqqqWidget>("Qqqq");
+Model* modelQuack = createModel<Qqqq::Qqqq, Qqqq::QuackWidget>("Quack");
+Model* modelQ = createModel<Qqqq::Qqqq, Qqqq::QWidget>("Q");

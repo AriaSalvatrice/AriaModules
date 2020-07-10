@@ -3,13 +3,16 @@ This program is free software: you can redistribute it and/or modify it under th
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-#include "plugin.hpp"
-#include <settings.hpp>
 
 // See what changed in Rack/src/app/RackScrollWidget.cpp whenever things break
 
 // RACK_GRID_HEIGHT = 3U   = 380px
 // RACK_GRID_WIDTH  = 1hp  =  15px
+
+#include "plugin.hpp"
+#include <settings.hpp>
+
+namespace Undular {
 
 // No, I will not debug race conditions with multiple instances
 static bool ariaSalvatriceUndularSingletonOwned = false;
@@ -329,4 +332,6 @@ struct UndularWidget : ModuleWidget {
     }
 };
 
-Model* modelUndular = createModel<Undular, UndularWidget>("Undular");
+} // namespace Undular
+
+Model* modelUndular = createModel<Undular::Undular, Undular::UndularWidget>("Undular");

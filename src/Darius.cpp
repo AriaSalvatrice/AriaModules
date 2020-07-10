@@ -3,17 +3,19 @@ This program is free software: you can redistribute it and/or modify it under th
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
+
+// Warning - this module was created with very little C++ experience, and features were 
+// added to it later without regard for code quality. This is maintained exploratory code, not good design.
+//
+// Note: the module calls it a "path" internally, but they are called "routes" for the user.
+
 #include "plugin.hpp"
 #include "prng.hpp"
 #include "quantizer.hpp"
 #include "lcd.hpp"
 #include "portablesequence.hpp"
 
-// Warning - this module was created with very little C++ experience, and features were 
-// added to it later without regard for code quality. This is maintained exploratory code, not good design.
-//
-// Note: the module calls them "path" internally, but they should be called "routes" for the user.
-
+namespace Darius {
 
 const int STEP1START = 0;  //               00        
 const int STEP2START = 1;  //             02  01            
@@ -155,7 +157,7 @@ struct Darius : Module {
             configParam(ROUTE_PARAM + i, 0.f, 1.f, 0.5f, "Random route");
         knobDivider.setDivision(KNOBDIVIDER);
         displayDivider.setDivision(DISPLAYDIVIDER);
-        lcdStatus.lcdPage = Lcd::TEXT1_AND_TEXT2_PAGE;
+        lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
         lcdStatus.lcdText1 = "MEDITATE..."; // Loading message
         lcdStatus.lcdText2 = "MEDITATION."; // https://www.youtube.com/watch?v=JqLNY1zyQ6o
         for (int i = 0; i < 100; i++) random::uniform(); // The first few seeds we get seem bad, need more warming up. Might just be superstition.
@@ -409,6 +411,7 @@ struct Darius : Module {
     }
 
     // Reset to the first step
+    // FIXME: 1 ms wait #36
     void reset(const ProcessArgs& args){
         step = 0;
         node = 0;
@@ -757,7 +760,7 @@ struct Darius : Module {
         }
 
         if (lcdMode == SLIDE_MODE) {
-            lcdStatus.lcdPage = Lcd::TEXT2_PAGE;
+            lcdStatus.lcdLayout = Lcd::TEXT2_LAYOUT;
             lcdStatus.lcdText1 = "SLIDE:";
             float displayDuration = slideDuration;
             if (displayDuration == 0.f)
@@ -776,11 +779,11 @@ struct Darius : Module {
         }
 
         if (lcdMode == SCALE_MODE) {
-            lcdStatus.lcdPage = Lcd::PIANO_AND_TEXT2_PAGE;
+            lcdStatus.lcdLayout = Lcd::PIANO_AND_TEXT2_LAYOUT;
             if(params[SCALE_PARAM].getValue() == 0.f) {
                 text = "CHROMATIC";
             } else {
-                text = Quantizer::noteLcdName((int)params[KEY_PARAM].getValue());
+                text = Quantizer::keyLcdName((int)params[KEY_PARAM].getValue());
                 text.append(" ");
                 text.append(Quantizer::scaleLcdName((int)params[SCALE_PARAM].getValue()));
             }
@@ -792,20 +795,20 @@ struct Darius : Module {
         }
 
         if (lcdMode == QUANTIZED_MODE){
-            lcdStatus.lcdPage = Lcd::PIANO_AND_TEXT2_PAGE;
+            lcdStatus.lcdLayout = Lcd::PIANO_AND_TEXT2_LAYOUT;
             lcdStatus.lcdText2 = Quantizer::noteOctaveLcdName(outputs[CV_OUTPUT].getVoltage());
             lcdStatus.pianoDisplay = Quantizer::pianoDisplay(outputs[CV_OUTPUT].getVoltage());
         }
 
         if (lcdMode == CV_MODE){
-            lcdStatus.lcdPage = Lcd::TEXT2_PAGE;
+            lcdStatus.lcdLayout = Lcd::TEXT2_LAYOUT;
             text = std::to_string( outputs[CV_OUTPUT].getVoltage() );
             text.resize(5);
             lcdStatus.lcdText2 = text + "V";
         }
 
         if (lcdMode == MINMAX_MODE) {
-            lcdStatus.lcdPage = Lcd::TEXT1_AND_TEXT2_PAGE;
+            lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
             if (params[QUANTIZE_TOGGLE_PARAM].getValue() == 0.f) {
                 text = (params[RANGE_PARAM].getValue() == 0.f) ? std::to_string(params[MIN_PARAM].getValue()) : std::to_string(params[MIN_PARAM].getValue() - 5.f);
                 text.resize(5);
@@ -828,7 +831,7 @@ struct Darius : Module {
 
         if (lcdMode == KNOB_MODE) {
             if (params[QUANTIZE_TOGGLE_PARAM].getValue() == 0.f) {
-                lcdStatus.lcdPage = Lcd::TEXT2_PAGE;
+                lcdStatus.lcdLayout = Lcd::TEXT2_LAYOUT;
                 if (params[RANGE_PARAM].getValue() == 0.f) {
                     f = rescale( params[CV_PARAM + lastCvChanged].getValue(), 0.f, 10.f, params[MIN_PARAM].getValue(), params[MAX_PARAM].getValue());
                 } else {
@@ -838,7 +841,7 @@ struct Darius : Module {
                 text.resize(5);
                 lcdStatus.lcdText2 = ">" + text + "V";
             } else {
-                lcdStatus.lcdPage = Lcd::PIANO_AND_TEXT2_PAGE;
+                lcdStatus.lcdLayout = Lcd::PIANO_AND_TEXT2_LAYOUT;
                 validNotes = Quantizer::validNotesInScaleKey( (int)params[SCALE_PARAM].getValue() , (int)params[KEY_PARAM].getValue() );
                  if (params[RANGE_PARAM].getValue() == 0.f) {
                      f = rescale(params[CV_PARAM + lastCvChanged].getValue(), 0.f, 10.f, params[MIN_PARAM].getValue() - 4.f, params[MAX_PARAM].getValue() - 4.f);
@@ -852,7 +855,7 @@ struct Darius : Module {
         }
 
         if (lcdMode == ROUTE_MODE) {
-            lcdStatus.lcdPage = Lcd::TEXT1_AND_TEXT2_PAGE;
+            lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
             relative = std::to_string( (1.f - params[ROUTE_PARAM + lastRouteChanged].getValue()) * 100.f);
             relative.resize(4);
             if (1.f - params[ROUTE_PARAM + lastRouteChanged].getValue() >= 0.9999f){
@@ -909,7 +912,7 @@ struct Darius : Module {
         for (int i = 1; i < 8; i++) pathTraveled[i] = -1;
         lightsReset = true;
         lcdMode = INIT_MODE;
-        lcdStatus.lcdPage = Lcd::TEXT1_AND_TEXT2_PAGE;
+        lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
         lcdStatus.lcdText1 = "MEDITATE...";
         lcdStatus.lcdText2 = "MEDITATION.";
         lcdLastInteraction = 0.f;
@@ -1193,7 +1196,9 @@ struct DariusWidget : ModuleWidget {
         // Output area //////////////////
 
         // LCD
-        addChild(Lcd::createLcd<Darius>(mm2px(Vec(10.3, 106.7)), module));
+        Lcd::LcdWidget<Darius> *lcd = new Lcd::LcdWidget<Darius>(module);
+        lcd->box.pos = mm2px(Vec(10.3f, 106.7f));
+        addChild(lcd);
 
         // Quantizer toggle
         addParam(createParam<DariusWidgets::AriaRockerSwitchHorizontal800ModeReset>(mm2px(Vec(11.1, 99.7)), module, Darius::QUANTIZE_TOGGLE_PARAM));
@@ -1202,12 +1207,12 @@ struct DariusWidget : ModuleWidget {
         addParam(createParam<AriaRockerSwitchHorizontal800Flipped>(mm2px(Vec(28.0, 118.8)), module, Darius::RANGE_PARAM));
 
         // Min & Max
-        addParam(createParam<DariusWidgets::AriaKnob820MinMax>(mm2px(Vec(49.5,  99.0)), module, Darius::MIN_PARAM));
-        addParam(createParam<DariusWidgets::AriaKnob820MinMax>(mm2px(Vec(49.5, 112.0)), module, Darius::MAX_PARAM));
+        addParam(createParam<DariusWidgets::AriaKnob820MinMax>(mm2px(Vec(49.5f, 112.f)), module, Darius::MIN_PARAM)); 
+        addParam(createParam<DariusWidgets::AriaKnob820MinMax>(mm2px(Vec(59.5f, 112.f)), module, Darius::MAX_PARAM)); 
 
         // Quantizer Key & Scale
-        addParam(createParam<DariusWidgets::AriaKnob820Scale>(mm2px(Vec(59.5, 99.0)), module, Darius::SCALE_PARAM));
-        addParam(createParam<DariusWidgets::AriaKnob820Scale>(mm2px(Vec(59.5, 112.0)), module, Darius::KEY_PARAM));
+        addParam(createParam<DariusWidgets::AriaKnob820Scale>(mm2px(Vec(49.5f, 99.f)), module, Darius::KEY_PARAM));
+        addParam(createParam<DariusWidgets::AriaKnob820Scale>(mm2px(Vec(59.5f, 99.f)), module, Darius::SCALE_PARAM));
 
         // External Scale
         addInput(createInput<AriaJackIn>(mm2px(Vec(69.5, 99.0)), module, Darius::EXT_SCALE_INPUT));
@@ -1324,4 +1329,6 @@ struct DariusWidget : ModuleWidget {
     }
 };
 
-Model* modelDarius = createModel<Darius, DariusWidget>("Darius");
+} // namespace Darius
+
+Model* modelDarius = createModel<Darius::Darius, Darius::DariusWidget>("Darius");

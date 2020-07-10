@@ -14,6 +14,7 @@ Modules documentation
 
 - [Split and Merge: Splort, Smerge, Spleet, Swerge, and Splirge](#split-and-merge-splort-smerge-spleet-swerge-and-splirge)
 - [Quatherina the Quantum Duck presents Quatherina's Quality Quad Quantizer](#quatherina-the-quantum-duck-presents-quatherinas-quality-quad-quantizer)
+- [Quatherina's Quale](#quatherinas-quale)
 - [Darius Branching Step Sequencer](#darius-branching-step-sequencer)
 - [Arcane, Atout & Aleister - Today's Fortune ★](#arcane-atout--aleister---todays-fortune-)
 - [UnDuLaR Rack Scroller](#undular-rack-scroller)
@@ -97,7 +98,7 @@ The possible sources of change are:
 
 All the quantizer columns on a module follow the same scale. And while in this documentation I call them scales for simplicity, **QQQQ** also works with chords (albeit, without knowledge of their intended voicing), and can be a fantasatic arpeggiator. 
 
-The **Piano keys** always show you the current scale. Keys lit in yellow are part of the scale, while unlit keys are disallowed. You can click on the keys to change which notes are allowed. When you click the **visualize** button of a quantizer line, the notes currently playing on that line are lit pink.
+The **Piano keys** always show you the current scale. Keys lit in yellow are part of the scale, while unlit keys are disallowed. You can click on the keys to change which notes are allowed. When you click the **visualize** button of a quantizer line, the notes currently playing on that line are lit pink (with a small dot in the center for accessibility).
 
 In the **LCD Area** at the top of the device, the **Scale** and **Key** knobs select a preset scale, and its key.     
 The available scales were curated for ease of use and instant satisfaction rather than for comprehensiveness, avoiding duplication in the form of scales that can be expressed as a mode of another scale (for your convenience, an exception is made for Natural Minor and Pentatonic Minor). The following scales, along with my qualified opinion about them, are available:
@@ -137,7 +138,7 @@ The scenes only save the scales: the positions of the knobs are global.
 
 ### Keyboard / Clipboard I/O
 
-With the **Keyboard** button, you can write down or paste chords from the clipboard, and have it transformed to **QQQQ** scenes! The three following notations are supported:
+With the **Keyboard** button, you can write down or paste chords from the clipboard, and have them transformed to **QQQQ** scenes! You can also use it to copy and paste scales as portable sequences. The three following modes are available:
 
 - **Lead sheet notation**: Chord symbols, separated with spaces, commas, or hyphens. It's rather liberal in what it accepts, but kinda chokes on slash chords and crazy jazz combos. Still, it should get you close. For example, this is a valid input: `G am B, E/G# Bb - A,Fsus2  Csus2 D(add9)`
 - **Roman numeral notation**: Roman numerals, separated with spaces, commas, or hyphens. The tonic will be set to the current position of the **Key** knob. To denote minor chords, rather than use lowercase, you need an explicit `m` after the numeral: `III im7 VIsus4` rather than `III i7 VIsus4`. It's a lot more fiddly than lead sheet notation and will only recognize rather basic progressions. 
@@ -148,6 +149,8 @@ Text input is always imported starting from the first scene. And remember: **QQQ
 Under the hood, **QQQQ** makes use of [Tonal.js](https://github.com/tonaljs/tonal)' knowledge of chords. Yup, this module runs javascript! Same [QuickJS](https://bellard.org/quickjs/) engine as [VCV Prototype](https://vcvrack.com/Prototype). Of course, the number crunching is efficient C++, javascript usage is limited to what it does best - fuzzy text parsing.
 
 Below the two text input buttons, you will find a high-definition **Likeness of Quatherina**, increasing the appeal of the module through co-branding.
+
+**KNOWN ISSUE**: **QQQQ** crashes when the chord input is over 120 characters long. I am looking into fixing this issue.
 
 
 ### Quantizer columns
@@ -175,6 +178,26 @@ While there are smaller and simpler quantizers than **QQQQ** available in the VC
 - **Culling**: When the output of a column is unplugged and its visualization disabled, the column in question does not process input, and thus consumes almost no CPU. Unnecessary calculations are also skipped when Sample & Hold is used.
 
 **Protip for cool kids only:** Did you know that there are a few people out there who do not use Quantizers, and instead choose to spend years to learn something called "Music Theory"? Those people do all their music by reading books and thinking really hard about maths! It's true - check out your local library for more information.
+
+
+
+
+Quatherina's Quale
+------------------
+
+![Quale](/doc/quale.png)
+
+Quatherina the Quantum Duck doesn't experience the existence of multiple octaves, and quavers at those who purport to. She makes no distinction between chords and scales. It's all voltage to her. 
+
+With some qualms, she humors your fancies, offering **Quale**: a little 3hp module to convert scales (as expressed in **QQQQ**'s polyphonic data bus format) to chords, and the other way around.
+
+When you patch the **Scale Input**, it's expressed on the **Chord Output** as a polyphonic chord on the fourth octave (0V to 0.91667V).
+
+When you patch in a polyphonic V/Oct signal on the **Chord Input**, it's folded to a single octave and expressed on the **Scale Output** in the **QQQQ** format, compatible with the rest of my collection.
+
+**Quale** can be used as an expander with the entire **Qqqq** family: when **Quale** is placed to the left of **QQQQ**, its **Scale Output** is forwarded to **QQQQ**. When **Quale** is placed to the right of **QQQQ**, the scale from **QQQQ** is expressed as a chord on **Quale**'s **Chord Output**.
+
+**Protip for cool kids only:** Quatherina has recently taken to calling people who claim to subjectively experience the existence of multiple octaves Q-Zombies.
 
 
 
@@ -284,7 +307,7 @@ Try to combine it with the [Split and Merge series](#split-and-merge-splort-smer
 - **Melody**: Polyphonic ports sending every note of the scale on the fourth octave (0V~0.9166667V), in the order of the 8 note pattern. It sends as many notes as there are in the scale (between 5 and 8).
 - **Padded**: Like **Melody**, sends the entire 8 note pattern, with any repeated note being one octave higher than normal.
 If you combine them with [ML_modules sequential switch 8->1](https://github.com/martin-lueders/ML_modules/wiki/Sequential-Switches), they can become a melody.
-- **External Scale**: Sends the scale in the format my quantizer and other modules uses: as a 12-channel polyphonic cable, where enabled notes have a continuous 10V signal, and disabled notes, 0V. Try it with **Qqqq** or **Darius**!
+- **External Scale**: Sends the scale in the format my quantizer and other modules uses: as a 12-channel polyphonic cable, where enabled notes have a continuous 10V signal, and disabled notes, 0V (or fewer). Try it with **Qqqq** or **Darius**!
 - **_Arcane Majeur_**: The number of the arcana, divided by 10.    
 Thus, _The Fool_ is 0V, _The Magician_ is 0.1V, and so on up to 2.1V for _The World_. Following the conventions of the Tarot of Marseilles, the 8th arcana is Justice, and the 11th is Strength, unlike the ordering popularized by the Rider-Waite-Smith deck, which swaps those two arcana around.    
 You can multiply this signal by 4.76 with an offsetter such as [Bogaudio's](https://github.com/bogaudio/BogaudioModules#offset) to obtain a 0V~9.99V signal, if you wish.
@@ -382,6 +405,8 @@ Installation
 
 Those modules are part of the [VCV plugin library](https://vcvrack.com/plugins.html). This is the easiest way to install them and keep them up to date. You can also do things the hard way and [build them yourself](https://vcvrack.com/manual/Building#building-rack-plugins) if you have a good reason to do so, for example, if you hate yourself, or if you enjoy building random C++ projects off github as a hobby.
 
+If you build my plugin locally, you have to `make dep` before you `make dist`. 
+
 
 
 
@@ -411,9 +436,9 @@ The **UnDuLaR** module background uses the traditional yagasuri kimono pattern a
 Lawyer's corner
 ---------------
 
-Yeah, the rules are a bit complicated, but here goes the breakdown:
+Yeah, the rules are a bit complicated. If they cause licensing incompatibilities (besides the intended virality of the GPL) lemme know. Here goes the breakdown:
 
-### Source code of invidivual modules
+### Source code of individual modules
 
 The code of the Aria Salvatrice Signature Series Synthesizer Modules is distributed under the [GNU General Public License v3.0 only](https://spdx.org/licenses/GPL-3.0-only.html). The modules come without any warranty and might recklessly endanger life and limb, the usual.
 
@@ -423,7 +448,7 @@ Not that the code is very good, but some libraries I created for my own use are 
 
 ### Faceplates 
 
- [CC-BY-SA-4.0](https://creativecommons.org/licenses/by-sa/4.0/), with the exception of my signature logo, which is copyrighted. You may freely distribute your faceplate edits to the VCV community.
+ [CC-BY-SA-4.0](https://creativecommons.org/licenses/by-sa/4.0/), with the exception of my signature logo, which is copyrighted, and generally not part of my faceplates. You may freely distribute your faceplate edits to the VCV community.
 
 ### Components (knobs, jacks, etc)
 
@@ -433,7 +458,7 @@ CC-BY-SA-4.0. If you re-use them, I request that you do not entirely re-use my s
 
 Copyrighted. It's mine.
 
-**If you edit my code to use my modules as a base for your own altered modules, remove my signature from your faceplates**, even if you think your changes are trivial: I don't want to endorse and take credit for something I didn't vet or personally participate in. 
+**If you edit my code to use my modules as a base for your own altered modules, remove my signature from your faceplates**, even if you think your changes are trivial: I don't want to endorse and take credit for something I didn't vet or personally participate in.
 
 If you are faithfully porting my code to a fork of VCV Rack, are compiling binaries for another platform, or are otherwise distributing my modules as I designed them, keep the signature. If unsure, just ask.
 
