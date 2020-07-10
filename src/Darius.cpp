@@ -1206,12 +1206,12 @@ struct DariusWidget : ModuleWidget {
         addParam(createParam<AriaRockerSwitchHorizontal800Flipped>(mm2px(Vec(28.0, 118.8)), module, Darius::RANGE_PARAM));
 
         // Min & Max
-        addParam(createParam<DariusWidgets::AriaKnob820MinMax>(mm2px(Vec(49.5,  99.0)), module, Darius::MIN_PARAM));
-        addParam(createParam<DariusWidgets::AriaKnob820MinMax>(mm2px(Vec(49.5, 112.0)), module, Darius::MAX_PARAM));
+        addParam(createParam<DariusWidgets::AriaKnob820MinMax>(mm2px(Vec(49.5f, 112.f)), module, Darius::MIN_PARAM)); 
+        addParam(createParam<DariusWidgets::AriaKnob820MinMax>(mm2px(Vec(59.5f, 112.f)), module, Darius::MAX_PARAM)); 
 
         // Quantizer Key & Scale
-        addParam(createParam<DariusWidgets::AriaKnob820Scale>(mm2px(Vec(59.5, 99.0)), module, Darius::SCALE_PARAM));
-        addParam(createParam<DariusWidgets::AriaKnob820Scale>(mm2px(Vec(59.5, 112.0)), module, Darius::KEY_PARAM));
+        addParam(createParam<DariusWidgets::AriaKnob820Scale>(mm2px(Vec(49.5f, 99.f)), module, Darius::KEY_PARAM));
+        addParam(createParam<DariusWidgets::AriaKnob820Scale>(mm2px(Vec(59.5f, 99.f)), module, Darius::SCALE_PARAM));
 
         // External Scale
         addInput(createInput<AriaJackIn>(mm2px(Vec(69.5, 99.0)), module, Darius::EXT_SCALE_INPUT));

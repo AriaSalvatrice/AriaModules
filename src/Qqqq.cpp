@@ -1176,8 +1176,8 @@ struct QqqqWidget : ModuleWidget {
         addChild(lcd);
 
         // Scale, Key, External
-        addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(25.f, 29.f)), module, Qqqq::SCALE_PARAM));
-        addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(35.f, 29.f)), module, Qqqq::KEY_PARAM));
+        addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(25.f, 29.f)), module, Qqqq::KEY_PARAM));
+        addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(35.f, 29.f)), module, Qqqq::SCALE_PARAM));
         addInput(createInput<AriaJackIn>(mm2px(Vec(45.f, 29.f)), module, Qqqq::EXT_SCALE_INPUT));
         addOutput(createOutput<AriaJackOut>(mm2px(Vec(55.f, 29.f)), module, Qqqq::EXT_SCALE_OUTPUT));
 
@@ -1260,10 +1260,10 @@ struct QuackWidget : ModuleWidget {
         drawPianoKeys(1.7f, 102.8f, module);
 
         // Scale, Key, External
-        addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(18.1f, 20.f)), module, Qqqq::SCALE_PARAM));
-        addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(26.4f, 20.f)), module, Qqqq::KEY_PARAM));
-        addInput(createInput<AriaJackIn>(mm2px(Vec(18.1f, 30.f)), module, Qqqq::EXT_SCALE_INPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(26.4f, 30.f)), module, Qqqq::EXT_SCALE_OUTPUT));
+        addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(18.1f, 18.f)), module, Qqqq::KEY_PARAM));
+        addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(26.4f, 18.f)), module, Qqqq::SCALE_PARAM));
+        addInput(createInput<AriaJackIn>(mm2px(Vec(18.1f, 31.f)), module, Qqqq::EXT_SCALE_INPUT));
+        addOutput(createOutput<AriaJackOut>(mm2px(Vec(26.4f, 31.f)), module, Qqqq::EXT_SCALE_OUTPUT));
 
         // The quantizer column
         drawQuantizerColumn(22.f, 43.f, module, 0);

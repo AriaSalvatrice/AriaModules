@@ -6,11 +6,8 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 
 ## UNRELEASED
 
-- Nothing
+### Changed
 
-## TODO:
-
-- [NEW] FIXME: Name Self-modifying sequencer.
 - [CHANGE] Darius: The position of the Key, Min, and Max knobs have been swapped for consistency across the module collection. This visual change will not break existing patches.
 - [CHANGE] Qqqq, Quack: The position of the Key and Scale knobs have been swapped for consistency across the module collection. This visual change will not break existing patches.
 
