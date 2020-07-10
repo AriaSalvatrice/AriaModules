@@ -11,7 +11,7 @@ You should have received a copy of the GNU General Public License along with thi
 
 namespace Quale {
 
-const int PROCESSDIVIDER = 1024;
+const int PROCESSDIVIDER = 32;
 
 struct Quale : Module {
     enum ParamIds {
