@@ -105,12 +105,15 @@ struct Solomon : Module {
     dsp::SchmittTrigger stepWalkTrigger;
     dsp::SchmittTrigger stepBackTrigger;
     dsp::SchmittTrigger stepForwardTrigger;
+    dsp::SchmittTrigger saveButtonTrigger;
+    dsp::SchmittTrigger loadButtonTrigger;
     dsp::PulseGenerator globalTrig;
     dsp::ClockDivider outputDivider;
     Lcd::LcdStatus lcdStatus;
 
     // Per node
     float cv[NODES];
+    float savedCv[NODES];
     std::array<bool, NODES> queue;
     std::array<bool, NODES> windowQueue;
     std::array<bool, NODES> delay;
@@ -139,7 +142,10 @@ struct Solomon : Module {
         configParam(SCALE_PARAM, 0.f, (float) Quantizer::NUM_SCALES - 1, 2.f, "Scale");
         scale = Quantizer::validNotesInScaleKey(Quantizer::NATURAL_MINOR, 0);
         // Default note is 0V - C4 - part of the default scale
-        for(size_t i = 0; i < NODES; i++) cv[i] = 0.f;
+        for(size_t i = 0; i < NODES; i++) {
+            cv[i] = 0.f;
+            savedCv[i] = 0.f;
+        }
 
         clearQueue();
         clearWindowQueue();
@@ -280,6 +286,18 @@ struct Solomon : Module {
             if(queueTrigger[i].process(params[NODE_QUEUE_PARAM + i].getValue())) {
                 queue[i] = ! queue[i];
             }
+        }
+    }
+
+    void processLoadButton() {
+        if(saveButtonTrigger.process(params[LOAD_PARAM].getValue())){
+            for (size_t i = 0; i < NODES; i++) cv[i] = savedCv[i];
+        }
+    }
+
+    void processSaveButton(){
+        if(saveButtonTrigger.process(params[SAVE_PARAM].getValue())){
+            for (size_t i = 0; i < NODES; i++) savedCv[i] = cv[i];
         }
     }
 
@@ -511,6 +529,8 @@ struct Solomon : Module {
             updateScale();
             processSdButtons();
             processQueueButtons();
+            processLoadButton();
+            processSaveButton();
         }
 
     }
@@ -748,13 +768,13 @@ struct SolomonWidget8 : ModuleWidget {
         lcd->box.pos = mm2px(Vec(7.7f, 68.8f));
         addChild(lcd);
 
-        addParam(createParam<ScaleKnob<Solomon<8>>>(mm2px(Vec(3.f, 81.f)), module, Solomon<8>::KEY_PARAM));
-        addParam(createParam<ScaleKnob<Solomon<8>>>(mm2px(Vec(15.f, 81.f)), module, Solomon<8>::SCALE_PARAM));
-        addInput(createInput<AriaJackIn>(mm2px(Vec(27.f, 81.f)), module, Solomon<8>::EXT_SCALE_INPUT));
+        addParam(createParam<ScaleKnob<Solomon<8>>>(mm2px(Vec(15.f, 81.f)), module, Solomon<8>::KEY_PARAM));
+        addParam(createParam<ScaleKnob<Solomon<8>>>(mm2px(Vec(27.f, 81.f)), module, Solomon<8>::SCALE_PARAM));
+        addInput(createInput<AriaJackIn>(mm2px(Vec(39.f, 81.f)), module, Solomon<8>::EXT_SCALE_INPUT));
 
-        addParam(createParam<MinMaxKnob<Solomon<8>>>(mm2px(Vec(3.f, 94.f)), module, Solomon<8>::MIN_PARAM));
-        addParam(createParam<MinMaxKnob<Solomon<8>>>(mm2px(Vec(15.f, 94.f)), module, Solomon<8>::MAX_PARAM));
-        addParam(createParam<SlideKnob<Solomon<8>>>(mm2px(Vec(27.f, 94.f)), module, Solomon<8>::SLIDE_PARAM));
+        addParam(createParam<MinMaxKnob<Solomon<8>>>(mm2px(Vec(15.f, 94.f)), module, Solomon<8>::MIN_PARAM));
+        addParam(createParam<MinMaxKnob<Solomon<8>>>(mm2px(Vec(27.f, 94.f)), module, Solomon<8>::MAX_PARAM));
+        addParam(createParam<SlideKnob<Solomon<8>>>(mm2px(Vec(39.f, 94.f)), module, Solomon<8>::SLIDE_PARAM));
 
         // Reset
         addInput(createInput<AriaJackIn>(mm2px(Vec(3.f, 107.f)), module, Solomon<8>::RESET_INPUT));
@@ -764,8 +784,8 @@ struct SolomonWidget8 : ModuleWidget {
         addOutput(createOutput<AriaJackOut>(mm2px(Vec(27.f, 107.f)), module, Solomon<8>::GLOBAL_CV_OUTPUT));
 
         // Load and Save
-        addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(39.f, 81.f)), module, Solomon<8>::SAVE_PARAM));
-        addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(39.f, 94.f)), module, Solomon<8>::LOAD_PARAM));
+        addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(3.f, 81.f)), module, Solomon<8>::SAVE_PARAM));
+        addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(3.f, 94.f)), module, Solomon<8>::LOAD_PARAM));
 
         // Nodes
         float xOffset = 53.f;
@@ -866,15 +886,17 @@ struct SolomonWidget4 : ModuleWidget {
         addParam(createParam<MinMaxKnob<Solomon<4>>>(mm2px(Vec(20.f, 32.f)), module, Solomon<4>::TOTAL_NODES_PARAM));
 
         // LCD
-        // addChild(Lcd::createLcd<Solomon<4>>(mm2px(Vec(7.7f, 68.8f)), module));
+        Lcd::LcdWidget<Solomon<4>> *lcd = new Lcd::LcdWidget<Solomon<4>>(module);
+        lcd->box.pos = mm2px(Vec(7.7f, 68.8f));
+        addChild(lcd);
 
-        addParam(createParam<ScaleKnob<Solomon<4>>>(mm2px(Vec(3.f, 81.f)), module, Solomon<4>::KEY_PARAM));
-        addParam(createParam<ScaleKnob<Solomon<4>>>(mm2px(Vec(15.f, 81.f)), module, Solomon<4>::SCALE_PARAM));
-        addInput(createInput<AriaJackIn>(mm2px(Vec(27.f, 81.f)), module, Solomon<4>::EXT_SCALE_INPUT));
+        addParam(createParam<ScaleKnob<Solomon<4>>>(mm2px(Vec(15.f, 81.f)), module, Solomon<4>::KEY_PARAM));
+        addParam(createParam<ScaleKnob<Solomon<4>>>(mm2px(Vec(27.f, 81.f)), module, Solomon<4>::SCALE_PARAM));
+        addInput(createInput<AriaJackIn>(mm2px(Vec(39.f, 81.f)), module, Solomon<4>::EXT_SCALE_INPUT));
 
-        addParam(createParam<MinMaxKnob<Solomon<4>>>(mm2px(Vec(3.f, 94.f)), module, Solomon<4>::MIN_PARAM));
-        addParam(createParam<MinMaxKnob<Solomon<4>>>(mm2px(Vec(15.f, 94.f)), module, Solomon<4>::MAX_PARAM));
-        addParam(createParam<SlideKnob<Solomon<4>>>(mm2px(Vec(27.f, 94.f)), module, Solomon<4>::SLIDE_PARAM));
+        addParam(createParam<MinMaxKnob<Solomon<4>>>(mm2px(Vec(15.f, 94.f)), module, Solomon<4>::MIN_PARAM));
+        addParam(createParam<MinMaxKnob<Solomon<4>>>(mm2px(Vec(27.f, 94.f)), module, Solomon<4>::MAX_PARAM));
+        addParam(createParam<SlideKnob<Solomon<4>>>(mm2px(Vec(39.f, 94.f)), module, Solomon<4>::SLIDE_PARAM));
 
         // Reset
         addInput(createInput<AriaJackIn>(mm2px(Vec(3.f, 107.f)), module, Solomon<4>::RESET_INPUT));
@@ -884,8 +906,8 @@ struct SolomonWidget4 : ModuleWidget {
         addOutput(createOutput<AriaJackOut>(mm2px(Vec(27.f, 107.f)), module, Solomon<4>::GLOBAL_CV_OUTPUT));
 
         // Load and Save
-        addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(39.f, 81.f)), module, Solomon<4>::SAVE_PARAM));
-        addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(39.f, 94.f)), module, Solomon<4>::LOAD_PARAM));
+        addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(3.f, 81.f)), module, Solomon<4>::SAVE_PARAM));
+        addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(3.f, 94.f)), module, Solomon<4>::LOAD_PARAM));
 
         // Nodes
         float xOffset = 53.f;
@@ -984,15 +1006,17 @@ struct SolomonWidget16 : ModuleWidget {
         addParam(createParam<MinMaxKnob<Solomon<16>>>(mm2px(Vec(20.f, 32.f)), module, Solomon<16>::TOTAL_NODES_PARAM));
 
         // LCD
-        // addChild(Lcd::createLcd<Solomon<16>>(mm2px(Vec(7.7f, 68.8f)), module));
+        Lcd::LcdWidget<Solomon<16>> *lcd = new Lcd::LcdWidget<Solomon<16>>(module);
+        lcd->box.pos = mm2px(Vec(7.7f, 68.8f));
+        addChild(lcd);
 
-        addParam(createParam<ScaleKnob<Solomon<16>>>(mm2px(Vec(3.f, 81.f)), module, Solomon<16>::KEY_PARAM));
-        addParam(createParam<ScaleKnob<Solomon<16>>>(mm2px(Vec(15.f, 81.f)), module, Solomon<16>::SCALE_PARAM));
-        addInput(createInput<AriaJackIn>(mm2px(Vec(27.f, 81.f)), module, Solomon<16>::EXT_SCALE_INPUT));
+        addParam(createParam<ScaleKnob<Solomon<16>>>(mm2px(Vec(15.f, 81.f)), module, Solomon<16>::KEY_PARAM));
+        addParam(createParam<ScaleKnob<Solomon<16>>>(mm2px(Vec(27.f, 81.f)), module, Solomon<16>::SCALE_PARAM));
+        addInput(createInput<AriaJackIn>(mm2px(Vec(39.f, 81.f)), module, Solomon<16>::EXT_SCALE_INPUT));
 
-        addParam(createParam<MinMaxKnob<Solomon<16>>>(mm2px(Vec(3.f, 94.f)), module, Solomon<16>::MIN_PARAM));
-        addParam(createParam<MinMaxKnob<Solomon<16>>>(mm2px(Vec(15.f, 94.f)), module, Solomon<16>::MAX_PARAM));
-        addParam(createParam<SlideKnob<Solomon<16>>>(mm2px(Vec(27.f, 94.f)), module, Solomon<16>::SLIDE_PARAM));
+        addParam(createParam<MinMaxKnob<Solomon<16>>>(mm2px(Vec(15.f, 94.f)), module, Solomon<16>::MIN_PARAM));
+        addParam(createParam<MinMaxKnob<Solomon<16>>>(mm2px(Vec(27.f, 94.f)), module, Solomon<16>::MAX_PARAM));
+        addParam(createParam<SlideKnob<Solomon<16>>>(mm2px(Vec(39.f, 94.f)), module, Solomon<16>::SLIDE_PARAM));
 
         // Reset
         addInput(createInput<AriaJackIn>(mm2px(Vec(3.f, 107.f)), module, Solomon<16>::RESET_INPUT));
@@ -1002,8 +1026,8 @@ struct SolomonWidget16 : ModuleWidget {
         addOutput(createOutput<AriaJackOut>(mm2px(Vec(27.f, 107.f)), module, Solomon<16>::GLOBAL_CV_OUTPUT));
 
         // Load and Save
-        addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(39.f, 81.f)), module, Solomon<16>::SAVE_PARAM));
-        addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(39.f, 94.f)), module, Solomon<16>::LOAD_PARAM));
+        addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(3.f, 81.f)), module, Solomon<16>::SAVE_PARAM));
+        addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(3.f, 94.f)), module, Solomon<16>::LOAD_PARAM));
 
         // Nodes
         float xOffset = 53.f;
