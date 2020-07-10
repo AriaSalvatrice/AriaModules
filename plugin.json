@@ -116,6 +116,33 @@
       ]
     },
     {
+      "slug": "Solomon4",
+      "name": "Signature Series Modulellus Salomonis Regis",
+      "description": "4-step sequencer conjuring lesser knowledge of the arts for those who self-patch pleasing sigils",
+      "tags": [
+        "Sequencer",
+        "Random"
+      ]
+    },
+    {
+      "slug": "Solomon8",
+      "name": "Signature Series Modulus Salomonis Regis",
+      "description": "8-step sequencer conjuring grand knowledge of the arts for those who self-patch pleasing sigils",
+      "tags": [
+        "Sequencer",
+        "Random"
+      ]
+    },
+    {
+      "slug": "Solomon16",
+      "name": "Signature Series Modulissimus Salomonis Regis",
+      "description": "16-step sequencer conjuring greater knowledge of the arts for those who self-patch pleasing sigils",
+      "tags": [
+        "Sequencer",
+        "Random"
+      ]
+    },  
+    {
       "slug": "Arcane",
       "name": "Signature Series Arcane",
       "description": "Today's fortune ★",
