@@ -392,11 +392,11 @@ struct Solomon : Module {
         for(size_t i = 0; i < NODES; i++) {
             if (sub1Sd[i] ) subSd(i, 1);
             if (sub2Sd[i] ) subSd(i, 2);
-            if (sub3Sd[i] ) subSd(i, 8);
+            if (sub3Sd[i] ) subSd(i, 3);
             if (sub1Oct[i]) subOct(i);
             if (add1Sd[i] ) addSd(i, 1);
             if (add2Sd[i] ) addSd(i, 2);
-            if (add3Sd[i] ) addSd(i, 9);
+            if (add3Sd[i] ) addSd(i, 3);
             if (add1Oct[i]) addOct(i);
         }
         clearTransposes();

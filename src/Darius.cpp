@@ -411,6 +411,7 @@ struct Darius : Module {
     }
 
     // Reset to the first step
+    // FIXME: 1 ms wait #36
     void reset(const ProcessArgs& args){
         step = 0;
         node = 0;

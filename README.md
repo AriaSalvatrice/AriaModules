@@ -189,7 +189,7 @@ With some qualms, she humors your fancies, offering **Quale**: a little 3hp modu
 
 When you patch the **Scale Input**, it's expressed on the **Chord Output** as a polyphonic chord on the fourth octave (0V to 0.91667V).
 
-When you in a polyphonic V/Oct signal on the **Chord Input**, it's folded to a single octave and expressed on the **Scale Output** in the **Qqqq** format, compatible with the rest of my collection.
+When you patch in a polyphonic V/Oct signal on the **Chord Input**, it's folded to a single octave and expressed on the **Scale Output** in the **Qqqq** format, compatible with the rest of my collection.
 
 **Quale** can be used as an expander with the entire **Qqqq** family: when **Quale** is placed to the left of **Qqqq**, its **Scale Output** is forwarded to **Qqqq**. When **Quale** is placed to the right of **Qqqq**, the scale from **Qqqq** is expressed as a chord on **Quale**'s **Chord Output**.
 
