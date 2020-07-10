@@ -14,6 +14,7 @@ Modules documentation
 
 - [Split and Merge: Splort, Smerge, Spleet, Swerge, and Splirge](#split-and-merge-splort-smerge-spleet-swerge-and-splirge)
 - [Quatherina the Quantum Duck presents Quatherina's Quality Quad Quantizer](#quatherina-the-quantum-duck-presents-quatherinas-quality-quad-quantizer)
+- [Quatherina's Quale](#quatherinas-quale)
 - [Darius Branching Step Sequencer](#darius-branching-step-sequencer)
 - [Arcane, Atout & Aleister - Today's Fortune ★](#arcane-atout--aleister---todays-fortune-)
 - [UnDuLaR Rack Scroller](#undular-rack-scroller)
@@ -97,7 +98,7 @@ The possible sources of change are:
 
 All the quantizer columns on a module follow the same scale. And while in this documentation I call them scales for simplicity, **QQQQ** also works with chords (albeit, without knowledge of their intended voicing), and can be a fantasatic arpeggiator. 
 
-The **Piano keys** always show you the current scale. Keys lit in yellow are part of the scale, while unlit keys are disallowed. You can click on the keys to change which notes are allowed. When you click the **visualize** button of a quantizer line, the notes currently playing on that line are lit pink.
+The **Piano keys** always show you the current scale. Keys lit in yellow are part of the scale, while unlit keys are disallowed. You can click on the keys to change which notes are allowed. When you click the **visualize** button of a quantizer line, the notes currently playing on that line are lit pink (with a small dot in the center for accessibility).
 
 In the **LCD Area** at the top of the device, the **Scale** and **Key** knobs select a preset scale, and its key.     
 The available scales were curated for ease of use and instant satisfaction rather than for comprehensiveness, avoiding duplication in the form of scales that can be expressed as a mode of another scale (for your convenience, an exception is made for Natural Minor and Pentatonic Minor). The following scales, along with my qualified opinion about them, are available:
@@ -137,7 +138,7 @@ The scenes only save the scales: the positions of the knobs are global.
 
 ### Keyboard / Clipboard I/O
 
-With the **Keyboard** button, you can write down or paste chords from the clipboard, and have it transformed to **QQQQ** scenes! The three following notations are supported:
+With the **Keyboard** button, you can write down or paste chords from the clipboard, and have them transformed to **QQQQ** scenes! You can also use it to copy and paste scales as portable sequences. The three following modes are available:
 
 - **Lead sheet notation**: Chord symbols, separated with spaces, commas, or hyphens. It's rather liberal in what it accepts, but kinda chokes on slash chords and crazy jazz combos. Still, it should get you close. For example, this is a valid input: `G am B, E/G# Bb - A,Fsus2  Csus2 D(add9)`
 - **Roman numeral notation**: Roman numerals, separated with spaces, commas, or hyphens. The tonic will be set to the current position of the **Key** knob. To denote minor chords, rather than use lowercase, you need an explicit `m` after the numeral: `III im7 VIsus4` rather than `III i7 VIsus4`. It's a lot more fiddly than lead sheet notation and will only recognize rather basic progressions. 
@@ -175,6 +176,24 @@ While there are smaller and simpler quantizers than **QQQQ** available in the VC
 - **Culling**: When the output of a column is unplugged and its visualization disabled, the column in question does not process input, and thus consumes almost no CPU. Unnecessary calculations are also skipped when Sample & Hold is used.
 
 **Protip for cool kids only:** Did you know that there are a few people out there who do not use Quantizers, and instead choose to spend years to learn something called "Music Theory"? Those people do all their music by reading books and thinking really hard about maths! It's true - check out your local library for more information.
+
+
+
+
+Quatherina's Quale
+------------------
+
+Quatherina the Quantum Duck doesn't experience the existence of multiple octaves, and quavers at those who purport to. She makes no distinction between chords and scales. It's all voltage to her. She merely humors your fancies.
+
+With some qualms, she found it necessary to offer **Quale**: a little 3hp module to convert scales (as expressed in **Qqqq**'s polyphonic data bus format) to chords, and the other way around.
+
+When you patch the **Scale Input**, it's expressed on the **Chord Output** as a polyphonic chord on the fourth octave (0V to 0.91667V).
+
+When you in a polyphonic V/Oct signal on the **Chord Input**, it's folded to a single octave and expressed on the **Scale Output** in the **Qqqq** format, compatible with the rest of my collection.
+
+**Quale** can be used as an expander with the entire **Qqqq** family: when **Quale** is placed to the left of **Qqqq**, its **Scale Output** is forwarded to **Qqqq**. When **Quale** is placed to the right of **Qqqq**, the scale from **Qqqq** is expressed as a chord on **Quale**'s **Chord Output**.
+
+**Protip for cool kids only:** Quatherina has recently taken to calling quaint people who claim to subjectively experience the existence of multiple octaves Q-Zombies.
 
 
 

@@ -97,6 +97,16 @@
       ]
     },
     {
+      "slug": "Quale",
+      "name": "Quatherina's Quale",
+      "description": "Convert chords to scales and scales to chords, using Quatherina's polyphonic scale representation",
+      "tags": [
+        "Polyphonic",
+        "Utility",
+        "Expander"
+      ]
+    },
+    {
       "slug": "Darius",
       "name": "Signature Series Darius",
       "description": "Branching 8-step sequencer taking a random path through its nodes",
@@ -172,15 +182,6 @@
     {
       "slug": "Undular",
       "name": "Signature Series Undular",
-      "description": "Scroll the rack via CV for live performance. After initialization, waits 10 seconds before processing signals.\nIf locked out by mistake, save your patch and reload it, you will have 10 seconds to unplug UnDuLaR",
-      "tags": [
-        "Controller",
-    		"Visual"
-      ]
-    },
-    {
-      "slug": "Test",
-      "name": "Test",
       "description": "Scroll the rack via CV for live performance. After initialization, waits 10 seconds before processing signals.\nIf locked out by mistake, save your patch and reload it, you will have 10 seconds to unplug UnDuLaR",
       "tags": [
         "Controller",

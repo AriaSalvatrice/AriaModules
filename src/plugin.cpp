@@ -22,6 +22,7 @@ void init(Plugin* p) {
     p->addModel(modelQqqq);
     p->addModel(modelQuack);
     p->addModel(modelQ);
+    p->addModel(modelQuale);
 
     // Sequencers
     p->addModel(modelDarius);
@@ -41,6 +42,6 @@ void init(Plugin* p) {
     p->addModel(modelBlank);
 
     // p->addModel(modelBendlet);
-    p->addModel(modelTest);
+    // p->addModel(modelTest);
 
 }
