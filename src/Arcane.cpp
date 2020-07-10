@@ -4,6 +4,12 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
+// This contains Arcane, Atout, and Aleister.
+
+// The singleton owner downloads the the fortune from the repository.
+// Other modules look for the cached file.
+// Long name to avoid shared namespace collisions.
+
 #include "plugin.hpp"
 #include "network.hpp"
 #include "quantizer.hpp"
@@ -11,11 +17,8 @@ You should have received a copy of the GNU General Public License along with thi
 #include <ctime>
 #include <thread>
 
-// This contains Arcane, Atout, and Aleister.
+namespace Arcane {
 
-// The singleton owner downloads the the fortune from the repository.
-// Other modules look for the cached file.
-// Long name to avoid shared namespace collisions.
 static bool ariaSalvatriceArcaneSingletonOwned = false;
 
 // Fortunes are generated 10mn in advance to account for desync'd clocks. 
@@ -1027,7 +1030,8 @@ struct AleisterWidget : ModuleWidget {
     }
 }; // AleisterWidget
 
+} // namespace Arcane
 
-Model* modelArcane   = createModel<Arcane, ArcaneWidget>("Arcane");
-Model* modelAtout    = createModel<Arcane, AtoutWidget>("Atout");
-Model* modelAleister = createModel<Aleister, AleisterWidget>("Aleister");
+Model* modelArcane   = createModel<Arcane::Arcane, Arcane::ArcaneWidget>("Arcane");
+Model* modelAtout    = createModel<Arcane::Arcane, Arcane::AtoutWidget>("Atout");
+Model* modelAleister = createModel<Arcane::Aleister, Arcane::AleisterWidget>("Aleister");

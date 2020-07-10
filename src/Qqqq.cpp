@@ -3,6 +3,12 @@ This program is free software: you can redistribute it and/or modify it under th
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
+
+/* Quatherina's Quality Quad Quantizer, Quack, Q<
+   All three modules are the same, with different widgets.
+   Yeah kinda wasteful but hey, still faster than most quantizers in the library.
+*/ 
+
 #include "plugin.hpp"
 #include "quantizer.hpp"
 #include "lcd.hpp"
@@ -10,9 +16,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include "javascript-libraries.hpp"
 #include "portablesequence.hpp"
 
-/* Quatherina's Quality Quad Quantizer, Quack, Q<
-   All three modules are the same, with different widgets.
-*/ 
+namespace Qqqq {
 
 enum LcdModes {
     INIT_MODE,
@@ -1324,7 +1328,8 @@ struct QWidget : ModuleWidget {
     }
 };
 
+} // namespace Qqqq
 
-Model* modelQqqq = createModel<Qqqq, QqqqWidget>("Qqqq");
-Model* modelQuack = createModel<Qqqq, QuackWidget>("Quack");
-Model* modelQ = createModel<Qqqq, QWidget>("Q");
+Model* modelQqqq = createModel<Qqqq::Qqqq, Qqqq::QqqqWidget>("Qqqq");
+Model* modelQuack = createModel<Qqqq::Qqqq, Qqqq::QuackWidget>("Quack");
+Model* modelQ = createModel<Qqqq::Qqqq, Qqqq::QWidget>("Q");

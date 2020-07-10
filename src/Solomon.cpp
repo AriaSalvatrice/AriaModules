@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License along with thi
 // TODO: JSON I/O
 // TODO: Portable sequences
 
-
 #include "plugin.hpp"
 #include "lcd.hpp"
 #include "quantizer.hpp"

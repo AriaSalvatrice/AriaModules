@@ -5,6 +5,8 @@ You should have received a copy of the GNU General Public License along with thi
 */
 #include "plugin.hpp"
 
+namespace Smerge{
+
 struct Smerge : Module {
     enum ParamIds {
         SORT_PARAM,
@@ -181,5 +183,7 @@ struct SmergeWidget : ModuleWidget {
     }
 };
 
+} // namespace Smerge
 
-Model* modelSmerge = createModel<Smerge, SmergeWidget>("Smerge");
+
+Model* modelSmerge = createModel<Smerge::Smerge, Smerge::SmergeWidget>("Smerge");

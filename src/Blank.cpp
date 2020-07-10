@@ -5,6 +5,8 @@ You should have received a copy of the GNU General Public License along with thi
 */
 #include "plugin.hpp"
 
+namespace Blank {
+
 struct Blank : Module {
     enum ParamIds {
         NUM_PARAMS
@@ -42,4 +44,6 @@ struct BlankWidget : ModuleWidget {
     }
 };
 
-Model* modelBlank = createModel<Blank, BlankWidget>("Blank");
+} // namespace Blank
+
+Model* modelBlank = createModel<Blank::Blank, Blank::BlankWidget>("Blank");

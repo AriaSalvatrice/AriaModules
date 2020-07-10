@@ -3,17 +3,19 @@ This program is free software: you can redistribute it and/or modify it under th
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
+
+// Warning - this module was created with very little C++ experience, and features were 
+// added to it later without regard for code quality. This is maintained exploratory code, not good design.
+//
+// Note: the module calls it a "path" internally, but they are called "routes" for the user.
+
 #include "plugin.hpp"
 #include "prng.hpp"
 #include "quantizer.hpp"
 #include "lcd.hpp"
 #include "portablesequence.hpp"
 
-// Warning - this module was created with very little C++ experience, and features were 
-// added to it later without regard for code quality. This is maintained exploratory code, not good design.
-//
-// Note: the module calls them "path" internally, but they should be called "routes" for the user.
-
+namespace Darius {
 
 const int STEP1START = 0;  //               00        
 const int STEP2START = 1;  //             02  01            
@@ -1326,4 +1328,6 @@ struct DariusWidget : ModuleWidget {
     }
 };
 
-Model* modelDarius = createModel<Darius, DariusWidget>("Darius");
+} // namespace Darius
+
+Model* modelDarius = createModel<Darius::Darius, Darius::DariusWidget>("Darius");

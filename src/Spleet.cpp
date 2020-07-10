@@ -5,6 +5,8 @@ You should have received a copy of the GNU General Public License along with thi
 */
 #include "plugin.hpp"
 
+namespace Spleet {
+
 struct Spleet : Module {
     enum ParamIds {
         SORT_PARAM,
@@ -146,4 +148,6 @@ struct SpleetWidget : ModuleWidget {
     }
 };
 
-Model* modelSpleet = createModel<Spleet, SpleetWidget>("Spleet");
+} // namespace Spleet
+
+Model* modelSpleet = createModel<Spleet::Spleet, Spleet::SpleetWidget>("Spleet");
