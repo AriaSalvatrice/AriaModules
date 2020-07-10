@@ -1,7 +1,7 @@
 {
   "slug": "AriaSalvatrice",
   "name": "Aria Salvatrice",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "license": "GPL-3.0-only",
   "brand": "Aria Salvatrice",
   "author": "Aria Salvatrice",
@@ -110,33 +110,6 @@
       "slug": "Darius",
       "name": "Signature Series Darius",
       "description": "Branching 8-step sequencer taking a random path through its nodes",
-      "tags": [
-        "Sequencer",
-        "Random"
-      ]
-    },
-    {
-      "slug": "Solomon4",
-      "name": "Signature Series Modulellus Salomonis Regis",
-      "description": "4-step sequencer conjuring lesser knowledge of the arts for those who self-patch pleasing sigils",
-      "tags": [
-        "Sequencer",
-        "Random"
-      ]
-    },
-    {
-      "slug": "Solomon8",
-      "name": "Signature Series Modulus Salomonis Regis",
-      "description": "8-step sequencer conjuring grand knowledge of the arts for those who self-patch pleasing sigils",
-      "tags": [
-        "Sequencer",
-        "Random"
-      ]
-    },
-    {
-      "slug": "Solomon16",
-      "name": "Signature Series Modulissimus Salomonis Regis",
-      "description": "16-step sequencer conjuring greater knowledge of the arts for those who self-patch pleasing sigils",
       "tags": [
         "Sequencer",
         "Random"

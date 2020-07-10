@@ -150,6 +150,8 @@ Under the hood, **QQQQ** makes use of [Tonal.js](https://github.com/tonaljs/tona
 
 Below the two text input buttons, you will find a high-definition **Likeness of Quatherina**, increasing the appeal of the module through co-branding.
 
+**KNOWN ISSUE**: **QQQQ** crashes when the chord input is over 120 characters long. I am looking into fixing this issue.
+
 
 ### Quantizer columns
 
@@ -183,15 +185,17 @@ While there are smaller and simpler quantizers than **QQQQ** available in the VC
 Quatherina's Quale
 ------------------
 
+![Quale](/doc/quale.png)
+
 Quatherina the Quantum Duck doesn't experience the existence of multiple octaves, and quavers at those who purport to. She makes no distinction between chords and scales. It's all voltage to her. 
 
-With some qualms, she humors your fancies, offering **Quale**: a little 3hp module to convert scales (as expressed in **Qqqq**'s polyphonic data bus format) to chords, and the other way around.
+With some qualms, she humors your fancies, offering **Quale**: a little 3hp module to convert scales (as expressed in **QQQQ**'s polyphonic data bus format) to chords, and the other way around.
 
 When you patch the **Scale Input**, it's expressed on the **Chord Output** as a polyphonic chord on the fourth octave (0V to 0.91667V).
 
-When you patch in a polyphonic V/Oct signal on the **Chord Input**, it's folded to a single octave and expressed on the **Scale Output** in the **Qqqq** format, compatible with the rest of my collection.
+When you patch in a polyphonic V/Oct signal on the **Chord Input**, it's folded to a single octave and expressed on the **Scale Output** in the **QQQQ** format, compatible with the rest of my collection.
 
-**Quale** can be used as an expander with the entire **Qqqq** family: when **Quale** is placed to the left of **Qqqq**, its **Scale Output** is forwarded to **Qqqq**. When **Quale** is placed to the right of **Qqqq**, the scale from **Qqqq** is expressed as a chord on **Quale**'s **Chord Output**.
+**Quale** can be used as an expander with the entire **Qqqq** family: when **Quale** is placed to the left of **QQQQ**, its **Scale Output** is forwarded to **QQQQ**. When **Quale** is placed to the right of **QQQQ**, the scale from **QQQQ** is expressed as a chord on **Quale**'s **Chord Output**.
 
 **Protip for cool kids only:** Quatherina has recently taken to calling people who claim to subjectively experience the existence of multiple octaves Q-Zombies.
 

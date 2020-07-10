@@ -30,9 +30,9 @@ extern Model *modelQuale;
 
 // Sequencers
 extern Model *modelDarius;
-extern Model *modelSolomon4;
-extern Model *modelSolomon8;
-extern Model *modelSolomon16;
+// extern Model *modelSolomon4;
+// extern Model *modelSolomon8;
+// extern Model *modelSolomon16;
 
 // Arcane
 extern Model *modelArcane;

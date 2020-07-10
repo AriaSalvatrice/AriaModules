@@ -4,7 +4,7 @@ Changelog
 The versioning follows this standard: the first number corresponds to the VCV rack version used. The second number is increased any time a new module is added. The third number is increased when something is added or fixed without adding any new module.
 
 
-## UNRELEASED
+## [1.5.1] - 2020-07-10
 
 ### New modules
 - [NEW] Quale: Convert chords to scales and scales to chords, using Quatherina's polyphonic scale representation.
