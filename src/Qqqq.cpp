@@ -390,7 +390,8 @@ struct Qqqq : Module {
     void updateExpander(){
         if ((leftExpander.module and leftExpander.module->model == modelQqqq)
         ||  (leftExpander.module and leftExpander.module->model == modelQuack)
-        ||  (leftExpander.module and leftExpander.module->model == modelQ)) {
+        ||  (leftExpander.module and leftExpander.module->model == modelQ)
+        ||  (leftExpander.module and leftExpander.module->model == modelQuale)) {
             // We are an expander
             lights[EXPANDER_IN_LIGHT].setBrightness(1.f);
             bool *message = (bool*) leftExpander.consumerMessage;
@@ -404,7 +405,8 @@ struct Qqqq : Module {
 
         if ((rightExpander.module and rightExpander.module->model == modelQqqq)
         ||  (rightExpander.module and rightExpander.module->model == modelQuack)
-        ||  (rightExpander.module and rightExpander.module->model == modelQ)) {
+        ||  (rightExpander.module and rightExpander.module->model == modelQ)
+        ||  (rightExpander.module and rightExpander.module->model == modelQuale)) {
             // We have an expander
             lights[EXPANDER_OUT_LIGHT].setBrightness(1.f);
             bool *message = (bool*) rightExpander.module->leftExpander.producerMessage;			

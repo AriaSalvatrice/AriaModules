@@ -222,6 +222,7 @@ struct Solomon : Module {
         }
     }
 
+    // FIXME: Quantize - scale can have changed.
     // Does nothing if there's no valid note to jump to
     void subOct(size_t node) {       
         if (cv[node] - 1.f >= getMinCv() - Quantizer::FUDGEOFFSET) {

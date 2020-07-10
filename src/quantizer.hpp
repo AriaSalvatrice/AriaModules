@@ -298,6 +298,12 @@ inline float quantize(float voltage, const std::array<bool, 12>& validNotes, int
     return clamp(voltage, -10.f, 10.f);
 }
 
+// C3 = 0, C#5 = 1, D8 = 2, etc.
+inline int quantizeToPositionInOctave(float voltage, const std::array<bool, 12>& validNotes) {
+    voltage = quantize(voltage, validNotes);
+    voltage = voltage * 12.f + 60.f;
+    return (int) voltage % 12;
+}
 
 // Note name and octave, for display on Lcd
 inline std::string noteOctaveLcdName(float voltage) {

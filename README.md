@@ -183,9 +183,9 @@ While there are smaller and simpler quantizers than **QQQQ** available in the VC
 Quatherina's Quale
 ------------------
 
-Quatherina the Quantum Duck doesn't experience the existence of multiple octaves, and quavers at those who purport to. She makes no distinction between chords and scales. It's all voltage to her. She merely humors your fancies.
+Quatherina the Quantum Duck doesn't experience the existence of multiple octaves, and quavers at those who purport to. She makes no distinction between chords and scales. It's all voltage to her. 
 
-With some qualms, she found it necessary to offer **Quale**: a little 3hp module to convert scales (as expressed in **Qqqq**'s polyphonic data bus format) to chords, and the other way around.
+With some qualms, she humors your fancies, offering **Quale**: a little 3hp module to convert scales (as expressed in **Qqqq**'s polyphonic data bus format) to chords, and the other way around.
 
 When you patch the **Scale Input**, it's expressed on the **Chord Output** as a polyphonic chord on the fourth octave (0V to 0.91667V).
 
@@ -193,7 +193,7 @@ When you in a polyphonic V/Oct signal on the **Chord Input**, it's folded to a s
 
 **Quale** can be used as an expander with the entire **Qqqq** family: when **Quale** is placed to the left of **Qqqq**, its **Scale Output** is forwarded to **Qqqq**. When **Quale** is placed to the right of **Qqqq**, the scale from **Qqqq** is expressed as a chord on **Quale**'s **Chord Output**.
 
-**Protip for cool kids only:** Quatherina has recently taken to calling quaint people who claim to subjectively experience the existence of multiple octaves Q-Zombies.
+**Protip for cool kids only:** Quatherina has recently taken to calling people who claim to subjectively experience the existence of multiple octaves Q-Zombies.
 
 
 
@@ -303,7 +303,7 @@ Try to combine it with the [Split and Merge series](#split-and-merge-splort-smer
 - **Melody**: Polyphonic ports sending every note of the scale on the fourth octave (0V~0.9166667V), in the order of the 8 note pattern. It sends as many notes as there are in the scale (between 5 and 8).
 - **Padded**: Like **Melody**, sends the entire 8 note pattern, with any repeated note being one octave higher than normal.
 If you combine them with [ML_modules sequential switch 8->1](https://github.com/martin-lueders/ML_modules/wiki/Sequential-Switches), they can become a melody.
-- **External Scale**: Sends the scale in the format my quantizer and other modules uses: as a 12-channel polyphonic cable, where enabled notes have a continuous 10V signal, and disabled notes, 0V. Try it with **Qqqq** or **Darius**!
+- **External Scale**: Sends the scale in the format my quantizer and other modules uses: as a 12-channel polyphonic cable, where enabled notes have a continuous 10V signal, and disabled notes, 0V (or fewer). Try it with **Qqqq** or **Darius**!
 - **_Arcane Majeur_**: The number of the arcana, divided by 10.    
 Thus, _The Fool_ is 0V, _The Magician_ is 0.1V, and so on up to 2.1V for _The World_. Following the conventions of the Tarot of Marseilles, the 8th arcana is Justice, and the 11th is Strength, unlike the ordering popularized by the Rider-Waite-Smith deck, which swaps those two arcana around.    
 You can multiply this signal by 4.76 with an offsetter such as [Bogaudio's](https://github.com/bogaudio/BogaudioModules#offset) to obtain a 0V~9.99V signal, if you wish.
