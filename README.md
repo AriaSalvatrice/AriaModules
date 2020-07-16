@@ -237,18 +237,6 @@ Thanks to [Frank Buss' Shaker](https://github.com/FrankBuss/FrankBussRackPlugin)
 
 
 
-Signature Series Blank Plate
-----------------------------
-
-![Blank Plate](/doc/blank.png)
-
-A complimentary 8hp blank plate and ♥-head screwdriver are included with every Signature Series module purchase.
-
-**Protip for cool kids only:** Having one or two blank plates in your patch is fine, but if you find yourself having too many of them, it's generally considered a red flag you're doing something wrong. The accepted best practice in the virtual modular community is to make your patch as gratuitously complicated as possible until you reach at least 95% CPU usage. 
-
-
-
-
 Installation
 ------------
 
@@ -308,25 +296,30 @@ Yeah, the rules are a bit complicated. If they cause licensing incompatibilities
 
 ### The output of my modules belongs to you
 
-It should go without saying that no sane courtroom would ever humor the idea the output of my modules is original enough to be my copyright -- even that of Arcane, which directly outputs random data obtained from a server under my control.
+It should go without saying that no sane courtroom would ever humor the idea the output of my modules is original enough to be my copyright, even that of Arcane, which directly outputs random data obtained from a server under my control.
 
-Since courtooms are rarely sane, **I explicitly relinquish any claim of intellectual propery over the output of my modules**, not that I believe I ever had any. Any song you make with them is yours alone.
+Since courtooms are rarely sane, **I explicitly relinquish any claim of intellectual propery over the output you obtain by operating my modules**, not that I believe I ever had any. Any song you make with them is yours alone.
+
 
 ### Source code of individual modules
 
 The code of the Aria Salvatrice Signature Series Synthesizer Modules is distributed under the [GNU General Public License v3.0 only](https://spdx.org/licenses/GPL-3.0-only.html). The modules come without any warranty and might recklessly endanger life and limb, the usual.
 
+
 ### Re-usable .hpp libraries
 
 Not that the code is very good, but some libraries I created for my own use are available under the less restrictive terms of the [Do What The Fuck You Want To Public License](https://spdx.org/licenses/WTFPL.html), to allow every VCV creator to do what the fuck they want. The files in question are [`src/components.hpp`](src/components.hpp), [`src/javascript.hpp`](src/javascript.hpp), [`src/lcd.hpp`](src/lcd.hpp), [`src/portablesequence.hpp`](src/portablesequence.hpp), [`src/prng.hpp`](src/prng.hpp), and [`src/quantizer.hpp`](src/quantizer.hpp).
+
 
 ### Faceplates 
 
  [CC-BY-SA-4.0](https://creativecommons.org/licenses/by-sa/4.0/), with the exception of my signature logo, which is copyrighted, and generally not directly baked into my faceplate SVG files. You may freely distribute your faceplate edits to the VCV community.
 
+
 ### Components (knobs, jacks, etc)
 
 CC-BY-SA-4.0. If you re-use them, I request you do not entirely re-use my signature color scheme in your own modules, but this request is not legally binding. Because I use a limited palette, it's easy to replace most colors in my SVG files using search and replace in a text editor.
+
 
 ### Signature / Logo
 
@@ -338,13 +331,16 @@ If you are faithfully porting my code to a fork of VCV Rack, are compiling binar
 
 The easiest way to remove my signature from every module is by blanking or replacing the graphic in the [`res/components/signature.svg`](res/components/signature.svg) file, and removing it from the blank plate: [`res/faceplates/Blank.svg`](res/faceplates/Blank.svg).
 
+
 ### Graphics for the **Arcane** module 
 
 [CC-BY-NC-SA](https://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_US), as they are a derivative work of the [CBD Tarot](https://www.cbdtarot.com/) released under that license. That includes the faceplate, as it uses a pattern taken from that tarot deck.
 
+
 ### LCD Font
 
 SVG export of the [Fixed_v01 font by Orgdot](http://www.orgdot.com/aliasfonts/index.htm), released under [a custom MIT-style license](res/components/lcd/Fixed_v01/LICENSE.txt).
+
 
 ### Copyright assignment
 
