@@ -201,41 +201,6 @@ When you patch in a polyphonic V/Oct signal on the **Chord Input**, it's folded 
 
 
 
-UnDuLaR Rack Scroller
----------------------
-
-![UnDuLaR](/doc/undular.png)
-
-Scroll your rack via CV! UnDuLaR adjusts to the size of your rack without any setup. You can also automate cable tension and opacity.
-
-This is particularly useful for live performance with MIDI gear. While you can bind every control, **I recommend using only one movement input**. Build a rack that is no wider (or no taller) than your screen at your preferred zoom level, bind to MIDI either a trig input pair or a scroll input, then lock the unused axis with its button. You do not want the mental overhead of navigating two dimensions while performing.
-
-- **UP**, **DOWN**, **LEFT**, **RIGHT**: Take trigs, and jump around the rack in the corresponding direction, wrapping around when it reaches the end.     
-The default vertical jump is 3U - the height of exactly one module.    
-The default horizontal jump is 32hp - the width of exactly one module, so long as the module in question happens to be exactly 32hp.
-- **Step X**, **Step Y**: Adjust the distance to jump on each trigger.
-- **Scroll X**, **Scroll Y**: Take 0V~10V, and smoothly scrolls your rack horizontally or vertically. You might want to invert the input if it feels more natural for you to operate your MIDI controller in the reverse direction.
-- **Padding**: Overshoots the scrolling a little by the specified hp.
-- **Zoom**: Takes 0V~10V, and zooms your rack in and out from 25% to 400%. **Zooming in and out in VCV Rack is neither fast nor reliable enough to ever attempt during live performance.** Expect broken graphics, CPU usage spikes, and audio crackles. This is due to VCV's graphics engine, there is nothing I can do to improve the performance.
-- **Alpha** (Opacity): Takes 0V~10V, and adjusts the opacity of cables.
-- **Tnsn.** (Tension): Takes 0V~10V, and adjust the tension of cables.
-- **Lock X/Lock Y**: By pressing those dangerous buttons, UnDuLaR fully takes over scrolling on that axis, preventing scrolling from the scrollbars, scrollwheels, arrow keys, middle click, or from dragging cables at the edges of the screen. It will be a little bit jittery, I can't help it. Those locks will only work if the three corresponding cable inputs for that axis are unplugged.
-
-As a safety measure, UnDuLar does nothing for the 10 first seconds after initialization. If you find yourself unable to scroll back to UnDuLaR, save your patch (yup, seriously), then reload it. You now have 10 seconds to find the Undular module and unplug it. 
-
-Known issue: zooming in and out after locking X or Y won't bring you where you expect, and might allow you to get out of bounds.    
-Known solution: don't do that.
-
-You can only use a single instance of UnDuLaR in your patch, as multiple instances would just fight each other for control. Additional instances past the first one do nothing.
-
-**Make sure you triple check the module works to your expectations every single time you're about to take it on the stage**, especially after a Rack update! I'll hear no complaints about botched performances, the module is provided as-is, with **zero guarantee** it will work with your setup, and zero guarantee that it will continue to work in the future. The only guarantee I offer is that zooming will cause you no end of trouble.
-
-Thanks to [Frank Buss' Shaker](https://github.com/FrankBuss/FrankBussRackPlugin) for demonstrating it's possible to do this stuff from a module!
-
-**Protip for cool kids only:** Never hesitate to attempt all sorts of imbecilic party tricks you will regret immediately, such as connecting an oscillator to the controls, forcing you to use `Engine > Sample Rate > Pause` before the onset of the seizure.
-
-
-
 
 Installation
 ------------
