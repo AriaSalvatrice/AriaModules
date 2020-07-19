@@ -99,6 +99,7 @@ struct Solomon : Module {
     size_t currentNode = 0;
     size_t selectedQueueNode = 0;
     float readWindow = -1.f; // -1 when closed
+    float resetDelay = -1.f; // 0 when reset started
     std::array<bool, 12> scale;
     dsp::SchmittTrigger stepQueueTrigger;
     dsp::SchmittTrigger stepTeleportTrigger;
@@ -107,6 +108,7 @@ struct Solomon : Module {
     dsp::SchmittTrigger stepForwardTrigger;
     dsp::SchmittTrigger saveButtonTrigger;
     dsp::SchmittTrigger loadButtonTrigger;
+    dsp::SchmittTrigger resetTrigger;
     dsp::PulseGenerator globalTrig;
     dsp::ClockDivider outputDivider;
     Lcd::LcdStatus lcdStatus;
@@ -159,6 +161,17 @@ struct Solomon : Module {
         lcdStatus.lcdMode = INIT_MODE;
         lcdStatus.lcdText1 = "LEARNING...";
         lcdStatus.lcdText2 = "SUMMONING..";
+    }
+
+    void processResetInput() {
+        for (size_t i = 0; i < NODES; i++) cv[i] = savedCv[i];
+        resetDelay = 0.f; // This starts the delay
+    }
+
+    // True when done waiting
+    bool wait1msOnReset(float sampleTime) {
+        resetDelay += sampleTime;
+        return((resetDelay >= 0.001f) ? true : false);
     }
 
     void updateScale() {
@@ -291,7 +304,7 @@ struct Solomon : Module {
     }
 
     void processLoadButton() {
-        if(saveButtonTrigger.process(params[LOAD_PARAM].getValue())){
+        if(loadButtonTrigger.process(params[LOAD_PARAM].getValue())){
             for (size_t i = 0; i < NODES; i++) cv[i] = savedCv[i];
         }
     }
@@ -303,6 +316,7 @@ struct Solomon : Module {
     }
 
     // If it's a queue input, something must be already enqueued.
+    // Other inputs are accepted without conditions.
     int getStepInput() {
         if (stepQueueTrigger.process(inputs[STEP_QUEUE_INPUT].getVoltageSum()) && queueCount() > 0) return STEP_QUEUE;
         if (stepTeleportTrigger.process(inputs[STEP_TELEPORT_INPUT].getVoltageSum()))               return STEP_TELEPORT;
@@ -506,11 +520,21 @@ struct Solomon : Module {
 
     void process(const ProcessArgs& args) override {
 
+        // Reset
+        if (resetTrigger.process(inputs[RESET_INPUT].getVoltageSum())) processResetInput();
+        if (resetDelay >= 0.f) {
+            if (wait1msOnReset(args.sampleTime)) {
+                // Done with reset
+                resetDelay = -1.f;
+            } else {
+                return;
+            }
+        }
+
         if (readWindow < 0.f) {
             // We are not in a Read Window
             stepType = getStepInput();
             if (stepType >= 0) readWindow = 0.f;
-
         }
         if (readWindow >= 0.f && readWindow < READWINDOWDURATION) {
             // We are in a Read Window
@@ -523,8 +547,7 @@ struct Solomon : Module {
             readWindow = -1.f;
         }
 
-        // No need to process this many outputs at audio rates, or to refresh those
-        // inputs this often.
+        // No need to process this many outputs at audio rates
         if (outputDivider.process()) {
             sendOutputs(args);
             updateScale();
@@ -533,7 +556,6 @@ struct Solomon : Module {
             processLoadButton();
             processSaveButton();
         }
-
     }
 
 };

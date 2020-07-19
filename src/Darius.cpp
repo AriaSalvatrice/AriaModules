@@ -118,6 +118,7 @@ struct Darius : Module {
     float lastOutput = 0.f;
     float lcdLastInteraction = 0.f;
     float probabilities[36];
+    float resetDelay = -1.f; // 0 when reset started
     dsp::SchmittTrigger stepUpCvTrigger;
     dsp::SchmittTrigger stepDownCvTrigger;
     dsp::SchmittTrigger stepBackCvTrigger;
@@ -411,7 +412,6 @@ struct Darius : Module {
     }
 
     // Reset to the first step
-    // FIXME: 1 ms wait #36
     void reset(const ProcessArgs& args){
         step = 0;
         node = 0;
@@ -421,6 +421,12 @@ struct Darius : Module {
         for (int i = 0; i < 36; i++)
             outputs[GATE_OUTPUT + i].setVoltage(0.f);
         lcdStatus.lcdDirty = true;
+        resetDelay = 0.f; // This starts the delay
+    }
+
+    bool wait1msOnReset(float sampleTime) {
+        resetDelay += sampleTime;
+        return((resetDelay >= 0.001f) ? true : false);
     }
     
     // Sets running to the current run status
@@ -933,6 +939,15 @@ struct Darius : Module {
             randomizeRoute(args);
         if (resetCvTrigger.process(inputs[RESET_INPUT].getVoltageSum()) or resetButtonTrigger.process(params[RESET_PARAM].getValue()))
             reset(args);
+        if (resetDelay >= 0.f) {
+            if (wait1msOnReset(args.sampleTime)) {
+                // Done with reset
+                resetDelay = -1.f;
+            } else {
+                return;
+            }
+        }
+
 
         if (resetCV)
             processResetCV(args);
