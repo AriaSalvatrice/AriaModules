@@ -4,6 +4,18 @@ Changelog
 The versioning follows this standard: the first number corresponds to the VCV rack version used. The second number is increased any time a new module is added. The third number is increased when something is added or fixed without adding any new module.
 
 
+## UNRELEASED
+
+### Changed
+
+- [CHANGE] Darius: New instances are now by default in quantizer mode, in the C Minor scale, with a limited CV range. Existing patches will not have their settings changed. 
+- [CHANGE] Darius: 1ms wait on reset implemented, as per recommended best practice.
+
+### Fixed
+
+- [FIX] Qqqq: Improved clamping of extremely high/low input.
+
+
 ## [1.5.1] - 2020-07-10
 
 ### New modules

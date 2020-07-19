@@ -573,18 +573,24 @@ struct Qqqq : Module {
                 voltage[i] = voltage[i] + params[OFFSET_PARAM + col].getValue();
                 if (params[TRANSPOSE_MODE_PARAM + col].getValue() == 0.f) {
                     // Quantize in transpose mode 0: Octaves
-                    voltage[i] = Quantizer::quantize(voltage[i], scale[scene]);
-                    voltage[i] = voltage[i] + params[TRANSPOSE_PARAM + col].getValue();
-                    voltage[i] = clamp(voltage[i], -10.f, 10.f);
+                    voltage[i] = Quantizer::quantize(clamp(voltage[i], -5.f, 5.f), scale[scene]);
+                    for (size_t j = 0; j < abs((int) params[TRANSPOSE_PARAM + col].getValue()); j++ ) {
+                        if (params[TRANSPOSE_PARAM + col].getValue() > 0.f && voltage[i] <= 5.f) {
+                            voltage[i] += 1.f;
+                        }
+                        if (params[TRANSPOSE_PARAM + col].getValue() < 0.f && voltage[i] >= -5.f) {
+                            voltage[i] -= 1.f;
+                        }
+                    }
                 }
                 if (params[TRANSPOSE_MODE_PARAM + col].getValue() == 1.f) {
                     // Quantize in transpose mode 1: Semitones
                     voltage[i] = voltage[i] + params[TRANSPOSE_PARAM + col].getValue() * 1.f / 12.f;
-                    voltage[i] = Quantizer::quantize(voltage[i], scale[scene]);
+                    voltage[i] = Quantizer::quantize(clamp(voltage[i], -5.f, 5.f), scale[scene]);
                 }
                 if (params[TRANSPOSE_MODE_PARAM + col].getValue() == 2.f) {
                     // Quantize in transpose mode 2: Scale degrees
-                    voltage[i] = Quantizer::quantize(voltage[i], scale[scene], (int) params[TRANSPOSE_PARAM + col].getValue());
+                    voltage[i] = Quantizer::quantize(clamp(voltage[i], -5.f, 5.f), scale[scene], (int) params[TRANSPOSE_PARAM + col].getValue());
                 }
                 shVoltage[col][i] = voltage[i];
             } else {

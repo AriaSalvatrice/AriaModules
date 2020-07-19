@@ -146,11 +146,11 @@ struct Darius : Module {
         configParam(RANDROUTE_PARAM, 0.f, 1.f, 0.f, "Meta-randomize random route knobs");
         configParam(SEED_MODE_PARAM, 0.f, 1.f, 0.f, "New random seed on first or all nodes");
         configParam(RANGE_PARAM, 0.f, 1.f, 0.f, "Voltage output range");
-        configParam(MIN_PARAM, 0.f, 10.f, 0.f, "Minimum CV/Note");
-        configParam(MAX_PARAM, 0.f, 10.f, 10.f, "Maximum CV/Note");
-        configParam(QUANTIZE_TOGGLE_PARAM, 0.f, 1.f, 0.f, "Precise CV/Quantized V/Oct");
+        configParam(MIN_PARAM, 0.f, 10.f, 3.f, "Minimum CV/Note");
+        configParam(MAX_PARAM, 0.f, 10.f, 5.f, "Maximum CV/Note");
+        configParam(QUANTIZE_TOGGLE_PARAM, 0.f, 1.f, 1.f, "Precise CV/Quantized V/Oct");
         configParam(KEY_PARAM, 0.f, 11.f, 0.f, "Key");
-        configParam(SCALE_PARAM, 0.f, (float) Quantizer::NUM_SCALES - 1, 0.f, "Scale");
+        configParam(SCALE_PARAM, 0.f, (float) Quantizer::NUM_SCALES - 1, 2.f, "Scale");
         configParam(SLIDE_PARAM, 0.f, 10.f, 0.f, "Slide");
         for (int i = 0; i < STEP9START; i++)
             configParam(CV_PARAM + i, 0.f, 10.f, 5.f, "CV");
