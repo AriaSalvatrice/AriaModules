@@ -213,7 +213,7 @@ struct Qqqq : Module {
         lcdStatus.lcdDirty = true;
     }
 
-    // Not portable sequences. Format is like:
+    // Chords, not portable sequences. Format is like:
     // [[0,4,7],[2,6,9],[4,8,11],[5,9,12],[7,11,2],[9,1,4],[11,3,6]]
     void importJson(const char* &jsonC) {
         json_error_t error;
@@ -230,6 +230,7 @@ struct Qqqq : Module {
                 }
             }
             size_t scenesJSize = json_array_size(rootJ);
+            if (scenesJSize > 16) scenesJSize = 16;
             for (size_t i = 0; i < scenesJSize; i++) {
                 json_t* scaleJ = json_array_get(rootJ, i);
                 size_t scaleJSize = json_array_size(scaleJ);

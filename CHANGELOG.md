@@ -13,7 +13,10 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 
 ### Fixed
 
+- [FIX] Qqqq: Fixed crash when importing chord progressions longer than 16 chords.
 - [FIX] Qqqq: Improved clamping of extremely high/low input.
+
+
 
 
 ## [1.5.1] - 2020-07-10
