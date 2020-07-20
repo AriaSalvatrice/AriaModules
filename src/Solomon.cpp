@@ -9,11 +9,8 @@ You should have received a copy of the GNU General Public License along with thi
 
 // TODO: Make notes flash upon trigger
 // TODO: Make LCD work..... cleaner than last modules
-// TODO: On reset
 // TODO: On randomize
-// TODO: JSON I/O
 // TODO: Portable sequences
-// TODO: Change the aspect of disabled nodes
 
 #include "plugin.hpp"
 #include "lcd.hpp"
@@ -178,6 +175,79 @@ struct Solomon : Module {
         resetDelay = 0.f;
     }
 
+    json_t* dataToJson() override {
+        json_t *rootJ = json_object();
+
+        json_object_set_new(rootJ, "currentNode", json_integer(currentNode));
+
+        json_t *scaleJ = json_array();
+        for (size_t i = 0; i < 12; i++) json_array_insert_new(scaleJ, i, json_boolean(scale[i]));
+        json_object_set_new(rootJ, "scale", scaleJ);
+
+        json_t *cvJ = json_array();
+        for (size_t i = 0; i < NODES; i++) json_array_insert_new(cvJ, i, json_real(cv[i]));
+        json_object_set_new(rootJ, "cv", cvJ);
+
+        json_t *savedCvJ = json_array();
+        for (size_t i = 0; i < NODES; i++) json_array_insert_new(savedCvJ, i, json_real(savedCv[i]));
+        json_object_set_new(rootJ, "savedCv", savedCvJ);
+
+        json_t *queueJ = json_array();
+        for (size_t i = 0; i < NODES; i++) json_array_insert_new(queueJ, i, json_boolean(queue[i]));
+        json_object_set_new(rootJ, "queue", queueJ);
+
+        json_t *delayJ = json_array();
+        for (size_t i = 0; i < NODES; i++) json_array_insert_new(delayJ, i, json_boolean(delay[i]));
+        json_object_set_new(rootJ, "delay", delayJ);
+
+        return rootJ;
+    }
+
+    void dataFromJson(json_t* rootJ) override {
+        json_t* currentNodeJ = json_object_get(rootJ, "currentNode");
+        if (currentNodeJ) currentNode = json_integer_value(currentNodeJ);
+
+        json_t *scaleJ = json_object_get(rootJ, "scale");
+        if (scaleJ) {
+            for (size_t i = 0; i < 12; i++) {
+                json_t *scaleNoteJ = json_array_get(scaleJ, i);
+                if (scaleNoteJ) scale[i] = json_boolean_value(scaleNoteJ);
+            }
+        }
+
+        json_t *cvJ = json_object_get(rootJ, "cv");
+        if (cvJ) {
+            for (size_t i = 0; i < NODES; i++) {
+                json_t *cvValueJ = json_array_get(cvJ, i);
+                if (cvValueJ) cv[i] = json_real_value(cvValueJ);
+            }
+        }
+
+        json_t *savedCvJ = json_object_get(rootJ, "savedCv");
+        if (savedCvJ) {
+            for (size_t i = 0; i < NODES; i++) {
+                json_t *savedCvValueJ = json_array_get(savedCvJ, i);
+                if (savedCvValueJ) savedCv[i] = json_real_value(savedCvValueJ);
+            }
+        }
+
+        json_t *queueJ = json_object_get(rootJ, "queue");
+        if (queueJ) {
+            for (size_t i = 0; i < NODES; i++) {
+                json_t *queueStatusJ = json_array_get(queueJ, i);
+                if (queueStatusJ) queue[i] = json_boolean_value(queueStatusJ);
+            }
+        }
+
+        json_t *delayJ = json_object_get(rootJ, "delay");
+        if (delayJ) {
+            for (size_t i = 0; i < NODES; i++) {
+                json_t *delayStatusJ = json_array_get(delayJ, i);
+                if (delayStatusJ) delay[i] = json_boolean_value(delayStatusJ);
+            }
+        }
+    }
+
     void processResetInput() {
         for (size_t i = 0; i < NODES; i++) cv[i] = savedCv[i];
         resetDelay = 0.f; // This starts the delay
@@ -255,12 +325,11 @@ struct Solomon : Module {
         }
     }
 
-    // FIXME: Quantize - scale can have changed.
     // Does nothing if there's no valid note to jump to
     void subOct(size_t node) {       
         if (cv[node] - 1.f >= getMinCv() - Quantizer::FUDGEOFFSET) {
             // We can remove an octave and stay in bounds
-            cv[node] -= 1.f;
+            cv[node] = Quantizer::quantize(cv[node] - 1.f, scale);;
         } else {
             // Separate octave from note
             float nodeOctave = floorf(cv[node]);
@@ -269,12 +338,12 @@ struct Solomon : Module {
             float candidate = maxOctave + nodeVoltageOnFirstOctave; 
             if (candidate <= getMaxCv() + Quantizer::FUDGEOFFSET && candidate >= getMinCv() - Quantizer::FUDGEOFFSET) {
                 // We can wrap around on the max octave
-                cv[node] = candidate;
+                cv[node] = Quantizer::quantize(candidate, scale);
             } else {
                 candidate -= 1.f;
                 if (candidate <= getMaxCv() + Quantizer::FUDGEOFFSET && candidate >= getMinCv() - Quantizer::FUDGEOFFSET) {
                     // We can wrap around one octave lower than the max octave
-                    cv[node] = candidate;
+                    cv[node] = Quantizer::quantize(candidate, scale);
                 }
             }
         }
@@ -284,18 +353,18 @@ struct Solomon : Module {
     // Same code as above with + and - and min and max flipped flipways
     void addOct(size_t node) {
         if (cv[node] + 1.f <= getMaxCv() + Quantizer::FUDGEOFFSET) {
-            cv[node] += 1.f;
+            cv[node] = Quantizer::quantize(cv[node] + 1.f, scale);;
         } else {
             float nodeOctave = floorf(cv[node]);
             float nodeVoltageOnFirstOctave = cv[node] - nodeOctave;
             float minOctave = floorf(getMinCv());
             float candidate = minOctave + nodeVoltageOnFirstOctave; 
             if (candidate >= getMinCv() - Quantizer::FUDGEOFFSET && candidate <= getMaxCv() + Quantizer::FUDGEOFFSET) {
-                cv[node] = candidate;
+                cv[node] = Quantizer::quantize(candidate, scale);
             } else {
                 candidate += 1.f;
                 if (candidate >= getMinCv() - Quantizer::FUDGEOFFSET && candidate <= getMaxCv() + Quantizer::FUDGEOFFSET) {
-                    cv[node] = candidate;
+                    cv[node] = Quantizer::quantize(candidate, scale);
                 }
             }
         }
@@ -390,7 +459,7 @@ struct Solomon : Module {
 
         // Add window queue triggers no matter the configuration        
         for (size_t i = 0; i < NODES; i++) {
-            if (!queue[i]) queue[i] = windowQueue[i]; // FIXME: getTotalNodes() ? 
+            if (!queue[i]) queue[i] = windowQueue[i];
         }
         clearWindowQueue();
     }
@@ -644,7 +713,7 @@ struct SlideKnob : AriaKnob820 {
 
 // Per-node segment display
 template <typename TModule>
-struct SegmentDisplay : TransparentWidget {
+struct SegmentDisplay : LightWidget {
 	TModule* module;
     size_t node;
 	std::shared_ptr<Font> font;
@@ -662,8 +731,12 @@ struct SegmentDisplay : TransparentWidget {
         Vec textPos = mm2px(Vec(0.f, 10.f));
 		nvgFillColor(args.vg, nvgRGB(0x0b, 0x57, 0x63));
 		nvgText(args.vg, textPos.x, textPos.y, "~~~", NULL);
-		nvgFillColor(args.vg, nvgRGB(0xc1, 0xf0, 0xf2));
         if(module) {
+            if(module->getTotalNodes() > node) {
+                nvgFillColor(args.vg, nvgRGB(0xc1, 0xf0, 0xf2));
+            } else {
+                nvgFillColor(args.vg, nvgRGB(0x76, 0xbf, 0xbe));
+            }
             text = Quantizer::noteOctaveSegmentName(module->cv[node]);
             nvgText(args.vg, textPos.x, textPos.y, text.c_str(), NULL);
         }
@@ -689,7 +762,7 @@ struct SegmentDisplayFramebuffer : FramebufferWidget {
 
 // The QUEUE message on the segment display
 template <typename TModule>
-struct QueueWidget : Widget {
+struct QueueWidget : TransparentWidget {
 	TModule* module;
     size_t node;
 	FramebufferWidget* framebuffer;
@@ -697,9 +770,9 @@ struct QueueWidget : Widget {
     bool lastStatus;
 
     QueueWidget() {
-        framebuffer = new widget::FramebufferWidget;
+        framebuffer = new FramebufferWidget;
         addChild(framebuffer);
-        svgWidget = new widget::SvgWidget;
+        svgWidget = new SvgWidget;
         svgWidget->setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/solomon-queue-lit.svg")));
         framebuffer->box.size = svgWidget->box.size;
         box.size = svgWidget->box.size;
@@ -720,7 +793,7 @@ struct QueueWidget : Widget {
 
 // The DELAY message on the segment display
 template <typename TModule>
-struct DelayWidget : Widget {
+struct DelayWidget : TransparentWidget {
 	TModule* module;
     size_t node;
 	FramebufferWidget* framebuffer;
@@ -728,9 +801,9 @@ struct DelayWidget : Widget {
     bool lastStatus;
 
     DelayWidget() {
-        framebuffer = new widget::FramebufferWidget;
+        framebuffer = new FramebufferWidget;
         addChild(framebuffer);
-        svgWidget = new widget::SvgWidget;
+        svgWidget = new SvgWidget;
         svgWidget->setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/solomon-delay-lit.svg")));
         framebuffer->box.size = svgWidget->box.size;
         box.size = svgWidget->box.size;
@@ -751,7 +824,7 @@ struct DelayWidget : Widget {
 
 // The PLAY arrow on the segment display
 template <typename TModule>
-struct PlayWidget : Widget {
+struct PlayWidget : TransparentWidget {
 	TModule* module;
     size_t node;
 	FramebufferWidget* framebuffer;
@@ -759,9 +832,9 @@ struct PlayWidget : Widget {
     size_t lastStatus; 
 
     PlayWidget() {
-        framebuffer = new widget::FramebufferWidget;
+        framebuffer = new FramebufferWidget;
         addChild(framebuffer);
-        svgWidget = new widget::SvgWidget;
+        svgWidget = new SvgWidget;
         svgWidget->setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/solomon-play-lit.svg")));
         framebuffer->box.size = svgWidget->box.size;
         box.size = svgWidget->box.size;

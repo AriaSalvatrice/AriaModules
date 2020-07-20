@@ -34,26 +34,23 @@ extern Plugin* pluginInstance;
 
 namespace Lcd {
 
+const float NOTIFICATIONTIMEOUT = 3.f; // seconds
+
 // Which elements to show and hide
 // FIXME: Migrate terminology entirely to mode.
 enum LcdLayouts {
     // Displays nothing
     OFF_LAYOUT,
-    // Only text on the first line
+    // Displays text on the first line and empties the second
     TEXT1_LAYOUT,
-    // Only text on the second line
+    // Displays text on the second line and empties the first
     TEXT2_LAYOUT,
-    // Text on two lines
+    // Displays text on two lines
     TEXT1_AND_TEXT2_LAYOUT,
     // Piano on the first line and text on the second
-    PIANO_AND_TEXT2_LAYOUT
+    PIANO_AND_TEXT2_LAYOUT,
 };
 
-// FIXME: Just do away with LCD Modes, they're complicated and should be custom per-module logic.
-enum LcdModes {
-    BOOT_MODE,
-    INIT_MODE
-};
 
 // Interface between the module & widgets with the LCD
 struct LcdStatus {
@@ -69,7 +66,7 @@ struct LcdStatus {
     // Whether to redraw the widget.
     bool lcdDirty = false;
 
-    // Which mode we're in defines which layout is used.
+    // Which mode we're in. Use this to implement custom module logic - the LCD has no clue what this means.
     int lcdMode = 0;
 
     // Whether to draw two lines of text, a piano, etc.
@@ -86,7 +83,7 @@ struct LcdStatus {
 
 // The draw widget, concerned only with rendering layouts.
 template <class TModule>
-struct LcdDrawWidget : TransparentWidget {
+struct LcdDrawWidget : LightWidget {
     TModule *module;
     std::array<std::shared_ptr<Svg>, 95> asciiSvg; // 32 to 126, the printable range
     std::array<std::shared_ptr<Svg>, 24> pianoSvg; // 0..11: Unlit, 12..23 = Lit
@@ -212,14 +209,5 @@ struct LcdWidget : TransparentWidget {
 };
 
 
-
-// template <class TModule>
-// Lcd::LcdFramebufferWidget<TModule>* createLcd(math::Vec pos, TModule *module) {
-//     Lcd::LcdFramebufferWidget<TModule> *lfb = new Lcd::LcdFramebufferWidget<TModule>(module);
-//     Lcd::LcdDrawWidget<TModule> *ldw = new Lcd::LcdDrawWidget<TModule>(module);
-//     lfb->box.pos = pos;
-//     lfb->addChild(ldw);
-//     return lfb;
-// }
 
 } // Lcd
