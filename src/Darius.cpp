@@ -766,8 +766,8 @@ struct Darius : Module {
         }
 
         if (lcdMode == SLIDE_MODE) {
-            lcdStatus.lcdLayout = Lcd::TEXT2_LAYOUT;
-            lcdStatus.lcdText1 = "SLIDE:";
+            lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
+            lcdStatus.lcdText1 = "Slide:";
             float displayDuration = slideDuration;
             if (displayDuration == 0.f)
                 lcdStatus.lcdText2 = "DISABLED";

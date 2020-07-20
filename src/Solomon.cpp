@@ -95,6 +95,7 @@ struct Solomon : Module {
     size_t selectedQueueNode = 0;
     float readWindow = -1.f; // -1 when closed
     float resetDelay = -1.f; // 0 when reset started
+    float slideDuration = 0.f;
     std::array<bool, 12> scale;
     dsp::SchmittTrigger stepQueueTrigger;
     dsp::SchmittTrigger stepTeleportTrigger;
@@ -267,6 +268,17 @@ struct Solomon : Module {
             scale = Quantizer::validNotesInScaleKey( (int) params[SCALE_PARAM].getValue(), (int) params[KEY_PARAM].getValue());
         }
     }
+
+    void updateSlide(){
+        slideDuration = params[SLIDE_PARAM].getValue();
+        if (slideDuration > 0.00001f ) {
+            slideDuration = rescale(slideDuration, 0.f, 10.f, -3.0f, 1.0f);
+            slideDuration = powf(10.0f, slideDuration);
+        } else {
+            slideDuration = 0.f;
+        }
+    }
+
 
     // How many are set by the knob
     size_t getTotalNodes() {
@@ -647,6 +659,7 @@ struct Solomon : Module {
         if (outputDivider.process()) {
             sendOutputs(args);
             updateScale();
+            updateSlide();
             processSdButtons();
             processQueueButtons();
             processLoadButton();
@@ -679,6 +692,7 @@ struct TotalNodesKnob : AriaKnob820Snap {
         dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLastInteraction = 0.f;
         dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdDirty = true;
         dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdMode = TOTAL_NODES_MODE;
+        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLayout = Lcd::TEXT2_LAYOUT;
         AriaKnob820::onDragMove(e);
     }
 };
@@ -694,6 +708,7 @@ struct ScaleKnob : AriaKnob820 {
         dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLastInteraction = 0.f;
         dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdDirty = true;
         dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdMode = SCALE_MODE;
+        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLayout = Lcd::PIANO_AND_TEXT2_LAYOUT;
         AriaKnob820::onDragMove(e);
     }
 };
@@ -705,17 +720,37 @@ struct MinMaxKnob : AriaKnob820 {
         dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLastInteraction = 0.f;
         dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdDirty = true;
         dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdMode = MINMAX_MODE;
+        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLayout = Lcd::TEXT2_LAYOUT;
         AriaKnob820::onDragMove(e);
     }
 };
 
 // Slide knobs
+// TODO: Make generic
 template <typename TModule>
 struct SlideKnob : AriaKnob820 {
     void onDragMove(const event::DragMove& e) override {
         dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLastInteraction = 0.f;
         dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdDirty = true;
         dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdMode = SLIDE_MODE;
+        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
+        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdText1 = "Slide:";
+
+        float displayDuration = dynamic_cast<TModule*>(paramQuantity->module)->slideDuration;
+        if (displayDuration == 0.f)
+            dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdText2 = "DISABLED";
+        if (displayDuration > 0.f && displayDuration < 1.f) {
+            int displayDurationMs = displayDuration * 1000;
+            displayDurationMs = truncf(displayDurationMs);
+            dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdText2 = std::to_string(displayDurationMs);
+            dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdText2.append("ms");
+        } 
+        if (displayDuration >= 1.f) {
+            dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdText2 = std::to_string(displayDuration);
+            dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdText2.resize(4);
+            dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdText2.append("s");
+        }
+
         AriaKnob820::onDragMove(e);
     }
 };
