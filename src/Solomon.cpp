@@ -9,11 +9,12 @@ You should have received a copy of the GNU General Public License along with thi
 
 // TODO: Make LCD work..... cleaner than last modules
 // TODO: Portable sequences
-// TODO: Right-click option to randomize notes
+// TODO: Right-click option to randomize notes only
 
 #include "plugin.hpp"
 #include "lcd.hpp"
 #include "quantizer.hpp"
+#include "prng.hpp"
 
 namespace Solomon {
 
@@ -47,6 +48,7 @@ struct Solomon : Module {
         SLIDE_PARAM,
         TOTAL_NODES_PARAM,
         QUEUE_CLEAR_MODE_PARAM,
+        REPEAT_MODE_PARAM,
         SAVE_PARAM,
         LOAD_PARAM,
         ENUMS(NODE_SUB_1_SD_PARAM, NODES),
@@ -111,6 +113,7 @@ struct Solomon : Module {
     dsp::PulseGenerator globalTrigger;
     dsp::PulseGenerator globalDisplayTrigger;
     dsp::ClockDivider outputDivider;
+    prng::prng prng;
     Lcd::LcdStatus lcdStatus;
 
     // Per node
@@ -139,6 +142,8 @@ struct Solomon : Module {
         configParam(MAX_PARAM, 0.f, 10.f, 5.f, "Maximum Note");
         configParam(SLIDE_PARAM, 0.f, 10.f, 0.f, "Slide");
         configParam(TOTAL_NODES_PARAM, 1.f, (float) NODES, (float) NODES, "Total Nodes");
+        configParam(QUEUE_CLEAR_MODE_PARAM, 0.f, 1.f, 0.f, "Clear queue after picking from it");
+        configParam(REPEAT_MODE_PARAM, 0.f, 1.f, 0.f, "Chance to walk or teleport to the current step");
 
         // C Minor is the default
         configParam(KEY_PARAM, 0.f, 11.f, 0.f, "Key");
@@ -162,6 +167,8 @@ struct Solomon : Module {
         lcdStatus.lcdMode = INIT_MODE;
         lcdStatus.lcdText1 = "LEARNING...";
         lcdStatus.lcdText2 = "SUMMONING..";
+
+        prng.init(random::uniform(), random::uniform());
     }
 
     void onReset() override {
@@ -182,8 +189,13 @@ struct Solomon : Module {
 
     void onRandomize() override {
         float r = 0.f;
+
+        // Set the MIN/MAX knobs to something reasonable
+        params[MIN_PARAM].setValue( prng.uniform() * 2.f + 3.f );
+        params[MAX_PARAM].setValue( params[MIN_PARAM].getValue() + prng.uniform() * 2.f + 1.f );
+
         for (size_t i = 0; i < NODES; i++) {
-            r = random::uniform() * 10.f;
+            r = prng.uniform() * 10.f;
             r = rescale(r, 0.f, 10.f, params[MIN_PARAM].getValue() - 5.f, params[MAX_PARAM].getValue() - 5.f);
             cv[i] = Quantizer::quantize(r, scale);
         }
@@ -543,12 +555,17 @@ struct Solomon : Module {
             currentNode = selectedQueueNode;
         }
 
-        // Teleport never brings back to the current step - unless we only have one
+        // Teleport never brings back to the current step - unless we only have one,
+        // or are in Repeat mode.
         if (stepType == STEP_TELEPORT) {
             if (getTotalNodes() > 1) {
                 std::vector<size_t> validNodes;
                 for (size_t i = 0; i < getTotalNodes(); i++) {
-                    if (i != currentNode) validNodes.push_back(i);
+                    if (params[REPEAT_MODE_PARAM].getValue() == 0.f) {
+                        if (i != currentNode) validNodes.push_back(i);
+                    } else {
+                        validNodes.push_back(i);
+                    }
                 }
                 std::random_shuffle(validNodes.begin(), validNodes.end());
                 currentNode = validNodes[0];
@@ -559,19 +576,24 @@ struct Solomon : Module {
 
         // Random walk can warp around
         if (stepType == STEP_WALK) {
-            if (random::uniform() >= 0.5f) {
-                // Walk forward
-                if (currentNode >= getTotalNodes() - 1) {
-                    currentNode = 0;
-                } else {
-                    currentNode++;
-                }
+            if (params[REPEAT_MODE_PARAM].getValue() == 1.f && prng.uniform() < 1.f / 3.f) {
+                // 1 chance out of 3 the current node repeats
             } else {
-                // Walk back
-                if (currentNode == 0) {
-                    currentNode = getTotalNodes() - 1;
+                // Then it's a coin flip which direction we go
+                if (prng.uniform() >= 0.5f) {
+                    // Walk forward
+                    if (currentNode >= getTotalNodes() - 1) {
+                        currentNode = 0;
+                    } else {
+                        currentNode++;
+                    }
                 } else {
-                    currentNode--;
+                    // Walk back
+                    if (currentNode == 0) {
+                        currentNode = getTotalNodes() - 1;
+                    } else {
+                        currentNode--;
+                    }
                 }
             }
         }
@@ -613,7 +635,7 @@ struct Solomon : Module {
         applyStep();
         updateLatch();
         clearTransposes();
-        randomGate = ( random::uniform() >= 0.5f ) ? true : false;
+        randomGate = ( prng.uniform() >= 0.5f ) ? true : false;
         globalTrigger.trigger();
         globalDisplayTrigger.trigger(0.003f);
         stepType = -1;
@@ -716,12 +738,29 @@ struct TotalNodesKnob : AriaKnob820Snap {
     void onDragMove(const event::DragMove& e) override {
         dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLastInteraction = 0.f;
         dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdDirty = true;
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdMode = TOTAL_NODES_MODE;
         dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLayout = Lcd::TEXT2_LAYOUT;
         AriaKnob820::onDragMove(e);
     }
 };
 
+
+/* 
+
+    if(params[SCALE_PARAM].getValue() == 0.f) {
+        text = "CHROMATIC";
+    } else {
+        text = Quantizer::keyLcdName((int)params[KEY_PARAM].getValue());
+        text.append(" ");
+        text.append(Quantizer::scaleLcdName((int)params[SCALE_PARAM].getValue()));
+    }
+
+    lcdStatus.lcdText2 = text;
+    lcdStatus.pianoDisplay = scale;
+
+*/
+
+
+// FIXME: What a mess lol
 // Scale/key knobs
 template <typename TModule>
 struct ScaleKnob : AriaKnob820 {
@@ -732,8 +771,22 @@ struct ScaleKnob : AriaKnob820 {
     void onDragMove(const event::DragMove& e) override {
         dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLastInteraction = 0.f;
         dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdDirty = true;
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdMode = SCALE_MODE;
         dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLayout = Lcd::PIANO_AND_TEXT2_LAYOUT;
+
+        std::string text = "";
+        if (dynamic_cast<TModule*>(paramQuantity->module)->params[dynamic_cast<TModule*>(paramQuantity->module)->SCALE_PARAM].getValue() == 0.f) {
+            text = "CHROMATIC";
+        } else {
+            text = Quantizer::keyLcdName((int) dynamic_cast<TModule*>(paramQuantity->module)->params[dynamic_cast<TModule*>(paramQuantity->module)->KEY_PARAM].getValue());
+            text.append(" ");
+            text.append(Quantizer::scaleLcdName((int) dynamic_cast<TModule*>(paramQuantity->module)->params[dynamic_cast<TModule*>(paramQuantity->module)->SCALE_PARAM].getValue()));
+        }
+        if ( dynamic_cast<TModule*>(paramQuantity->module)->inputs[dynamic_cast<TModule*>(paramQuantity->module)->EXT_SCALE_INPUT].isConnected()) {
+            text = "EXTERNAL";
+        }
+        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdText2 = text;
+        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.pianoDisplay = dynamic_cast<TModule*>(paramQuantity->module)->scale;
+
         AriaKnob820::onDragMove(e);
     }
 };
@@ -744,8 +797,7 @@ struct MinMaxKnob : AriaKnob820 {
     void onDragMove(const event::DragMove& e) override {
         dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLastInteraction = 0.f;
         dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdDirty = true;
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdMode = MINMAX_MODE;
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLayout = Lcd::TEXT2_LAYOUT;
+        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
         AriaKnob820::onDragMove(e);
     }
 };
@@ -757,7 +809,6 @@ struct SlideKnob : AriaKnob820 {
     void onDragMove(const event::DragMove& e) override {
         dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLastInteraction = 0.f;
         dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdDirty = true;
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdMode = SLIDE_MODE;
         dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
         dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdText1 = "Slide:";
 
@@ -944,6 +995,9 @@ struct SolomonWidget8 : ModuleWidget {
         // Queue clear mode
         addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(28.4f, 17.1f)), module, Solomon<8>::QUEUE_CLEAR_MODE_PARAM));
 
+        // Repeat mode
+        addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(42.4f, 17.1f)), module, Solomon<8>::REPEAT_MODE_PARAM));
+
         // Global step inputs. Ordered counterclockwise.
         addInput(createInput<AriaJackIn>(mm2px(Vec(20.f, 17.f)), module, Solomon<8>::STEP_QUEUE_INPUT));
         addInput(createInput<AriaJackIn>(mm2px(Vec( 5.f, 32.f)), module, Solomon<8>::STEP_TELEPORT_INPUT));
@@ -1066,6 +1120,9 @@ struct SolomonWidget4 : ModuleWidget {
         // Queue clear mode
         addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(28.4f, 17.1f)), module, Solomon<4>::QUEUE_CLEAR_MODE_PARAM));
 
+        // Repeat mode
+        addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(42.4f, 17.1f)), module, Solomon<4>::REPEAT_MODE_PARAM));
+
         // Global step inputs. Ordered counterclockwise.
         addInput(createInput<AriaJackIn>(mm2px(Vec(20.f, 17.f)), module, Solomon<4>::STEP_QUEUE_INPUT));
         addInput(createInput<AriaJackIn>(mm2px(Vec( 5.f, 32.f)), module, Solomon<4>::STEP_TELEPORT_INPUT));
@@ -1185,6 +1242,9 @@ struct SolomonWidget16 : ModuleWidget {
 
         // Queue clear mode
         addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(28.4f, 17.1f)), module, Solomon<16>::QUEUE_CLEAR_MODE_PARAM));
+
+        // Repeat mode
+        addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(42.4f, 17.1f)), module, Solomon<16>::REPEAT_MODE_PARAM));
 
         // Global step inputs. Ordered counterclockwise.
         addInput(createInput<AriaJackIn>(mm2px(Vec(20.f, 17.f)), module, Solomon<16>::STEP_QUEUE_INPUT));
