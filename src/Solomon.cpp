@@ -7,10 +7,10 @@ You should have received a copy of the GNU General Public License along with thi
 // Self-modifying sequencer. Internally, the slots are called "nodes", "step" refers to the movement.
 // Templates are used to create multiple versions: 4, 8, and 16 steps.
 
-// TODO: Make notes flash upon trigger
 // TODO: Make LCD work..... cleaner than last modules
 // TODO: On randomize
 // TODO: Portable sequences
+// TODO: Slide
 
 #include "plugin.hpp"
 #include "lcd.hpp"
@@ -104,7 +104,8 @@ struct Solomon : Module {
     dsp::SchmittTrigger saveButtonTrigger;
     dsp::SchmittTrigger loadButtonTrigger;
     dsp::SchmittTrigger resetTrigger;
-    dsp::PulseGenerator globalTrig;
+    dsp::PulseGenerator globalTrigger;
+    dsp::PulseGenerator globalDisplayTrigger;
     dsp::ClockDivider outputDivider;
     Lcd::LcdStatus lcdStatus;
 
@@ -586,13 +587,15 @@ struct Solomon : Module {
         updateLatch();
         clearTransposes();
         randomGate = ( random::uniform() >= 0.5f ) ? true : false;
-        globalTrig.trigger(1e-3f);
+        globalTrigger.trigger();
+        globalDisplayTrigger.trigger(0.003f);
         stepType = -1;
     }
 
     // We refresh lotsa stuff, but we don't need to do it at audio rates
     void sendOutputs(const ProcessArgs& args) {
-        outputs[GLOBAL_TRIG_OUTPUT].setVoltage( globalTrig.process(args.sampleTime) ? 10.f : 0.f);
+        outputs[GLOBAL_TRIG_OUTPUT].setVoltage( globalTrigger.process(args.sampleTime) ? 10.f : 0.f);
+        globalDisplayTrigger.process(args.sampleTime);
         outputs[GLOBAL_CV_OUTPUT].setVoltage(cv[currentNode]); // TODO: Slide
 
         for(size_t i = 0; i < NODES; i++) {
@@ -648,6 +651,12 @@ struct Solomon : Module {
             processQueueButtons();
             processLoadButton();
             processSaveButton();
+
+            // if (nodeDisplayFlashing) {
+            //     DEBUG("flash");
+            // } else {
+            //     DEBUG("not flash");
+            // }
         }
     }
 
@@ -731,13 +740,14 @@ struct SegmentDisplay : LightWidget {
         Vec textPos = mm2px(Vec(0.f, 10.f));
 		nvgFillColor(args.vg, nvgRGB(0x0b, 0x57, 0x63));
 		nvgText(args.vg, textPos.x, textPos.y, "~~~", NULL);
-        if(module) {
-            if(module->getTotalNodes() > node) {
+        if (module) {
+            if (module->getTotalNodes() > node) {
                 nvgFillColor(args.vg, nvgRGB(0xc1, 0xf0, 0xf2));
             } else {
                 nvgFillColor(args.vg, nvgRGB(0x76, 0xbf, 0xbe));
             }
             text = Quantizer::noteOctaveSegmentName(module->cv[node]);
+            if (node == module->currentNode && module->globalDisplayTrigger.remaining > 0.f) text = "~~~";
             nvgText(args.vg, textPos.x, textPos.y, text.c_str(), NULL);
         }
 	}
@@ -751,9 +761,10 @@ struct SegmentDisplayFramebuffer : FramebufferWidget {
 
     void step() override{
         if (module) { 
-            if (module->cv[node] != lastStatus) {
+            if (module->cv[node] != lastStatus || module->globalDisplayTrigger.remaining > 0.f) {
                 dirty = true;
             }
+
             FramebufferWidget::step();
         }
     }
