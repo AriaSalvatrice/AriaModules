@@ -18,16 +18,19 @@ using namespace rack;
 extern Plugin* pluginInstance;
 
 // This LCD widget  displays data, provided by the module or by widgets.
-// Its size is currently fixed to 36*10mm - 2 lines of 11 characters. TODO: change it
+// Its size is currently fixed to 36*10mm - 2 lines of 11 characters.
 //
 // The LCD LAYOUT is the layout, e.g., two lines of text, or a piano and a line of text.
-// The LCD MODE is the internal state of the LCD.
+// The LCD MODE is deprecated.
+//
+// Modulus Salomonis Regis is the only module to implement the LCD somewhat as intended.
+// Arcane, Darius and QQQQ do things in deprecated ways.
 // 
 // On Arcane and Darius, the SVG of the LCD is a little bit too small to display
 // descenders on the second line of text, so uppercase is mostly used.
-// Future modules will have a slightly larger LCD to fit descenders if desired.
+// Newer modules have a larger LCD to fit descenders.
 //
-// It's under heavy rework - I strongly advise against re-using this yet.
+// It's under heavy rework - I advise against re-using this yet.
 // 
 // If you're gonna reuse this code despite the warnings, please consider changing my signature
 // color scheme to your own. You can recolor the SVG letters in batch with a text editor.
@@ -66,6 +69,7 @@ struct LcdStatus {
     bool lcdDirty = false;
 
     // Which mode we're in. Use this to implement custom module logic - the LCD has no clue what this means.
+    // FIXME: Deprected, move away from using this.
     int lcdMode = 0;
 
     // Whether to draw two lines of text, a piano, etc.
@@ -81,14 +85,14 @@ struct LcdStatus {
         for (int i = 0; i < 12; i++) pianoDisplay[i] = false;
     }
 
-    // true if the notificationTimeout has elapsed.
-    bool notificationStep(float &deltaTime) {
-        lcdLastInteraction += deltaTime;
-        if (deltaTime >= notificationTimeout) {
-            lcdLastInteraction = 0.f;
-            return true;
-        } else {
-            return false;
+    // Call this from the module.
+    // Use this to go back to the main page.
+    void notificationStep(float deltaTime) {
+        if (lcdLastInteraction >= 0.f) {
+            lcdLastInteraction += deltaTime;
+        }
+        if (lcdLastInteraction >= notificationTimeout) {
+            lcdLastInteraction = -1.f;
         }
     }
 
@@ -205,7 +209,7 @@ struct LcdFramebufferWidget : FramebufferWidget{
     }
 };
 
-// The actual LCD widget, concerned with Modes.
+// The actual LCD widget.
 template <typename TModule>
 struct LcdWidget : TransparentWidget {
     TModule *module;
@@ -218,6 +222,16 @@ struct LcdWidget : TransparentWidget {
         ldw = new Lcd::LcdDrawWidget<TModule>(module);
         addChild(lfb);
         lfb->addChild(ldw);
+    }
+
+    // Override this to process timeouts and default modes
+    void processDefaultMode() {
+
+    }
+
+    void draw(const DrawArgs& args) override {
+        processDefaultMode();
+        TransparentWidget::draw(args);
     }
 };
 

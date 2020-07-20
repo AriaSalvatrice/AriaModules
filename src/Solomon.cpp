@@ -138,8 +138,8 @@ struct Solomon : Module {
     Solomon() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
-        configParam(MIN_PARAM, 0.f, 10.f, 3.f, "Minimum Note");
-        configParam(MAX_PARAM, 0.f, 10.f, 5.f, "Maximum Note");
+        configParam(MIN_PARAM, 1.f, 9.f, 3.f, "Minimum Note");
+        configParam(MAX_PARAM, 1.f, 9.f, 5.f, "Maximum Note");
         configParam(SLIDE_PARAM, 0.f, 10.f, 0.f, "Slide");
         configParam(TOTAL_NODES_PARAM, 1.f, (float) NODES, (float) NODES, "Total Nodes");
         configParam(QUEUE_CLEAR_MODE_PARAM, 0.f, 1.f, 0.f, "Clear queue after picking from it");
@@ -167,6 +167,7 @@ struct Solomon : Module {
         lcdStatus.lcdMode = INIT_MODE;
         lcdStatus.lcdText1 = "LEARNING...";
         lcdStatus.lcdText2 = "SUMMONING..";
+        lcdStatus.lcdLastInteraction = 0.f;
 
         prng.init(random::uniform(), random::uniform());
     }
@@ -674,6 +675,8 @@ struct Solomon : Module {
 
     void process(const ProcessArgs& args) override {
 
+        lcdStatus.notificationStep(args.sampleTime);
+
         // Reset
         if (resetTrigger.process(inputs[RESET_INPUT].getVoltageSum())) processResetInput();
         if (resetDelay >= 0.f) {
@@ -711,12 +714,6 @@ struct Solomon : Module {
             processQueueButtons();
             processLoadButton();
             processSaveButton();
-
-            // if (nodeDisplayFlashing) {
-            //     DEBUG("flash");
-            // } else {
-            //     DEBUG("not flash");
-            // }
         }
     }
 
@@ -730,37 +727,22 @@ struct Solomon : Module {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-
-
 // Total nodes knobs
 template <typename TModule>
 struct TotalNodesKnob : AriaKnob820Snap {
     void onDragMove(const event::DragMove& e) override {
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLastInteraction = 0.f;
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdDirty = true;
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLayout = Lcd::TEXT2_LAYOUT;
+        TModule* module = dynamic_cast<TModule*>(paramQuantity->module);
+
+        module->lcdStatus.lcdLastInteraction = 0.f;
+        module->lcdStatus.lcdDirty = true;
+        module->lcdStatus.lcdLayout = Lcd::TEXT2_LAYOUT;
+        module->lcdStatus.lcdText2 = "Nodes: " + std::to_string( (int) module->params[module->TOTAL_NODES_PARAM].getValue());
+
         AriaKnob820::onDragMove(e);
     }
 };
 
 
-/* 
-
-    if(params[SCALE_PARAM].getValue() == 0.f) {
-        text = "CHROMATIC";
-    } else {
-        text = Quantizer::keyLcdName((int)params[KEY_PARAM].getValue());
-        text.append(" ");
-        text.append(Quantizer::scaleLcdName((int)params[SCALE_PARAM].getValue()));
-    }
-
-    lcdStatus.lcdText2 = text;
-    lcdStatus.pianoDisplay = scale;
-
-*/
-
-
-// FIXME: What a mess lol
 // Scale/key knobs
 template <typename TModule>
 struct ScaleKnob : AriaKnob820 {
@@ -768,68 +750,79 @@ struct ScaleKnob : AriaKnob820 {
         snap = true;
         AriaKnob820();
     }
+
     void onDragMove(const event::DragMove& e) override {
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLastInteraction = 0.f;
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdDirty = true;
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLayout = Lcd::PIANO_AND_TEXT2_LAYOUT;
+        TModule* module = dynamic_cast<TModule*>(paramQuantity->module);
+
+        module->lcdStatus.lcdLastInteraction = 0.f;
+        module->lcdStatus.lcdDirty = true;
+        module->lcdStatus.lcdLayout = Lcd::PIANO_AND_TEXT2_LAYOUT;
 
         std::string text = "";
-        if (dynamic_cast<TModule*>(paramQuantity->module)->params[dynamic_cast<TModule*>(paramQuantity->module)->SCALE_PARAM].getValue() == 0.f) {
+        if (module->params[module->SCALE_PARAM].getValue() == 0.f) {
             text = "CHROMATIC";
         } else {
-            text = Quantizer::keyLcdName((int) dynamic_cast<TModule*>(paramQuantity->module)->params[dynamic_cast<TModule*>(paramQuantity->module)->KEY_PARAM].getValue());
+            text = Quantizer::keyLcdName((int) module->params[module->KEY_PARAM].getValue());
             text.append(" ");
-            text.append(Quantizer::scaleLcdName((int) dynamic_cast<TModule*>(paramQuantity->module)->params[dynamic_cast<TModule*>(paramQuantity->module)->SCALE_PARAM].getValue()));
+            text.append(Quantizer::scaleLcdName((int) module->params[module->SCALE_PARAM].getValue()));
         }
-        if ( dynamic_cast<TModule*>(paramQuantity->module)->inputs[dynamic_cast<TModule*>(paramQuantity->module)->EXT_SCALE_INPUT].isConnected()) {
+        if ( module->inputs[module->EXT_SCALE_INPUT].isConnected()) {
             text = "EXTERNAL";
         }
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdText2 = text;
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.pianoDisplay = dynamic_cast<TModule*>(paramQuantity->module)->scale;
+        module->lcdStatus.lcdText2 = text;
+        module->lcdStatus.pianoDisplay = module->scale;
 
         AriaKnob820::onDragMove(e);
     }
 };
+
 
 // Min/Max knobs
 template <typename TModule>
 struct MinMaxKnob : AriaKnob820 {
     void onDragMove(const event::DragMove& e) override {
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLastInteraction = 0.f;
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdDirty = true;
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
+        TModule* module = dynamic_cast<TModule*>(paramQuantity->module);
+
+        module->lcdStatus.lcdLastInteraction = 0.f;
+        module->lcdStatus.lcdDirty = true;
+        module->lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
+        module->lcdStatus.lcdText1 = "Min: " + Quantizer::noteOctaveLcdName(module->params[module->MIN_PARAM].getValue() - 4.f);
+        module->lcdStatus.lcdText2 = "Max: " + Quantizer::noteOctaveLcdName(module->params[module->MAX_PARAM].getValue() - 4.f);
+
         AriaKnob820::onDragMove(e);
     }
 };
 
+
 // Slide knobs
-// TODO: Make generic
 template <typename TModule>
 struct SlideKnob : AriaKnob820 {
     void onDragMove(const event::DragMove& e) override {
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLastInteraction = 0.f;
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdDirty = true;
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdText1 = "Slide:";
+        TModule* module = dynamic_cast<TModule*>(paramQuantity->module);
 
-        float displayDuration = dynamic_cast<TModule*>(paramQuantity->module)->slideDuration;
+        module->lcdStatus.lcdLastInteraction = 0.f;
+        module->lcdStatus.lcdDirty = true;
+        module->lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
+        module->lcdStatus.lcdText1 = "Slide:";
+
+        float displayDuration = module->slideDuration;
         if (displayDuration == 0.f)
-            dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdText2 = "DISABLED";
+            module->lcdStatus.lcdText2 = "DISABLED";
         if (displayDuration > 0.f && displayDuration < 1.f) {
             int displayDurationMs = displayDuration * 1000;
             displayDurationMs = truncf(displayDurationMs);
-            dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdText2 = std::to_string(displayDurationMs);
-            dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdText2.append("ms");
+            module->lcdStatus.lcdText2 = std::to_string(displayDurationMs);
+            module->lcdStatus.lcdText2.append("ms");
         } 
         if (displayDuration >= 1.f) {
-            dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdText2 = std::to_string(displayDuration);
-            dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdText2.resize(4);
-            dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdText2.append("s");
+            module->lcdStatus.lcdText2 = std::to_string(displayDuration);
+            module->lcdStatus.lcdText2.resize(4);
+            module->lcdStatus.lcdText2.append("s");
         }
-
         AriaKnob820::onDragMove(e);
     }
 };
+
 
 // Per-node segment display
 template <typename TModule>
@@ -863,6 +856,37 @@ struct SegmentDisplay : LightWidget {
         }
 	}
 };
+
+template <typename TModule>
+struct SolomonLcdWidget : TransparentWidget {
+    TModule *module;
+    Lcd::LcdFramebufferWidget<TModule> *lfb;
+    Lcd::LcdDrawWidget<TModule> *ldw;
+
+    SolomonLcdWidget(TModule *_module){
+        module = _module;
+        lfb = new Lcd::LcdFramebufferWidget<TModule>(module);
+        ldw = new Lcd::LcdDrawWidget<TModule>(module);
+        addChild(lfb);
+        lfb->addChild(ldw);
+    }
+
+    void processDefaultMode() {
+        if (module->lcdStatus.lcdLastInteraction != -1.f) return;
+        module->lcdStatus.lcdDirty = true;
+        module->lcdStatus.lcdLayout = Lcd::PIANO_AND_TEXT2_LAYOUT;
+        module->lcdStatus.pianoDisplay = Quantizer::pianoDisplay(module->outputs[module->GLOBAL_CV_OUTPUT].getVoltage());
+        std::string text = Quantizer::noteOctaveLcdName(module->outputs[module->GLOBAL_CV_OUTPUT].getVoltage());
+        text = text + " | " + std::to_string(module->currentNode + 1);
+        module->lcdStatus.lcdText2 = text;
+    }
+
+    void draw(const DrawArgs& args) override {
+        processDefaultMode();
+        TransparentWidget::draw(args);
+    }
+};
+
 
 template <typename TModule>
 struct SegmentDisplayFramebuffer : FramebufferWidget {
@@ -913,6 +937,7 @@ struct QueueWidget : TransparentWidget {
     }
 };
 
+
 // The DELAY message on the segment display
 template <typename TModule>
 struct DelayWidget : TransparentWidget {
@@ -943,6 +968,7 @@ struct DelayWidget : TransparentWidget {
         Widget::step();
     }
 };
+
 
 // The PLAY arrow on the segment display
 template <typename TModule>
@@ -1009,7 +1035,7 @@ struct SolomonWidget8 : ModuleWidget {
         addParam(createParam<TotalNodesKnob<Solomon<8>>>(mm2px(Vec(20.f, 32.f)), module, Solomon<8>::TOTAL_NODES_PARAM));
 
         // LCD
-        Lcd::LcdWidget<Solomon<8>> *lcd = new Lcd::LcdWidget<Solomon<8>>(module);
+        SolomonLcdWidget<Solomon<8>> *lcd = new SolomonLcdWidget<Solomon<8>>(module);
         lcd->box.pos = mm2px(Vec(7.7f, 68.8f));
         addChild(lcd);
 
@@ -1134,7 +1160,7 @@ struct SolomonWidget4 : ModuleWidget {
         addParam(createParam<TotalNodesKnob<Solomon<4>>>(mm2px(Vec(20.f, 32.f)), module, Solomon<4>::TOTAL_NODES_PARAM));
 
         // LCD
-        Lcd::LcdWidget<Solomon<4>> *lcd = new Lcd::LcdWidget<Solomon<4>>(module);
+        SolomonLcdWidget<Solomon<4>> *lcd = new SolomonLcdWidget<Solomon<4>>(module);
         lcd->box.pos = mm2px(Vec(7.7f, 68.8f));
         addChild(lcd);
 
@@ -1257,7 +1283,7 @@ struct SolomonWidget16 : ModuleWidget {
         addParam(createParam<TotalNodesKnob<Solomon<16>>>(mm2px(Vec(20.f, 32.f)), module, Solomon<16>::TOTAL_NODES_PARAM));
 
         // LCD
-        Lcd::LcdWidget<Solomon<16>> *lcd = new Lcd::LcdWidget<Solomon<16>>(module);
+        SolomonLcdWidget<Solomon<16>> *lcd = new SolomonLcdWidget<Solomon<16>>(module);
         lcd->box.pos = mm2px(Vec(7.7f, 68.8f));
         addChild(lcd);
 
