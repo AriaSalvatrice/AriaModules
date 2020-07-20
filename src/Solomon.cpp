@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include "lcd.hpp"
 #include "quantizer.hpp"
 #include "prng.hpp"
+#include "portablesequence.hpp"
 
 namespace Solomon {
 
@@ -92,6 +93,10 @@ struct Solomon : Module {
 
     // Global
     bool randomGate = false;
+    bool copyPortableSequence = false;
+    bool pastePortableSequence = false;
+    bool resetStepConfig = true; // FIXME: JSON
+    bool resetLoadConfig = true;
     int stepType = -1;
     size_t currentNode = 0;
     size_t selectedQueueNode = 0;
@@ -207,6 +212,9 @@ struct Solomon : Module {
 
         json_object_set_new(rootJ, "currentNode", json_integer(currentNode));
 
+        json_object_set_new(rootJ, "resetStepConfig", json_boolean(resetStepConfig));
+        json_object_set_new(rootJ, "resetLoadConfig", json_boolean(resetLoadConfig));
+
         json_t *scaleJ = json_array();
         for (size_t i = 0; i < 12; i++) json_array_insert_new(scaleJ, i, json_boolean(scale[i]));
         json_object_set_new(rootJ, "scale", scaleJ);
@@ -234,6 +242,12 @@ struct Solomon : Module {
         json_t* currentNodeJ = json_object_get(rootJ, "currentNode");
         if (currentNodeJ) currentNode = json_integer_value(currentNodeJ);
 
+        json_t* resetStepConfigJ = json_object_get(rootJ, "resetStepConfig");
+        if (resetStepConfigJ) resetStepConfig = json_boolean_value(resetStepConfigJ);
+
+        json_t* resetLoadConfigJ = json_object_get(rootJ, "resetLoadConfig");
+        if (resetLoadConfigJ) resetLoadConfig = json_boolean_value(resetLoadConfigJ);
+        
         json_t *scaleJ = json_object_get(rootJ, "scale");
         if (scaleJ) {
             for (size_t i = 0; i < 12; i++) {
@@ -275,10 +289,28 @@ struct Solomon : Module {
         }
     }
 
+    // FIXME: Undo
+    void importPortableSequence() {
+        pastePortableSequence = false;
+        PortableSequence::Sequence sequence;
+        sequence.fromClipboard();
+        sequence.sort();
+        sequence.clampValues();
+        size_t max = std::min(NODES, sequence.notes.size());
+        for (size_t i = 0; i < max; i++) {
+            cv[i] = sequence.notes[i].pitch;
+        }
+    }
+
+    void exportPortableSequence() {
+        copyPortableSequence = false;
+
+    }
+
     void processResetInput() {
-        for (size_t i = 0; i < NODES; i++) cv[i] = savedCv[i];
         resetDelay = 0.f; // This starts the delay
-        currentNode = 0;
+        if(resetLoadConfig) for (size_t i = 0; i < NODES; i++) cv[i] = savedCv[i];
+        if(resetStepConfig) currentNode = 0;
     }
 
     // True when done waiting
@@ -678,6 +710,10 @@ struct Solomon : Module {
 
         lcdStatus.notificationStep(args.sampleTime);
 
+        if (copyPortableSequence) exportPortableSequence();
+
+        if (pastePortableSequence) importPortableSequence();
+
         // Reset
         if (resetTrigger.process(inputs[RESET_INPUT].getVoltageSum())) processResetInput();
         if (resetDelay >= 0.f) {
@@ -873,6 +909,7 @@ struct SolomonLcdWidget : TransparentWidget {
     }
 
     void processDefaultMode() {
+        if (!module) return;
         if (module->lcdStatus.lcdLastInteraction != -1.f) return;
         module->lcdStatus.lcdDirty = true;
         module->lcdStatus.lcdLayout = Lcd::PIANO_AND_TEXT2_LAYOUT;
@@ -1003,6 +1040,39 @@ struct PlayWidget : TransparentWidget {
 };
 
 
+template <typename TModule>
+struct CopyPortableSequenceItem : MenuItem {
+    TModule *module;
+    void onAction(const event::Action &e) override {
+        module->copyPortableSequence = true;
+    }
+};
+
+template <typename TModule>
+struct PastePortableSequenceItem : MenuItem {
+    TModule *module;
+    void onAction(const event::Action &e) override {
+        module->pastePortableSequence = true;
+    }
+};
+
+template <typename TModule>
+struct ResetStepConfigItem : MenuItem {
+    TModule *module;
+    void onAction(const event::Action &e) override {
+        module->resetStepConfig = (module->resetStepConfig) ? false : true;
+    }
+};
+
+template <typename TModule>
+struct ResetLoadConfigItem : MenuItem {
+    TModule *module;
+    void onAction(const event::Action &e) override {
+        module->resetLoadConfig = (module->resetLoadConfig) ? false : true;
+    }
+};
+
+
 // 8 is the main version, from which the others are copied
 struct SolomonWidget8 : ModuleWidget {
 
@@ -1116,6 +1186,34 @@ struct SolomonWidget8 : ModuleWidget {
             xOffset += 25.f;
         }
     }
+
+    void appendContextMenu(ui::Menu *menu) override {	
+        Solomon<8> *module = dynamic_cast<Solomon<8>*>(this->module);
+        assert(module);
+
+        menu->addChild(new MenuSeparator());
+
+        CopyPortableSequenceItem<Solomon<8>> *copyPortableSequenceItem = createMenuItem<CopyPortableSequenceItem<Solomon<8>>>("Copy Portable Sequence");
+        copyPortableSequenceItem->module = module;
+        menu->addChild(copyPortableSequenceItem);
+
+        PastePortableSequenceItem<Solomon<8>> *pastePortableSequenceItem = createMenuItem<PastePortableSequenceItem<Solomon<8>>>("Paste Portable Sequence");
+        pastePortableSequenceItem->module = module;
+        menu->addChild(pastePortableSequenceItem);
+
+        menu->addChild(new MenuSeparator());
+
+        ResetStepConfigItem<Solomon<8>> *resetStepConfigItem = createMenuItem<ResetStepConfigItem<Solomon<8>>>("Reset input goes back to first step");
+        resetStepConfigItem->module = module;
+        resetStepConfigItem->rightText += (module->resetStepConfig) ? "✔" : "";
+        menu->addChild(resetStepConfigItem);
+
+        ResetLoadConfigItem<Solomon<8>> *resetLoadConfigItem = createMenuItem<ResetLoadConfigItem<Solomon<8>>>("Reset input loads the saved pattern");
+        resetLoadConfigItem->module = module;
+        resetLoadConfigItem->rightText += (module->resetLoadConfig) ? "✔" : "";
+        menu->addChild(resetLoadConfigItem);
+    }
+
 };
 
 
