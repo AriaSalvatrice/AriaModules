@@ -96,6 +96,8 @@ struct Solomon : Module {
     float readWindow = -1.f; // -1 when closed
     float resetDelay = -1.f; // 0 when reset started
     float slideDuration = 0.f;
+    float slideCounter = 0.f;
+    float lastOutput = 0.f;
     std::array<bool, 12> scale;
     dsp::SchmittTrigger stepQueueTrigger;
     dsp::SchmittTrigger stepTeleportTrigger;
@@ -592,6 +594,7 @@ struct Solomon : Module {
 
     // A read window just elapsed, we move to the next step and send the outputs
     void processStep() {
+        lastOutput = cv[currentNode];
         applyTransposes();
         applyQueue();
         applyDelay();
@@ -602,13 +605,22 @@ struct Solomon : Module {
         globalTrigger.trigger();
         globalDisplayTrigger.trigger(0.003f);
         stepType = -1;
+        slideCounter = 0.f;
     }
 
     // We refresh lotsa stuff, but we don't need to do it at audio rates
     void sendOutputs(const ProcessArgs& args) {
         outputs[GLOBAL_TRIG_OUTPUT].setVoltage( globalTrigger.process(args.sampleTime) ? 10.f : 0.f);
         globalDisplayTrigger.process(args.sampleTime);
-        outputs[GLOBAL_CV_OUTPUT].setVoltage(cv[currentNode]); // TODO: Slide
+
+        float output = cv[currentNode];
+        // Slide
+        if (slideDuration > 0.f && slideDuration > slideCounter) {
+            output = crossfade(lastOutput, output, (slideCounter / slideDuration) );
+            slideCounter += args.sampleTime * OUTPUTDIVIDER;
+        }
+
+        outputs[GLOBAL_CV_OUTPUT].setVoltage(output); // TODO: Slide
 
         for(size_t i = 0; i < NODES; i++) {
             outputs[NODE_DELAY_OUTPUT + i].setVoltage( (delay[i]) ? 10.f : 0.f);
