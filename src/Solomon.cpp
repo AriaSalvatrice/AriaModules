@@ -7,10 +7,6 @@ You should have received a copy of the GNU General Public License along with thi
 // Self-modifying sequencer. Internally, the slots are called "nodes", "step" refers to the movement.
 // Templates are used to create multiple versions: 4, 8, and 16 steps.
 
-// TODO: Portable sequences
-// TODO: Right-click option to randomize notes only
-// TODO: Right-click option to decide what Reset does
-
 #include "plugin.hpp"
 #include "lcd.hpp"
 #include "quantizer.hpp"
@@ -95,8 +91,10 @@ struct Solomon : Module {
     bool randomGate = false;
     bool copyPortableSequence = false;
     bool pastePortableSequence = false;
-    bool resetStepConfig = true; // FIXME: JSON
+    bool resetStepConfig = true;
     bool resetLoadConfig = true;
+    bool randomizePitchesRequested = false;
+    bool quantizePitchesRequested = false;
     int stepType = -1;
     size_t currentNode = 0;
     size_t selectedQueueNode = 0;
@@ -193,18 +191,22 @@ struct Solomon : Module {
         resetDelay = 0.f;
     }
 
-    void onRandomize() override {
+    void randomizePitches() {
+        randomizePitchesRequested = false;
         float r = 0.f;
+        for (size_t i = 0; i < NODES; i++) {
+            r = prng.uniform() * 10.f;
+            r = rescale(r, 0.f, 10.f, params[MIN_PARAM].getValue() - 4.f, params[MAX_PARAM].getValue() - 4.f);
+            cv[i] = Quantizer::quantize(r, scale);
+        }
+    }
 
+    void onRandomize() override {
         // Set the MIN/MAX knobs to something reasonable
         params[MIN_PARAM].setValue( prng.uniform() * 2.f + 3.f );
         params[MAX_PARAM].setValue( params[MIN_PARAM].getValue() + prng.uniform() * 2.f + 1.f );
 
-        for (size_t i = 0; i < NODES; i++) {
-            r = prng.uniform() * 10.f;
-            r = rescale(r, 0.f, 10.f, params[MIN_PARAM].getValue() - 5.f, params[MAX_PARAM].getValue() - 5.f);
-            cv[i] = Quantizer::quantize(r, scale);
-        }
+        randomizePitches();
     }
 
     json_t* dataToJson() override {
@@ -289,7 +291,6 @@ struct Solomon : Module {
         }
     }
 
-    // FIXME: Undo
     void importPortableSequence() {
         pastePortableSequence = false;
         PortableSequence::Sequence sequence;
@@ -304,7 +305,25 @@ struct Solomon : Module {
 
     void exportPortableSequence() {
         copyPortableSequence = false;
+        PortableSequence::Sequence sequence;
+        PortableSequence::Note note;
 
+        note.length = 1.f;
+        for (size_t i = 0; i < (size_t) params[TOTAL_NODES_PARAM].getValue(); i++){
+            note.start = (float) i;
+            note.pitch = cv[i];
+            sequence.addNote(note);
+        }
+
+        sequence.clampValues();
+        sequence.sort();
+        sequence.calculateLength();
+        sequence.toClipboard();
+    }
+
+    void quantizePitches() {
+        quantizePitchesRequested = false;
+        for (size_t i = 0; i < NODES; i++) cv[i] = Quantizer::quantize(cv[i], scale);
     }
 
     void processResetInput() {
@@ -710,9 +729,10 @@ struct Solomon : Module {
 
         lcdStatus.notificationStep(args.sampleTime);
 
-        if (copyPortableSequence) exportPortableSequence();
-
-        if (pastePortableSequence) importPortableSequence();
+        if (copyPortableSequence)      exportPortableSequence();
+        if (pastePortableSequence)     importPortableSequence();
+        if (randomizePitchesRequested) randomizePitches();
+        if (quantizePitchesRequested)  quantizePitches();
 
         // Reset
         if (resetTrigger.process(inputs[RESET_INPUT].getVoltageSum())) processResetInput();
@@ -1072,6 +1092,22 @@ struct ResetLoadConfigItem : MenuItem {
     }
 };
 
+template <typename TModule>
+struct RandomizePitchesRequestedItem : MenuItem {
+    TModule *module;
+    void onAction(const event::Action &e) override {
+        module->randomizePitchesRequested = true;
+    }
+};
+
+template <typename TModule>
+struct QuantizePitchesRequestedItem : MenuItem {
+    TModule *module;
+    void onAction(const event::Action &e) override {
+        module->quantizePitchesRequested = true;
+    }
+};
+
 
 // 8 is the main version, from which the others are copied
 struct SolomonWidget8 : ModuleWidget {
@@ -1212,6 +1248,16 @@ struct SolomonWidget8 : ModuleWidget {
         resetLoadConfigItem->module = module;
         resetLoadConfigItem->rightText += (module->resetLoadConfig) ? "✔" : "";
         menu->addChild(resetLoadConfigItem);
+
+        menu->addChild(new MenuSeparator());
+
+        RandomizePitchesRequestedItem<Solomon<8>> *randomizePitchesRequestedItem = createMenuItem<RandomizePitchesRequestedItem<Solomon<8>>>("Randomize all nodes");
+        randomizePitchesRequestedItem->module = module;
+        menu->addChild(randomizePitchesRequestedItem);
+
+        QuantizePitchesRequestedItem<Solomon<8>> *quantizePitchesRequestedItem = createMenuItem<QuantizePitchesRequestedItem<Solomon<8>>>("Quantize all nodes");
+        quantizePitchesRequestedItem->module = module;
+        menu->addChild(quantizePitchesRequestedItem);
     }
 
 };
@@ -1339,6 +1385,44 @@ struct SolomonWidget4 : ModuleWidget {
             xOffset += 25.f;
         }
     }
+
+    void appendContextMenu(ui::Menu *menu) override {	
+        Solomon<4> *module = dynamic_cast<Solomon<4>*>(this->module);
+        assert(module);
+
+        menu->addChild(new MenuSeparator());
+
+        CopyPortableSequenceItem<Solomon<4>> *copyPortableSequenceItem = createMenuItem<CopyPortableSequenceItem<Solomon<4>>>("Copy Portable Sequence");
+        copyPortableSequenceItem->module = module;
+        menu->addChild(copyPortableSequenceItem);
+
+        PastePortableSequenceItem<Solomon<4>> *pastePortableSequenceItem = createMenuItem<PastePortableSequenceItem<Solomon<4>>>("Paste Portable Sequence");
+        pastePortableSequenceItem->module = module;
+        menu->addChild(pastePortableSequenceItem);
+
+        menu->addChild(new MenuSeparator());
+
+        ResetStepConfigItem<Solomon<4>> *resetStepConfigItem = createMenuItem<ResetStepConfigItem<Solomon<4>>>("Reset input goes back to first step");
+        resetStepConfigItem->module = module;
+        resetStepConfigItem->rightText += (module->resetStepConfig) ? "✔" : "";
+        menu->addChild(resetStepConfigItem);
+
+        ResetLoadConfigItem<Solomon<4>> *resetLoadConfigItem = createMenuItem<ResetLoadConfigItem<Solomon<4>>>("Reset input loads the saved pattern");
+        resetLoadConfigItem->module = module;
+        resetLoadConfigItem->rightText += (module->resetLoadConfig) ? "✔" : "";
+        menu->addChild(resetLoadConfigItem);
+
+        menu->addChild(new MenuSeparator());
+
+        RandomizePitchesRequestedItem<Solomon<4>> *randomizePitchesRequestedItem = createMenuItem<RandomizePitchesRequestedItem<Solomon<4>>>("Randomize all nodes");
+        randomizePitchesRequestedItem->module = module;
+        menu->addChild(randomizePitchesRequestedItem);
+
+        QuantizePitchesRequestedItem<Solomon<4>> *quantizePitchesRequestedItem = createMenuItem<QuantizePitchesRequestedItem<Solomon<4>>>("Quantize all nodes");
+        quantizePitchesRequestedItem->module = module;
+        menu->addChild(quantizePitchesRequestedItem);
+    }
+
 };
 
 
@@ -1462,6 +1546,44 @@ struct SolomonWidget16 : ModuleWidget {
             xOffset += 25.f;
         }
     }
+
+    void appendContextMenu(ui::Menu *menu) override {	
+        Solomon<16> *module = dynamic_cast<Solomon<16>*>(this->module);
+        assert(module);
+
+        menu->addChild(new MenuSeparator());
+
+        CopyPortableSequenceItem<Solomon<16>> *copyPortableSequenceItem = createMenuItem<CopyPortableSequenceItem<Solomon<16>>>("Copy Portable Sequence");
+        copyPortableSequenceItem->module = module;
+        menu->addChild(copyPortableSequenceItem);
+
+        PastePortableSequenceItem<Solomon<16>> *pastePortableSequenceItem = createMenuItem<PastePortableSequenceItem<Solomon<16>>>("Paste Portable Sequence");
+        pastePortableSequenceItem->module = module;
+        menu->addChild(pastePortableSequenceItem);
+
+        menu->addChild(new MenuSeparator());
+
+        ResetStepConfigItem<Solomon<16>> *resetStepConfigItem = createMenuItem<ResetStepConfigItem<Solomon<16>>>("Reset input goes back to first step");
+        resetStepConfigItem->module = module;
+        resetStepConfigItem->rightText += (module->resetStepConfig) ? "✔" : "";
+        menu->addChild(resetStepConfigItem);
+
+        ResetLoadConfigItem<Solomon<16>> *resetLoadConfigItem = createMenuItem<ResetLoadConfigItem<Solomon<16>>>("Reset input loads the saved pattern");
+        resetLoadConfigItem->module = module;
+        resetLoadConfigItem->rightText += (module->resetLoadConfig) ? "✔" : "";
+        menu->addChild(resetLoadConfigItem);
+
+        menu->addChild(new MenuSeparator());
+
+        RandomizePitchesRequestedItem<Solomon<16>> *randomizePitchesRequestedItem = createMenuItem<RandomizePitchesRequestedItem<Solomon<16>>>("Randomize all nodes");
+        randomizePitchesRequestedItem->module = module;
+        menu->addChild(randomizePitchesRequestedItem);
+
+        QuantizePitchesRequestedItem<Solomon<16>> *quantizePitchesRequestedItem = createMenuItem<QuantizePitchesRequestedItem<Solomon<16>>>("Quantize all nodes");
+        quantizePitchesRequestedItem->module = module;
+        menu->addChild(quantizePitchesRequestedItem);
+    }
+
 };
 
 
