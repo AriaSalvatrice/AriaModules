@@ -8,9 +8,8 @@ You should have received a copy of the GNU General Public License along with thi
 // Templates are used to create multiple versions: 4, 8, and 16 steps.
 
 // TODO: Make LCD work..... cleaner than last modules
-// TODO: On randomize
 // TODO: Portable sequences
-// TODO: Slide
+// TODO: Right-click option to randomize notes
 
 #include "plugin.hpp"
 #include "lcd.hpp"
@@ -19,6 +18,7 @@ You should have received a copy of the GNU General Public License along with thi
 namespace Solomon {
 
 const float READWINDOWDURATION = 0.001f; // Seconds
+const float WINDOWTIMEOUTDURATION = 0.002f; // How fast windows can open
 const int OUTPUTDIVIDER = 32;
 
 enum StepTypes {
@@ -95,6 +95,7 @@ struct Solomon : Module {
     size_t selectedQueueNode = 0;
     float readWindow = -1.f; // -1 when closed
     float resetDelay = -1.f; // 0 when reset started
+    float windowTimeout = 0.f; // Wait between accepting triggers
     float slideDuration = 0.f;
     float slideCounter = 0.f;
     float lastOutput = 0.f;
@@ -177,6 +178,15 @@ struct Solomon : Module {
         clearLatches();
 
         resetDelay = 0.f;
+    }
+
+    void onRandomize() override {
+        float r = 0.f;
+        for (size_t i = 0; i < NODES; i++) {
+            r = random::uniform() * 10.f;
+            r = rescale(r, 0.f, 10.f, params[MIN_PARAM].getValue() - 5.f, params[MAX_PARAM].getValue() - 5.f);
+            cv[i] = Quantizer::quantize(r, scale);
+        }
     }
 
     json_t* dataToJson() override {
@@ -422,11 +432,13 @@ struct Solomon : Module {
     // If it's a queue input, something must be already enqueued.
     // Other inputs are accepted without conditions.
     int getStepInput() {
-        if (stepQueueTrigger.process(inputs[STEP_QUEUE_INPUT].getVoltageSum()) && queueCount() > 0) return STEP_QUEUE;
-        if (stepTeleportTrigger.process(inputs[STEP_TELEPORT_INPUT].getVoltageSum()))               return STEP_TELEPORT;
-        if (stepWalkTrigger.process(inputs[STEP_WALK_INPUT].getVoltageSum()))                       return STEP_WALK;
-        if (stepBackTrigger.process(inputs[STEP_BACK_INPUT].getVoltageSum()))                       return STEP_BACK;
-        if (stepForwardTrigger.process(inputs[STEP_FORWARD_INPUT].getVoltageSum()))                 return STEP_FORWARD;
+        if (windowTimeout > WINDOWTIMEOUTDURATION) {
+            if (stepQueueTrigger.process(inputs[STEP_QUEUE_INPUT].getVoltageSum()) && queueCount() > 0) return STEP_QUEUE;
+            if (stepTeleportTrigger.process(inputs[STEP_TELEPORT_INPUT].getVoltageSum()))               return STEP_TELEPORT;
+            if (stepWalkTrigger.process(inputs[STEP_WALK_INPUT].getVoltageSum()))                       return STEP_WALK;
+            if (stepBackTrigger.process(inputs[STEP_BACK_INPUT].getVoltageSum()))                       return STEP_BACK;
+            if (stepForwardTrigger.process(inputs[STEP_FORWARD_INPUT].getVoltageSum()))                 return STEP_FORWARD;
+        }
         return -1;
     }
 
@@ -655,6 +667,7 @@ struct Solomon : Module {
             // We are not in a Read Window
             stepType = getStepInput();
             if (stepType >= 0) readWindow = 0.f;
+            if (windowTimeout < WINDOWTIMEOUTDURATION) windowTimeout += args.sampleTime;
         }
         if (readWindow >= 0.f && readWindow < READWINDOWDURATION) {
             // We are in a Read Window

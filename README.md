@@ -1,6 +1,8 @@
 Aria Salvatrice Signature Series Synthesizer Modules
 ====================================================
 
+![](https://img.shields.io/badge/Works%20on%20my%20computer-Yes-success?style=plastic)
+
 Hiya hello hey hi. These here are a few cool and nice modules what for [VCV Rack](https://vcvrack.com/). You can download them from [its built-in library](library.vcvrack.com/).
 
 I am some persuasion of multimedia artist interested in generative processes, creating [music](https://ariasalvatrice.bandcamp.com/releases) in genres I've come to call "_Gay Baroque Technopop_" and "_Pastoral Industrial_". All these synthesizer modules were designed for my own use first. With this collection, I aim to create an integrated, coherent system of opinionated, unique modules, primarily concerned with the live performance of aleatoric techno. Despite their focus, these modules are versatile, and integrate well with the wider VCV ecosystem. Many artists enjoyed using my modules in all sorts of music, and I hope you will like them too.

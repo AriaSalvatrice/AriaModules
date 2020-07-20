@@ -34,7 +34,6 @@ extern Plugin* pluginInstance;
 
 namespace Lcd {
 
-const float NOTIFICATIONTIMEOUT = 3.f; // seconds
 
 // Which elements to show and hide
 // FIXME: Migrate terminology entirely to mode.
@@ -75,8 +74,22 @@ struct LcdStatus {
     // For any info on a timer in the module. This widget has no knowledge what it means.
     float lcdLastInteraction = 0.f;
 
+    // How long before going back to the main display.
+    float notificationTimeout = 3.f;
+
     LcdStatus() {
         for (int i = 0; i < 12; i++) pianoDisplay[i] = false;
+    }
+
+    // true if the notificationTimeout has elapsed.
+    bool notificationStep(float &deltaTime) {
+        lcdLastInteraction += deltaTime;
+        if (deltaTime >= notificationTimeout) {
+            lcdLastInteraction = 0.f;
+            return true;
+        } else {
+            return false;
+        }
     }
 
 };
