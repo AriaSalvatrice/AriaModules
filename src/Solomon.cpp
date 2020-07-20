@@ -7,9 +7,9 @@ You should have received a copy of the GNU General Public License along with thi
 // Self-modifying sequencer. Internally, the slots are called "nodes", "step" refers to the movement.
 // Templates are used to create multiple versions: 4, 8, and 16 steps.
 
-// TODO: Make LCD work..... cleaner than last modules
 // TODO: Portable sequences
 // TODO: Right-click option to randomize notes only
+// TODO: Right-click option to decide what Reset does
 
 #include "plugin.hpp"
 #include "lcd.hpp"
@@ -278,6 +278,7 @@ struct Solomon : Module {
     void processResetInput() {
         for (size_t i = 0; i < NODES; i++) cv[i] = savedCv[i];
         resetDelay = 0.f; // This starts the delay
+        currentNode = 0;
     }
 
     // True when done waiting
