@@ -19,6 +19,18 @@
   <defs
      id="defs882">
     <linearGradient
+       inkscape:collect="always"
+       id="linearGradient8923">
+      <stop
+         style="stop-color:#000000;stop-opacity:0.2"
+         offset="0"
+         id="stop8919" />
+      <stop
+         style="stop-color:#000000;stop-opacity:0"
+         offset="1"
+         id="stop8921" />
+    </linearGradient>
+    <linearGradient
        gradientTransform="matrix(16.666664,0,0,0.8,1.0000212,32.2)"
        osb:paint="solid"
        id="Pink">
@@ -90,6 +102,16 @@
        id="linearGradient2962"
        xlink:href="#linearGradient1980"
        inkscape:collect="always" />
+    <linearGradient
+       gradientTransform="translate(21.166667)"
+       gradientUnits="userSpaceOnUse"
+       y2="74.352684"
+       x2="-8.8671408"
+       y1="68.454407"
+       x1="-8.9201202"
+       id="linearGradient8917"
+       xlink:href="#linearGradient8923"
+       inkscape:collect="always" />
   </defs>
   <sodipodi:namedview
      inkscape:document-rotation="0"
@@ -99,11 +121,11 @@
      inkscape:window-height="1019"
      inkscape:window-width="1920"
      showgrid="false"
-     inkscape:current-layer="layer9"
+     inkscape:current-layer="layer3"
      inkscape:document-units="mm"
-     inkscape:cy="169.96451"
-     inkscape:cx="187.50788"
-     inkscape:zoom="1.979899"
+     inkscape:cy="266.22695"
+     inkscape:cx="80.837974"
+     inkscape:zoom="5.6000001"
      inkscape:pageshadow="2"
      inkscape:pageopacity="0.0"
      borderopacity="1.0"
@@ -733,6 +755,10 @@
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222px;font-family:'Nova Square';-inkscape-font-specification:'Nova Square';fill:#083d45;fill-opacity:1;stroke-width:0.264583"
          d="m 69.573217,83.893302 v -0.719335 h -0.07579 q -0.482313,0 -0.482313,-0.482313 v -0.865408 l 0.261827,-0.124023 h 0.01378 v 0.989431 q 0,0.234266 0.206706,0.234266 h 0.427191 q 0.206706,0 0.206706,-0.234266 v -0.865408 l 0.261827,-0.124023 h 0.01378 v 0.989431 q 0,0.482313 -0.482313,0.482313 h -0.07579 v 0.595312 l -0.261827,0.124023 z" />
     </g>
+    <path
+       id="path8909"
+       style="display:inline;fill:url(#linearGradient8917);fill-opacity:1;stroke:none;stroke-width:1.11038;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 6.2000193,68.5 H 42.20002 v 10 H 6.2000193 Z" />
   </g>
   <g
      style="display:inline;opacity:1"
