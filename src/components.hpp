@@ -241,6 +241,12 @@ struct AriaKnob820 : app::SvgKnob {
     }
 };
 
+struct AriaKnob820Snap : AriaKnob820 {
+    AriaKnob820Snap() {
+        snap = true;
+        AriaKnob820();
+    }
+};
 
 struct AriaKnob820Transparent : app::SvgKnob {
     AriaKnob820Transparent() {

@@ -923,6 +923,7 @@ struct Darius : Module {
         lcdStatus.lcdText2 = "MEDITATION.";
         lcdLastInteraction = 0.f;
         lcdStatus.lcdDirty = true;
+        resetDelay = 0.f;
     }
 
     void process(const ProcessArgs& args) override {

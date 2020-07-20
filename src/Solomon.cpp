@@ -7,15 +7,13 @@ You should have received a copy of the GNU General Public License along with thi
 // Self-modifying sequencer. Internally, the slots are called "nodes", "step" refers to the movement.
 // Templates are used to create multiple versions: 4, 8, and 16 steps.
 
-// TODO: Make Reset work
-// TODO: Implement Save/Load buttons
-// TODO: Implement Total Nodes knob
 // TODO: Make notes flash upon trigger
 // TODO: Make LCD work..... cleaner than last modules
 // TODO: On reset
 // TODO: On randomize
 // TODO: JSON I/O
 // TODO: Portable sequences
+// TODO: Change the aspect of disabled nodes
 
 #include "plugin.hpp"
 #include "lcd.hpp"
@@ -138,6 +136,7 @@ struct Solomon : Module {
         configParam(MIN_PARAM, 0.f, 10.f, 3.f, "Minimum Note");
         configParam(MAX_PARAM, 0.f, 10.f, 5.f, "Maximum Note");
         configParam(SLIDE_PARAM, 0.f, 10.f, 0.f, "Slide");
+        configParam(TOTAL_NODES_PARAM, 1.f, (float) NODES, (float) NODES, "Total Nodes");
 
         // C Minor is the default
         configParam(KEY_PARAM, 0.f, 11.f, 0.f, "Key");
@@ -163,6 +162,22 @@ struct Solomon : Module {
         lcdStatus.lcdText2 = "SUMMONING..";
     }
 
+    void onReset() override {
+        // Default note is 0V - C4 - part of the default scale
+        for(size_t i = 0; i < NODES; i++) {
+            cv[i] = 0.f;
+            savedCv[i] = 0.f;
+        }
+
+        clearQueue();
+        clearWindowQueue();
+        clearDelay();
+        clearTransposes();
+        clearLatches();
+
+        resetDelay = 0.f;
+    }
+
     void processResetInput() {
         for (size_t i = 0; i < NODES; i++) cv[i] = savedCv[i];
         resetDelay = 0.f; // This starts the delay
@@ -182,10 +197,15 @@ struct Solomon : Module {
         }
     }
 
+    // How many are set by the knob
+    size_t getTotalNodes() {
+        return (size_t) params[TOTAL_NODES_PARAM].getValue();
+    }
+
     // How many nodes are enqueued
     size_t queueCount() {
         size_t count = 0;
-        for(size_t i = 0; i < NODES; i++) {
+        for(size_t i = 0; i < getTotalNodes(); i++) {
             if (queue[i] == true) count++;
         }
         return count;
@@ -357,7 +377,7 @@ struct Solomon : Module {
         // Only select from the queue if we know we have something in it, or we crash.
         if (stepType == STEP_QUEUE) {
             std::vector<size_t> validSteps;
-            for (size_t i = 0; i < NODES; i++) {
+            for (size_t i = 0; i < getTotalNodes(); i++) {
                 if (queue[i]) validSteps.push_back(i);
             }
             std::random_shuffle(validSteps.begin(), validSteps.end());
@@ -370,7 +390,7 @@ struct Solomon : Module {
 
         // Add window queue triggers no matter the configuration        
         for (size_t i = 0; i < NODES; i++) {
-            if (!queue[i]) queue[i] = windowQueue[i];
+            if (!queue[i]) queue[i] = windowQueue[i]; // FIXME: getTotalNodes() ? 
         }
         clearWindowQueue();
     }
@@ -427,21 +447,25 @@ struct Solomon : Module {
             currentNode = selectedQueueNode;
         }
 
-        // Teleport never brings back to the current step
+        // Teleport never brings back to the current step - unless we only have one
         if (stepType == STEP_TELEPORT) {
-            std::vector<size_t> validNodes;
-            for (size_t i = 0; i < NODES; i++) {
-                if (i != currentNode) validNodes.push_back(i);
+            if (getTotalNodes() > 1) {
+                std::vector<size_t> validNodes;
+                for (size_t i = 0; i < getTotalNodes(); i++) {
+                    if (i != currentNode) validNodes.push_back(i);
+                }
+                std::random_shuffle(validNodes.begin(), validNodes.end());
+                currentNode = validNodes[0];
+            } else {
+                currentNode = 0;
             }
-            std::random_shuffle(validNodes.begin(), validNodes.end());
-            currentNode = validNodes[0];
         }
 
         // Random walk can warp around
         if (stepType == STEP_WALK) {
             if (random::uniform() >= 0.5f) {
                 // Walk forward
-                if (currentNode == NODES - 1) {
+                if (currentNode >= getTotalNodes() - 1) {
                     currentNode = 0;
                 } else {
                     currentNode++;
@@ -449,7 +473,7 @@ struct Solomon : Module {
             } else {
                 // Walk back
                 if (currentNode == 0) {
-                    currentNode = NODES - 1;
+                    currentNode = getTotalNodes() - 1;
                 } else {
                     currentNode--;
                 }
@@ -459,7 +483,7 @@ struct Solomon : Module {
         // Step back can warp around
         if (stepType == STEP_BACK) {
             if (currentNode == 0) {
-                currentNode = NODES - 1;
+                currentNode = getTotalNodes() - 1;
             } else {
                 currentNode--;
             }
@@ -467,7 +491,7 @@ struct Solomon : Module {
 
         // Step forward can warp around
         if (stepType == STEP_FORWARD) {
-            if (currentNode == NODES - 1) {
+            if (currentNode >= getTotalNodes() - 1) {
                 currentNode = 0;
             } else {
                 currentNode++;
@@ -572,7 +596,7 @@ struct Solomon : Module {
 
 // Total nodes knobs
 template <typename TModule>
-struct TotalNodesKnob : AriaKnob820 {
+struct TotalNodesKnob : AriaKnob820Snap {
     void onDragMove(const event::DragMove& e) override {
         dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLastInteraction = 0.f;
         dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdDirty = true;
@@ -784,7 +808,7 @@ struct SolomonWidget8 : ModuleWidget {
         addInput(createInput<AriaJackIn>(mm2px(Vec(30.f, 47.f)), module, Solomon<8>::STEP_BACK_INPUT));
 
         // Total Steps
-        addParam(createParam<MinMaxKnob<Solomon<8>>>(mm2px(Vec(20.f, 32.f)), module, Solomon<8>::TOTAL_NODES_PARAM));
+        addParam(createParam<TotalNodesKnob<Solomon<8>>>(mm2px(Vec(20.f, 32.f)), module, Solomon<8>::TOTAL_NODES_PARAM));
 
         // LCD
         Lcd::LcdWidget<Solomon<8>> *lcd = new Lcd::LcdWidget<Solomon<8>>(module);
@@ -906,7 +930,7 @@ struct SolomonWidget4 : ModuleWidget {
         addInput(createInput<AriaJackIn>(mm2px(Vec(30.f, 47.f)), module, Solomon<4>::STEP_BACK_INPUT));
 
         // Total Steps
-        addParam(createParam<MinMaxKnob<Solomon<4>>>(mm2px(Vec(20.f, 32.f)), module, Solomon<4>::TOTAL_NODES_PARAM));
+        addParam(createParam<TotalNodesKnob<Solomon<4>>>(mm2px(Vec(20.f, 32.f)), module, Solomon<4>::TOTAL_NODES_PARAM));
 
         // LCD
         Lcd::LcdWidget<Solomon<4>> *lcd = new Lcd::LcdWidget<Solomon<4>>(module);
@@ -1026,7 +1050,7 @@ struct SolomonWidget16 : ModuleWidget {
         addInput(createInput<AriaJackIn>(mm2px(Vec(30.f, 47.f)), module, Solomon<16>::STEP_BACK_INPUT));
 
         // Total Steps
-        addParam(createParam<MinMaxKnob<Solomon<16>>>(mm2px(Vec(20.f, 32.f)), module, Solomon<16>::TOTAL_NODES_PARAM));
+        addParam(createParam<TotalNodesKnob<Solomon<16>>>(mm2px(Vec(20.f, 32.f)), module, Solomon<16>::TOTAL_NODES_PARAM));
 
         // LCD
         Lcd::LcdWidget<Solomon<16>> *lcd = new Lcd::LcdWidget<Solomon<16>>(module);

@@ -35,6 +35,7 @@ extern Plugin* pluginInstance;
 namespace Lcd {
 
 // Which elements to show and hide
+// FIXME: Migrate terminology entirely to mode.
 enum LcdLayouts {
     // Displays nothing
     OFF_LAYOUT,
