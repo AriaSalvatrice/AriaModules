@@ -91,6 +91,7 @@ struct Sequence {
     }
 
     // Length is best set explicitly, but can be calculated if missing
+    // FIXME: Might be broken - check
     void calculateLength(){
         for(std::size_t i = 0; i < notes.size() - 1; i++)
             length = ((notes[i].start + notes[i].length) > length) ? (notes[i].start + notes[i].length) : length;

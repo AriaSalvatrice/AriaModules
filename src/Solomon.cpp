@@ -7,23 +7,16 @@ You should have received a copy of the GNU General Public License along with thi
 // Self-modifying sequencer. Internally, the slots are called "nodes", "step" refers to the movement.
 // Templates are used to create multiple versions: 4, 8, and 16 steps.
 
-// TODO: Make Reset work
-// TODO: Implement Save/Load buttons
-// TODO: Implement Total Nodes knob
-// TODO: Make notes flash upon trigger
-// TODO: Make LCD work..... cleaner than last modules
-// TODO: On reset
-// TODO: On randomize
-// TODO: JSON I/O
-// TODO: Portable sequences
-
 #include "plugin.hpp"
 #include "lcd.hpp"
 #include "quantizer.hpp"
+#include "prng.hpp"
+#include "portablesequence.hpp"
 
 namespace Solomon {
 
 const float READWINDOWDURATION = 0.001f; // Seconds
+const float WINDOWTIMEOUTDURATION = 0.002f; // How fast windows can open
 const int OUTPUTDIVIDER = 32;
 
 enum StepTypes {
@@ -52,6 +45,7 @@ struct Solomon : Module {
         SLIDE_PARAM,
         TOTAL_NODES_PARAM,
         QUEUE_CLEAR_MODE_PARAM,
+        REPEAT_MODE_PARAM,
         SAVE_PARAM,
         LOAD_PARAM,
         ENUMS(NODE_SUB_1_SD_PARAM, NODES),
@@ -95,10 +89,22 @@ struct Solomon : Module {
 
     // Global
     bool randomGate = false;
+    bool copyPortableSequence = false;
+    bool pastePortableSequence = false;
+    bool resetStepConfig = true;
+    bool resetLoadConfig = true;
+    bool resetQuantizeConfig = false;
+    bool randomizePitchesRequested = false;
+    bool quantizePitchesRequested = false;
     int stepType = -1;
     size_t currentNode = 0;
     size_t selectedQueueNode = 0;
     float readWindow = -1.f; // -1 when closed
+    float resetDelay = -1.f; // 0 when reset started
+    float windowTimeout = 0.f; // Wait between accepting triggers
+    float slideDuration = 0.f;
+    float slideCounter = 0.f;
+    float lastOutput = 0.f;
     std::array<bool, 12> scale;
     dsp::SchmittTrigger stepQueueTrigger;
     dsp::SchmittTrigger stepTeleportTrigger;
@@ -107,8 +113,11 @@ struct Solomon : Module {
     dsp::SchmittTrigger stepForwardTrigger;
     dsp::SchmittTrigger saveButtonTrigger;
     dsp::SchmittTrigger loadButtonTrigger;
-    dsp::PulseGenerator globalTrig;
+    dsp::SchmittTrigger resetTrigger;
+    dsp::PulseGenerator globalTrigger;
+    dsp::PulseGenerator globalDisplayTrigger;
     dsp::ClockDivider outputDivider;
+    prng::prng prng;
     Lcd::LcdStatus lcdStatus;
 
     // Per node
@@ -133,9 +142,12 @@ struct Solomon : Module {
     Solomon() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
-        configParam(MIN_PARAM, 0.f, 10.f, 3.f, "Minimum Note");
-        configParam(MAX_PARAM, 0.f, 10.f, 5.f, "Maximum Note");
+        configParam(MIN_PARAM, 1.f, 9.f, 3.f, "Minimum Note");
+        configParam(MAX_PARAM, 1.f, 9.f, 5.f, "Maximum Note");
         configParam(SLIDE_PARAM, 0.f, 10.f, 0.f, "Slide");
+        configParam(TOTAL_NODES_PARAM, 1.f, (float) NODES, (float) NODES, "Total Nodes");
+        configParam(QUEUE_CLEAR_MODE_PARAM, 0.f, 1.f, 0.f, "Clear queue after picking from it");
+        configParam(REPEAT_MODE_PARAM, 0.f, 1.f, 0.f, "Chance to walk or teleport to the current step");
 
         // C Minor is the default
         configParam(KEY_PARAM, 0.f, 11.f, 0.f, "Key");
@@ -159,6 +171,179 @@ struct Solomon : Module {
         lcdStatus.lcdMode = INIT_MODE;
         lcdStatus.lcdText1 = "LEARNING...";
         lcdStatus.lcdText2 = "SUMMONING..";
+        lcdStatus.lcdLastInteraction = 0.f;
+
+        prng.init(random::uniform(), random::uniform());
+    }
+
+    void onReset() override {
+        // Default note is 0V - C4 - part of the default scale
+        for(size_t i = 0; i < NODES; i++) {
+            cv[i] = 0.f;
+            savedCv[i] = 0.f;
+        }
+
+        clearQueue();
+        clearWindowQueue();
+        clearDelay();
+        clearTransposes();
+        clearLatches();
+
+        resetDelay = 0.f;
+    }
+
+    void randomizePitches() {
+        randomizePitchesRequested = false;
+        float r = 0.f;
+        for (size_t i = 0; i < NODES; i++) {
+            r = prng.uniform() * 10.f;
+            r = rescale(r, 0.f, 10.f, params[MIN_PARAM].getValue() - 4.f, params[MAX_PARAM].getValue() - 4.f);
+            cv[i] = Quantizer::quantize(r, scale);
+        }
+    }
+
+    void onRandomize() override {
+        // Set the MIN/MAX knobs to something reasonable
+        params[MIN_PARAM].setValue( prng.uniform() * 2.f + 3.f );
+        params[MAX_PARAM].setValue( params[MIN_PARAM].getValue() + prng.uniform() * 2.f + 1.f );
+
+        randomizePitches();
+    }
+
+    json_t* dataToJson() override {
+        json_t *rootJ = json_object();
+
+        json_object_set_new(rootJ, "currentNode", json_integer(currentNode));
+
+        json_object_set_new(rootJ, "resetStepConfig", json_boolean(resetStepConfig));
+        json_object_set_new(rootJ, "resetLoadConfig", json_boolean(resetLoadConfig));
+        json_object_set_new(rootJ, "resetQuantizeConfig", json_boolean(resetQuantizeConfig));
+
+        json_t *scaleJ = json_array();
+        for (size_t i = 0; i < 12; i++) json_array_insert_new(scaleJ, i, json_boolean(scale[i]));
+        json_object_set_new(rootJ, "scale", scaleJ);
+
+        json_t *cvJ = json_array();
+        for (size_t i = 0; i < NODES; i++) json_array_insert_new(cvJ, i, json_real(cv[i]));
+        json_object_set_new(rootJ, "cv", cvJ);
+
+        json_t *savedCvJ = json_array();
+        for (size_t i = 0; i < NODES; i++) json_array_insert_new(savedCvJ, i, json_real(savedCv[i]));
+        json_object_set_new(rootJ, "savedCv", savedCvJ);
+
+        json_t *queueJ = json_array();
+        for (size_t i = 0; i < NODES; i++) json_array_insert_new(queueJ, i, json_boolean(queue[i]));
+        json_object_set_new(rootJ, "queue", queueJ);
+
+        json_t *delayJ = json_array();
+        for (size_t i = 0; i < NODES; i++) json_array_insert_new(delayJ, i, json_boolean(delay[i]));
+        json_object_set_new(rootJ, "delay", delayJ);
+
+        return rootJ;
+    }
+
+    void dataFromJson(json_t* rootJ) override {
+        json_t* currentNodeJ = json_object_get(rootJ, "currentNode");
+        if (currentNodeJ) currentNode = json_integer_value(currentNodeJ);
+
+        json_t* resetStepConfigJ = json_object_get(rootJ, "resetStepConfig");
+        if (resetStepConfigJ) resetStepConfig = json_boolean_value(resetStepConfigJ);
+
+        json_t* resetLoadConfigJ = json_object_get(rootJ, "resetLoadConfig");
+        if (resetLoadConfigJ) resetLoadConfig = json_boolean_value(resetLoadConfigJ);
+
+        json_t* resetQuantizeConfigJ = json_object_get(rootJ, "resetQuantizeConfig");
+        if (resetQuantizeConfigJ) resetQuantizeConfig = json_boolean_value(resetQuantizeConfigJ);
+
+
+        json_t *scaleJ = json_object_get(rootJ, "scale");
+        if (scaleJ) {
+            for (size_t i = 0; i < 12; i++) {
+                json_t *scaleNoteJ = json_array_get(scaleJ, i);
+                if (scaleNoteJ) scale[i] = json_boolean_value(scaleNoteJ);
+            }
+        }
+
+        json_t *cvJ = json_object_get(rootJ, "cv");
+        if (cvJ) {
+            for (size_t i = 0; i < NODES; i++) {
+                json_t *cvValueJ = json_array_get(cvJ, i);
+                if (cvValueJ) cv[i] = json_real_value(cvValueJ);
+            }
+        }
+
+        json_t *savedCvJ = json_object_get(rootJ, "savedCv");
+        if (savedCvJ) {
+            for (size_t i = 0; i < NODES; i++) {
+                json_t *savedCvValueJ = json_array_get(savedCvJ, i);
+                if (savedCvValueJ) savedCv[i] = json_real_value(savedCvValueJ);
+            }
+        }
+
+        json_t *queueJ = json_object_get(rootJ, "queue");
+        if (queueJ) {
+            for (size_t i = 0; i < NODES; i++) {
+                json_t *queueStatusJ = json_array_get(queueJ, i);
+                if (queueStatusJ) queue[i] = json_boolean_value(queueStatusJ);
+            }
+        }
+
+        json_t *delayJ = json_object_get(rootJ, "delay");
+        if (delayJ) {
+            for (size_t i = 0; i < NODES; i++) {
+                json_t *delayStatusJ = json_array_get(delayJ, i);
+                if (delayStatusJ) delay[i] = json_boolean_value(delayStatusJ);
+            }
+        }
+    }
+
+    void importPortableSequence() {
+        pastePortableSequence = false;
+        PortableSequence::Sequence sequence;
+        sequence.fromClipboard();
+        sequence.sort();
+        sequence.clampValues();
+        size_t max = std::min(NODES, sequence.notes.size());
+        for (size_t i = 0; i < max; i++) {
+            cv[i] = sequence.notes[i].pitch;
+        }
+    }
+
+    void exportPortableSequence() {
+        copyPortableSequence = false;
+        PortableSequence::Sequence sequence;
+        PortableSequence::Note note;
+
+        note.length = 1.f;
+        sequence.length = 0.f;
+        for (size_t i = 0; i < (size_t) params[TOTAL_NODES_PARAM].getValue(); i++){
+            note.start = (float) i;
+            note.pitch = cv[i];
+            sequence.addNote(note);
+            sequence.length += 1.f;
+        }
+
+        sequence.clampValues();
+        sequence.sort();
+        sequence.toClipboard();
+    }
+
+    void quantizePitches() {
+        quantizePitchesRequested = false;
+        for (size_t i = 0; i < NODES; i++) cv[i] = Quantizer::quantize(cv[i], scale);
+    }
+
+    void processResetInput() {
+        resetDelay = 0.f; // This starts the delay
+        if(resetLoadConfig) for (size_t i = 0; i < NODES; i++) cv[i] = savedCv[i];
+        if(resetStepConfig) currentNode = 0;
+        if(resetQuantizeConfig) quantizePitches();
+    }
+
+    // True when done waiting
+    bool wait1msOnReset(float sampleTime) {
+        resetDelay += sampleTime;
+        return((resetDelay >= 0.001f) ? true : false);
     }
 
     void updateScale() {
@@ -169,10 +354,26 @@ struct Solomon : Module {
         }
     }
 
+    void updateSlide(){
+        slideDuration = params[SLIDE_PARAM].getValue();
+        if (slideDuration > 0.00001f ) {
+            slideDuration = rescale(slideDuration, 0.f, 10.f, -3.0f, 1.0f);
+            slideDuration = powf(10.0f, slideDuration);
+        } else {
+            slideDuration = 0.f;
+        }
+    }
+
+
+    // How many are set by the knob
+    size_t getTotalNodes() {
+        return (size_t) params[TOTAL_NODES_PARAM].getValue();
+    }
+
     // How many nodes are enqueued
     size_t queueCount() {
         size_t count = 0;
-        for(size_t i = 0; i < NODES; i++) {
+        for(size_t i = 0; i < getTotalNodes(); i++) {
             if (queue[i] == true) count++;
         }
         return count;
@@ -222,12 +423,11 @@ struct Solomon : Module {
         }
     }
 
-    // FIXME: Quantize - scale can have changed.
     // Does nothing if there's no valid note to jump to
     void subOct(size_t node) {       
         if (cv[node] - 1.f >= getMinCv() - Quantizer::FUDGEOFFSET) {
             // We can remove an octave and stay in bounds
-            cv[node] -= 1.f;
+            cv[node] = Quantizer::quantize(cv[node] - 1.f, scale);;
         } else {
             // Separate octave from note
             float nodeOctave = floorf(cv[node]);
@@ -236,12 +436,12 @@ struct Solomon : Module {
             float candidate = maxOctave + nodeVoltageOnFirstOctave; 
             if (candidate <= getMaxCv() + Quantizer::FUDGEOFFSET && candidate >= getMinCv() - Quantizer::FUDGEOFFSET) {
                 // We can wrap around on the max octave
-                cv[node] = candidate;
+                cv[node] = Quantizer::quantize(candidate, scale);
             } else {
                 candidate -= 1.f;
                 if (candidate <= getMaxCv() + Quantizer::FUDGEOFFSET && candidate >= getMinCv() - Quantizer::FUDGEOFFSET) {
                     // We can wrap around one octave lower than the max octave
-                    cv[node] = candidate;
+                    cv[node] = Quantizer::quantize(candidate, scale);
                 }
             }
         }
@@ -251,18 +451,18 @@ struct Solomon : Module {
     // Same code as above with + and - and min and max flipped flipways
     void addOct(size_t node) {
         if (cv[node] + 1.f <= getMaxCv() + Quantizer::FUDGEOFFSET) {
-            cv[node] += 1.f;
+            cv[node] = Quantizer::quantize(cv[node] + 1.f, scale);;
         } else {
             float nodeOctave = floorf(cv[node]);
             float nodeVoltageOnFirstOctave = cv[node] - nodeOctave;
             float minOctave = floorf(getMinCv());
             float candidate = minOctave + nodeVoltageOnFirstOctave; 
             if (candidate >= getMinCv() - Quantizer::FUDGEOFFSET && candidate <= getMaxCv() + Quantizer::FUDGEOFFSET) {
-                cv[node] = candidate;
+                cv[node] = Quantizer::quantize(candidate, scale);
             } else {
                 candidate += 1.f;
                 if (candidate >= getMinCv() - Quantizer::FUDGEOFFSET && candidate <= getMaxCv() + Quantizer::FUDGEOFFSET) {
-                    cv[node] = candidate;
+                    cv[node] = Quantizer::quantize(candidate, scale);
                 }
             }
         }
@@ -291,7 +491,7 @@ struct Solomon : Module {
     }
 
     void processLoadButton() {
-        if(saveButtonTrigger.process(params[LOAD_PARAM].getValue())){
+        if(loadButtonTrigger.process(params[LOAD_PARAM].getValue())){
             for (size_t i = 0; i < NODES; i++) cv[i] = savedCv[i];
         }
     }
@@ -303,12 +503,15 @@ struct Solomon : Module {
     }
 
     // If it's a queue input, something must be already enqueued.
+    // Other inputs are accepted without conditions.
     int getStepInput() {
-        if (stepQueueTrigger.process(inputs[STEP_QUEUE_INPUT].getVoltageSum()) && queueCount() > 0) return STEP_QUEUE;
-        if (stepTeleportTrigger.process(inputs[STEP_TELEPORT_INPUT].getVoltageSum()))               return STEP_TELEPORT;
-        if (stepWalkTrigger.process(inputs[STEP_WALK_INPUT].getVoltageSum()))                       return STEP_WALK;
-        if (stepBackTrigger.process(inputs[STEP_BACK_INPUT].getVoltageSum()))                       return STEP_BACK;
-        if (stepForwardTrigger.process(inputs[STEP_FORWARD_INPUT].getVoltageSum()))                 return STEP_FORWARD;
+        if (windowTimeout > WINDOWTIMEOUTDURATION) {
+            if (stepQueueTrigger.process(inputs[STEP_QUEUE_INPUT].getVoltageSum()) && queueCount() > 0) return STEP_QUEUE;
+            if (stepTeleportTrigger.process(inputs[STEP_TELEPORT_INPUT].getVoltageSum()))               return STEP_TELEPORT;
+            if (stepWalkTrigger.process(inputs[STEP_WALK_INPUT].getVoltageSum()))                       return STEP_WALK;
+            if (stepBackTrigger.process(inputs[STEP_BACK_INPUT].getVoltageSum()))                       return STEP_BACK;
+            if (stepForwardTrigger.process(inputs[STEP_FORWARD_INPUT].getVoltageSum()))                 return STEP_FORWARD;
+        }
         return -1;
     }
 
@@ -343,7 +546,7 @@ struct Solomon : Module {
         // Only select from the queue if we know we have something in it, or we crash.
         if (stepType == STEP_QUEUE) {
             std::vector<size_t> validSteps;
-            for (size_t i = 0; i < NODES; i++) {
+            for (size_t i = 0; i < getTotalNodes(); i++) {
                 if (queue[i]) validSteps.push_back(i);
             }
             std::random_shuffle(validSteps.begin(), validSteps.end());
@@ -413,31 +616,45 @@ struct Solomon : Module {
             currentNode = selectedQueueNode;
         }
 
-        // Teleport never brings back to the current step
+        // Teleport never brings back to the current step - unless we only have one,
+        // or are in Repeat mode.
         if (stepType == STEP_TELEPORT) {
-            std::vector<size_t> validNodes;
-            for (size_t i = 0; i < NODES; i++) {
-                if (i != currentNode) validNodes.push_back(i);
+            if (getTotalNodes() > 1) {
+                std::vector<size_t> validNodes;
+                for (size_t i = 0; i < getTotalNodes(); i++) {
+                    if (params[REPEAT_MODE_PARAM].getValue() == 0.f) {
+                        if (i != currentNode) validNodes.push_back(i);
+                    } else {
+                        validNodes.push_back(i);
+                    }
+                }
+                std::random_shuffle(validNodes.begin(), validNodes.end());
+                currentNode = validNodes[0];
+            } else {
+                currentNode = 0;
             }
-            std::random_shuffle(validNodes.begin(), validNodes.end());
-            currentNode = validNodes[0];
         }
 
         // Random walk can warp around
         if (stepType == STEP_WALK) {
-            if (random::uniform() >= 0.5f) {
-                // Walk forward
-                if (currentNode == NODES - 1) {
-                    currentNode = 0;
-                } else {
-                    currentNode++;
-                }
+            if (params[REPEAT_MODE_PARAM].getValue() == 1.f && prng.uniform() < 1.f / 3.f) {
+                // 1 chance out of 3 the current node repeats
             } else {
-                // Walk back
-                if (currentNode == 0) {
-                    currentNode = NODES - 1;
+                // Then it's a coin flip which direction we go
+                if (prng.uniform() >= 0.5f) {
+                    // Walk forward
+                    if (currentNode >= getTotalNodes() - 1) {
+                        currentNode = 0;
+                    } else {
+                        currentNode++;
+                    }
                 } else {
-                    currentNode--;
+                    // Walk back
+                    if (currentNode == 0) {
+                        currentNode = getTotalNodes() - 1;
+                    } else {
+                        currentNode--;
+                    }
                 }
             }
         }
@@ -445,7 +662,7 @@ struct Solomon : Module {
         // Step back can warp around
         if (stepType == STEP_BACK) {
             if (currentNode == 0) {
-                currentNode = NODES - 1;
+                currentNode = getTotalNodes() - 1;
             } else {
                 currentNode--;
             }
@@ -453,7 +670,7 @@ struct Solomon : Module {
 
         // Step forward can warp around
         if (stepType == STEP_FORWARD) {
-            if (currentNode == NODES - 1) {
+            if (currentNode >= getTotalNodes() - 1) {
                 currentNode = 0;
             } else {
                 currentNode++;
@@ -472,21 +689,33 @@ struct Solomon : Module {
 
     // A read window just elapsed, we move to the next step and send the outputs
     void processStep() {
+        lastOutput = cv[currentNode];
         applyTransposes();
         applyQueue();
         applyDelay();
         applyStep();
         updateLatch();
         clearTransposes();
-        randomGate = ( random::uniform() >= 0.5f ) ? true : false;
-        globalTrig.trigger(1e-3f);
+        randomGate = ( prng.uniform() >= 0.5f ) ? true : false;
+        globalTrigger.trigger();
+        globalDisplayTrigger.trigger(0.003f);
         stepType = -1;
+        slideCounter = 0.f;
     }
 
     // We refresh lotsa stuff, but we don't need to do it at audio rates
     void sendOutputs(const ProcessArgs& args) {
-        outputs[GLOBAL_TRIG_OUTPUT].setVoltage( globalTrig.process(args.sampleTime) ? 10.f : 0.f);
-        outputs[GLOBAL_CV_OUTPUT].setVoltage(cv[currentNode]); // TODO: Slide
+        outputs[GLOBAL_TRIG_OUTPUT].setVoltage( globalTrigger.process(args.sampleTime) ? 10.f : 0.f);
+        globalDisplayTrigger.process(args.sampleTime);
+
+        float output = cv[currentNode];
+        // Slide
+        if (slideDuration > 0.f && slideDuration > slideCounter) {
+            output = crossfade(lastOutput, output, (slideCounter / slideDuration) );
+            slideCounter += args.sampleTime * OUTPUTDIVIDER;
+        }
+
+        outputs[GLOBAL_CV_OUTPUT].setVoltage(output); // TODO: Slide
 
         for(size_t i = 0; i < NODES; i++) {
             outputs[NODE_DELAY_OUTPUT + i].setVoltage( (delay[i]) ? 10.f : 0.f);
@@ -506,11 +735,29 @@ struct Solomon : Module {
 
     void process(const ProcessArgs& args) override {
 
+        lcdStatus.notificationStep(args.sampleTime);
+
+        if (copyPortableSequence)      exportPortableSequence();
+        if (pastePortableSequence)     importPortableSequence();
+        if (randomizePitchesRequested) randomizePitches();
+        if (quantizePitchesRequested)  quantizePitches();
+
+        // Reset
+        if (resetTrigger.process(inputs[RESET_INPUT].getVoltageSum())) processResetInput();
+        if (resetDelay >= 0.f) {
+            if (wait1msOnReset(args.sampleTime)) {
+                // Done with reset
+                resetDelay = -1.f;
+            } else {
+                return;
+            }
+        }
+
         if (readWindow < 0.f) {
             // We are not in a Read Window
             stepType = getStepInput();
             if (stepType >= 0) readWindow = 0.f;
-
+            if (windowTimeout < WINDOWTIMEOUTDURATION) windowTimeout += args.sampleTime;
         }
         if (readWindow >= 0.f && readWindow < READWINDOWDURATION) {
             // We are in a Read Window
@@ -523,17 +770,16 @@ struct Solomon : Module {
             readWindow = -1.f;
         }
 
-        // No need to process this many outputs at audio rates, or to refresh those
-        // inputs this often.
+        // No need to process this many outputs at audio rates
         if (outputDivider.process()) {
             sendOutputs(args);
             updateScale();
+            updateSlide();
             processSdButtons();
             processQueueButtons();
             processLoadButton();
             processSaveButton();
         }
-
     }
 
 };
@@ -546,15 +792,17 @@ struct Solomon : Module {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-
-
 // Total nodes knobs
 template <typename TModule>
-struct TotalNodesKnob : AriaKnob820 {
+struct TotalNodesKnob : AriaKnob820Snap {
     void onDragMove(const event::DragMove& e) override {
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLastInteraction = 0.f;
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdDirty = true;
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdMode = TOTAL_NODES_MODE;
+        TModule* module = dynamic_cast<TModule*>(paramQuantity->module);
+
+        module->lcdStatus.lcdLastInteraction = 0.f;
+        module->lcdStatus.lcdDirty = true;
+        module->lcdStatus.lcdLayout = Lcd::TEXT2_LAYOUT;
+        module->lcdStatus.lcdText2 = "Nodes: " + std::to_string( (int) module->params[module->TOTAL_NODES_PARAM].getValue());
+
         AriaKnob820::onDragMove(e);
     }
 };
@@ -566,10 +814,28 @@ struct ScaleKnob : AriaKnob820 {
         snap = true;
         AriaKnob820();
     }
+
     void onDragMove(const event::DragMove& e) override {
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLastInteraction = 0.f;
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdDirty = true;
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdMode = SCALE_MODE;
+        TModule* module = dynamic_cast<TModule*>(paramQuantity->module);
+
+        module->lcdStatus.lcdLastInteraction = 0.f;
+        module->lcdStatus.lcdDirty = true;
+        module->lcdStatus.lcdLayout = Lcd::PIANO_AND_TEXT2_LAYOUT;
+
+        std::string text = "";
+        if (module->params[module->SCALE_PARAM].getValue() == 0.f) {
+            text = "CHROMATIC";
+        } else {
+            text = Quantizer::keyLcdName((int) module->params[module->KEY_PARAM].getValue());
+            text.append(" ");
+            text.append(Quantizer::scaleLcdName((int) module->params[module->SCALE_PARAM].getValue()));
+        }
+        if ( module->inputs[module->EXT_SCALE_INPUT].isConnected()) {
+            text = "EXTERNAL";
+        }
+        module->lcdStatus.lcdText2 = text;
+        module->lcdStatus.pianoDisplay = module->scale;
+
         AriaKnob820::onDragMove(e);
     }
 };
@@ -578,9 +844,14 @@ struct ScaleKnob : AriaKnob820 {
 template <typename TModule>
 struct MinMaxKnob : AriaKnob820 {
     void onDragMove(const event::DragMove& e) override {
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLastInteraction = 0.f;
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdDirty = true;
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdMode = MINMAX_MODE;
+        TModule* module = dynamic_cast<TModule*>(paramQuantity->module);
+
+        module->lcdStatus.lcdLastInteraction = 0.f;
+        module->lcdStatus.lcdDirty = true;
+        module->lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
+        module->lcdStatus.lcdText1 = "Min: " + Quantizer::noteOctaveLcdName(module->params[module->MIN_PARAM].getValue() - 4.f);
+        module->lcdStatus.lcdText2 = "Max: " + Quantizer::noteOctaveLcdName(module->params[module->MAX_PARAM].getValue() - 4.f);
+
         AriaKnob820::onDragMove(e);
     }
 };
@@ -589,16 +860,35 @@ struct MinMaxKnob : AriaKnob820 {
 template <typename TModule>
 struct SlideKnob : AriaKnob820 {
     void onDragMove(const event::DragMove& e) override {
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdLastInteraction = 0.f;
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdDirty = true;
-        dynamic_cast<TModule*>(paramQuantity->module)->lcdStatus.lcdMode = SLIDE_MODE;
+        TModule* module = dynamic_cast<TModule*>(paramQuantity->module);
+
+        module->lcdStatus.lcdLastInteraction = 0.f;
+        module->lcdStatus.lcdDirty = true;
+        module->lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
+        module->lcdStatus.lcdText1 = "Slide:";
+
+        float displayDuration = module->slideDuration;
+        if (displayDuration == 0.f)
+            module->lcdStatus.lcdText2 = "DISABLED";
+        if (displayDuration > 0.f && displayDuration < 1.f) {
+            int displayDurationMs = displayDuration * 1000;
+            displayDurationMs = truncf(displayDurationMs);
+            module->lcdStatus.lcdText2 = std::to_string(displayDurationMs);
+            module->lcdStatus.lcdText2.append("ms");
+        } 
+        if (displayDuration >= 1.f) {
+            module->lcdStatus.lcdText2 = std::to_string(displayDuration);
+            module->lcdStatus.lcdText2.resize(4);
+            module->lcdStatus.lcdText2.append("s");
+        }
         AriaKnob820::onDragMove(e);
     }
 };
 
+
 // Per-node segment display
 template <typename TModule>
-struct SegmentDisplay : TransparentWidget {
+struct SegmentDisplay : LightWidget {
 	TModule* module;
     size_t node;
 	std::shared_ptr<Font> font;
@@ -616,13 +906,50 @@ struct SegmentDisplay : TransparentWidget {
         Vec textPos = mm2px(Vec(0.f, 10.f));
 		nvgFillColor(args.vg, nvgRGB(0x0b, 0x57, 0x63));
 		nvgText(args.vg, textPos.x, textPos.y, "~~~", NULL);
-		nvgFillColor(args.vg, nvgRGB(0xc1, 0xf0, 0xf2));
-        if(module) {
+        if (module) {
+            if (module->getTotalNodes() > node) {
+                nvgFillColor(args.vg, nvgRGB(0xc1, 0xf0, 0xf2));
+            } else {
+                nvgFillColor(args.vg, nvgRGB(0x76, 0xbf, 0xbe));
+            }
             text = Quantizer::noteOctaveSegmentName(module->cv[node]);
+            if (node == module->currentNode && module->globalDisplayTrigger.remaining > 0.f) text = "~~~";
             nvgText(args.vg, textPos.x, textPos.y, text.c_str(), NULL);
         }
 	}
 };
+
+template <typename TModule>
+struct SolomonLcdWidget : TransparentWidget {
+    TModule *module;
+    Lcd::LcdFramebufferWidget<TModule> *lfb;
+    Lcd::LcdDrawWidget<TModule> *ldw;
+
+    SolomonLcdWidget(TModule *_module){
+        module = _module;
+        lfb = new Lcd::LcdFramebufferWidget<TModule>(module);
+        ldw = new Lcd::LcdDrawWidget<TModule>(module);
+        addChild(lfb);
+        lfb->addChild(ldw);
+    }
+
+    void processDefaultMode() {
+        if (!module) return;
+        if (module->lcdStatus.lcdLastInteraction != -1.f) return;
+        module->lcdStatus.lcdDirty = true;
+        module->lcdStatus.lcdLayout = Lcd::PIANO_AND_TEXT2_LAYOUT;
+        module->lcdStatus.pianoDisplay = Quantizer::pianoDisplay(module->outputs[module->GLOBAL_CV_OUTPUT].getVoltage());
+        std::string text = Quantizer::noteOctaveLcdName(module->outputs[module->GLOBAL_CV_OUTPUT].getVoltage());
+        text = text + " | " + std::to_string(module->currentNode + 1);
+        module->lcdStatus.lcdText2 = text;
+    }
+
+    void draw(const DrawArgs& args) override {
+        processDefaultMode();
+        TransparentWidget::draw(args);
+    }
+};
+
 
 template <typename TModule>
 struct SegmentDisplayFramebuffer : FramebufferWidget {
@@ -632,9 +959,10 @@ struct SegmentDisplayFramebuffer : FramebufferWidget {
 
     void step() override{
         if (module) { 
-            if (module->cv[node] != lastStatus) {
+            if (module->cv[node] != lastStatus || module->globalDisplayTrigger.remaining > 0.f) {
                 dirty = true;
             }
+
             FramebufferWidget::step();
         }
     }
@@ -643,7 +971,7 @@ struct SegmentDisplayFramebuffer : FramebufferWidget {
 
 // The QUEUE message on the segment display
 template <typename TModule>
-struct QueueWidget : Widget {
+struct QueueWidget : TransparentWidget {
 	TModule* module;
     size_t node;
 	FramebufferWidget* framebuffer;
@@ -651,9 +979,9 @@ struct QueueWidget : Widget {
     bool lastStatus;
 
     QueueWidget() {
-        framebuffer = new widget::FramebufferWidget;
+        framebuffer = new FramebufferWidget;
         addChild(framebuffer);
-        svgWidget = new widget::SvgWidget;
+        svgWidget = new SvgWidget;
         svgWidget->setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/solomon-queue-lit.svg")));
         framebuffer->box.size = svgWidget->box.size;
         box.size = svgWidget->box.size;
@@ -672,9 +1000,10 @@ struct QueueWidget : Widget {
     }
 };
 
+
 // The DELAY message on the segment display
 template <typename TModule>
-struct DelayWidget : Widget {
+struct DelayWidget : TransparentWidget {
 	TModule* module;
     size_t node;
 	FramebufferWidget* framebuffer;
@@ -682,9 +1011,9 @@ struct DelayWidget : Widget {
     bool lastStatus;
 
     DelayWidget() {
-        framebuffer = new widget::FramebufferWidget;
+        framebuffer = new FramebufferWidget;
         addChild(framebuffer);
-        svgWidget = new widget::SvgWidget;
+        svgWidget = new SvgWidget;
         svgWidget->setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/solomon-delay-lit.svg")));
         framebuffer->box.size = svgWidget->box.size;
         box.size = svgWidget->box.size;
@@ -703,9 +1032,10 @@ struct DelayWidget : Widget {
     }
 };
 
+
 // The PLAY arrow on the segment display
 template <typename TModule>
-struct PlayWidget : Widget {
+struct PlayWidget : TransparentWidget {
 	TModule* module;
     size_t node;
 	FramebufferWidget* framebuffer;
@@ -713,9 +1043,9 @@ struct PlayWidget : Widget {
     size_t lastStatus; 
 
     PlayWidget() {
-        framebuffer = new widget::FramebufferWidget;
+        framebuffer = new FramebufferWidget;
         addChild(framebuffer);
-        svgWidget = new widget::SvgWidget;
+        svgWidget = new SvgWidget;
         svgWidget->setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/solomon-play-lit.svg")));
         framebuffer->box.size = svgWidget->box.size;
         box.size = svgWidget->box.size;
@@ -731,6 +1061,63 @@ struct PlayWidget : Widget {
             lastStatus = module->currentNode;
         }
         Widget::step();
+    }
+};
+
+
+template <typename TModule>
+struct CopyPortableSequenceItem : MenuItem {
+    TModule *module;
+    void onAction(const event::Action &e) override {
+        module->copyPortableSequence = true;
+    }
+};
+
+template <typename TModule>
+struct PastePortableSequenceItem : MenuItem {
+    TModule *module;
+    void onAction(const event::Action &e) override {
+        module->pastePortableSequence = true;
+    }
+};
+
+template <typename TModule>
+struct ResetStepConfigItem : MenuItem {
+    TModule *module;
+    void onAction(const event::Action &e) override {
+        module->resetStepConfig = (module->resetStepConfig) ? false : true;
+    }
+};
+
+template <typename TModule>
+struct ResetLoadConfigItem : MenuItem {
+    TModule *module;
+    void onAction(const event::Action &e) override {
+        module->resetLoadConfig = (module->resetLoadConfig) ? false : true;
+    }
+};
+
+template <typename TModule>
+struct ResetQuantizeConfigItem : MenuItem {
+    TModule *module;
+    void onAction(const event::Action &e) override {
+        module->resetQuantizeConfig = (module->resetQuantizeConfig) ? false : true;
+    }
+};
+
+template <typename TModule>
+struct RandomizePitchesRequestedItem : MenuItem {
+    TModule *module;
+    void onAction(const event::Action &e) override {
+        module->randomizePitchesRequested = true;
+    }
+};
+
+template <typename TModule>
+struct QuantizePitchesRequestedItem : MenuItem {
+    TModule *module;
+    void onAction(const event::Action &e) override {
+        module->quantizePitchesRequested = true;
     }
 };
 
@@ -754,6 +1141,9 @@ struct SolomonWidget8 : ModuleWidget {
         // Queue clear mode
         addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(28.4f, 17.1f)), module, Solomon<8>::QUEUE_CLEAR_MODE_PARAM));
 
+        // Repeat mode
+        addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(42.4f, 17.1f)), module, Solomon<8>::REPEAT_MODE_PARAM));
+
         // Global step inputs. Ordered counterclockwise.
         addInput(createInput<AriaJackIn>(mm2px(Vec(20.f, 17.f)), module, Solomon<8>::STEP_QUEUE_INPUT));
         addInput(createInput<AriaJackIn>(mm2px(Vec( 5.f, 32.f)), module, Solomon<8>::STEP_TELEPORT_INPUT));
@@ -762,10 +1152,10 @@ struct SolomonWidget8 : ModuleWidget {
         addInput(createInput<AriaJackIn>(mm2px(Vec(30.f, 47.f)), module, Solomon<8>::STEP_BACK_INPUT));
 
         // Total Steps
-        addParam(createParam<MinMaxKnob<Solomon<8>>>(mm2px(Vec(20.f, 32.f)), module, Solomon<8>::TOTAL_NODES_PARAM));
+        addParam(createParam<TotalNodesKnob<Solomon<8>>>(mm2px(Vec(20.f, 32.f)), module, Solomon<8>::TOTAL_NODES_PARAM));
 
         // LCD
-        Lcd::LcdWidget<Solomon<8>> *lcd = new Lcd::LcdWidget<Solomon<8>>(module);
+        SolomonLcdWidget<Solomon<8>> *lcd = new SolomonLcdWidget<Solomon<8>>(module);
         lcd->box.pos = mm2px(Vec(7.7f, 68.8f));
         addChild(lcd);
 
@@ -845,6 +1235,49 @@ struct SolomonWidget8 : ModuleWidget {
             xOffset += 25.f;
         }
     }
+
+    void appendContextMenu(ui::Menu *menu) override {	
+        Solomon<8> *module = dynamic_cast<Solomon<8>*>(this->module);
+        assert(module);
+
+        menu->addChild(new MenuSeparator());
+
+        CopyPortableSequenceItem<Solomon<8>> *copyPortableSequenceItem = createMenuItem<CopyPortableSequenceItem<Solomon<8>>>("Copy Portable Sequence");
+        copyPortableSequenceItem->module = module;
+        menu->addChild(copyPortableSequenceItem);
+
+        PastePortableSequenceItem<Solomon<8>> *pastePortableSequenceItem = createMenuItem<PastePortableSequenceItem<Solomon<8>>>("Paste Portable Sequence");
+        pastePortableSequenceItem->module = module;
+        menu->addChild(pastePortableSequenceItem);
+
+        menu->addChild(new MenuSeparator());
+
+        ResetStepConfigItem<Solomon<8>> *resetStepConfigItem = createMenuItem<ResetStepConfigItem<Solomon<8>>>("Reset input goes back to first step");
+        resetStepConfigItem->module = module;
+        resetStepConfigItem->rightText += (module->resetStepConfig) ? "✔" : "";
+        menu->addChild(resetStepConfigItem);
+
+        ResetLoadConfigItem<Solomon<8>> *resetLoadConfigItem = createMenuItem<ResetLoadConfigItem<Solomon<8>>>("Reset input loads the saved pattern");
+        resetLoadConfigItem->module = module;
+        resetLoadConfigItem->rightText += (module->resetLoadConfig) ? "✔" : "";
+        menu->addChild(resetLoadConfigItem);
+
+        ResetQuantizeConfigItem<Solomon<8>> *resetQuantizeConfigItem = createMenuItem<ResetQuantizeConfigItem<Solomon<8>>>("Reset input quantizes the pattern");
+        resetQuantizeConfigItem->module = module;
+        resetQuantizeConfigItem->rightText += (module->resetQuantizeConfig) ? "✔" : "";
+        menu->addChild(resetQuantizeConfigItem);
+
+        menu->addChild(new MenuSeparator());
+
+        RandomizePitchesRequestedItem<Solomon<8>> *randomizePitchesRequestedItem = createMenuItem<RandomizePitchesRequestedItem<Solomon<8>>>("Randomize all nodes");
+        randomizePitchesRequestedItem->module = module;
+        menu->addChild(randomizePitchesRequestedItem);
+
+        QuantizePitchesRequestedItem<Solomon<8>> *quantizePitchesRequestedItem = createMenuItem<QuantizePitchesRequestedItem<Solomon<8>>>("Quantize all nodes");
+        quantizePitchesRequestedItem->module = module;
+        menu->addChild(quantizePitchesRequestedItem);
+    }
+
 };
 
 
@@ -876,6 +1309,9 @@ struct SolomonWidget4 : ModuleWidget {
         // Queue clear mode
         addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(28.4f, 17.1f)), module, Solomon<4>::QUEUE_CLEAR_MODE_PARAM));
 
+        // Repeat mode
+        addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(42.4f, 17.1f)), module, Solomon<4>::REPEAT_MODE_PARAM));
+
         // Global step inputs. Ordered counterclockwise.
         addInput(createInput<AriaJackIn>(mm2px(Vec(20.f, 17.f)), module, Solomon<4>::STEP_QUEUE_INPUT));
         addInput(createInput<AriaJackIn>(mm2px(Vec( 5.f, 32.f)), module, Solomon<4>::STEP_TELEPORT_INPUT));
@@ -884,10 +1320,10 @@ struct SolomonWidget4 : ModuleWidget {
         addInput(createInput<AriaJackIn>(mm2px(Vec(30.f, 47.f)), module, Solomon<4>::STEP_BACK_INPUT));
 
         // Total Steps
-        addParam(createParam<MinMaxKnob<Solomon<4>>>(mm2px(Vec(20.f, 32.f)), module, Solomon<4>::TOTAL_NODES_PARAM));
+        addParam(createParam<TotalNodesKnob<Solomon<4>>>(mm2px(Vec(20.f, 32.f)), module, Solomon<4>::TOTAL_NODES_PARAM));
 
         // LCD
-        Lcd::LcdWidget<Solomon<4>> *lcd = new Lcd::LcdWidget<Solomon<4>>(module);
+        SolomonLcdWidget<Solomon<4>> *lcd = new SolomonLcdWidget<Solomon<4>>(module);
         lcd->box.pos = mm2px(Vec(7.7f, 68.8f));
         addChild(lcd);
 
@@ -967,6 +1403,49 @@ struct SolomonWidget4 : ModuleWidget {
             xOffset += 25.f;
         }
     }
+
+    void appendContextMenu(ui::Menu *menu) override {	
+        Solomon<4> *module = dynamic_cast<Solomon<4>*>(this->module);
+        assert(module);
+
+        menu->addChild(new MenuSeparator());
+
+        CopyPortableSequenceItem<Solomon<4>> *copyPortableSequenceItem = createMenuItem<CopyPortableSequenceItem<Solomon<4>>>("Copy Portable Sequence");
+        copyPortableSequenceItem->module = module;
+        menu->addChild(copyPortableSequenceItem);
+
+        PastePortableSequenceItem<Solomon<4>> *pastePortableSequenceItem = createMenuItem<PastePortableSequenceItem<Solomon<4>>>("Paste Portable Sequence");
+        pastePortableSequenceItem->module = module;
+        menu->addChild(pastePortableSequenceItem);
+
+        menu->addChild(new MenuSeparator());
+
+        ResetStepConfigItem<Solomon<4>> *resetStepConfigItem = createMenuItem<ResetStepConfigItem<Solomon<4>>>("Reset input goes back to first step");
+        resetStepConfigItem->module = module;
+        resetStepConfigItem->rightText += (module->resetStepConfig) ? "✔" : "";
+        menu->addChild(resetStepConfigItem);
+
+        ResetLoadConfigItem<Solomon<4>> *resetLoadConfigItem = createMenuItem<ResetLoadConfigItem<Solomon<4>>>("Reset input loads the saved pattern");
+        resetLoadConfigItem->module = module;
+        resetLoadConfigItem->rightText += (module->resetLoadConfig) ? "✔" : "";
+        menu->addChild(resetLoadConfigItem);
+
+        ResetQuantizeConfigItem<Solomon<4>> *resetQuantizeConfigItem = createMenuItem<ResetQuantizeConfigItem<Solomon<4>>>("Reset input quantizes the pattern");
+        resetQuantizeConfigItem->module = module;
+        resetQuantizeConfigItem->rightText += (module->resetQuantizeConfig) ? "✔" : "";
+        menu->addChild(resetQuantizeConfigItem);
+
+        menu->addChild(new MenuSeparator());
+
+        RandomizePitchesRequestedItem<Solomon<4>> *randomizePitchesRequestedItem = createMenuItem<RandomizePitchesRequestedItem<Solomon<4>>>("Randomize all nodes");
+        randomizePitchesRequestedItem->module = module;
+        menu->addChild(randomizePitchesRequestedItem);
+
+        QuantizePitchesRequestedItem<Solomon<4>> *quantizePitchesRequestedItem = createMenuItem<QuantizePitchesRequestedItem<Solomon<4>>>("Quantize all nodes");
+        quantizePitchesRequestedItem->module = module;
+        menu->addChild(quantizePitchesRequestedItem);
+    }
+
 };
 
 
@@ -996,6 +1475,9 @@ struct SolomonWidget16 : ModuleWidget {
         // Queue clear mode
         addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(28.4f, 17.1f)), module, Solomon<16>::QUEUE_CLEAR_MODE_PARAM));
 
+        // Repeat mode
+        addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(42.4f, 17.1f)), module, Solomon<16>::REPEAT_MODE_PARAM));
+
         // Global step inputs. Ordered counterclockwise.
         addInput(createInput<AriaJackIn>(mm2px(Vec(20.f, 17.f)), module, Solomon<16>::STEP_QUEUE_INPUT));
         addInput(createInput<AriaJackIn>(mm2px(Vec( 5.f, 32.f)), module, Solomon<16>::STEP_TELEPORT_INPUT));
@@ -1004,10 +1486,10 @@ struct SolomonWidget16 : ModuleWidget {
         addInput(createInput<AriaJackIn>(mm2px(Vec(30.f, 47.f)), module, Solomon<16>::STEP_BACK_INPUT));
 
         // Total Steps
-        addParam(createParam<MinMaxKnob<Solomon<16>>>(mm2px(Vec(20.f, 32.f)), module, Solomon<16>::TOTAL_NODES_PARAM));
+        addParam(createParam<TotalNodesKnob<Solomon<16>>>(mm2px(Vec(20.f, 32.f)), module, Solomon<16>::TOTAL_NODES_PARAM));
 
         // LCD
-        Lcd::LcdWidget<Solomon<16>> *lcd = new Lcd::LcdWidget<Solomon<16>>(module);
+        SolomonLcdWidget<Solomon<16>> *lcd = new SolomonLcdWidget<Solomon<16>>(module);
         lcd->box.pos = mm2px(Vec(7.7f, 68.8f));
         addChild(lcd);
 
@@ -1087,6 +1569,49 @@ struct SolomonWidget16 : ModuleWidget {
             xOffset += 25.f;
         }
     }
+
+    void appendContextMenu(ui::Menu *menu) override {	
+        Solomon<16> *module = dynamic_cast<Solomon<16>*>(this->module);
+        assert(module);
+
+        menu->addChild(new MenuSeparator());
+
+        CopyPortableSequenceItem<Solomon<16>> *copyPortableSequenceItem = createMenuItem<CopyPortableSequenceItem<Solomon<16>>>("Copy Portable Sequence");
+        copyPortableSequenceItem->module = module;
+        menu->addChild(copyPortableSequenceItem);
+
+        PastePortableSequenceItem<Solomon<16>> *pastePortableSequenceItem = createMenuItem<PastePortableSequenceItem<Solomon<16>>>("Paste Portable Sequence");
+        pastePortableSequenceItem->module = module;
+        menu->addChild(pastePortableSequenceItem);
+
+        menu->addChild(new MenuSeparator());
+
+        ResetStepConfigItem<Solomon<16>> *resetStepConfigItem = createMenuItem<ResetStepConfigItem<Solomon<16>>>("Reset input goes back to first step");
+        resetStepConfigItem->module = module;
+        resetStepConfigItem->rightText += (module->resetStepConfig) ? "✔" : "";
+        menu->addChild(resetStepConfigItem);
+
+        ResetLoadConfigItem<Solomon<16>> *resetLoadConfigItem = createMenuItem<ResetLoadConfigItem<Solomon<16>>>("Reset input loads the saved pattern");
+        resetLoadConfigItem->module = module;
+        resetLoadConfigItem->rightText += (module->resetLoadConfig) ? "✔" : "";
+        menu->addChild(resetLoadConfigItem);
+
+        ResetQuantizeConfigItem<Solomon<16>> *resetQuantizeConfigItem = createMenuItem<ResetQuantizeConfigItem<Solomon<16>>>("Reset input quantizes the pattern");
+        resetQuantizeConfigItem->module = module;
+        resetQuantizeConfigItem->rightText += (module->resetQuantizeConfig) ? "✔" : "";
+        menu->addChild(resetQuantizeConfigItem);
+
+        menu->addChild(new MenuSeparator());
+
+        RandomizePitchesRequestedItem<Solomon<16>> *randomizePitchesRequestedItem = createMenuItem<RandomizePitchesRequestedItem<Solomon<16>>>("Randomize all nodes");
+        randomizePitchesRequestedItem->module = module;
+        menu->addChild(randomizePitchesRequestedItem);
+
+        QuantizePitchesRequestedItem<Solomon<16>> *quantizePitchesRequestedItem = createMenuItem<QuantizePitchesRequestedItem<Solomon<16>>>("Quantize all nodes");
+        quantizePitchesRequestedItem->module = module;
+        menu->addChild(quantizePitchesRequestedItem);
+    }
+
 };
 
 

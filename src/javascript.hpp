@@ -65,9 +65,8 @@ struct Runtime {
     }
 
     const char* readVariableAsChar(const char* variable){
-        size_t plen;
         JSValue value = JS_GetPropertyStr(context, globalObject, variable);
-        const char *readValue = JS_ToCStringLen(context, &plen, value);
+        const char *readValue = JS_ToCString(context, value);
         JS_FreeValue(context, value);
         return readValue;
     }

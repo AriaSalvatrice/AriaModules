@@ -13,6 +13,7 @@ You should have received a copy of the GNU General Public License along with thi
 - Sort randomly on trigger
 - Trim to _n_ outputs |
 - Pad to _n_ outputs  | Min max
+- Remove dupes
 - 
 
 */

@@ -118,6 +118,7 @@ struct Darius : Module {
     float lastOutput = 0.f;
     float lcdLastInteraction = 0.f;
     float probabilities[36];
+    float resetDelay = -1.f; // 0 when reset started
     dsp::SchmittTrigger stepUpCvTrigger;
     dsp::SchmittTrigger stepDownCvTrigger;
     dsp::SchmittTrigger stepBackCvTrigger;
@@ -145,11 +146,11 @@ struct Darius : Module {
         configParam(RANDROUTE_PARAM, 0.f, 1.f, 0.f, "Meta-randomize random route knobs");
         configParam(SEED_MODE_PARAM, 0.f, 1.f, 0.f, "New random seed on first or all nodes");
         configParam(RANGE_PARAM, 0.f, 1.f, 0.f, "Voltage output range");
-        configParam(MIN_PARAM, 0.f, 10.f, 0.f, "Minimum CV/Note");
-        configParam(MAX_PARAM, 0.f, 10.f, 10.f, "Maximum CV/Note");
-        configParam(QUANTIZE_TOGGLE_PARAM, 0.f, 1.f, 0.f, "Precise CV/Quantized V/Oct");
+        configParam(MIN_PARAM, 0.f, 10.f, 3.f, "Minimum CV/Note");
+        configParam(MAX_PARAM, 0.f, 10.f, 5.f, "Maximum CV/Note");
+        configParam(QUANTIZE_TOGGLE_PARAM, 0.f, 1.f, 1.f, "Precise CV/Quantized V/Oct");
         configParam(KEY_PARAM, 0.f, 11.f, 0.f, "Key");
-        configParam(SCALE_PARAM, 0.f, (float) Quantizer::NUM_SCALES - 1, 0.f, "Scale");
+        configParam(SCALE_PARAM, 0.f, (float) Quantizer::NUM_SCALES - 1, 2.f, "Scale");
         configParam(SLIDE_PARAM, 0.f, 10.f, 0.f, "Slide");
         for (int i = 0; i < STEP9START; i++)
             configParam(CV_PARAM + i, 0.f, 10.f, 5.f, "CV");
@@ -421,6 +422,12 @@ struct Darius : Module {
         for (int i = 0; i < 36; i++)
             outputs[GATE_OUTPUT + i].setVoltage(0.f);
         lcdStatus.lcdDirty = true;
+        resetDelay = 0.f; // This starts the delay
+    }
+
+    bool wait1msOnReset(float sampleTime) {
+        resetDelay += sampleTime;
+        return((resetDelay >= 0.001f) ? true : false);
     }
     
     // Sets running to the current run status
@@ -760,8 +767,8 @@ struct Darius : Module {
         }
 
         if (lcdMode == SLIDE_MODE) {
-            lcdStatus.lcdLayout = Lcd::TEXT2_LAYOUT;
-            lcdStatus.lcdText1 = "SLIDE:";
+            lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
+            lcdStatus.lcdText1 = "Slide:";
             float displayDuration = slideDuration;
             if (displayDuration == 0.f)
                 lcdStatus.lcdText2 = "DISABLED";
@@ -917,6 +924,7 @@ struct Darius : Module {
         lcdStatus.lcdText2 = "MEDITATION.";
         lcdLastInteraction = 0.f;
         lcdStatus.lcdDirty = true;
+        resetDelay = 0.f;
     }
 
     void process(const ProcessArgs& args) override {
@@ -933,6 +941,15 @@ struct Darius : Module {
             randomizeRoute(args);
         if (resetCvTrigger.process(inputs[RESET_INPUT].getVoltageSum()) or resetButtonTrigger.process(params[RESET_PARAM].getValue()))
             reset(args);
+        if (resetDelay >= 0.f) {
+            if (wait1msOnReset(args.sampleTime)) {
+                // Done with reset
+                resetDelay = -1.f;
+            } else {
+                return;
+            }
+        }
+
 
         if (resetCV)
             processResetCV(args);

@@ -18,41 +18,41 @@ using namespace rack;
 extern Plugin* pluginInstance;
 
 // This LCD widget  displays data, provided by the module or by widgets.
-// Its size is currently fixed to 36*10mm - 2 lines of 11 characters. TODO: change it
+// Its size is currently fixed to 36*10mm - 2 lines of 11 characters.
 //
 // The LCD LAYOUT is the layout, e.g., two lines of text, or a piano and a line of text.
-// The LCD MODE is the internal state of the LCD.
+// The LCD MODE is deprecated.
+//
+// Modulus Salomonis Regis is the only module to implement the LCD somewhat as intended.
+// Arcane, Darius and QQQQ do things in deprecated ways.
 // 
 // On Arcane and Darius, the SVG of the LCD is a little bit too small to display
 // descenders on the second line of text, so uppercase is mostly used.
-// Future modules will have a slightly larger LCD to fit descenders if desired.
+// Newer modules have a larger LCD to fit descenders.
 //
-// It's under heavy rework - I strongly advise against re-using this yet.
+// It's under heavy rework - I advise against re-using this yet.
 // 
 // If you're gonna reuse this code despite the warnings, please consider changing my signature
 // color scheme to your own. You can recolor the SVG letters in batch with a text editor.
 
 namespace Lcd {
 
+
 // Which elements to show and hide
+// FIXME: Migrate terminology entirely to mode.
 enum LcdLayouts {
     // Displays nothing
     OFF_LAYOUT,
-    // Only text on the first line
+    // Displays text on the first line and empties the second
     TEXT1_LAYOUT,
-    // Only text on the second line
+    // Displays text on the second line and empties the first
     TEXT2_LAYOUT,
-    // Text on two lines
+    // Displays text on two lines
     TEXT1_AND_TEXT2_LAYOUT,
     // Piano on the first line and text on the second
-    PIANO_AND_TEXT2_LAYOUT
+    PIANO_AND_TEXT2_LAYOUT,
 };
 
-// FIXME: Just do away with LCD Modes, they're complicated and should be custom per-module logic.
-enum LcdModes {
-    BOOT_MODE,
-    INIT_MODE
-};
 
 // Interface between the module & widgets with the LCD
 struct LcdStatus {
@@ -68,7 +68,8 @@ struct LcdStatus {
     // Whether to redraw the widget.
     bool lcdDirty = false;
 
-    // Which mode we're in defines which layout is used.
+    // Which mode we're in. Use this to implement custom module logic - the LCD has no clue what this means.
+    // FIXME: Deprected, move away from using this.
     int lcdMode = 0;
 
     // Whether to draw two lines of text, a piano, etc.
@@ -77,15 +78,29 @@ struct LcdStatus {
     // For any info on a timer in the module. This widget has no knowledge what it means.
     float lcdLastInteraction = 0.f;
 
+    // How long before going back to the main display.
+    float notificationTimeout = 3.f;
+
     LcdStatus() {
         for (int i = 0; i < 12; i++) pianoDisplay[i] = false;
+    }
+
+    // Call this from the module.
+    // Use this to go back to the main page.
+    void notificationStep(float deltaTime) {
+        if (lcdLastInteraction >= 0.f) {
+            lcdLastInteraction += deltaTime;
+        }
+        if (lcdLastInteraction >= notificationTimeout) {
+            lcdLastInteraction = -1.f;
+        }
     }
 
 };
 
 // The draw widget, concerned only with rendering layouts.
 template <class TModule>
-struct LcdDrawWidget : TransparentWidget {
+struct LcdDrawWidget : LightWidget {
     TModule *module;
     std::array<std::shared_ptr<Svg>, 95> asciiSvg; // 32 to 126, the printable range
     std::array<std::shared_ptr<Svg>, 24> pianoSvg; // 0..11: Unlit, 12..23 = Lit
@@ -194,7 +209,7 @@ struct LcdFramebufferWidget : FramebufferWidget{
     }
 };
 
-// The actual LCD widget, concerned with Modes.
+// The actual LCD widget.
 template <typename TModule>
 struct LcdWidget : TransparentWidget {
     TModule *module;
@@ -208,17 +223,18 @@ struct LcdWidget : TransparentWidget {
         addChild(lfb);
         lfb->addChild(ldw);
     }
+
+    // Override this to process timeouts and default modes
+    void processDefaultMode() {
+
+    }
+
+    void draw(const DrawArgs& args) override {
+        processDefaultMode();
+        TransparentWidget::draw(args);
+    }
 };
 
 
-
-// template <class TModule>
-// Lcd::LcdFramebufferWidget<TModule>* createLcd(math::Vec pos, TModule *module) {
-//     Lcd::LcdFramebufferWidget<TModule> *lfb = new Lcd::LcdFramebufferWidget<TModule>(module);
-//     Lcd::LcdDrawWidget<TModule> *ldw = new Lcd::LcdDrawWidget<TModule>(module);
-//     lfb->box.pos = pos;
-//     lfb->addChild(ldw);
-//     return lfb;
-// }
 
 } // Lcd

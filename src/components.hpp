@@ -25,6 +25,8 @@ extern Plugin* pluginInstance;
 // - TODO: Remove every single dependency on the component library, since it is not open-source. 
 // - TODO: Namespace instead of prefix
 
+
+
 //////////////////////////////// Base
 
 struct SvgSwitchUnshadowed : SvgSwitch {
@@ -241,6 +243,12 @@ struct AriaKnob820 : app::SvgKnob {
     }
 };
 
+struct AriaKnob820Snap : AriaKnob820 {
+    AriaKnob820Snap() {
+        snap = true;
+        AriaKnob820();
+    }
+};
 
 struct AriaKnob820Transparent : app::SvgKnob {
     AriaKnob820Transparent() {

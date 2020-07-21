@@ -4,9 +4,36 @@ Changelog
 The versioning follows this standard: the first number corresponds to the VCV rack version used. The second number is increased any time a new module is added. The third number is increased when something is added or fixed without adding any new module.
 
 
+## [1.6.0] - 2020-07-21
+
+### New Modules
+
+- [NEW] Modulus Salomonis Regis: Self-modifying, self-patching sequencer. 8 nodes version.
+- [NEW] Modulellus Salomonis Regis: Self-modifying, self-patching sequencer. 4 nodes version.
+- [NEW] Modulissimus Salomonis Regis: Self-modifying, self-patching sequencer. 16 nodes version.
+
+### Documentation
+
+- [NEW] A new documentation site is available: <https://aria.dog/modules/>
+- [REMOVED] The Github documentation was removed in favor of the new documentation site.
+
+### Changed
+
+- [CHANGE] Darius: New instances are now by default in quantizer mode, in the C Minor scale, with a limited CV range. Existing patches will not have their settings changed. 
+- [CHANGE] Darius: 1ms wait on reset implemented, as per recommended best practice.
+
+### Fixed
+
+- [FIX] Qqqq: Fixed crash when importing chord progressions longer than 16 chords.
+- [FIX] Qqqq: Improved clamping of extremely high/low input.
+
+
+
+
 ## [1.5.1] - 2020-07-10
 
 ### New modules
+
 - [NEW] Quale: Convert chords to scales and scales to chords, using Quatherina's polyphonic scale representation.
 
 ### Changed
