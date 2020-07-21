@@ -8,7 +8,7 @@ Hiya hello hey hi what’s hip love, I’m Aria Salvatrice. I’m a French expat
 I make [Gay Baroque Technopop](https://soundcloud.com/ariasalvatrice) and [Pastoral Industrial](https://ariasalvatrice.bandcamp.com/) music happen, and made a buncha synth modules compatible with VCV Rack for my own use.    
 They are the Aria Salvatrice Signature Series. They’re growing into an integrated system for performing aleatoric techno. Lotsa artists found them inspiring for many genres of music. You can grab them for free!
 
-![Modules](/docs/collection.jpg)
+![Modules](/doc/collection.jpg)
 
 
 
