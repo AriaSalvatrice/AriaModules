@@ -3,72 +3,49 @@ Aria Salvatrice Signature Series Synthesizer Modules
 
 ![](https://img.shields.io/badge/Works%20on%20my%20computer-Yes-success?style=plastic)
 
-Hiya hello hey hi. These here are a few cool and nice modules what for [VCV Rack](https://vcvrack.com/). You can download them from [its built-in library](library.vcvrack.com/).
+Hiya hello hey hi what’s hip love, I’m Aria Salvatrice. I’m a French expat living on the Worldwide Web with my dog.
 
-I am some persuasion of multimedia artist interested in generative processes, creating [music](https://ariasalvatrice.bandcamp.com/releases) in genres I've come to call "_Gay Baroque Technopop_" and "_Pastoral Industrial_". All these synthesizer modules were designed for my own use first. With this collection, I aim to create an integrated, coherent system of opinionated, unique modules, primarily concerned with the live performance of aleatoric techno. Despite their focus, these modules are versatile, and integrate well with the wider VCV ecosystem. Many artists enjoyed using my modules in all sorts of music, and I hope you will like them too.
+I make [Gay Baroque Technopop](https://soundcloud.com/ariasalvatrice) and [Pastoral Industrial](https://ariasalvatrice.bandcamp.com/) music happen, and made a buncha synth modules compatible with VCV Rack for my own use.    
+They are the Aria Salvatrice Signature Series. They’re growing into an integrated system for performing aleatoric techno. Lotsa artists found them inspiring for many genres of music. You can grab them for free!
 
-This collection of modules is free software. If you wish to send me a tip for my modules, at this time, donations can only be accepted in the form of [pay-what-you-want album purchases](https://ariasalvatrice.bandcamp.com/releases). I am looking into providing additional donation options in the future.
+![Modules](/docs/collection.jpg)
 
-----
 
-Modules documentation
----------------------
 
-- [Split and Merge: Splort, Smerge, Spleet, Swerge, and Splirge](#split-and-merge-splort-smerge-spleet-swerge-and-splirge)
-- [Quatherina the Quantum Duck presents Quatherina's Quality Quad Quantizer](#quatherina-the-quantum-duck-presents-quatherinas-quality-quad-quantizer)
-- [Quatherina's Quale](#quatherinas-quale)
-- [Darius Branching Step Sequencer](#darius-branching-step-sequencer)
-- [Arcane, Atout & Aleister - Today's Fortune ★](#arcane-atout--aleister---todays-fortune-)
-- [UnDuLaR Rack Scroller](#undular-rack-scroller)
-- [Signature Series Blank Plate](#signature-series-blank-plate)
+Downloads
+---------
+
+For technical reasons, my modules cannot be automatically built by the VCV library, so up-to-date versions are no longer available for download from its library, you have to install them manually. If my plugin is re-integrated to the library, it will be safe to automatically update this manually installed version. 
+
+You can [download version 1.6.0](https://github.com/AriaSalvatrice/AriaVCVModules/releases/tag/1.6.0) from the Github releases pages. Then, to install, place the downloaded ZIP file in the following directory:
+
+- Windows: `My Documents/Rack/plugins-v1`
+- Linux: `~/.Rack/plugins-v1`
+- OS X: `Documents/Rack/plugins-v1`
+
+<!-- Those modules are part of the [VCV plugin library](https://vcvrack.com/plugins.html). This is the easiest way to install them and keep them up to date. --> 
+
+You can also do things the hard way and [build them yourself](https://vcvrack.com/manual/Building#building-rack-plugins) if you have a good reason to do so, for example, if you hate yourself, or if you enjoy building random C++ projects off github as a hobby.
+
+If you build my plugin locally, you have to `make dep` before you `make dist`. 
+
+
+
+Documentation
+-------------
+
+The documentation of the modules is only available [from my website](https://aria.dog/modules/).
+
 
 
 Other thingies
 --------------
 
 - [Changelog](CHANGELOG.md)
-- [Installation](#installation)
-- [Acknowledgements & Credits](#acknowledgements--credits)
-- [Lawyer's corner](#lawyers-corner)
-- [Contact](#contact)
 - [Design language of the modules](doc/design.md)
 - [Future plans for the collection](doc/plans.md)
 - [How to contribute](CONTRIBUTING.md)
 - [Beta / pre-release thread on VCV forums](https://community.vcvrack.com/t/arias-cool-and-nice-thread-of-barely-working-betas-and-bug-squashing/8208)
-
-
-
-Split and Merge: Splort, Smerge, Spleet, Swerge, and Splirge
-------------------------------------------------------------
-
-![Split and merge](/doc/split.png)
-
-A collection of tiny cute polyphonic splits and merges, with a neato trick: they can sort channels by voltage! It's meant for neat freaks who want their values in order, and for the advancement of science in general. I did not make them because a use case exists. I made them because I want to see what kinds of use cases you will come up with. 
-
-- **Splort**: _16 channels polyphonic split with optional chainable sort mode._ 5hp.
-- **Smerge**: _16 channels polyphonic merge with optional chainable sort mode._ 5hp.
-- **Spleet**: _Dual 4 channels / single 8 channels polyphonic split with optional sort mode._ 3hp. If nothing is plugged in the second input, the 4 outputs of the second bank act as channel 5 to 8 of the first input. 
-- **Swerge**: _Dual 4 channels / single 8 channels polyphonic merge with optional sort mode._ 3hp. If nothing is plugged in the first output, both banks act as a single 8 channel merge on the second output.
-- **Splirge**: _4 channels polyphonic split and merge with optional sort mode._ 3hp. When nothing is plugged in the split input, it's internally connected to the merge output, so you can use the module only to sort values. Saves you 7hp over using VCV Fundamental's Split and Merge if you just need four channels! 
-
-The sorting is disabled by default on all devices. Once enabled, channels are continuously sorted by voltage, from lowest to highest. Don't limit yourself to feeding them CV, send them audio and listen what happens! You can create hybrid waveforms by sending them multiple oscillators. On the 3hp devices, the sort button affects both banks.
-
-Splort and Smerge, the 16 channel modules, have a special feature: they can **Link the sort order**. Daisy chain Splort and/or Smerge devices to make them all sort their channels in the same order as the first device in the chain. Useful to sort notes and gates together. Link has no effect when the "Sort" button is disabled, but if there's a link input plugged in, the output will still forward it.
-
-The word "Splirge" seems to have been coined by the late Håkan Müller as part of [a Reason Rack Extension](https://www.reasonstudios.com/shop/rack-extension/mxsplirger-cv-flexible-split-merge/), and I think it's a cool word. The rest of the names were crafted by a consortium of expert linguists and personal branding gurus. 
-
-**Protip for cool kids only:** here's how the link feature works internally: it's a polyphonic cable, each channel is set to either 0V (means the channel isn't connected), or to a multiple of 0.1V to specify its order (so the first channel in sort order is 0.1V, the 12th one is 1.2V, etc). It doesn't expect specific values, just for them to be in the correct order. Try out a polyphonic sample and hold on the Link cable! 
-
-
-
-
-Installation
-------------
-
-Those modules are part of the [VCV plugin library](https://vcvrack.com/plugins.html). This is the easiest way to install them and keep them up to date. You can also do things the hard way and [build them yourself](https://vcvrack.com/manual/Building#building-rack-plugins) if you have a good reason to do so, for example, if you hate yourself, or if you enjoy building random C++ projects off github as a hobby.
-
-If you build my plugin locally, you have to `make dep` before you `make dist`. 
-
 
 
 
@@ -179,6 +156,7 @@ SVG export of the [Fixed_v01 font by Orgdot](http://www.orgdot.com/aliasfonts/in
 **By sending me pull requests, you assign their copyright to me, allowing me, in perpetuity, to license your contributions however I see fit**.    
 Right now, that means a mix of GPL-3.0-only and WTFPL, but I reserve the right to relicense it or re-use code in proprietary projects in the future.     
 This is a personal project where I don't expect external contributions to be any more complex than small-scale bugfixes and feature additions, so I think that's reasonable. If you think that's unreasonable, don't contribute. You will be asked to acknowledge this policy the first time you send me a pull request. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for more information.
+
 
 
 Contact

@@ -315,15 +315,16 @@ struct Solomon : Module {
         PortableSequence::Note note;
 
         note.length = 1.f;
+        sequence.length = 0.f;
         for (size_t i = 0; i < (size_t) params[TOTAL_NODES_PARAM].getValue(); i++){
             note.start = (float) i;
             note.pitch = cv[i];
             sequence.addNote(note);
+            sequence.length += 1.f;
         }
 
         sequence.clampValues();
         sequence.sort();
-        sequence.calculateLength();
         sequence.toClipboard();
     }
 
