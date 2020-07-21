@@ -93,6 +93,7 @@ struct Solomon : Module {
     bool pastePortableSequence = false;
     bool resetStepConfig = true;
     bool resetLoadConfig = true;
+    bool resetQuantizeConfig = false;
     bool randomizePitchesRequested = false;
     bool quantizePitchesRequested = false;
     int stepType = -1;
@@ -216,6 +217,7 @@ struct Solomon : Module {
 
         json_object_set_new(rootJ, "resetStepConfig", json_boolean(resetStepConfig));
         json_object_set_new(rootJ, "resetLoadConfig", json_boolean(resetLoadConfig));
+        json_object_set_new(rootJ, "resetQuantizeConfig", json_boolean(resetQuantizeConfig));
 
         json_t *scaleJ = json_array();
         for (size_t i = 0; i < 12; i++) json_array_insert_new(scaleJ, i, json_boolean(scale[i]));
@@ -249,7 +251,11 @@ struct Solomon : Module {
 
         json_t* resetLoadConfigJ = json_object_get(rootJ, "resetLoadConfig");
         if (resetLoadConfigJ) resetLoadConfig = json_boolean_value(resetLoadConfigJ);
-        
+
+        json_t* resetQuantizeConfigJ = json_object_get(rootJ, "resetQuantizeConfig");
+        if (resetQuantizeConfigJ) resetQuantizeConfig = json_boolean_value(resetQuantizeConfigJ);
+
+
         json_t *scaleJ = json_object_get(rootJ, "scale");
         if (scaleJ) {
             for (size_t i = 0; i < 12; i++) {
@@ -330,6 +336,7 @@ struct Solomon : Module {
         resetDelay = 0.f; // This starts the delay
         if(resetLoadConfig) for (size_t i = 0; i < NODES; i++) cv[i] = savedCv[i];
         if(resetStepConfig) currentNode = 0;
+        if(resetQuantizeConfig) quantizePitches();
     }
 
     // True when done waiting
@@ -1093,6 +1100,14 @@ struct ResetLoadConfigItem : MenuItem {
 };
 
 template <typename TModule>
+struct ResetQuantizeConfigItem : MenuItem {
+    TModule *module;
+    void onAction(const event::Action &e) override {
+        module->resetQuantizeConfig = (module->resetQuantizeConfig) ? false : true;
+    }
+};
+
+template <typename TModule>
 struct RandomizePitchesRequestedItem : MenuItem {
     TModule *module;
     void onAction(const event::Action &e) override {
@@ -1248,6 +1263,11 @@ struct SolomonWidget8 : ModuleWidget {
         resetLoadConfigItem->module = module;
         resetLoadConfigItem->rightText += (module->resetLoadConfig) ? "✔" : "";
         menu->addChild(resetLoadConfigItem);
+
+        ResetQuantizeConfigItem<Solomon<8>> *resetQuantizeConfigItem = createMenuItem<ResetQuantizeConfigItem<Solomon<8>>>("Reset input quantizes the pattern");
+        resetQuantizeConfigItem->module = module;
+        resetQuantizeConfigItem->rightText += (module->resetQuantizeConfig) ? "✔" : "";
+        menu->addChild(resetQuantizeConfigItem);
 
         menu->addChild(new MenuSeparator());
 
@@ -1412,6 +1432,11 @@ struct SolomonWidget4 : ModuleWidget {
         resetLoadConfigItem->rightText += (module->resetLoadConfig) ? "✔" : "";
         menu->addChild(resetLoadConfigItem);
 
+        ResetQuantizeConfigItem<Solomon<4>> *resetQuantizeConfigItem = createMenuItem<ResetQuantizeConfigItem<Solomon<4>>>("Reset input quantizes the pattern");
+        resetQuantizeConfigItem->module = module;
+        resetQuantizeConfigItem->rightText += (module->resetQuantizeConfig) ? "✔" : "";
+        menu->addChild(resetQuantizeConfigItem);
+
         menu->addChild(new MenuSeparator());
 
         RandomizePitchesRequestedItem<Solomon<4>> *randomizePitchesRequestedItem = createMenuItem<RandomizePitchesRequestedItem<Solomon<4>>>("Randomize all nodes");
@@ -1572,6 +1597,11 @@ struct SolomonWidget16 : ModuleWidget {
         resetLoadConfigItem->module = module;
         resetLoadConfigItem->rightText += (module->resetLoadConfig) ? "✔" : "";
         menu->addChild(resetLoadConfigItem);
+
+        ResetQuantizeConfigItem<Solomon<16>> *resetQuantizeConfigItem = createMenuItem<ResetQuantizeConfigItem<Solomon<16>>>("Reset input quantizes the pattern");
+        resetQuantizeConfigItem->module = module;
+        resetQuantizeConfigItem->rightText += (module->resetQuantizeConfig) ? "✔" : "";
+        menu->addChild(resetQuantizeConfigItem);
 
         menu->addChild(new MenuSeparator());
 
