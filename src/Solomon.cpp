@@ -807,7 +807,6 @@ struct TotalNodesKnob : AriaKnob820Snap {
     }
 };
 
-
 // Scale/key knobs
 template <typename TModule>
 struct ScaleKnob : AriaKnob820 {
@@ -841,7 +840,6 @@ struct ScaleKnob : AriaKnob820 {
     }
 };
 
-
 // Min/Max knobs
 template <typename TModule>
 struct MinMaxKnob : AriaKnob820 {
@@ -857,7 +855,6 @@ struct MinMaxKnob : AriaKnob820 {
         AriaKnob820::onDragMove(e);
     }
 };
-
 
 // Slide knobs
 template <typename TModule>
