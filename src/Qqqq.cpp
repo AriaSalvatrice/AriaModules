@@ -151,6 +151,8 @@ struct Qqqq : Module {
 
     json_t* dataToJson() override {
         json_t* rootJ = json_object();
+
+        json_object_set_new(rootJ, "scene", json_integer(scene));
         json_t* scenesJ = json_array();
         for (int i = 0; i < 16; i++) {
             json_t* sceneJ = json_array();
@@ -165,6 +167,9 @@ struct Qqqq : Module {
     }
 
     void dataFromJson(json_t* rootJ) override {
+        json_t* sceneJ = json_object_get(rootJ, "scene");
+        if (sceneJ) scene = json_integer_value(sceneJ);
+
         json_t* scenesJ = json_object_get(rootJ, "scenes");
         if (scenesJ){
             for (int i = 0; i < 16; i++) {
@@ -177,6 +182,8 @@ struct Qqqq : Module {
                 }
             }
         }
+        updateScene();
+        scaleToPiano();
     }
 
     void onReset() override {
