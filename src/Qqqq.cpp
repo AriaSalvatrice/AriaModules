@@ -487,7 +487,7 @@ struct Qqqq : Module {
         // External scale: was it just connected?
         if (!lastExtInConnected && inputs[EXT_SCALE_INPUT].isConnected()) {
             for (int i = 0; i < 12; i++){
-                scale[scene][i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.f) ? true : false;
+                scale[scene][i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.1f) ? true : false;
             }
             scaleToPiano();
         }
@@ -495,7 +495,7 @@ struct Qqqq : Module {
         // External scale: has it changed?
         std::array<bool, 12> currentExternalScale;
         if (inputs[EXT_SCALE_INPUT].isConnected()) {
-            for (int i = 0; i < 12; i++) currentExternalScale[i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.f) ? true : false;
+            for (int i = 0; i < 12; i++) currentExternalScale[i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.1f) ? true : false;
             if (currentExternalScale != lastExternalScale) {
                 lastExternalScale = currentExternalScale;
                 scale[scene] = currentExternalScale;
@@ -519,7 +519,18 @@ struct Qqqq : Module {
 
     void updateExternalOutput() {
         if (outputs[EXT_SCALE_OUTPUT].isConnected()){
-            for (int i = 0; i < 12; i++) outputs[EXT_SCALE_OUTPUT].setVoltage( (scale[scene][i]) ? 10.f : 0.f, i);
+            for (int i = 0; i < 12; i++) {
+                if (scale[scene][i]) {
+                    if ((int) params[KEY_PARAM].getValue() == i) {
+                        outputs[EXT_SCALE_OUTPUT].setVoltage(10.f, i);
+                    } else {
+                        outputs[EXT_SCALE_OUTPUT].setVoltage(8.f, i);
+                    }
+                } else {
+                    outputs[EXT_SCALE_OUTPUT].setVoltage(0.f, i);
+                }
+            } 
+            // outputs[EXT_SCALE_OUTPUT].setVoltage( (scale[scene][i]) ? 8.f : 0.f, i);
             outputs[EXT_SCALE_OUTPUT].setChannels(12);
         }
     }

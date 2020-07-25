@@ -23,7 +23,8 @@
         },
         "presentation": {
           "echo": true,
-          "reveal": "always",
+          "reveal": "silent",
+          "clear": true,
           "focus": false,
           "panel": "shared"
         },
