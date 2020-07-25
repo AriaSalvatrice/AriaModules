@@ -29,13 +29,17 @@ DEPS += $(quickjs)
 OBJECTS += $(quickjs)
 QUICKJS_MAKE_FLAGS += prefix="$(DEP_PATH)"
 ifdef ARCH_WIN
+	CROSS_PREFIX=$(subst gcc,,${CC})
 	QUICKJS_MAKE_FLAGS += CONFIG_WIN32=y
+else ifdef ARCH_MAC
+	CROSS_PREFIX=$(subst clang,,${CC})
+	QUICKJS_MAKE_FLAGS += CONFIG_DARWIN=y
 endif
 $(quickjs):
 	cd dep && git clone "https://github.com/JerrySievert/QuickJS.git"
 	cd dep/QuickJS && git checkout b70d5344013836544631c361ae20569b978176c9
-	cd dep/QuickJS && $(MAKE) $(QUICKJS_MAKE_FLAGS)
-	cd dep/QuickJS && $(MAKE) $(QUICKJS_MAKE_FLAGS) install
+	cd dep/QuickJS && CROSS_PREFIX=$(CROSS_PREFIX) $(MAKE) $(QUICKJS_MAKE_FLAGS)
+	cd dep/QuickJS && CROSS_PREFIX=$(CROSS_PREFIX) $(MAKE) $(QUICKJS_MAKE_FLAGS) install
 
 
 # Include the Rack plugin Makefile framework
