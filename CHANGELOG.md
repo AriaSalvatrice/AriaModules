@@ -1,7 +1,7 @@
 Changelog
 =========
 
-The versioning follows this standard: the first number corresponds to the VCV rack version used. The second number is increased any time a new module is added. The third number is increased when something is added or fixed without adding any new module.
+The versioning follows this standard: the first number corresponds to the VCV rack version used. The second number is increased any time a new module family is added. The third number is increased when something is added or fixed without adding a new module family.
 
 
 ## UNRELEASED [1.6.1] 
