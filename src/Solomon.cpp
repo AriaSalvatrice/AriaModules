@@ -715,7 +715,7 @@ struct Solomon : Module {
             slideCounter += args.sampleTime * OUTPUTDIVIDER;
         }
 
-        outputs[GLOBAL_CV_OUTPUT].setVoltage(output); // TODO: Slide
+        outputs[GLOBAL_CV_OUTPUT].setVoltage(output);
 
         for(size_t i = 0; i < NODES; i++) {
             outputs[NODE_DELAY_OUTPUT + i].setVoltage( (delay[i]) ? 10.f : 0.f);
