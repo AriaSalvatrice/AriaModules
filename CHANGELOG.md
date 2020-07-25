@@ -6,17 +6,21 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 
 ## UNRELEASED [1.6.1] 
 
+### Added
+
+- [NEW] QQQQ: New right-click option to advance scene with trigs instead
+
 ### Changed
 
-- [CHANGE] - Arcane, Atout: The Poly External Scale output now sends 8V for enabled semitons, for future expansion of the Poly External Scale format.
-- [CHANGE] - Darius: The minimum voltage to toggle a semitone from a Poly External Scale is now 0.1V, for future expansion of the Poly External Scale format.
-- [CHANGE] - Qqqq, Quack, Q<, Quale: The minimum voltage to toggle a semitone from a Poly External Scale is now 0.1V, for future expansion of the Poly External Scale format.
-- [CHANGE] - Qqqq: The Poly External Scale output now sends 8V for enabled semitons, and 10V for the key if it is enabled on the piano display, for future expansion of the Poly External Scale format.
-- [CHANGE] - Modulus Salomonis Regis, Modulellus Salomonis Regis, Modulissimus Salomonis Regis : The minimum voltage to toggle a semitone from a Poly External Scale is now 0.1V, for future expansion of the Poly External Scale format.
+- [CHANGE] Arcane, Atout: The Poly External Scale output now sends 8V for enabled semitons, for future expansion of the Poly External Scale format.
+- [CHANGE] Darius: The minimum voltage to toggle a semitone from a Poly External Scale is now 0.1V, for future expansion of the Poly External Scale format.
+- [CHANGE] QQQQ, Quack, Q<, Quale: The minimum voltage to toggle a semitone from a Poly External Scale is now 0.1V, for future expansion of the Poly External Scale format.
+- [CHANGE] QQQQ, Quack: The Poly External Scale output now sends 8V for enabled semitones, and 10V for the key if it is enabled on the piano display, for future expansion of the Poly External Scale format.
+- [CHANGE] Modulus Salomonis Regis, Modulellus Salomonis Regis, Modulissimus Salomonis Regis : The minimum voltage to toggle a semitone from a Poly External Scale is now 0.1V, for future expansion of the Poly External Scale format.
 
 ### Fixed
 
-- [FIX] - Qqqq: Fixed reloading a patch with a scene CV cable patched in reloading the wrong scale if the signal received changes after reload. 
+- [FIX] Qqqq: Fixed reloading a patch with a scene CV cable patched in reloading the wrong scale if the signal received changes after reload. 
 
 
 
