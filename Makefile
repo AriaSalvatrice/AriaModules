@@ -20,11 +20,10 @@ DISTRIBUTABLES += $(wildcard LICENSE*)
 DISTRIBUTABLES += $(wildcard doc/LICENSE*)
 
 
-# Testing Prototype's makefile to try out QuickJS & LuaJIT stuff
-
 include $(RACK_DIR)/arch.mk
 
-# QuickJS
+# QuickJS integration. Thanks to Jerry Sievert & Cschol for their help with this.
+# To use QuickJS in VCV, use this repository, or it won't build properly in the VCV library.
 quickjs := dep/lib/quickjs/libquickjs.a
 DEPS += $(quickjs)
 OBJECTS += $(quickjs)
@@ -34,11 +33,9 @@ ifdef ARCH_WIN
 endif
 $(quickjs):
 	cd dep && git clone "https://github.com/JerrySievert/QuickJS.git"
-	cd dep/QuickJS && git checkout 807adc8ca9010502853d471bd8331cdc1d376b94
+	cd dep/QuickJS && git checkout b70d5344013836544631c361ae20569b978176c9
 	cd dep/QuickJS && $(MAKE) $(QUICKJS_MAKE_FLAGS)
 	cd dep/QuickJS && $(MAKE) $(QUICKJS_MAKE_FLAGS) install
-
-
 
 
 # Include the Rack plugin Makefile framework

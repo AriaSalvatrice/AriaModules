@@ -12,29 +12,23 @@ They are the Aria Salvatrice Signature Series. They’re growing into an integra
 
 
 
-Downloads
----------
-
-For technical reasons, my modules cannot be automatically built by the VCV library, so up-to-date versions are no longer available for download from its library, you have to install them manually. If my plugin is re-integrated to the library, it will be safe to automatically update this manually installed version. 
-
-You can [download version 1.6.0](https://github.com/AriaSalvatrice/AriaVCVModules/releases/tag/1.6.0) from the Github releases pages. Then, to install, place the downloaded ZIP file in the following directory:
-
-- Windows: `My Documents/Rack/plugins-v1`
-- Linux: `~/.Rack/plugins-v1`
-- OS X: `Documents/Rack/plugins-v1`
-
-<!-- Those modules are part of the [VCV plugin library](https://vcvrack.com/plugins.html). This is the easiest way to install them and keep them up to date. --> 
-
-You can also do things the hard way and [build them yourself](https://vcvrack.com/manual/Building#building-rack-plugins) if you have a good reason to do so, for example, if you hate yourself, or if you enjoy building random C++ projects off github as a hobby.
-
-If you build my plugin locally, you have to `make dep` before you `make dist`. 
-
-
-
 Documentation
 -------------
 
 The documentation of the modules is only available [from my website](https://aria.dog/modules/).
+
+
+
+Download & Installation
+-----------------------
+
+Those modules are part of the VCV plugin library. By [subscribing to my plugin](https://library.vcvrack.com/AriaSalvatrice/), you will receive every stable update automatically. Installing my modules from the VCV library the only supported way.
+
+The only downloads you will find here are [automatic development builds](https://github.com/AriaSalvatrice/AriaVCVModules/releases/tag/AzureCI), which are never guaranteed to work properly.
+
+You can also do things the hard way and [build the plugin yourself](https://vcvrack.com/manual/Building#building-rack-plugins) if you have a good reason to do so, for example, if you hate yourself, or if you enjoy building random C++ projects off github as a hobby.
+
+If you build my plugin locally, you have to `make dep` before you `make dist`. 
 
 
 

@@ -348,7 +348,7 @@ struct Solomon : Module {
 
     void updateScale() {
         if (inputs[EXT_SCALE_INPUT].isConnected() ) {
-            for (size_t i = 0; i < 12; i++) scale[i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.f) ? true : false;
+            for (size_t i = 0; i < 12; i++) scale[i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.1f) ? true : false;
         } else {
             scale = Quantizer::validNotesInScaleKey( (int) params[SCALE_PARAM].getValue(), (int) params[KEY_PARAM].getValue());
         }

@@ -637,7 +637,7 @@ struct Darius : Module {
     void updateScale(const ProcessArgs& args){
         if (inputs[EXT_SCALE_INPUT].isConnected()) {
             for(int i = 0; i < 12; i++) {
-                scale [i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.f) ? true : false;
+                scale [i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.1f) ? true : false;
             }
         } else {
             scale = Quantizer::validNotesInScaleKey( (int)params[SCALE_PARAM].getValue() , (int)params[KEY_PARAM].getValue() );

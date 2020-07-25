@@ -265,7 +265,7 @@ struct Arcane : ArcaneBase {
         outputs[SCALE_OUTPUT].setChannels(notesInScale);
         outputs[SCALE_PADDED_OUTPUT].setChannels(8);
         for (int i = 0; i < 12; i++)
-            outputs[EXTERNAL_SCALE_OUTPUT].setVoltage( (scale[i]) ? 10.f : 0.f, i);
+            outputs[EXTERNAL_SCALE_OUTPUT].setVoltage( (scale[i]) ? 8.f : 0.f, i);
         outputs[EXTERNAL_SCALE_OUTPUT].setChannels(12);
     }
     

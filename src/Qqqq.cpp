@@ -77,6 +77,7 @@ struct Qqqq : Module {
     bool leftMessages[2][12];
     bool isExpander = false;
     bool lastIsExpander = false;
+    bool sceneTrigSelection = false;
     int lcdMode = INIT_MODE;
     int scene = 0;
     int lastScene = 0;
@@ -101,6 +102,7 @@ struct Qqqq : Module {
     dsp::ClockDivider processDivider;
     dsp::ClockDivider lcdDivider;
     dsp::SchmittTrigger shTrigger[4];
+    dsp::SchmittTrigger sceneSelectionTrigger;
     
     Qqqq() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -151,6 +153,10 @@ struct Qqqq : Module {
 
     json_t* dataToJson() override {
         json_t* rootJ = json_object();
+
+        json_object_set_new(rootJ, "sceneTrigSelection", json_boolean(sceneTrigSelection));
+        json_object_set_new(rootJ, "scene", json_integer(scene));
+
         json_t* scenesJ = json_array();
         for (int i = 0; i < 16; i++) {
             json_t* sceneJ = json_array();
@@ -165,6 +171,12 @@ struct Qqqq : Module {
     }
 
     void dataFromJson(json_t* rootJ) override {
+        json_t* sceneTrigSelectionJ = json_object_get(rootJ, "sceneTrigSelection");
+        if (sceneTrigSelectionJ) sceneTrigSelection = json_boolean_value(sceneTrigSelectionJ);
+
+        json_t* sceneJ = json_object_get(rootJ, "scene");
+        if (sceneJ) scene = json_integer_value(sceneJ);
+
         json_t* scenesJ = json_object_get(rootJ, "scenes");
         if (scenesJ){
             for (int i = 0; i < 16; i++) {
@@ -177,6 +189,8 @@ struct Qqqq : Module {
                 }
             }
         }
+        updateScene();
+        scaleToPiano();
     }
 
     void onReset() override {
@@ -423,11 +437,22 @@ struct Qqqq : Module {
 
     // Sets the scene. The CV input overrides the buttons.
     void updateScene() {
-        if (inputs[SCENE_INPUT].isConnected() && inputs[SCENE_INPUT].getVoltageSum() >= 0.f) {
+
+        // Voltage selection
+        if (inputs[SCENE_INPUT].isConnected() && ! sceneTrigSelection && inputs[SCENE_INPUT].getVoltageSum() >= 0.f) {
             scene = (int) rescale(inputs[SCENE_INPUT].getVoltageSum(), 0.f, 10.f, 0.f, 15.2f);
             if (scene != lastScene) sceneChanged = true;
-            for (int i = 0; i < 16; i++) params[SCENE_BUTTON_PARAM + i].setValue( (i == scene) ? 1.f : 0.f );
-        } else {
+        }
+
+        // Trig selection
+        if (inputs[SCENE_INPUT].isConnected() && sceneTrigSelection && sceneSelectionTrigger.process(inputs[SCENE_INPUT].getVoltageSum()) ) {
+            scene++;
+            if (scene > getLastScene()) scene = 0;
+            if (scene != lastScene) sceneChanged = true;
+        }
+
+        // Button selection
+        if (! inputs[SCENE_INPUT].isConnected()) {
             for (int i = 0; i < 16; i++) {
                 if ( params[SCENE_BUTTON_PARAM + i].getValue() == 1.f && i != lastScene ) {
                     scene = i;
@@ -438,9 +463,11 @@ struct Qqqq : Module {
                     }
                 }
             }
-            // You shouldn't be able to turn off the current scene
-            if (params[SCENE_BUTTON_PARAM + scene].getValue() == 0.f) params[SCENE_BUTTON_PARAM + scene].setValue(1.f);
         }
+
+        // You shouldn't be able to turn on multiple scenes at once, or turn off the current one
+        for (int i = 0; i < 16; i++) params[SCENE_BUTTON_PARAM + i].setValue( (i == scene) ? 1.f : 0.f );
+
         lastScene = scene;
     }
 
@@ -480,7 +507,7 @@ struct Qqqq : Module {
         // External scale: was it just connected?
         if (!lastExtInConnected && inputs[EXT_SCALE_INPUT].isConnected()) {
             for (int i = 0; i < 12; i++){
-                scale[scene][i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.f) ? true : false;
+                scale[scene][i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.1f) ? true : false;
             }
             scaleToPiano();
         }
@@ -488,7 +515,7 @@ struct Qqqq : Module {
         // External scale: has it changed?
         std::array<bool, 12> currentExternalScale;
         if (inputs[EXT_SCALE_INPUT].isConnected()) {
-            for (int i = 0; i < 12; i++) currentExternalScale[i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.f) ? true : false;
+            for (int i = 0; i < 12; i++) currentExternalScale[i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.1f) ? true : false;
             if (currentExternalScale != lastExternalScale) {
                 lastExternalScale = currentExternalScale;
                 scale[scene] = currentExternalScale;
@@ -512,7 +539,18 @@ struct Qqqq : Module {
 
     void updateExternalOutput() {
         if (outputs[EXT_SCALE_OUTPUT].isConnected()){
-            for (int i = 0; i < 12; i++) outputs[EXT_SCALE_OUTPUT].setVoltage( (scale[scene][i]) ? 10.f : 0.f, i);
+            for (int i = 0; i < 12; i++) {
+                if (scale[scene][i]) {
+                    if ((int) params[KEY_PARAM].getValue() == i) {
+                        outputs[EXT_SCALE_OUTPUT].setVoltage(10.f, i);
+                    } else {
+                        outputs[EXT_SCALE_OUTPUT].setVoltage(8.f, i);
+                    }
+                } else {
+                    outputs[EXT_SCALE_OUTPUT].setVoltage(0.f, i);
+                }
+            } 
+            // outputs[EXT_SCALE_OUTPUT].setVoltage( (scale[scene][i]) ? 8.f : 0.f, i);
             outputs[EXT_SCALE_OUTPUT].setChannels(12);
         }
     }
@@ -1207,6 +1245,41 @@ struct QqqqWidget : ModuleWidget {
         addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(1.4, 125.2)), module, Qqqq::EXPANDER_IN_LIGHT));
         addChild(createLight<SmallLight<OutputLight>>(mm2px(Vec(98.1, 125.2)), module, Qqqq::EXPANDER_OUT_LIGHT));
     }
+
+
+    struct SceneStandardSelectionConfigItem : MenuItem {
+        Qqqq *module;
+        void onAction(const event::Action &e) override {
+            module->sceneTrigSelection = false;
+        }
+    };
+
+    struct SceneTrigSelectionConfigItem : MenuItem {
+        Qqqq *module;
+        void onAction(const event::Action &e) override {
+            module->sceneTrigSelection = true;
+        }
+    };
+
+
+    void appendContextMenu(ui::Menu *menu) override {	
+        Qqqq *module = dynamic_cast<Qqqq*>(this->module);
+        assert(module);
+
+        menu->addChild(new MenuSeparator());
+
+        SceneStandardSelectionConfigItem *sceneStandardSelectionConfigItem = createMenuItem<SceneStandardSelectionConfigItem>("Select Scenes with 0V~10V");
+        sceneStandardSelectionConfigItem->module = module;
+        sceneStandardSelectionConfigItem->rightText += (module->sceneTrigSelection) ? "" : "✔";
+        menu->addChild(sceneStandardSelectionConfigItem);
+
+        SceneTrigSelectionConfigItem *sceneTrigSelectionConfigItem = createMenuItem<SceneTrigSelectionConfigItem>("Advance Scenes with trigs");
+        sceneTrigSelectionConfigItem->module = module;
+        sceneTrigSelectionConfigItem->rightText += (module->sceneTrigSelection) ? "✔" : "";
+        menu->addChild(sceneTrigSelectionConfigItem);
+    }
+
+
 };
 
 
