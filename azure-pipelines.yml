@@ -139,6 +139,7 @@ stages:
             $(add-release-notes) > $(Build.ArtifactStagingDirectory)/ReleaseNotes.md
           displayName: Add release notes
         - task: GitHubRelease@0
+          condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/development'))
           displayName: "Update Github Release"
           inputs:
             gitHubConnection: github.com_AriaSalvatrice
