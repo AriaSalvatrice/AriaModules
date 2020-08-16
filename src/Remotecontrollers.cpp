@@ -11,7 +11,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include "plugin.hpp"
 #include "quantizer.hpp"
 
-namespace Controllers {
+namespace Remotecontrollers {
 
 // Nope, no audio rate option provided until someone makes a strong argument why they need it.
 const int PROCESSDIVIDER = 32;
@@ -405,6 +405,52 @@ struct Rotatoes4Widget : ModuleWidget {
 
 };
 
-} // Namespace Controllers
 
-Model* modelRotatoes4 = createModel<Controllers::Rotatoes<4>, Controllers::Rotatoes4Widget>("Rotatoes4");
+// A grabby is really just a single rotato
+struct GrabbyWidget : ModuleWidget {
+
+    void drawRotato(Rotatoes<1>* module, float y, int num) {
+        addParam(createParam<AriaKnobRotato>(mm2px(Vec(3.52f, y)), module, Rotatoes<1>::ROTATO_PARAM + num));
+        addOutput(createOutput<AriaJackOut>(mm2px(Vec(3.52f, y + 10.f)), module, Rotatoes<1>::CV_OUTPUT + num));
+        addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(2.25f, y + 6.9f)), module, Rotatoes<1>::QUANTIZE_LIGHT + num));
+    }
+
+    GrabbyWidget(Rotatoes<1>* module) {
+        setModule(module);
+        setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Grabby.svg")));
+
+        // Signature
+        addChild(createWidget<AriaSignature>(mm2px(Vec(1.0f, 114.5f))));
+
+        // External
+        addInput(createInput<AriaJackIn>(mm2px(Vec(3.52f, 15.9f)), module, Rotatoes<1>::EXT_SCALE_INPUT));
+
+        // Grabby
+        drawRotato(module, 94.f, 0);
+
+        // Screws
+        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+    }
+
+    void appendContextMenu(ui::Menu *menu) override {	
+        Rotatoes<1> *module = dynamic_cast<Rotatoes<1>*>(this->module);
+        assert(module);
+
+        menu->addChild(new MenuSeparator());
+
+        // FIXME: No need for a submenu
+        RotatoSettingsItem<1> *rotatoSettingsItem = createMenuItem<RotatoSettingsItem<1>>("Grabby");
+        rotatoSettingsItem->module = module;
+        rotatoSettingsItem->knob = 0;
+        menu->addChild(rotatoSettingsItem);
+    }
+};
+
+
+} // Namespace Remotecontrollers
+
+Model* modelRotatoes4 = createModel<Remotecontrollers::Rotatoes<4>, Remotecontrollers::Rotatoes4Widget>("Rotatoes4");
+Model* modelGrabby = createModel<Remotecontrollers::Rotatoes<1>, Remotecontrollers::GrabbyWidget>("Grabby");

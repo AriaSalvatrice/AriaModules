@@ -205,6 +205,15 @@
       ]
     },
     {
+      "slug": "Grabby",
+      "name": "Signature Series Grabby",
+      "description": "A lil fader for automation or manual performance of CV parameters. Right-click options to offset and invert output.\n Support for Poly External Scales from Quatherina's Quantizer.",
+      "tags": [
+        "Controller",
+        "Utility"
+      ]
+    },
+    {
       "slug": "Undular",
       "name": "Signature Series Undular",
       "description": "Scroll the rack via CV for live performance. After initialization, waits 10 seconds before processing signals.\nIf locked out by mistake, save your patch and reload it, you will have 10 seconds to unplug UnDuLaR",
