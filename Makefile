@@ -2,9 +2,9 @@
 RACK_DIR ?= ../..
 
 # FLAGS will be passed to both the C and C++ compiler
-FLAGS += -Idep/include
+FLAGS += 
 CFLAGS +=
-CXXFLAGS +=
+CXXFLAGS += -Idep
 
 # Careful about linking to shared libraries, since you can't assume much about the user's environment and library search path.
 # Static libraries are fine, but they should be added to this plugin's build system.
@@ -44,8 +44,7 @@ endif
 	QUICKJS_MAKE_FLAGS += CONFIG_DARWIN=y
 endif
 $(quickjs):
-	# Specifying the directory name explicitly to avoid inconsistent capitalization across systems
-	cd dep && git clone "https://github.com/JerrySievert/QuickJS.git" QuickJS
+	cd dep && git clone "https://github.com/JerrySievert/QuickJS.git"
 	cd dep/QuickJS && git checkout b70d5344013836544631c361ae20569b978176c9
 	cd dep/QuickJS && CROSS_PREFIX=$(CROSS_PREFIX) $(MAKE) $(QUICKJS_MAKE_FLAGS)
 	cd dep/QuickJS && CROSS_PREFIX=$(CROSS_PREFIX) $(MAKE) $(QUICKJS_MAKE_FLAGS) install

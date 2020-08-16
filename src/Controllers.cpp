@@ -42,8 +42,24 @@ struct Rotatoes : Module {
     }
 };
 
+// Add a margin to my normal knob, so the square that shows it's bound to MIDI is offset a bit.
+// A black placeholder square is added to the faceplate. Position numbers are yolo'd. 
+struct AriaKnob820Margin : AriaKnob820 {
+    AriaKnob820Margin() {
+        AriaKnob820();
+        box.size.x += 4.f;
+        box.size.y += 2.1f;
+    }
+};
+
 
 struct Rotatoes4Widget : ModuleWidget {
+
+    void drawRotato(Rotatoes<4>* module, float y, int num) {
+        addParam(createParam<AriaKnob820Margin>(mm2px(Vec(3.52f, y)), module, Rotatoes<4>::ROTATO_PARAM + num));
+        addOutput(createOutput<AriaJackOut>(mm2px(Vec(3.52f, y + 10.f)), module, Rotatoes<4>::CV_OUTPUT + num));
+    }
+
     Rotatoes4Widget(Rotatoes<4>* module) {
         setModule(module);
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Rotatoes.svg")));
@@ -54,21 +70,11 @@ struct Rotatoes4Widget : ModuleWidget {
         // External
         addInput(createInput<AriaJackIn>(mm2px(Vec(3.52f, 15.9f)), module, Rotatoes<4>::EXT_SCALE_INPUT));
 
-        // Group 1
-        addParam( createParam<AriaKnob820>( mm2px(Vec(3.52f, 31.f)), module, Rotatoes<4>::ROTATO_PARAM + 0));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(3.52f, 41.f)), module, Rotatoes<4>::CV_OUTPUT    + 0));
-
-        // Group 2
-        addParam( createParam<AriaKnob820>( mm2px(Vec(3.52f, 52.f)), module, Rotatoes<4>::ROTATO_PARAM + 1));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(3.52f, 62.f)), module, Rotatoes<4>::CV_OUTPUT    + 1));
-
-        // Group 3
-        addParam( createParam<AriaKnob820>( mm2px(Vec(3.52f, 73.f)), module, Rotatoes<4>::ROTATO_PARAM + 2));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(3.52f, 83.f)), module, Rotatoes<4>::CV_OUTPUT    + 2));
-
-        // Group 4
-        addParam( createParam<AriaKnob820>( mm2px(Vec(3.52f, 94.f)), module, Rotatoes<4>::ROTATO_PARAM + 3));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(3.52f, 104.f)), module, Rotatoes<4>::CV_OUTPUT    + 3));
+        // Rotatoes
+        drawRotato(module, 31.f, 0);
+        drawRotato(module, 52.f, 1);
+        drawRotato(module, 73.f, 2);
+        drawRotato(module, 94.f, 3);
 
         // Screws
         addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
