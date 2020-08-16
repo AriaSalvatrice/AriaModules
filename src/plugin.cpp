@@ -34,7 +34,10 @@ void init(Plugin* p) {
     p->addModel(modelArcane);
     p->addModel(modelAtout);
     p->addModel(modelAleister);
-    
+
+    // Controllers
+    p->addModel(modelRotatoes4);
+
     // Live performance
     p->addModel(modelUndular);
 

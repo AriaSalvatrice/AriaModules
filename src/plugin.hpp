@@ -39,6 +39,9 @@ extern Model *modelArcane;
 extern Model *modelAtout;
 extern Model *modelAleister;
 
+// Controllers
+extern Model *modelRotatoes4;
+
 // Live performance
 extern Model *modelUndular;
 

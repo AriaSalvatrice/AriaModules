@@ -73,7 +73,7 @@
     {
       "slug": "Qqqq",
       "name": "Quatherina's Quality Quad Quantizer",
-      "description": "Quatherina the Quantum Duck's Quantizer with custom & external scales, 16 scenes, offset, sample and hold,\ntransposition, lead sheet chords parsing, 4 polyphonic quantizer columns, and a licensed illustration of Quatherina",
+      "description": "Quatherina the Quantum Duck's Quantizer with custom & Poly External Scales, 16 scenes, offset, sample and hold,\ntransposition, lead sheet chords parsing, 4 polyphonic quantizer columns, and a licensed illustration of Quatherina",
       "manualUrl": "https://aria.dog/modules/qqqq",
       "tags": [
         "Quantizer",
@@ -193,6 +193,15 @@
         "Quantizer",
         "Sequencer",
         "Expander"
+      ]
+    },
+    {
+      "slug": "Rotatoes4",
+      "name": "Signature Series Rotatoes",
+      "description": "4 tiny knobs for automation or manual performance of CV parameters. Right-click options to attenuate and invert output.\n Support for Poly External Scales from Quatherina's Quantizer.",
+      "tags": [
+        "Controller",
+        "Utility"
       ]
     },
     {
