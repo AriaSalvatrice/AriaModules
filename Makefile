@@ -44,7 +44,8 @@ endif
 	QUICKJS_MAKE_FLAGS += CONFIG_DARWIN=y
 endif
 $(quickjs):
-	cd dep && git clone "https://github.com/JerrySievert/QuickJS.git"
+	# Specifying the directory name explicitly to avoid inconsistent capitalization across systems
+	cd dep && git clone "https://github.com/JerrySievert/QuickJS.git" QuickJS
 	cd dep/QuickJS && git checkout b70d5344013836544631c361ae20569b978176c9
 	cd dep/QuickJS && CROSS_PREFIX=$(CROSS_PREFIX) $(MAKE) $(QUICKJS_MAKE_FLAGS)
 	cd dep/QuickJS && CROSS_PREFIX=$(CROSS_PREFIX) $(MAKE) $(QUICKJS_MAKE_FLAGS) install
