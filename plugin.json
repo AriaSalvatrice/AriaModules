@@ -198,7 +198,7 @@
     {
       "slug": "Rotatoes4",
       "name": "Signature Series Rotatoes",
-      "description": "4 tiny knobs for automation or manual performance of CV parameters. Right-click options to attenuate and invert output.\n Support for Poly External Scales from Quatherina's Quantizer.",
+      "description": "4 tiny knobs for automation or manual performance of CV parameters. Right-click options to offset and invert output.\n Support for Poly External Scales from Quatherina's Quantizer.",
       "tags": [
         "Controller",
         "Utility"

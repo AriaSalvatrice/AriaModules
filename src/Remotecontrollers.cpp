@@ -9,6 +9,7 @@ You should have received a copy of the GNU General Public License along with thi
 // Faders and buttons planned next.
 
 #include "plugin.hpp"
+#include "quantizer.hpp"
 
 namespace Controllers {
 
@@ -30,12 +31,15 @@ struct Rotatoes : Module {
         NUM_OUTPUTS
     };
     enum LightIds {
+        ENUMS(QUANTIZE_LIGHT, KNOBS),
         NUM_LIGHTS
     };
 
 
     float min[KNOBS];
     float max[KNOBS];
+    std::array<bool, KNOBS> quantize;
+    std::array<bool, 12> scale;
     dsp::ClockDivider processDivider;
     
 
@@ -46,6 +50,7 @@ struct Rotatoes : Module {
             configParam(ROTATO_PARAM + i, 0.f, 1.f, 0.f, "Rotato " + std::to_string(i + 1));
             min[i] = 0.f;
             max[i] = 10.f;
+            quantize[i] = true; // True = Auto if Poly External Scale present.
         }
 
         processDivider.setDivision(PROCESSDIVIDER);
@@ -63,6 +68,10 @@ struct Rotatoes : Module {
         for (size_t i = 0; i < KNOBS; i++) json_array_insert_new(maxJ, i, json_real(max[i]));
         json_object_set_new(rootJ, "max", maxJ);
 
+        json_t *quantizeJ = json_array();
+        for (size_t i = 0; i < KNOBS; i++) json_array_insert_new(quantizeJ, i, json_boolean(quantize[i]));
+        json_object_set_new(rootJ, "quantize", quantizeJ);
+
         return rootJ;
     }
 
@@ -75,6 +84,7 @@ struct Rotatoes : Module {
                 if (minValueJ) min[i] = json_real_value(minValueJ);
             }
         }
+
         json_t *maxJ = json_object_get(rootJ, "max");
         if (maxJ) {
             for (size_t i = 0; i < KNOBS; i++) {
@@ -82,16 +92,43 @@ struct Rotatoes : Module {
                 if (maxValueJ) max[i] = json_real_value(maxValueJ);
             }
         }
+
+        json_t *quantizeJ = json_object_get(rootJ, "quantize");
+        if (quantizeJ) {
+            for (size_t i = 0; i < KNOBS; i++) {
+                json_t *quantizeValueJ = json_array_get(quantizeJ, i);
+                if (quantizeValueJ) quantize[i] = json_boolean_value(quantizeValueJ);
+            }
+        }
     }
 
 
     void process(const ProcessArgs& args) override {
         if (processDivider.process()) {
-            for(size_t i = 0; i < KNOBS; i++) {
-                outputs[CV_OUTPUT + i].setVoltage( rescale(params[ROTATO_PARAM + i].getValue(), 0.f, 1.f, min[i], max[i]) );
+
+            if (inputs[EXT_SCALE_INPUT].isConnected()) {
+                for (int i = 0; i < 12; i++){
+                    scale[i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.1f) ? true : false;
+                }
+                for(size_t i = 0; i < KNOBS; i++) {
+                    if (quantize[i]) {
+                        outputs[CV_OUTPUT + i].setVoltage( Quantizer::quantize( rescale(params[ROTATO_PARAM + i].getValue(), 0.f, 1.f, min[i], max[i]), scale) );
+                        lights[QUANTIZE_LIGHT + i].setBrightness(1.f);
+                    } else {
+                        outputs[CV_OUTPUT + i].setVoltage( rescale(params[ROTATO_PARAM + i].getValue(), 0.f, 1.f, min[i], max[i]) );
+                        lights[QUANTIZE_LIGHT + i].setBrightness(0.f);
+                    }
+                }
+            } else {
+                for(size_t i = 0; i < KNOBS; i++) {
+                    outputs[CV_OUTPUT + i].setVoltage( rescale(params[ROTATO_PARAM + i].getValue(), 0.f, 1.f, min[i], max[i]) );
+                    lights[QUANTIZE_LIGHT + i].setBrightness( (quantize[i]) ? 0.25f : 0.f);
+                }
             }
+
         }
     }
+    
 };
 
 
@@ -149,6 +186,22 @@ struct RotatoSettingsItem : MenuItem {
         }
     };
 
+    struct RotatoSettingQuantizeAuto : MenuItem {
+        Rotatoes<KNOBS>* module;
+        size_t knob;
+        void onAction(const event::Action &e) override {
+            module->quantize[knob] = true;
+        }
+    };
+
+    struct RotatoSettingQuantizeDisabled : MenuItem {
+        Rotatoes<KNOBS>* module;
+        size_t knob;
+        void onAction(const event::Action &e) override {
+            module->quantize[knob] = false;
+        }
+    };
+
     struct RotatoSettingUnipolar : MenuItem {
         Rotatoes<KNOBS>* module;
         size_t knob;
@@ -203,8 +256,42 @@ struct RotatoSettingsItem : MenuItem {
         }
     };
 
+    struct RotatoSettingVoctC2C4 : MenuItem {
+        Rotatoes<KNOBS>* module;
+        size_t knob;
+        void onAction(const event::Action &e) override {
+            module->min[knob] = -2.f;
+            module->max[knob] = 0.f;
+        }
+    };
+
+    struct RotatoSettingVoctC4C6 : MenuItem {
+        Rotatoes<KNOBS>* module;
+        size_t knob;
+        void onAction(const event::Action &e) override {
+            module->min[knob] = 0.f;
+            module->max[knob] = 2.f;
+        }
+    };
+
     Menu *createChildMenu() override {
         Menu *menu = new Menu;
+
+        menu->addChild(createMenuLabel("Quantize to Poly External Scale"));
+
+        RotatoSettingQuantizeAuto *rotatoSettingQuantizeAuto = createMenuItem<RotatoSettingQuantizeAuto>("Automatic", "");
+        rotatoSettingQuantizeAuto->module = module;
+        rotatoSettingQuantizeAuto->knob = knob;
+        rotatoSettingQuantizeAuto->rightText += (module->quantize[knob]) ? "✔" : "";
+        menu->addChild(rotatoSettingQuantizeAuto);
+
+        RotatoSettingQuantizeDisabled *rotatoSettingQuantizeDisabled = createMenuItem<RotatoSettingQuantizeDisabled>("Disabled", "");
+        rotatoSettingQuantizeDisabled->module = module;
+        rotatoSettingQuantizeDisabled->knob = knob;
+        rotatoSettingQuantizeDisabled->rightText += (module->quantize[knob]) ? "" : "✔";
+        menu->addChild(rotatoSettingQuantizeDisabled);
+
+        menu->addChild(new MenuSeparator());
 
         menu->addChild(createMenuLabel("Range (can be inverted)"));
 
@@ -252,6 +339,18 @@ struct RotatoSettingsItem : MenuItem {
         rotatoSettingBipolarInverted->knob = knob;
         menu->addChild(rotatoSettingBipolarInverted);
 
+        menu->addChild(createMenuLabel("V/Oct range Presets"));
+
+        RotatoSettingVoctC2C4 *rotatoSettingVoctC2C4 = createMenuItem<RotatoSettingVoctC2C4>("Set to C2 ~ C4", "");
+        rotatoSettingVoctC2C4->module = module;
+        rotatoSettingVoctC2C4->knob = knob;
+        menu->addChild(rotatoSettingVoctC2C4);
+
+        RotatoSettingVoctC4C6 *rotatoSettingVoctC4C6 = createMenuItem<RotatoSettingVoctC4C6>("Set to C4 ~ C6", "");
+        rotatoSettingVoctC4C6->module = module;
+        rotatoSettingVoctC4C6->knob = knob;
+        menu->addChild(rotatoSettingVoctC4C6);
+
         return menu;
     }
 
@@ -263,6 +362,7 @@ struct Rotatoes4Widget : ModuleWidget {
     void drawRotato(Rotatoes<4>* module, float y, int num) {
         addParam(createParam<AriaKnobRotato>(mm2px(Vec(3.52f, y)), module, Rotatoes<4>::ROTATO_PARAM + num));
         addOutput(createOutput<AriaJackOut>(mm2px(Vec(3.52f, y + 10.f)), module, Rotatoes<4>::CV_OUTPUT + num));
+        addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(2.25f, y + 6.9f)), module, Rotatoes<4>::QUANTIZE_LIGHT + num));
     }
 
     Rotatoes4Widget(Rotatoes<4>* module) {
