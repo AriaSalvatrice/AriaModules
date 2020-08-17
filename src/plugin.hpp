@@ -40,8 +40,9 @@ extern Model *modelAtout;
 extern Model *modelAleister;
 
 // Remote controllers
-extern Model *modelRotatoes4;
+extern Model *modelPokies4;
 extern Model *modelGrabby;
+extern Model *modelRotatoes4;
 
 // Live performance
 extern Model *modelUndular;

@@ -36,8 +36,9 @@ void init(Plugin* p) {
     p->addModel(modelAleister);
 
     // Remote Controllers
-    p->addModel(modelRotatoes4);
+    p->addModel(modelPokies4);
     p->addModel(modelGrabby);
+    p->addModel(modelRotatoes4);
 
     // Live performance
     p->addModel(modelUndular);

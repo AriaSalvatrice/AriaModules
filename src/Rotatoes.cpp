@@ -4,14 +4,13 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-// Small controllers.
-// Rotatoes = knobs
-// Faders and buttons planned next.
+// Contains the Rotatoes module, and the Grabby module.
+// A grabby is really just a rotato that's linear when you think about it.
 
 #include "plugin.hpp"
 #include "quantizer.hpp"
 
-namespace Remotecontrollers {
+namespace Rotatoes {
 
 // Nope, no audio rate option provided until someone makes a strong argument why they need it.
 const int PROCESSDIVIDER = 32;
@@ -143,11 +142,25 @@ struct Rotatoes : Module {
 
 // Add a margin to my normal knob, so the square that shows it's bound to MIDI is offset a bit.
 // A black placeholder square is added to the faceplate. Positioning of the rectangle is yolo'd.
-struct AriaKnobRotato : AriaKnob820 {
-    AriaKnobRotato() {
+struct KnobRotato : AriaKnob820 {
+    KnobRotato() {
         AriaKnob820();
-        box.size.x += 4.f;
-        box.size.y += 2.1f;
+        // box.size.x += 4.f;
+        box.size.x += mm2px(1.35f);
+        // box.size.y += 2.1f;
+        box.size.y += mm2px(0.71f);
+    }
+};
+
+struct GrabbySlider : SvgSlider {
+    GrabbySlider() {
+        SvgSlider();
+        setBackgroundSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/grabby-bg.svg")));
+        setHandleSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/grabby-knob.svg")));
+        maxHandlePos = mm2px(Vec(0.f, 0.4f));
+        minHandlePos = mm2px(Vec(0.f, 62.f));
+        box.size.x = mm2px(10.45f);
+        box.size.y = mm2px(71.9f);
     }
 };
 
@@ -360,10 +373,19 @@ struct RotatoSettingsItem : MenuItem {
 };
 
 
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
 struct Rotatoes4Widget : ModuleWidget {
 
     void drawRotato(Rotatoes<4>* module, float y, int num) {
-        addParam(createParam<AriaKnobRotato>(mm2px(Vec(3.52f, y)), module, Rotatoes<4>::ROTATO_PARAM + num));
+        addParam(createParam<KnobRotato>(mm2px(Vec(3.52f, y)), module, Rotatoes<4>::ROTATO_PARAM + num));
         addOutput(createOutput<AriaJackOut>(mm2px(Vec(3.52f, y + 10.f)), module, Rotatoes<4>::CV_OUTPUT + num));
         addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(2.25f, y + 6.9f)), module, Rotatoes<4>::QUANTIZE_LIGHT + num));
     }
@@ -418,14 +440,7 @@ struct Rotatoes4Widget : ModuleWidget {
 
 
 
-// A grabby is really just a single rotato
 struct GrabbyWidget : ModuleWidget {
-
-    void drawRotato(Rotatoes<1>* module, float y, int num) {
-        addParam(createParam<AriaKnobRotato>(mm2px(Vec(3.52f, y)), module, Rotatoes<1>::ROTATO_PARAM + num));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(3.52f, y + 10.f)), module, Rotatoes<1>::CV_OUTPUT + num));
-        addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(2.25f, y + 6.9f)), module, Rotatoes<1>::QUANTIZE_LIGHT + num));
-    }
 
     GrabbyWidget(Rotatoes<1>* module) {
         setModule(module);
@@ -438,7 +453,9 @@ struct GrabbyWidget : ModuleWidget {
         addInput(createInput<AriaJackIn>(mm2px(Vec(3.52f, 15.9f)), module, Rotatoes<1>::EXT_SCALE_INPUT));
 
         // Grabby
-        drawRotato(module, 94.f, 0);
+        addParam(createParam<GrabbySlider>(mm2px(Vec(2.62f, 31.f)), module, Rotatoes<1>::ROTATO_PARAM + 0));
+        addOutput(createOutput<AriaJackOut>(mm2px(Vec(3.52f, 104.f)), module, Rotatoes<1>::CV_OUTPUT + 0));
+        addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(2.25f, 100.9f)), module, Rotatoes<1>::QUANTIZE_LIGHT + 0));
 
         // Screws
         addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
@@ -533,7 +550,7 @@ struct GrabbyWidget : ModuleWidget {
 };
 
 
-} // Namespace Remotecontrollers
+} // Namespace Rotatoes
 
-Model* modelRotatoes4 = createModel<Remotecontrollers::Rotatoes<4>, Remotecontrollers::Rotatoes4Widget>("Rotatoes4");
-Model* modelGrabby = createModel<Remotecontrollers::Rotatoes<1>, Remotecontrollers::GrabbyWidget>("Grabby");
+Model* modelRotatoes4 = createModel<Rotatoes::Rotatoes<4>, Rotatoes::Rotatoes4Widget>("Rotatoes4");
+Model* modelGrabby = createModel<Rotatoes::Rotatoes<1>, Rotatoes::GrabbyWidget>("Grabby");

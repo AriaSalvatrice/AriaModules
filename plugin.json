@@ -196,9 +196,9 @@
       ]
     },
     {
-      "slug": "Rotatoes4",
-      "name": "Signature Series Rotatoes",
-      "description": "4 tiny knobs for automation or manual performance of CV parameters. Right-click options to offset and invert output.\n Support for Poly External Scales from Quatherina's Quantizer.",
+      "slug": "Pokies4",
+      "name": "Signature Series Pokies",
+      "description": "4 tiny buttons for automation or manual performance of CV parameters. Right-click options to change output values, and use in latch mode.",
       "tags": [
         "Controller",
         "Utility"
@@ -208,6 +208,15 @@
       "slug": "Grabby",
       "name": "Signature Series Grabby",
       "description": "A lil fader for automation or manual performance of CV parameters. Right-click options to offset and invert output.\n Support for Poly External Scales from Quatherina's Quantizer.",
+      "tags": [
+        "Controller",
+        "Utility"
+      ]
+    },
+    {
+      "slug": "Rotatoes4",
+      "name": "Signature Series Rotatoes",
+      "description": "4 tiny knobs for automation or manual performance of CV parameters. Right-click options to offset and invert output.\n Support for Poly External Scales from Quatherina's Quantizer.",
       "tags": [
         "Controller",
         "Utility"
