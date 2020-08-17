@@ -470,21 +470,6 @@ struct GrabbyWidget : ModuleWidget {
 
         // NOTE: Entirely copy-pasted from above code for multiple rotatoes. 
         // Yeah it's nasty looking but oh well.
-        menu->addChild(createMenuLabel("Quantize to Poly External Scale"));
-
-        RotatoSettingsItem<1>::RotatoSettingQuantizeAuto *rotatoSettingQuantizeAuto = createMenuItem<RotatoSettingsItem<1>::RotatoSettingQuantizeAuto>("Automatic", "");
-        rotatoSettingQuantizeAuto->module = module;
-        rotatoSettingQuantizeAuto->knob = 0;
-        rotatoSettingQuantizeAuto->rightText += (module->quantize[0]) ? "✔" : "";
-        menu->addChild(rotatoSettingQuantizeAuto);
-
-        RotatoSettingsItem<1>::RotatoSettingQuantizeDisabled *rotatoSettingQuantizeDisabled = createMenuItem<RotatoSettingsItem<1>::RotatoSettingQuantizeDisabled>("Disabled", "");
-        rotatoSettingQuantizeDisabled->module = module;
-        rotatoSettingQuantizeDisabled->knob = 0;
-        rotatoSettingQuantizeDisabled->rightText += (module->quantize[0]) ? "" : "✔";
-        menu->addChild(rotatoSettingQuantizeDisabled);
-
-        menu->addChild(new MenuSeparator());
 
         menu->addChild(createMenuLabel("Range (can be inverted)"));
 
