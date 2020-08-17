@@ -251,8 +251,8 @@ struct RotatoSettingsItem : MenuItem {
         Rotatoes<KNOBS>* module;
         size_t knob;
         void onAction(const event::Action &e) override {
-            module->min[knob] = -5.f;
-            module->max[knob] = 5.f;
+            module->min[knob] = 5.f;
+            module->max[knob] = -5.f;
         }
     };
 
@@ -276,6 +276,9 @@ struct RotatoSettingsItem : MenuItem {
 
     Menu *createChildMenu() override {
         Menu *menu = new Menu;
+
+        menu->addChild(createMenuLabel("Rotato " + std::to_string(knob)));
+        menu->addChild(new MenuSeparator());
 
         menu->addChild(createMenuLabel("Quantize to Poly External Scale"));
 
@@ -406,6 +409,15 @@ struct Rotatoes4Widget : ModuleWidget {
 };
 
 
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
 // A grabby is really just a single rotato
 struct GrabbyWidget : ModuleWidget {
 
@@ -441,11 +453,82 @@ struct GrabbyWidget : ModuleWidget {
 
         menu->addChild(new MenuSeparator());
 
-        // FIXME: No need for a submenu
-        RotatoSettingsItem<1> *rotatoSettingsItem = createMenuItem<RotatoSettingsItem<1>>("Grabby");
-        rotatoSettingsItem->module = module;
-        rotatoSettingsItem->knob = 0;
-        menu->addChild(rotatoSettingsItem);
+        // NOTE: Entirely copy-pasted from above code for multiple rotatoes. 
+        // Yeah it's nasty looking but oh well.
+        menu->addChild(createMenuLabel("Quantize to Poly External Scale"));
+
+        RotatoSettingsItem<1>::RotatoSettingQuantizeAuto *rotatoSettingQuantizeAuto = createMenuItem<RotatoSettingsItem<1>::RotatoSettingQuantizeAuto>("Automatic", "");
+        rotatoSettingQuantizeAuto->module = module;
+        rotatoSettingQuantizeAuto->knob = 0;
+        rotatoSettingQuantizeAuto->rightText += (module->quantize[0]) ? "✔" : "";
+        menu->addChild(rotatoSettingQuantizeAuto);
+
+        RotatoSettingsItem<1>::RotatoSettingQuantizeDisabled *rotatoSettingQuantizeDisabled = createMenuItem<RotatoSettingsItem<1>::RotatoSettingQuantizeDisabled>("Disabled", "");
+        rotatoSettingQuantizeDisabled->module = module;
+        rotatoSettingQuantizeDisabled->knob = 0;
+        rotatoSettingQuantizeDisabled->rightText += (module->quantize[0]) ? "" : "✔";
+        menu->addChild(rotatoSettingQuantizeDisabled);
+
+        menu->addChild(new MenuSeparator());
+
+        menu->addChild(createMenuLabel("Range (can be inverted)"));
+
+		RotatoSettingsItem<1>::MinMaxSliderItem *minSliderItem = new RotatoSettingsItem<1>::MinMaxSliderItem(&module->min[0], "Minimum");
+		minSliderItem->box.size.x = 190.f;
+		menu->addChild(minSliderItem);
+
+		RotatoSettingsItem<1>::MinMaxSliderItem *maxSliderItem = new RotatoSettingsItem<1>::MinMaxSliderItem(&module->max[0], "Maximum");
+		maxSliderItem->box.size.x = 190.f;
+		menu->addChild(maxSliderItem);
+
+        menu->addChild(new MenuSeparator());
+
+        menu->addChild(createMenuLabel("Presets"));
+
+        RotatoSettingsItem<1>::RotatoSettingUnipolar *rotatoSettingUnipolar = createMenuItem<RotatoSettingsItem<1>::RotatoSettingUnipolar>("Set to 0 V ~ 10 V", "");
+        rotatoSettingUnipolar->module = module;
+        rotatoSettingUnipolar->knob = 0;
+        menu->addChild(rotatoSettingUnipolar);
+
+        RotatoSettingsItem<1>::RotatoSettingUnipolar5v *rotatoSettingUnipolar5v = createMenuItem<RotatoSettingsItem<1>::RotatoSettingUnipolar5v>("Set to 0 V ~ 5 V", "");
+        rotatoSettingUnipolar5v->module = module;
+        rotatoSettingUnipolar5v->knob = 0;
+        menu->addChild(rotatoSettingUnipolar5v);
+
+        RotatoSettingsItem<1>::RotatoSettingBipolar *rotatoSettingBipolar = createMenuItem<RotatoSettingsItem<1>::RotatoSettingBipolar>("Set to -5 V ~ 5 V", "");
+        rotatoSettingBipolar->module = module;
+        rotatoSettingBipolar->knob = 0;
+        menu->addChild(rotatoSettingBipolar);
+
+        menu->addChild(createMenuLabel("Inverted Presets"));
+
+        RotatoSettingsItem<1>::RotatoSettingUnipolarInverted *rotatoSettingUnipolarInverted = createMenuItem<RotatoSettingsItem<1>::RotatoSettingUnipolarInverted>("Set to 10 V ~ 0 V", "");
+        rotatoSettingUnipolarInverted->module = module;
+        rotatoSettingUnipolarInverted->knob = 0;
+        menu->addChild(rotatoSettingUnipolarInverted);
+
+        RotatoSettingsItem<1>::RotatoSettingUnipolar5vInverted *rotatoSettingUnipolar5vInverted = createMenuItem<RotatoSettingsItem<1>::RotatoSettingUnipolar5vInverted>("Set to 5 V ~ 0 V", "");
+        rotatoSettingUnipolar5vInverted->module = module;
+        rotatoSettingUnipolar5vInverted->knob = 0;
+        menu->addChild(rotatoSettingUnipolar5vInverted);
+
+        RotatoSettingsItem<1>::RotatoSettingBipolarInverted *rotatoSettingBipolarInverted = createMenuItem<RotatoSettingsItem<1>::RotatoSettingBipolarInverted>("Set to 5 V ~ -5 V", "");
+        rotatoSettingBipolarInverted->module = module;
+        rotatoSettingBipolarInverted->knob = 0;
+        menu->addChild(rotatoSettingBipolarInverted);
+
+        menu->addChild(createMenuLabel("V/Oct range Presets"));
+
+        RotatoSettingsItem<1>::RotatoSettingVoctC2C4 *rotatoSettingVoctC2C4 = createMenuItem<RotatoSettingsItem<1>::RotatoSettingVoctC2C4>("Set to C2 ~ C4", "");
+        rotatoSettingVoctC2C4->module = module;
+        rotatoSettingVoctC2C4->knob = 0;
+        menu->addChild(rotatoSettingVoctC2C4);
+
+        RotatoSettingsItem<1>::RotatoSettingVoctC4C6 *rotatoSettingVoctC4C6 = createMenuItem<RotatoSettingsItem<1>::RotatoSettingVoctC4C6>("Set to C4 ~ C6", "");
+        rotatoSettingVoctC4C6->module = module;
+        rotatoSettingVoctC4C6->knob = 0;
+        menu->addChild(rotatoSettingVoctC4C6);
+
     }
 };
 
