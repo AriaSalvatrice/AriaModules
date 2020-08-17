@@ -34,7 +34,12 @@ void init(Plugin* p) {
     p->addModel(modelArcane);
     p->addModel(modelAtout);
     p->addModel(modelAleister);
-    
+
+    // Remote Controllers
+    p->addModel(modelPokies4);
+    p->addModel(modelGrabby);
+    p->addModel(modelRotatoes4);
+
     // Live performance
     p->addModel(modelUndular);
 

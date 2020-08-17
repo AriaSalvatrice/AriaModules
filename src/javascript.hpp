@@ -34,7 +34,7 @@
 #include <rack.hpp>
 
 // QuickJS always throws a warning here, but it works.
-#include "quickjs/quickjs.h"
+#include "QuickJS/quickjs.h"
 
 namespace Javascript {
 

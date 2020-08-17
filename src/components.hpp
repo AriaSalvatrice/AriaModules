@@ -27,7 +27,7 @@ extern Plugin* pluginInstance;
 
 
 
-//////////////////////////////// Base
+/*                          Base                       */
 
 struct SvgSwitchUnshadowed : SvgSwitch {
     SvgSwitchUnshadowed() {
@@ -37,7 +37,7 @@ struct SvgSwitchUnshadowed : SvgSwitch {
 };
 
 
-//////////////////////////////// Decorative
+/*                          Decorative                       */
 
 // These require a standard <3-shaped screwdriver, provided complimentary with every purchasee. 
 struct AriaScrew : SvgScrew {
@@ -55,7 +55,7 @@ struct AriaSignature : SvgWidget {
 
 
 
-//////////////////////////////// Jacks
+/*                          Jacks                       */
 
 // Input jacks are always lit yellow.
 struct AriaJackIn : SVGPort {
@@ -78,7 +78,7 @@ struct AriaJackTransparent : SVGPort {
     }
 };
 
-/////////////// Old style lights - TODO: Remove dependency on component library
+/*                          Old style lights - TODO: Remove dependency on component library                       */
 
 template <typename TBase = GrayModuleLightWidget>
 struct TOutputLight : TBase {
@@ -97,7 +97,7 @@ struct TInputLight : TBase {
 typedef TInputLight<> InputLight;
 
 
-/////////////// Jack lights
+/*                          Jack Lights                       */
 
 // Those lights should be added before transparent jacks, at the same position.
 struct AriaJackLight : app::ModuleLightWidget {
@@ -148,7 +148,7 @@ struct AriaOutputLight : AriaJackLight {
 
 
 
-//////////////////////////////// Switches
+/*                          Switches                       */
 
 // 5.00mm switch. Yellow when lit.
 struct AriaPushButton500 : SvgSwitch {
@@ -233,7 +233,7 @@ struct AriaRockerSwitchVertical800 : SvgSwitchUnshadowed {
 };
 
 
-//////////////////////////////// Knobs
+/*                          Knobs                       */
 
 struct AriaKnob820 : app::SvgKnob {
     AriaKnob820() {
