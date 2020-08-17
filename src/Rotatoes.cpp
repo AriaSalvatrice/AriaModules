@@ -145,9 +145,7 @@ struct Rotatoes : Module {
 struct KnobRotato : AriaKnob820 {
     KnobRotato() {
         AriaKnob820();
-        // box.size.x += 4.f;
         box.size.x += mm2px(1.35f);
-        // box.size.y += 2.1f;
         box.size.y += mm2px(0.71f);
     }
 };
@@ -290,7 +288,7 @@ struct RotatoSettingsItem : MenuItem {
     Menu *createChildMenu() override {
         Menu *menu = new Menu;
 
-        menu->addChild(createMenuLabel("Rotato " + std::to_string(knob)));
+        menu->addChild(createMenuLabel("Rotato " + std::to_string(knob + 1)));
         menu->addChild(new MenuSeparator());
 
         menu->addChild(createMenuLabel("Quantize to Poly External Scale"));
