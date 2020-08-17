@@ -52,11 +52,6 @@ struct Pokies : Module {
             momentary[i] = true;
         }
 
-        // FIXME: Test
-        enabled[1] = true;
-        momentary[0] = false;
-        momentary[1] = false;
-
         processDivider.setDivision(PROCESSDIVIDER);
     }
 

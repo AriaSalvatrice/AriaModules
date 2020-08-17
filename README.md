@@ -54,8 +54,6 @@ Thanks to [Jerry Sievert](https://legitimatesounding.com/) and [cschol](https://
 
 Thanks to [Squinky Labs](https://github.com/squinkylabs/SquinkyVCV), [Stoermelder](https://github.com/stoermelder/vcvrack-packone), [David O'Rourke](https://github.com/david-c14/SubmarineFree) for technical advice.
 
-Thanks to [Omri Cohen](https://www.youtube.com/channel/UCuWKHSHTHMV_nVSeNH4gYAg) for covering my modules.
-
 Thanks to [Ken McAloon](https://whatsinaname.xyz/) for Latin language translations.
 
 Thanks to [Sophie](https://twitter.com/DreamyDoric) for music theory advice.
