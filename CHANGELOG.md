@@ -4,6 +4,10 @@ Changelog
 The versioning follows this standard: the first number corresponds to the VCV rack version used. The second number is increased any time a new module family is added. The third number is increased when something is added or fixed without adding a new module family.
 
 
+## Unreleased
+
+
+
 ## [1.7.0] - 2020-08-17
 
 ### New Modules
@@ -11,6 +15,8 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 - [NEW] Pokies: 4 tiny buttons for automation or manual performance of CV parameters. Right-click options to change output values, and use in latch mode.
 - [NEW] Grabby: A lil fader for automation or manual performance of CV parameters. Right-click options to offset and invert output. Support for Poly External Scales from Qqqq.
 - [NEW] Rotatoes: 4 tiny knobs for automation or manual performance of CV parameters. Right-click options to offset and invert output. Support for Poly External Scales from Qqqq.
+
+
 
 
 ## [1.6.1]  - 2020-07-25

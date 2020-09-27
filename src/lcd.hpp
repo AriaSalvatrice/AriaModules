@@ -82,7 +82,7 @@ struct LcdStatus {
     float notificationTimeout = 3.f;
 
     LcdStatus() {
-        for (int i = 0; i < 12; i++) pianoDisplay[i] = false;
+       for (size_t i = 0; i < 12; i++) pianoDisplay[i] = false;
     }
 
     // Call this from the module.
@@ -111,11 +111,11 @@ struct LcdDrawWidget : LightWidget {
         module = _module;
         if (module) {
             box.size = mm2px(Vec(36.0, 10.0));
-            for (int i = 0; i < 12; i++) // Unlit
+           for (size_t i = 0; i < 12; i++) // Unlit
                 pianoSvg[i] = APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/lcd/piano/u" + std::to_string(i) + ".svg"));
-            for (int i = 0; i < 12; i++) // Lit
+           for (size_t i = 0; i < 12; i++) // Lit
                 pianoSvg[i + 12] = APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/lcd/piano/l" + std::to_string(i) + ".svg"));
-            for (int i = 0; i < 95; i++)
+           for (size_t i = 0; i < 95; i++)
                 asciiSvg[i] = APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/lcd/Fixed_v01/" + std::to_string(i + 32) + ".svg"));
         }
     }
@@ -162,7 +162,7 @@ struct LcdDrawWidget : LightWidget {
             nvgSave(args.vg);
             lcdText1 = module->lcdStatus.lcdText1;
             lcdText1.append(11, ' '); // Ensure the string is long enough
-            for (int i = 0; i < 11; i++) {
+           for (size_t i = 0; i < 11; i++) {
                 char c = lcdText1.at(i);
                 svgDraw(args.vg, asciiSvg[ c - 32 ]->handle);
                 nvgTranslate(args.vg, 6, 0);
@@ -178,7 +178,7 @@ struct LcdDrawWidget : LightWidget {
             nvgTranslate(args.vg, 0, 11);
             lcdText2 = module->lcdStatus.lcdText2;
             lcdText2.append(11, ' '); // Ensure the string is long enough
-            for (int i = 0; i < 11; i++) {
+           for (size_t i = 0; i < 11; i++) {
                 char c = lcdText2.at(i);
                 svgDraw(args.vg, asciiSvg[ c - 32 ]->handle);
                 nvgTranslate(args.vg, 6, 0);

@@ -39,14 +39,14 @@ struct Splort : Module {
     
     // Split without sorting, faster
     void split(const ProcessArgs& args) {
-        for (int i = 0; i < 16; i++)
+        for (size_t i = 0; i < 16; i++)
             outputs[SPLIT_OUTPUT + i].setVoltage(inputs[POLY_INPUT].getVoltage(i));
     }
     
     // Split with sorting, and send Link output
     void splitSortLink(const ProcessArgs& args) {
         std::array<std::array<float, 2>, 16> splitVoltages;	
-        int connected = 0;
+        size_t connected = 0;
 
         // How many connected inputs?
         connected = inputs[POLY_INPUT].getChannels();
@@ -54,7 +54,7 @@ struct Splort : Module {
             outputs[LINK_OUTPUT].setChannels(connected);
 
         // Fill array
-        for (int i = 0; i < 16; i++) {
+        for (size_t i = 0; i < 16; i++) {
             if (i < connected) {
                 splitVoltages[i][0] = inputs[POLY_INPUT].getVoltage(i);
                 splitVoltages[i][1] = (inputs[LINK_INPUT].isConnected()) ? inputs[LINK_INPUT].getVoltage(i) : (i + 1.f) * 0.1f;
@@ -76,7 +76,7 @@ struct Splort : Module {
         }
         
         // Output
-        for (int i = 0; i < 16; i++) {
+        for (size_t i = 0; i < 16; i++) {
             outputs[SPLIT_OUTPUT + i].setVoltage(splitVoltages[i][0]);
             if (! inputs[LINK_INPUT].isConnected())
                 outputs[LINK_OUTPUT].setVoltage(splitVoltages[i][1], i);
@@ -86,7 +86,7 @@ struct Splort : Module {
     void chainLink(const ProcessArgs& args) {
         if (inputs[LINK_INPUT].isConnected()) {
             outputs[LINK_OUTPUT].setChannels(inputs[LINK_INPUT].getChannels());
-            for (int i = 0; i < 16; i++)
+            for (size_t i = 0; i < 16; i++)
                 outputs[LINK_OUTPUT].setVoltage(inputs[LINK_INPUT].getVoltage(i), i);
         } else {
             if (! params[SORT_PARAM].getValue())

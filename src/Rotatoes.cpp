@@ -106,7 +106,7 @@ struct Rotatoes : Module {
         if (processDivider.process()) {
 
             if (inputs[EXT_SCALE_INPUT].isConnected()) {
-                for (int i = 0; i < 12; i++){
+                for (size_t i = 0; i < 12; i++){
                     scale[i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.1f) ? true : false;
                 }
                 for(size_t i = 0; i < KNOBS; i++) {

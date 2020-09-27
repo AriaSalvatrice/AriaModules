@@ -39,7 +39,7 @@ struct Smerge : Module {
     // Merge without sorting, faster
     void merge(const ProcessArgs& args) {
         int lastMergeChannel = 0;
-        for (int i = 0; i < 16; i++) {
+        for (size_t i = 0; i < 16; i++) {
             if (inputs[MERGE_INPUT + i].isConnected()) {
                 outputs[POLY_OUTPUT].setVoltage(inputs[MERGE_INPUT + i].getVoltage(), i);
                 lastMergeChannel = i+1;
@@ -53,7 +53,7 @@ struct Smerge : Module {
     // Merge with sorting, and send Link output
     void mergeSortLink(const ProcessArgs& args) {
         std::array<std::array<float, 2>, 16> mergedVoltages;	
-        int connected = 0;
+        size_t connected = 0;
         
         if (inputs[LINK_INPUT].isConnected()) {
             // Link input
@@ -73,7 +73,7 @@ struct Smerge : Module {
             });	
         } else {
             // No link input
-            for (int i = 0; i < 16; i++) {
+            for (size_t i = 0; i < 16; i++) {
                 if (inputs[MERGE_INPUT + i].isConnected()) {
                     mergedVoltages[i][0] = inputs[MERGE_INPUT + i].getVoltage();
                     mergedVoltages[i][1] = (i + 1.f) * 0.1f;
@@ -87,7 +87,7 @@ struct Smerge : Module {
         }
         
         // Send to poly output
-        for (int i = 0; i < connected; i++) {
+        for (size_t i = 0; i < connected; i++) {
             outputs[POLY_OUTPUT].setVoltage(mergedVoltages[i][0], i);
         }
         outputs[POLY_OUTPUT].setChannels(connected);
@@ -95,7 +95,7 @@ struct Smerge : Module {
         // Send to link output
         if (! inputs[LINK_INPUT].isConnected()) {
             outputs[LINK_OUTPUT].setChannels(connected);
-            for (int i = 0; i < 16; i++) {
+            for (size_t i = 0; i < 16; i++) {
                 outputs[LINK_OUTPUT].setVoltage(mergedVoltages[i][1], i);
             }
         }
@@ -104,7 +104,7 @@ struct Smerge : Module {
     void chainLink(const ProcessArgs& args) {
         if (inputs[LINK_INPUT].isConnected()) {
             outputs[LINK_OUTPUT].setChannels(inputs[LINK_INPUT].getChannels());
-            for (int i = 0; i < 16; i++) {
+            for (size_t i = 0; i < 16; i++) {
                 outputs[LINK_OUTPUT].setVoltage(inputs[LINK_INPUT].getVoltage(i), i);
             }
         } else {

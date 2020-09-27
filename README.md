@@ -15,14 +15,18 @@ They are the Aria Salvatrice Signature Series. They’re growing into an integra
 Documentation
 -------------
 
-The documentation of the modules is only available [from my website](https://aria.dog/modules/).
+The documentation of the modules is only available [from my website](https://aria.dog/modules/). It's beginner-friendly and detailed - please check it out.
 
 
 
-Download & Installation
------------------------
+Compatibility, Download & Installation
+--------------------------------------
 
-Those modules are part of the VCV plugin library. By [subscribing to my plugin](https://library.vcvrack.com/AriaSalvatrice/), you will receive every stable update automatically. Installing my modules from the VCV library the only supported way.
+Those modules should work with any 1.x version of VCV Rack. They are part of VCV's onlinne library: by [subscribing to my plugin](https://library.vcvrack.com/AriaSalvatrice/), you will receive every stable update a few days after it's released. Installing my modules from the VCV library the recommended way.
+
+Forks and ports of VCV Rack such as the [Sonaremin](https://github.com/hexdump0815/sonaremin) might bundle my modules in their preferred way. 
+
+No efforts will be made to support forks based on the 0.x series such as [miRack](https://mirack.app/modules/) - they will probably never be supported.
 
 The only downloads you will find here are [automatic development builds](https://github.com/AriaSalvatrice/AriaVCVModules/releases/tag/AzureCI), which are never guaranteed to work properly.
 
@@ -37,7 +41,7 @@ Other thingies
 
 - [Changelog](CHANGELOG.md)
 - [Design language of the modules](doc/design.md)
-- [Future plans for the collection](doc/plans.md)
+- [Future plans for the collection](https://aria.dog/modules/plans/)
 - [How to contribute](CONTRIBUTING.md)
 - [Beta / pre-release thread on VCV forums](https://community.vcvrack.com/t/arias-cool-and-nice-thread-of-barely-working-betas-and-bug-squashing/8208)
 

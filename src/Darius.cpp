@@ -152,16 +152,16 @@ struct Darius : Module {
         configParam(KEY_PARAM, 0.f, 11.f, 0.f, "Key");
         configParam(SCALE_PARAM, 0.f, (float) Quantizer::NUM_SCALES - 1, 2.f, "Scale");
         configParam(SLIDE_PARAM, 0.f, 10.f, 0.f, "Slide");
-        for (int i = 0; i < STEP9START; i++)
+       for (size_t i = 0; i < STEP9START; i++)
             configParam(CV_PARAM + i, 0.f, 10.f, 5.f, "CV");
-        for (int i = 0; i < STEP8START; i++)
+       for (size_t i = 0; i < STEP8START; i++)
             configParam(ROUTE_PARAM + i, 0.f, 1.f, 0.5f, "Random route");
         knobDivider.setDivision(KNOBDIVIDER);
         displayDivider.setDivision(DISPLAYDIVIDER);
         lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
         lcdStatus.lcdText1 = "MEDITATE..."; // Loading message
         lcdStatus.lcdText2 = "MEDITATION."; // https://www.youtube.com/watch?v=JqLNY1zyQ6o
-        for (int i = 0; i < 100; i++) random::uniform(); // The first few seeds we get seem bad, need more warming up. Might just be superstition.
+       for (size_t i = 0; i < 100; i++) random::uniform(); // The first few seeds we get seem bad, need more warming up. Might just be superstition.
     }
     
     json_t* dataToJson() override {
@@ -171,7 +171,7 @@ struct Darius : Module {
         json_object_set_new(rootJ, "lastNode", json_integer(lastNode));
         json_object_set_new(rootJ, "lastGate", json_integer(lastGate));
         json_t *pathTraveledJ = json_array();
-        for (int i = 0; i < 8; i++) {
+       for (size_t i = 0; i < 8; i++) {
             json_array_insert_new(pathTraveledJ, i, json_integer(pathTraveled[i]));
         } 
         json_object_set_new(rootJ, "pathTraveled", pathTraveledJ);
@@ -197,7 +197,7 @@ struct Darius : Module {
         }
         json_t *pathTraveledJ = json_object_get(rootJ, "pathTraveled");
         if (pathTraveledJ) {
-            for (int i = 0; i < 8; i++) {
+           for (size_t i = 0; i < 8; i++) {
                 json_t *pathTraveledNodeJ = json_array_get(pathTraveledJ, i);
                 if (pathTraveledNodeJ) {
                     pathTraveled[i] = json_integer_value(pathTraveledNodeJ);
@@ -227,14 +227,14 @@ struct Darius : Module {
         void undo() override {
             Darius *module = dynamic_cast<Darius*>(APP->engine->getModule(this->moduleId));
             if (module) {
-                for (int i = 0; i < 36; i++) module->params[param + i].setValue(this->oldValues[i]);
+               for (size_t i = 0; i < 36; i++) module->params[param + i].setValue(this->oldValues[i]);
             }
         }
 
         void redo() override {
             Darius *module = dynamic_cast<Darius*>(APP->engine->getModule(this->moduleId));
             if (module) {
-                for (int i = 0; i < 36; i++) module->params[param + i].setValue(this->newValues[i]);
+               for (size_t i = 0; i < 36; i++) module->params[param + i].setValue(this->newValues[i]);
             }
         }
     };
@@ -242,18 +242,18 @@ struct Darius : Module {
     void randomizeCv(const ProcessArgs& args){
         std::array<float, 36> oldValues;
         std::array<float, 36> newValues;
-        for (int i = 0; i < 36; i++) oldValues[i] = params[CV_PARAM + i].getValue();
-        for (int i = 0; i < 36; i++) params[CV_PARAM + i].setValue(random::uniform() * 10.f);
-        for (int i = 0; i < 36; i++) newValues[i] = params[CV_PARAM + i].getValue();
+       for (size_t i = 0; i < 36; i++) oldValues[i] = params[CV_PARAM + i].getValue();
+       for (size_t i = 0; i < 36; i++) params[CV_PARAM + i].setValue(random::uniform() * 10.f);
+       for (size_t i = 0; i < 36; i++) newValues[i] = params[CV_PARAM + i].getValue();
         APP->history->push(new BulkCvAction(this->id, "randomize Darius CV", CV_PARAM, oldValues, newValues));
     }
     
     void randomizeRoute(const ProcessArgs& args){
         std::array<float, 36> oldValues;
         std::array<float, 36> newValues;
-        for (int i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
-        for (int i = 0; i < 36; i++) params[ROUTE_PARAM + i].setValue(random::uniform());	
-        for (int i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
+       for (size_t i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
+       for (size_t i = 0; i < 36; i++) params[ROUTE_PARAM + i].setValue(random::uniform());	
+       for (size_t i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
         APP->history->push(new BulkCvAction(this->id, "randomize Darius Routes", ROUTE_PARAM, oldValues, newValues));
     }
     
@@ -261,9 +261,9 @@ struct Darius : Module {
         resetCV = false;
         std::array<float, 36> oldValues;
         std::array<float, 36> newValues;
-        for (int i = 0; i < 36; i++) oldValues[i] = params[CV_PARAM + i].getValue();
-        for (int i = 0; i < 36; i++) params[CV_PARAM + i].setValue(5.f);	
-        for (int i = 0; i < 36; i++) newValues[i] = params[CV_PARAM + i].getValue();
+       for (size_t i = 0; i < 36; i++) oldValues[i] = params[CV_PARAM + i].getValue();
+       for (size_t i = 0; i < 36; i++) params[CV_PARAM + i].setValue(5.f);	
+       for (size_t i = 0; i < 36; i++) newValues[i] = params[CV_PARAM + i].getValue();
         APP->history->push(new BulkCvAction(this->id, "reset Darius CV", CV_PARAM, oldValues, newValues));
     }
 
@@ -271,9 +271,9 @@ struct Darius : Module {
         resetRoutes = false;
         std::array<float, 36> oldValues;
         std::array<float, 36> newValues;
-        for (int i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
-        for (int i = 0; i < 36; i++) params[ROUTE_PARAM + i].setValue(0.5f);	
-        for (int i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
+       for (size_t i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
+       for (size_t i = 0; i < 36; i++) params[ROUTE_PARAM + i].setValue(0.5f);	
+       for (size_t i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
         APP->history->push(new BulkCvAction(this->id, "reset Darius Routes", ROUTE_PARAM, oldValues, newValues));
     }
 
@@ -281,9 +281,9 @@ struct Darius : Module {
         routesToTop = false;
         std::array<float, 36> oldValues;
         std::array<float, 36> newValues;
-        for (int i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
-        for (int i = 0; i < 36; i++) params[ROUTE_PARAM + i].setValue(0.f);	
-        for (int i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
+       for (size_t i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
+       for (size_t i = 0; i < 36; i++) params[ROUTE_PARAM + i].setValue(0.f);	
+       for (size_t i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
         APP->history->push(new BulkCvAction(this->id, "set Darius Routes to Top", ROUTE_PARAM, oldValues, newValues));
     }
 
@@ -291,9 +291,9 @@ struct Darius : Module {
         routesToBottom = false;
         std::array<float, 36> oldValues;
         std::array<float, 36> newValues;
-        for (int i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
-        for (int i = 0; i < 36; i++) params[ROUTE_PARAM + i].setValue(1.f);	
-        for (int i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
+       for (size_t i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
+       for (size_t i = 0; i < 36; i++) params[ROUTE_PARAM + i].setValue(1.f);	
+       for (size_t i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
         APP->history->push(new BulkCvAction(this->id, "set Darius Routes to Bottom", ROUTE_PARAM, oldValues, newValues));
     }
 
@@ -301,15 +301,15 @@ struct Darius : Module {
         routesToEqualProbability = false;
         std::array<float, 36> oldValues;
         std::array<float, 36> newValues;
-        for (int i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
+       for (size_t i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
         params[ROUTE_PARAM].setValue(0.5f);
-        for (int i = 0; i < 2; i++) params[ROUTE_PARAM + i + STEP2START].setValue( (i + 1) / 3.f );
-        for (int i = 0; i < 3; i++) params[ROUTE_PARAM + i + STEP3START].setValue( (i + 1) / 4.f );
-        for (int i = 0; i < 4; i++) params[ROUTE_PARAM + i + STEP4START].setValue( (i + 1) / 5.f );
-        for (int i = 0; i < 5; i++) params[ROUTE_PARAM + i + STEP5START].setValue( (i + 1) / 6.f );
-        for (int i = 0; i < 6; i++) params[ROUTE_PARAM + i + STEP6START].setValue( (i + 1) / 7.f );
-        for (int i = 0; i < 7; i++) params[ROUTE_PARAM + i + STEP7START].setValue( (i + 1) / 8.f );
-        for (int i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
+       for (size_t i = 0; i < 2; i++) params[ROUTE_PARAM + i + STEP2START].setValue( (i + 1) / 3.f );
+       for (size_t i = 0; i < 3; i++) params[ROUTE_PARAM + i + STEP3START].setValue( (i + 1) / 4.f );
+       for (size_t i = 0; i < 4; i++) params[ROUTE_PARAM + i + STEP4START].setValue( (i + 1) / 5.f );
+       for (size_t i = 0; i < 5; i++) params[ROUTE_PARAM + i + STEP5START].setValue( (i + 1) / 6.f );
+       for (size_t i = 0; i < 6; i++) params[ROUTE_PARAM + i + STEP6START].setValue( (i + 1) / 7.f );
+       for (size_t i = 0; i < 7; i++) params[ROUTE_PARAM + i + STEP7START].setValue( (i + 1) / 8.f );
+       for (size_t i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
         APP->history->push(new BulkCvAction(this->id, "set Darius Routes to Spread out", ROUTE_PARAM, oldValues, newValues));
     }
 
@@ -319,8 +319,8 @@ struct Darius : Module {
         routesToBinaryTree = false;
         std::array<float, 36> oldValues;
         std::array<float, 36> newValues;
-        for (int i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
-        for (int i = 0; i < 36; i++) params[ROUTE_PARAM + i].setValue(0.5f);
+       for (size_t i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
+       for (size_t i = 0; i < 36; i++) params[ROUTE_PARAM + i].setValue(0.5f);
         params[ROUTE_PARAM +  1].setValue(0.f);
         params[ROUTE_PARAM +  2].setValue(1.f);
         params[ROUTE_PARAM +  6].setValue(0.f);
@@ -335,7 +335,7 @@ struct Darius : Module {
         params[ROUTE_PARAM + 17].setValue(0.f);
         params[ROUTE_PARAM + 18].setValue(1.f);
         params[ROUTE_PARAM + 20].setValue(1.f);
-        for (int i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
+       for (size_t i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
         APP->history->push(new BulkCvAction(this->id, "set Darius Routes to Binary tree", ROUTE_PARAM, oldValues, newValues));
     }
 
@@ -347,7 +347,7 @@ struct Darius : Module {
         sequence.fromClipboard();
         sequence.sort();
         sequence.clampValues();
-        for (int i = 0; i < 36; i++) oldValues[i] = params[CV_PARAM + i].getValue(); 
+       for (size_t i = 0; i < 36; i++) oldValues[i] = params[CV_PARAM + i].getValue(); 
         for(int i = 0; i < 1; i++) params[CV_PARAM + i + STEP1START].setValue( (sequence.notes.size() > 0) ? clamp(sequence.notes[0].pitch + 4.f, 0.f, 10.f) : 5.f);
         for(int i = 0; i < 2; i++) params[CV_PARAM + i + STEP2START].setValue( (sequence.notes.size() > 1) ? clamp(sequence.notes[1].pitch + 4.f, 0.f, 10.f) : 5.f);
         for(int i = 0; i < 3; i++) params[CV_PARAM + i + STEP3START].setValue( (sequence.notes.size() > 2) ? clamp(sequence.notes[2].pitch + 4.f, 0.f, 10.f) : 5.f);
@@ -356,7 +356,7 @@ struct Darius : Module {
         for(int i = 0; i < 6; i++) params[CV_PARAM + i + STEP6START].setValue( (sequence.notes.size() > 5) ? clamp(sequence.notes[5].pitch + 4.f, 0.f, 10.f) : 5.f);
         for(int i = 0; i < 7; i++) params[CV_PARAM + i + STEP7START].setValue( (sequence.notes.size() > 6) ? clamp(sequence.notes[6].pitch + 4.f, 0.f, 10.f) : 5.f);
         for(int i = 0; i < 8; i++) params[CV_PARAM + i + STEP8START].setValue( (sequence.notes.size() > 7) ? clamp(sequence.notes[7].pitch + 4.f, 0.f, 10.f) : 5.f);
-        for (int i = 0; i < 36; i++) newValues[i] = params[CV_PARAM + i].getValue();
+       for (size_t i = 0; i < 36; i++) newValues[i] = params[CV_PARAM + i].getValue();
         APP->history->push(new BulkCvAction(this->id, "import Portable Sequence", CV_PARAM, oldValues, newValues));
     }
 
@@ -377,7 +377,7 @@ struct Darius : Module {
         localPrng.init(localSeed, localSeed);
 
         note.length = 1.f;
-        for (int i = 0; i < 8; i++) {
+       for (int i = 0; i < 8; i++) {
             note.start = (float) i;
             note.pitch = params[CV_PARAM + currentNode].getValue();
             if (params[QUANTIZE_TOGGLE_PARAM].getValue() == 1.f) {
@@ -400,7 +400,7 @@ struct Darius : Module {
 
     void resetPathTraveled(const ProcessArgs& args){
         pathTraveled[0] = 0;
-        for (int i = 1; i < 8; i++) pathTraveled[i] = -1;
+       for (size_t i = 1; i < 8; i++) pathTraveled[i] = -1;
     }
     
     void refreshSeed(const ProcessArgs& args){
@@ -419,7 +419,7 @@ struct Darius : Module {
         lastNode = 0;
         lightsReset = true;
         resetPathTraveled(args);
-        for (int i = 0; i < 36; i++)
+       for (size_t i = 0; i < 36; i++)
             outputs[GATE_OUTPUT + i].setVoltage(0.f);
         lcdStatus.lcdDirty = true;
         resetDelay = 0.f; // This starts the delay
@@ -703,8 +703,8 @@ struct Darius : Module {
 
         // Clean up by request only
         if (lightsReset) {
-            for (int i = 0; i < 36; i++) lights[CV_LIGHT + i].setBrightness( 0.f );
-            for (int i = 0; i < 8; i++) {
+           for (size_t i = 0; i < 36; i++) lights[CV_LIGHT + i].setBrightness( 0.f );
+           for (size_t i = 0; i < 8; i++) {
                 if (pathTraveled[i] >= 0) lights[CV_LIGHT + pathTraveled[i]].setBrightness( 1.f );
             }
             lightsReset = false;
@@ -716,25 +716,25 @@ struct Darius : Module {
         float brightness[36];
         // Light the outputs depending on amount of steps enabled
         brightness[0] = (stepFirst <= 1 && stepLast >= 1 ) ? 1.f : 0.f ;
-        for (int i = STEP2START; i < STEP3START; i++)
+       for (size_t i = STEP2START; i < STEP3START; i++)
             brightness[i] = (stepFirst <= 2 && stepLast >= 2 ) ? 1.f : 0.f;
-        for (int i = STEP3START; i < STEP4START; i++)
+       for (size_t i = STEP3START; i < STEP4START; i++)
             brightness[i] = (stepFirst <= 3 && stepLast >= 3 ) ? 1.f : 0.f;
-        for (int i = STEP4START; i < STEP5START; i++)
+       for (size_t i = STEP4START; i < STEP5START; i++)
             brightness[i] = (stepFirst <= 4 && stepLast >= 4 ) ? 1.f : 0.f;
-        for (int i = STEP5START; i < STEP6START; i++)
+       for (size_t i = STEP5START; i < STEP6START; i++)
             brightness[i] = (stepFirst <= 5 && stepLast >= 5 ) ? 1.f : 0.f;
-        for (int i = STEP6START; i < STEP7START; i++)
+       for (size_t i = STEP6START; i < STEP7START; i++)
             brightness[i] = (stepFirst <= 6 && stepLast >= 6 ) ? 1.f : 0.f;
-        for (int i = STEP7START; i < STEP8START; i++)
+       for (size_t i = STEP7START; i < STEP8START; i++)
             brightness[i] = (stepFirst <= 7 && stepLast >= 7 ) ? 1.f : 0.f;
-        for (int i = STEP8START; i < STEP9START; i++)
+       for (size_t i = STEP8START; i < STEP9START; i++)
             brightness[i] = (stepFirst <= 8 && stepLast >= 8 ) ? 1.f : 0.f;
         // And turn off nodes that are impossible to reach
-        for (int i = 0; i < 36; i++)
+       for (size_t i = 0; i < 36; i++)
             if (probabilities[i] == 0.f) brightness[i] = 0.f;
 
-        for (int i = 0; i < 36; i++)
+       for (size_t i = 0; i < 36; i++)
             lights[GATE_LIGHT + i].setBrightness(brightness[i]);
         
     }
@@ -916,7 +916,7 @@ struct Darius : Module {
         node = 0;
         lastNode = 0;
         pathTraveled[0] = 0;
-        for (int i = 1; i < 8; i++) pathTraveled[i] = -1;
+       for (size_t i = 1; i < 8; i++) pathTraveled[i] = -1;
         lightsReset = true;
         lcdMode = INIT_MODE;
         lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
@@ -1126,56 +1126,56 @@ struct DariusWidget : ModuleWidget {
         addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
         // The main area - lights, knobs and trigger outputs.
-        for (int i = 0; i < 1; i++) {
+       for (size_t i = 0; i < 1; i++) {
             addChild(createLight<AriaInputLight>(mm2px(Vec( 4.5, (16.0 + (6.5 * 7) + i * 13.0))), module, Darius::CV_LIGHT +    i));
             addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820TransparentCV>(mm2px(Vec( 4.5, (16.0 + (6.5 * 7) + i * 13.0))), module, Darius::CV_PARAM +    i, i));
             addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820Route>(mm2px(Vec(14.5, (16.0 + (6.5 * 7) + i * 13.0))), module, Darius::ROUTE_PARAM + i, i));
             addChild(createLight<AriaOutputLight>(mm2px(Vec( 9.5, (22.5 + (6.5 * 7) + i * 13.0))), module, Darius::GATE_LIGHT +  i));
             addOutput(createOutput<AriaJackTransparent>(mm2px(Vec( 9.5, (22.5 + (6.5 * 7) + i * 13.0))), module, Darius::GATE_OUTPUT + i));
         }
-        for (int i = 0; i < 2; i++) {
+       for (size_t i = 0; i < 2; i++) {
             addChild(createLight<AriaInputLight>(mm2px(Vec(24.5, (16.0 + (6.5 * 6) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP2START));
             addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820TransparentCV>(mm2px(Vec(24.5, (16.0 + (6.5 * 6) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP2START, i + STEP2START));
             addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820Route>(mm2px(Vec(34.5, (16.0 + (6.5 * 6) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP2START, i + STEP2START));
             addChild(createLight<AriaOutputLight>(mm2px(Vec(29.5, (22.5 + (6.5 * 6) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP2START));
             addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(29.5, (22.5 + (6.5 * 6) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP2START));
         }
-        for (int i = 0; i < 3; i++) {
+       for (size_t i = 0; i < 3; i++) {
             addChild(createLight<AriaInputLight>(mm2px(Vec(44.5, (16.0 + (6.5 * 5) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP3START));
             addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820TransparentCV>(mm2px(Vec(44.5, (16.0 + (6.5 * 5) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP3START, i + STEP3START));
             addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820Route>(mm2px(Vec(54.5, (16.0 + (6.5 * 5) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP3START, i + STEP3START));
             addChild(createLight<AriaOutputLight>(mm2px(Vec(49.5, (22.5 + (6.5 * 5) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP3START));
             addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(49.5, (22.5 + (6.5 * 5) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP3START));
         }
-        for (int i = 0; i < 4; i++) {
+       for (size_t i = 0; i < 4; i++) {
             addChild(createLight<AriaInputLight>(mm2px(Vec(64.5, (16.0 + (6.5 * 4) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP4START));
             addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820TransparentCV>(mm2px(Vec(64.5, (16.0 + (6.5 * 4) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP4START, i + STEP4START));
             addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820Route>(mm2px(Vec(74.5, (16.0 + (6.5 * 4) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP4START, i + STEP4START));
             addChild(createLight<AriaOutputLight>(mm2px(Vec(69.5, (22.5 + (6.5 * 4) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP4START));
             addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(69.5, (22.5 + (6.5 * 4) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP4START));
         }
-        for (int i = 0; i < 5; i++) {
+       for (size_t i = 0; i < 5; i++) {
             addChild(createLight<AriaInputLight>(mm2px(Vec(84.5, (16.0 + (6.5 * 3) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP5START));
             addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820TransparentCV>(mm2px(Vec(84.5, (16.0 + (6.5 * 3) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP5START, i + STEP5START));
             addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820Route>(mm2px(Vec(94.5, (16.0 + (6.5 * 3) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP5START, i + STEP5START));
             addChild(createLight<AriaOutputLight>(mm2px(Vec(89.5, (22.5 + (6.5 * 3) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP5START));
             addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(89.5, (22.5 + (6.5 * 3) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP5START));
         }
-        for (int i = 0; i < 6; i++) {
+       for (size_t i = 0; i < 6; i++) {
             addChild(createLight<AriaInputLight>(mm2px(Vec(104.5, (16.0 + (6.5 * 2) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP6START));
             addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820TransparentCV>(mm2px(Vec(104.5, (16.0 + (6.5 * 2) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP6START, i + STEP6START));
             addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820Route>(mm2px(Vec(114.5, (16.0 + (6.5 * 2) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP6START, i + STEP6START));
             addChild(createLight<AriaOutputLight>(mm2px(Vec(109.5, (22.5 + (6.5 * 2) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP6START));
             addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(109.5, (22.5 + (6.5 * 2) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP6START));
         }
-        for (int i = 0; i < 7; i++) {
+       for (size_t i = 0; i < 7; i++) {
             addChild(createLight<AriaInputLight>(mm2px(Vec(124.5, (16.0 + (6.5 * 1) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP7START));
             addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820TransparentCV>(mm2px(Vec(124.5, (16.0 + (6.5 * 1) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP7START, i + STEP7START));
             addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820Route>(mm2px(Vec(134.5, (16.0 + (6.5 * 1) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP7START, i + STEP7START));
             addChild(createLight<AriaOutputLight>(mm2px(Vec(129.5, (22.5 + (6.5 * 1) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP7START));
             addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(129.5, (22.5 + (6.5 * 1) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP7START));
         }
-        for (int i = 0; i < 8; i++) {
+       for (size_t i = 0; i < 8; i++) {
             addChild(createLight<AriaInputLight>(mm2px(Vec(144.5, (16.0 + (6.5 * 0) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP8START));
             addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820TransparentCV>(mm2px(Vec(144.5, (16.0 + (6.5 * 0) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP8START, i + STEP8START));
             addChild(createLight<AriaOutputLight>(mm2px(Vec(149.5, (22.5 + (6.5 * 0) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP8START));

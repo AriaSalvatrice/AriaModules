@@ -38,13 +38,13 @@ struct Spleet : Module {
 
     // Split without sorting, faster
     void split(const ProcessArgs& args) {
-        for (int i = 0; i < 4; i++) // First bank
+        for (size_t i = 0; i < 4; i++) // First bank
             outputs[SPLIT_OUTPUT + i].setVoltage(inputs[POLY_INPUT + 0].getVoltage(i));
         if (chainMode) { // Second bank depends on chain mode
-            for (int i = 4; i < 8; i++) 
+            for (size_t i = 4; i < 8; i++) 
                 outputs[SPLIT_OUTPUT + i].setVoltage(inputs[POLY_INPUT + 0].getVoltage(i));
         } else {
-            for (int i = 4; i < 8; i++)
+            for (size_t i = 4; i < 8; i++)
                 outputs[SPLIT_OUTPUT + i].setVoltage(inputs[POLY_INPUT + 1].getVoltage(i - 4));
         }
     }
@@ -52,7 +52,7 @@ struct Spleet : Module {
     // Split with sorting
     void splitSort(const ProcessArgs& args) {
         std::array<float, 8> splitVoltages;	// First bank, or both if chained
-        int connected = 0; // First bank, or both if chained
+        size_t connected = 0; // First bank, or both if chained
         std::array<float, 4> splitVoltagesSecond;	
         int connectedSecond = 0;
         
@@ -62,7 +62,7 @@ struct Spleet : Module {
         connectedSecond = inputs[POLY_INPUT + 1].getChannels();
                 
         // Fill arrays
-        for (int i = 0; i < 8; i++)
+        for (size_t i = 0; i < 8; i++)
             splitVoltages[i] = (i < connected) ? (inputs[POLY_INPUT + 0].getVoltage(i)) : 0.f;
         for (int i = 0; i < 4; i++)
             splitVoltagesSecond[i] = (i < connectedSecond) ? (inputs[POLY_INPUT + 1].getVoltage(i)) : 0.f;
@@ -70,9 +70,9 @@ struct Spleet : Module {
         // Sort and output
         std::sort(splitVoltages.begin(), splitVoltages.begin() + connected);
         std::sort(splitVoltagesSecond.begin(), splitVoltagesSecond.begin() + connectedSecond);
-        for (int i = 0; i < 4; i++)
+        for (size_t i = 0; i < 4; i++)
             outputs[SPLIT_OUTPUT + i].setVoltage(splitVoltages[i]);	
-        for (int i = 0; i < 4; i++)
+        for (size_t i = 0; i < 4; i++)
             outputs[SPLIT_OUTPUT + i + 4].setVoltage( (chainMode) ? (splitVoltages[i + 4]) : (splitVoltagesSecond[i]) );
     }
     

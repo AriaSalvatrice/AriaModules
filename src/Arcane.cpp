@@ -86,38 +86,38 @@ struct ArcaneBase : Module {
         int patternBnum = 0;
         json_t* patternBnumJ = json_object_get(rootJ, "patternB");
         if (patternBnumJ) patternBnum = json_integer_value(patternBnumJ);
-        for (int i = 0; i < 16; ++i)
+        for (size_t i = 0; i < 16; ++i)
             patternB[15 - i] = (patternBnum >> i) & 1;
         
         int patternCnum = 0;
         json_t* patternCnumJ = json_object_get(rootJ, "patternC");
         if (patternCnumJ) patternCnum = json_integer_value(patternCnumJ);
-        for (int i = 0; i < 16; ++i)
+        for (size_t i = 0; i < 16; ++i)
             patternC[15 - i] = (patternCnum >> i) & 1;
         
         int patternDnum = 0;
         json_t* patternDnumJ = json_object_get(rootJ, "patternD");
         if (patternDnumJ) patternDnum = json_integer_value(patternDnumJ);
-        for (int i = 0; i < 16; ++i)
+        for (size_t i = 0; i < 16; ++i)
             patternD[15 - i] = (patternDnum >> i) & 1;
         
         int patternEnum = 0;
         json_t* patternEnumJ = json_object_get(rootJ, "patternE");
         if (patternEnumJ) patternEnum = json_integer_value(patternEnumJ);
-        for (int i = 0; i < 16; ++i)
+        for (size_t i = 0; i < 16; ++i)
             patternE[15 - i] = (patternEnum >> i) & 1;
         
         int scaleNum = 0;
         json_t* scaleNumJ = json_object_get(rootJ, "scale");
         if (scaleNumJ) scaleNum = json_integer_value(scaleNumJ);
-        for (int i = 0; i < 12; ++i){
+        for (size_t i = 0; i < 12; ++i){
             scale[11 - i] = (scaleNum >> i) & 1;
             lcdStatus.pianoDisplay[11 - i] = (scaleNum >> i) & 1;
         }
         
         json_t* notePatternJ = json_object_get(rootJ, "notePattern");		
         if (notePatternJ) {
-            for (int i = 0; i < 8; i++) {
+            for (size_t i = 0; i < 8; i++) {
                 json_t* noteJ = json_array_get(notePatternJ, i);
                 if (noteJ)
                     notePattern[i] = json_integer_value(noteJ);
@@ -254,17 +254,17 @@ struct Arcane : ArcaneBase {
         outputs[ARCANA_OUTPUT].setVoltage( arcana * 0.1f );
         outputs[BPM_NUM_OUTPUT].setVoltage (log2f(1.0f / (120.f / bpm)));
         
-        int notesInScale = 0;
-        for (int i = 0; i < 12; i++)
+        size_t notesInScale = 0;
+        for (size_t i = 0; i < 12; i++)
             if (scale[i]) notesInScale++;
-        for (int i = 0; i < 8; i++) {
+        for (size_t i = 0; i < 8; i++) {
             outputs[SCALE_OUTPUT].setVoltage( (notePattern[i] / 12.f), i);
             float paddedOutput = i < notesInScale ? (notePattern[i] / 12.f) : (notePattern[i] / 12.f + 1.f);
             outputs[SCALE_PADDED_OUTPUT].setVoltage(paddedOutput, i);
         }
         outputs[SCALE_OUTPUT].setChannels(notesInScale);
         outputs[SCALE_PADDED_OUTPUT].setChannels(8);
-        for (int i = 0; i < 12; i++)
+        for (size_t i = 0; i < 12; i++)
             outputs[EXTERNAL_SCALE_OUTPUT].setVoltage( (scale[i]) ? 8.f : 0.f, i);
         outputs[EXTERNAL_SCALE_OUTPUT].setChannels(12);
     }
@@ -619,7 +619,7 @@ struct Aleister : ArcaneBase {
     void sendVoltage(const ProcessArgs& args) {
         // If the user connects only the first cable, assume they want it polyphonic
         bool polyBRequested = true, polyCRequested = true, polyDRequested = true, polyERequested = true;
-        for (int i = 1; i < 16; i++) {
+        for (size_t i = 1; i < 16; i++) {
             if ( outputs[PATTERN_B_OUTPUT + i].isConnected() ) polyBRequested = false;
             if ( outputs[PATTERN_C_OUTPUT + i].isConnected() ) polyCRequested = false;
             if ( outputs[PATTERN_D_OUTPUT + i].isConnected() ) polyDRequested = false;
@@ -629,37 +629,37 @@ struct Aleister : ArcaneBase {
         // setChannels(16) throws warnings, but works normally.
         // https://github.com/VCVRack/Rack/issues/1524 - compiler bug
         if (polyBRequested) {
-            for (int i = 0; i < 16; i++) outputs[PATTERN_B_OUTPUT].setVoltage(patternB[i] ? 10.f : 0.f, i);
+            for (size_t i = 0; i < 16; i++) outputs[PATTERN_B_OUTPUT].setVoltage(patternB[i] ? 10.f : 0.f, i);
             outputs[PATTERN_B_OUTPUT].setChannels(16);
         } else {
-            for (int i = 0; i < 16; i++) outputs[PATTERN_B_OUTPUT + i].setVoltage(patternB[i] ? 10.f : 0.f);
+            for (size_t i = 0; i < 16; i++) outputs[PATTERN_B_OUTPUT + i].setVoltage(patternB[i] ? 10.f : 0.f);
             outputs[PATTERN_B_OUTPUT].setChannels(0);
         }
         if (polyCRequested) {
-            for (int i = 0; i < 16; i++) outputs[PATTERN_C_OUTPUT].setVoltage(patternC[i] ? 10.f : 0.f, i);
+            for (size_t i = 0; i < 16; i++) outputs[PATTERN_C_OUTPUT].setVoltage(patternC[i] ? 10.f : 0.f, i);
             outputs[PATTERN_C_OUTPUT].setChannels(16);
         } else {
-            for (int i = 0; i < 16; i++) outputs[PATTERN_C_OUTPUT + i].setVoltage(patternC[i] ? 10.f : 0.f);
+            for (size_t i = 0; i < 16; i++) outputs[PATTERN_C_OUTPUT + i].setVoltage(patternC[i] ? 10.f : 0.f);
             outputs[PATTERN_C_OUTPUT].setChannels(0);
         }
         if (polyDRequested) {
-            for (int i = 0; i < 16; i++) outputs[PATTERN_D_OUTPUT].setVoltage(patternD[i] ? 10.f : 0.f, i);
+            for (size_t i = 0; i < 16; i++) outputs[PATTERN_D_OUTPUT].setVoltage(patternD[i] ? 10.f : 0.f, i);
             outputs[PATTERN_D_OUTPUT].setChannels(16);
         } else {
-            for (int i = 0; i < 16; i++) outputs[PATTERN_D_OUTPUT + i].setVoltage(patternD[i] ? 10.f : 0.f);
+            for (size_t i = 0; i < 16; i++) outputs[PATTERN_D_OUTPUT + i].setVoltage(patternD[i] ? 10.f : 0.f);
             outputs[PATTERN_D_OUTPUT].setChannels(0);
         }
         if (polyERequested) {
-            for (int i = 0; i < 16; i++) outputs[PATTERN_E_OUTPUT].setVoltage(patternE[i] ? 10.f : 0.f, i);
+            for (size_t i = 0; i < 16; i++) outputs[PATTERN_E_OUTPUT].setVoltage(patternE[i] ? 10.f : 0.f, i);
             outputs[PATTERN_E_OUTPUT].setChannels(16);
         } else {
-            for (int i = 0; i < 16; i++) outputs[PATTERN_E_OUTPUT + i].setVoltage(patternE[i] ? 10.f : 0.f);
+            for (size_t i = 0; i < 16; i++) outputs[PATTERN_E_OUTPUT + i].setVoltage(patternE[i] ? 10.f : 0.f);
             outputs[PATTERN_E_OUTPUT].setChannels(0);
         }
     }
 
     void processLights(const ProcessArgs& args) {
-        for (int i = 0; i < 16; i++) {
+        for (size_t i = 0; i < 16; i++) {
             lights[PATTERN_B_LIGHT + i].setBrightness(patternB[i] ? 1.f : 0.f);
             lights[PATTERN_C_LIGHT + i].setBrightness(patternC[i] ? 1.f : 0.f);
             lights[PATTERN_D_LIGHT + i].setBrightness(patternD[i] ? 1.f : 0.f);
@@ -676,14 +676,14 @@ struct Aleister : ArcaneBase {
     }
     
     // Turn on a step and turn off the others
-    void turnOnPatternLight(int light, int step, const ProcessArgs& args) {
-        for (int i = 0; i < 16; i++) {
+    void turnOnPatternLight(size_t light, size_t step, const ProcessArgs& args) {
+        for (size_t i = 0; i < 16; i++) {
             lights[light + i ].setBrightness( (i == step) ? 1.f : 0.f);
         }
     }
     
     void turnOffPatternLight(int light, const ProcessArgs& args) {
-        for (int i = 0; i < 16; i++) {
+        for (size_t i = 0; i < 16; i++) {
             lights[light + i].setBrightness(0.f);
         }
     }
@@ -996,7 +996,7 @@ struct AleisterWidget : ModuleWidget {
         float startX = 3.2;
         float startY = 18.0;
         
-        for (int i = 0; i < 8; i++) {
+        for (size_t i = 0; i < 8; i++) {
             addChild(createLight<AriaOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 00.f)), module, Aleister::PATTERN_B_LIGHT + i + 0));
             addChild(createLight<AriaOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 08.f)), module, Aleister::PATTERN_B_LIGHT + i + 8));
             addChild(createLight<AriaOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 24.f)), module, Aleister::PATTERN_C_LIGHT + i + 0));

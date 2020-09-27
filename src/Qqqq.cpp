@@ -121,7 +121,7 @@ struct Qqqq : Module {
         configParam(NOTE_PARAM + 11, 0.f, 1.f, 0.f, "B");
         configParam(KEY_PARAM, 0.f, 11.f, 0.f, "Key");
         configParam(SCALE_PARAM, 0.f, (float) Quantizer::NUM_SCALES - 1, 2.f, "Scale");
-        for (int i = 0; i < 4; i++){
+       for (size_t i = 0; i < 4; i++){
             configParam(SCALING_PARAM + i, -100.f, 300.f, 100.f, "Scaling", "%");
             configParam(OFFSET_PARAM + i, -10.f, 10.f, 0.f, "Offset", "V");
             configParam(TRANSPOSE_PARAM + i, -12.f, 12.f, 0.f, "Transpose");
@@ -134,7 +134,7 @@ struct Qqqq : Module {
         configParam(VISUALIZE_PARAM + 2, 0.f, 1.f, 0.f, "Visualize on Piano");
         configParam(VISUALIZE_PARAM + 3, 0.f, 1.f, 0.f, "Visualize on Piano");
         configParam(SCENE_BUTTON_PARAM, 0.f, 1.f, 0.f, "Scene #1");
-        for (int i = 1; i < 16; i++) configParam(SCENE_BUTTON_PARAM + i, 0.f, 1.f, 0.f, "Scene #" + std::to_string(i + 1));
+       for (size_t i = 1; i < 16; i++) configParam(SCENE_BUTTON_PARAM + i, 0.f, 1.f, 0.f, "Scene #" + std::to_string(i + 1));
         processDivider.setDivision(PROCESSDIVIDER);
         lcdDivider.setDivision(LCDDIVIDER);
         lcdMode = INIT_MODE;
@@ -142,7 +142,7 @@ struct Qqqq : Module {
         lcdStatus.lcdText1 = " Q- ...";
         lcdStatus.lcdLayout = Lcd::TEXT1_LAYOUT;
         // Initialize
-        for (int i = 0; i < 16; i++) { for (int j = 0; j < 12; j++) { scale[i][j] = false; }}
+       for (size_t i = 0; i < 16; i++) { for (int j = 0; j < 12; j++) { scale[i][j] = false; }}
         // C Minor in first scene
         scale[0][0] = true; scale[0][2] = true; scale[0][3] = true; scale[0][5] = true; scale[0][7] = true; scale[0][8] = true; scale[0][10] = true;
         // Expander
@@ -158,7 +158,7 @@ struct Qqqq : Module {
         json_object_set_new(rootJ, "scene", json_integer(scene));
 
         json_t* scenesJ = json_array();
-        for (int i = 0; i < 16; i++) {
+       for (size_t i = 0; i < 16; i++) {
             json_t* sceneJ = json_array();
             for (int j = 0; j < 12; j++) {
                 json_array_append_new(sceneJ, json_boolean(scale[i][j]));
@@ -179,7 +179,7 @@ struct Qqqq : Module {
 
         json_t* scenesJ = json_object_get(rootJ, "scenes");
         if (scenesJ){
-            for (int i = 0; i < 16; i++) {
+           for (size_t i = 0; i < 16; i++) {
                 json_t* sceneJ = json_array_get(scenesJ, i);
                 if (sceneJ) {
                     for (int j = 0; j < 12; j++) {
@@ -194,7 +194,7 @@ struct Qqqq : Module {
     }
 
     void onReset() override {
-        for (int i = 1; i < 16; i++) {
+       for (size_t i = 1; i < 16; i++) {
             for (int j = 0; j < 12; j++) {
                 scale[i][j] = false;
             }
@@ -212,7 +212,7 @@ struct Qqqq : Module {
     }
 
     void onRandomize() override {
-        for (int i = 0; i < 16; i++) {
+       for (size_t i = 0; i < 16; i++) {
             for (int j = 0; j < 12; j++) {
                 // Should produce about 7 notes per scale
                 scale[i][j] = (random::uniform() > 0.42f) ? true : false;
@@ -238,7 +238,7 @@ struct Qqqq : Module {
             lcdMode = INIT_MODE;
             lcdStatus.lcdDirty = true;
         } else {
-            for (int i = 0; i < 16; i++) {
+           for (size_t i = 0; i < 16; i++) {
                 for (int j = 0; j < 12; j++) {
                     scale[i][j] = false;
                 }
@@ -259,7 +259,7 @@ struct Qqqq : Module {
             lcdLastInteraction = 0.f;
             lcdMode = INIT_MODE;
             lcdStatus.lcdDirty = true;
-            for (int i = 1; i < 16; i++) {
+           for (size_t i = 1; i < 16; i++) {
                 params[SCENE_BUTTON_PARAM + i].setValue(0.f);
             }
             scene = 0;
@@ -270,7 +270,7 @@ struct Qqqq : Module {
 
     // Returns the last non-empty scene
     int getLastScene() {
-        for (int i = 15; i >=0; i--) {
+       for (int i = 15; i >=0; i--) {
             for (int j = 0; j < 12; j++) {
                 if (scale[i][j] == true) return i;
             }
@@ -309,7 +309,7 @@ struct Qqqq : Module {
     void copyPortableSequence(){
         PortableSequence::Sequence sequence;
         sequence.length = (float) getLastScene() + 1;
-        for (int i = 0; i <= getLastScene(); i++) {
+       for (int i = 0; i <= getLastScene(); i++) {
             for (int j = 0; j < 12; j++) {
                 if (scale[i][j] == true) {
                     PortableSequence::Note note;
@@ -336,14 +336,14 @@ struct Qqqq : Module {
         if (sequence.notes.size() < 1) return;
 
         // Reset scales
-        for (int i = 0; i < 16; i++) {
+       for (size_t i = 0; i < 16; i++) {
             for (int j = 0; j < 12; j++) {
                 scale[i][j] = false;
             }
         }
 
         int position = 0;
-        for (int i = 0; i < 16; i++) {
+       for (size_t i = 0; i < 16; i++) {
             float start = sequence.notes[position].start;
             int remaining = sequence.notes.size() - position;
             if (remaining > 0) {
@@ -410,7 +410,7 @@ struct Qqqq : Module {
             // We are an expander
             lights[EXPANDER_IN_LIGHT].setBrightness(1.f);
             bool *message = (bool*) leftExpander.consumerMessage;
-            for (int i = 0; i < 12; i++) receivedExpanderScale[i] = message[i];
+           for (size_t i = 0; i < 12; i++) receivedExpanderScale[i] = message[i];
             isExpander = true;
         } else {
             // We are not an expander
@@ -425,7 +425,7 @@ struct Qqqq : Module {
             // We have an expander
             lights[EXPANDER_OUT_LIGHT].setBrightness(1.f);
             bool *message = (bool*) rightExpander.module->leftExpander.producerMessage;			
-            for (int i = 0; i < 12; i++) message[i] = scale[scene][i];
+           for (size_t i = 0; i < 12; i++) message[i] = scale[scene][i];
             rightExpander.module->leftExpander.messageFlipRequested = true;
         } else {
             // We have no expander
@@ -453,7 +453,7 @@ struct Qqqq : Module {
 
         // Button selection
         if (! inputs[SCENE_INPUT].isConnected()) {
-            for (int i = 0; i < 16; i++) {
+           for (int i = 0; i < 16; i++) {
                 if ( params[SCENE_BUTTON_PARAM + i].getValue() == 1.f && i != lastScene ) {
                     scene = i;
                     sceneChanged = true;
@@ -466,7 +466,7 @@ struct Qqqq : Module {
         }
 
         // You shouldn't be able to turn on multiple scenes at once, or turn off the current one
-        for (int i = 0; i < 16; i++) params[SCENE_BUTTON_PARAM + i].setValue( (i == scene) ? 1.f : 0.f );
+       for (int i = 0; i < 16; i++) params[SCENE_BUTTON_PARAM + i].setValue( (i == scene) ? 1.f : 0.f );
 
         lastScene = scene;
     }
@@ -474,7 +474,7 @@ struct Qqqq : Module {
 
     // Update the piano display to match the state of the internal scale if necessary
     void scaleToPiano() {
-        for (int i = 0; i < 12; i++) {
+       for (size_t i = 0; i < 12; i++) {
             params[NOTE_PARAM + i].setValue((scale[scene][i]) ? 1.f : 0.f);
         }
     }
@@ -482,7 +482,7 @@ struct Qqqq : Module {
 
     // Update the internal scale to match the state of the piano display
     void pianoToScale() {
-        for (int i = 0; i < 12; i++) scale[scene][i] = (params[NOTE_PARAM + i].getValue() == 1.f)  ? true : false;
+       for (size_t i = 0; i < 12; i++) scale[scene][i] = (params[NOTE_PARAM + i].getValue() == 1.f)  ? true : false;
     }
 
 
@@ -506,7 +506,7 @@ struct Qqqq : Module {
 
         // External scale: was it just connected?
         if (!lastExtInConnected && inputs[EXT_SCALE_INPUT].isConnected()) {
-            for (int i = 0; i < 12; i++){
+           for (size_t i = 0; i < 12; i++){
                 scale[scene][i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.1f) ? true : false;
             }
             scaleToPiano();
@@ -515,7 +515,7 @@ struct Qqqq : Module {
         // External scale: has it changed?
         std::array<bool, 12> currentExternalScale;
         if (inputs[EXT_SCALE_INPUT].isConnected()) {
-            for (int i = 0; i < 12; i++) currentExternalScale[i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.1f) ? true : false;
+           for (size_t i = 0; i < 12; i++) currentExternalScale[i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.1f) ? true : false;
             if (currentExternalScale != lastExternalScale) {
                 lastExternalScale = currentExternalScale;
                 scale[scene] = currentExternalScale;
@@ -539,7 +539,7 @@ struct Qqqq : Module {
 
     void updateExternalOutput() {
         if (outputs[EXT_SCALE_OUTPUT].isConnected()){
-            for (int i = 0; i < 12; i++) {
+           for (int i = 0; i < 12; i++) {
                 if (scale[scene][i]) {
                     if ((int) params[KEY_PARAM].getValue() == i) {
                         outputs[EXT_SCALE_OUTPUT].setVoltage(10.f, i);
@@ -557,16 +557,16 @@ struct Qqqq : Module {
 
 
     void cleanLitKeys() {
-        for (int i =  0; i < 12; i++) litKeys[i] = false; 
+       for (size_t i =  0; i < 12; i++) litKeys[i] = false; 
     }
 
 
     // When there is no CV input, use the column to the left instead.
     void processInputs() {
         inputChannels[0] = inputs[CV_INPUT + 0].getChannels();
-        for (int i = 0; i < inputChannels[0]; i++) inputVoltage[0][i] = inputs[CV_INPUT + 0].getVoltage(i);
+       for (int i = 0; i < inputChannels[0]; i++) inputVoltage[0][i] = inputs[CV_INPUT + 0].getVoltage(i);
 
-        for (int i = 1; i < 4; i++) {
+       for (size_t i = 1; i < 4; i++) {
             inputChannels[i] = inputs[CV_INPUT + i].getChannels();
             if (inputChannels[i] > 0) {
                 for (int j = 0; j < inputChannels[i]; j++) inputVoltage[i][j] = inputs[CV_INPUT + i].getVoltage(j);
@@ -603,7 +603,7 @@ struct Qqqq : Module {
         if (sh) shChannels[col] = channels;
 
         // Iterate channels
-        for (int i = 0; i < channels; i++) {
+       for (int i = 0; i < channels; i++) {
 
             // Only process if S&H this sample
             if (sh) {

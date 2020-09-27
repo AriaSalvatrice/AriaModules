@@ -40,7 +40,7 @@ struct Splirge : Module {
     // Merge without sorting, faster
     void merge(const ProcessArgs& args) {
         int lastMergeChannel = 0;
-        for (int i = 0; i < 4; i++) {
+        for (size_t i = 0; i < 4; i++) {
             if (inputs[MERGE_INPUT + i].isConnected()) {
                 outputs[POLY_OUTPUT].setVoltage(inputs[MERGE_INPUT + i].getVoltage(), i);
                 lastMergeChannel = i+1;
@@ -53,15 +53,15 @@ struct Splirge : Module {
 
     // Split without sorting, faster
     void split(const ProcessArgs& args) {
-        for (int i = 0; i < 4; i++)
+        for (size_t i = 0; i < 4; i++)
             outputs[SPLIT_OUTPUT + i].setVoltage( (inputs[POLY_INPUT].isConnected()) ? inputs[POLY_INPUT].getVoltage(i) : inputs[MERGE_INPUT + i].getVoltage());
     }
 
     // Merge with sorting
     void mergeSort(const ProcessArgs& args) {
         std::array<float, 4> mergedVoltages;
-        int connected = 0;
-        for (int i = 0; i < 4; i++) {
+        size_t connected = 0;
+        for (size_t i = 0; i < 4; i++) {
             if (inputs[MERGE_INPUT + i].isConnected()) {
                 mergedVoltages[i] = inputs[MERGE_INPUT + i].getVoltage();
                 connected = i + 1;
@@ -70,7 +70,7 @@ struct Splirge : Module {
             }
         }
         std::sort(mergedVoltages.begin(), mergedVoltages.begin() + connected);		
-        for (int i = 0; i < connected; i++)
+        for (size_t i = 0; i < connected; i++)
             outputs[POLY_OUTPUT].setVoltage(mergedVoltages[i], i);
         outputs[POLY_OUTPUT].setChannels(connected);
     }
@@ -78,24 +78,24 @@ struct Splirge : Module {
     // Split with sorting
     void splitSort(const ProcessArgs& args) {
         std::array<float, 4> splitVoltages;	
-        int connected = 0;
+        size_t connected = 0;
 
         // How many connected inputs?
         if (inputs[POLY_INPUT].isConnected()) {
             connected = inputs[POLY_INPUT].getChannels();
         } else { // Internal default wiring
-            for (int i = 0; i < 4; i++)
+            for (size_t i = 0; i < 4; i++)
                 connected = (inputs[MERGE_INPUT + i].isConnected()) ? i + 1 : connected;
         }
         
         // Fill array
-        for (int i = 0; i < 4; i++)
+        for (size_t i = 0; i < 4; i++)
             if (i < connected)
                 splitVoltages[i] = (inputs[POLY_INPUT].isConnected()) ? inputs[POLY_INPUT].getVoltage(i) : inputs[MERGE_INPUT + i].getVoltage();
         
         // Sort and output
         std::sort(splitVoltages.begin(), splitVoltages.begin() + connected);
-        for (int i = 0; i < 4; i++)
+        for (size_t i = 0; i < 4; i++)
             outputs[SPLIT_OUTPUT + i].setVoltage(splitVoltages[i]);	
     }
     
@@ -106,7 +106,7 @@ struct Splirge : Module {
         // Merge output
         int mergeInputCount = 0;
         int lastInput = 0;
-        for (int i = 0; i < 4; i++)
+        for (size_t i = 0; i < 4; i++)
             if (inputs[MERGE_INPUT + i].isConnected()){
                 mergeInputCount++;
                 lastInput = i;
