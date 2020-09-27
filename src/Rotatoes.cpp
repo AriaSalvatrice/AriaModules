@@ -46,7 +46,12 @@ struct Rotatoes : Module {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
         for(size_t i = 0; i < KNOBS; i++){
-            configParam(ROTATO_PARAM + i, 0.f, 1.f, 0.f, "Rotato " + std::to_string(i + 1));
+            if (KNOBS == 1) {
+                // If there's only one, it's a grabby, not a rotato.
+                configParam(ROTATO_PARAM, 0.f, 1.f, 0.f, "Grabby");
+            } else {
+                configParam(ROTATO_PARAM + i, 0.f, 1.f, 0.f, "Rotato " + std::to_string(i + 1));
+            }
             min[i] = 0.f;
             max[i] = 10.f;
             quantize[i] = true; // True = Auto if Poly External Scale present.

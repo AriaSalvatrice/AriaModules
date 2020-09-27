@@ -412,7 +412,6 @@ struct Darius : Module {
     }
 
     // Reset to the first step
-    // FIXME: 1 ms wait #36
     void reset(const ProcessArgs& args){
         step = 0;
         node = 0;
@@ -597,7 +596,9 @@ struct Darius : Module {
             if (forceUp or forceDown) {
                 if (forceUp) {
                     if (step == 1) {
-                        node = 1; // FIXME: This check prevents issue #21 but I don't understand why
+                        /* NOTE: This check prevents issue #21 but I don't understand why.
+                           Not gonna bother to figure out this old bad code. */
+                        node = 1; 
                     } else {
                         node = node + step;
                     }
@@ -628,7 +629,8 @@ struct Darius : Module {
     void nodeBack(const ProcessArgs& args){
         lightsReset = true;
         node = pathTraveled[step];
-        // FIXME: This conditional avoids a bizarre problem where randomSeed goes NaN. Not sure what's exactly going on!!
+        // NOTE: This conditional avoids a bizarre problem where randomSeed goes NaN.
+        // Not sure what's exactly going on, not very eager to figure out this old code.
         if (step < 7) pathTraveled[step + 1] = -1; 
         lastNode = node;
         lcdStatus.lcdDirty = true;
