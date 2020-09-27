@@ -44,6 +44,10 @@ struct Smerge : Module {
     
     // Merge without sorting, faster
     void merge() {
+
+        // Don't waste time if there's no output connected
+        if (!outputs[POLY_OUTPUT].isConnected()) return;
+
         int lastMergeChannel = 0;
         for (size_t i = 0; i < 16; i++) {
             if (inputs[MERGE_INPUT + i].isConnected()) {

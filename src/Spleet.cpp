@@ -55,6 +55,7 @@ struct Spleet : Module {
         }
     }
     
+
     // Split with sorting
     void splitSort() {
         std::array<float, 8> splitVoltages;	// First bank, or both if chained

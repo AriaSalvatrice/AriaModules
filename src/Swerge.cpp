@@ -44,6 +44,9 @@ struct Swerge : Module {
     // Merge without sorting, faster
     void merge() {
         int lastMergeChannel = 0;
+
+        // Don't waste time if there's no output connected
+        if (!outputs[POLY_OUTPUT].isConnected() && !outputs[POLY_OUTPUT + 1].isConnected()) return;
         
         // Set first bank normally
         for (size_t i = 0; i < 4; i++) {
@@ -85,7 +88,10 @@ struct Swerge : Module {
     void mergeSort() {
         std::array<float, 8> mergedVoltages;
         size_t connected = 0;
-        
+
+        // Don't waste time if there's no output connected
+        if (!outputs[POLY_OUTPUT].isConnected() && !outputs[POLY_OUTPUT + 1].isConnected()) return;
+
         // Fist bank normally
         connected = 0;
         for (size_t i = 0; i < 4; i++) {

@@ -45,6 +45,10 @@ struct Splirge : Module {
     
     // Merge without sorting, faster
     void merge() {
+
+        // Don't waste time if there's no output connected
+        if (!outputs[POLY_OUTPUT].isConnected()) return;
+
         int lastMergeChannel = 0;
         for (size_t i = 0; i < 4; i++) {
             if (inputs[MERGE_INPUT + i].isConnected()) {
@@ -59,14 +63,26 @@ struct Splirge : Module {
 
     // Split without sorting, faster
     void split() {
+
+        // Don't waste time if there's no output connected
+        if (   !outputs[SPLIT_OUTPUT].isConnected()     && !outputs[SPLIT_OUTPUT + 1].isConnected()
+            && !outputs[SPLIT_OUTPUT + 2].isConnected() && !outputs[SPLIT_OUTPUT + 3].isConnected()) {
+             return;
+        }
+
         for (size_t i = 0; i < 4; i++)
             outputs[SPLIT_OUTPUT + i].setVoltage( (inputs[POLY_INPUT].isConnected()) ? inputs[POLY_INPUT].getVoltage(i) : inputs[MERGE_INPUT + i].getVoltage());
     }
 
     // Merge with sorting
     void mergeSort() {
+
+        // Don't waste time if there's no output connected
+        if (!outputs[POLY_OUTPUT].isConnected()) return;
+
         std::array<float, 4> mergedVoltages;
         size_t connected = 0;
+
         for (size_t i = 0; i < 4; i++) {
             if (inputs[MERGE_INPUT + i].isConnected()) {
                 mergedVoltages[i] = inputs[MERGE_INPUT + i].getVoltage();
@@ -81,8 +97,10 @@ struct Splirge : Module {
         outputs[POLY_OUTPUT].setChannels(connected);
     }
 
+
     // Split with sorting
     void splitSort() {
+
         std::array<float, 4> splitVoltages;	
         size_t connected = 0;
 
