@@ -3,6 +3,12 @@ This program is free software: you can redistribute it and/or modify it under th
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
+
+
+// Warning - this module was created with very little C++ experience, and features were 
+// added to it later without regard for code quality. This is maintained exploratory code, not good design.
+
+
 #include "plugin.hpp"
 
 namespace Splirge {
@@ -38,7 +44,7 @@ struct Splirge : Module {
     }
     
     // Merge without sorting, faster
-    void merge(const ProcessArgs& args) {
+    void merge() {
         int lastMergeChannel = 0;
         for (size_t i = 0; i < 4; i++) {
             if (inputs[MERGE_INPUT + i].isConnected()) {
@@ -52,13 +58,13 @@ struct Splirge : Module {
     }
 
     // Split without sorting, faster
-    void split(const ProcessArgs& args) {
+    void split() {
         for (size_t i = 0; i < 4; i++)
             outputs[SPLIT_OUTPUT + i].setVoltage( (inputs[POLY_INPUT].isConnected()) ? inputs[POLY_INPUT].getVoltage(i) : inputs[MERGE_INPUT + i].getVoltage());
     }
 
     // Merge with sorting
-    void mergeSort(const ProcessArgs& args) {
+    void mergeSort() {
         std::array<float, 4> mergedVoltages;
         size_t connected = 0;
         for (size_t i = 0; i < 4; i++) {
@@ -76,7 +82,7 @@ struct Splirge : Module {
     }
 
     // Split with sorting
-    void splitSort(const ProcessArgs& args) {
+    void splitSort() {
         std::array<float, 4> splitVoltages;	
         size_t connected = 0;
 
@@ -99,7 +105,7 @@ struct Splirge : Module {
             outputs[SPLIT_OUTPUT + i].setVoltage(splitVoltages[i]);	
     }
     
-    void updateLeds(const ProcessArgs& args) {
+    void updateLeds() {
         // Chain light
         lights[CHAIN_LIGHT].setBrightness( (inputs[POLY_INPUT].isConnected())? 0.f : 1.f);
 
@@ -129,14 +135,14 @@ struct Splirge : Module {
 
     void process(const ProcessArgs& args) override {
         if (params[SORT_PARAM].getValue()) {
-            mergeSort(args);
-            splitSort(args);
+            mergeSort();
+            splitSort();
         } else {
-            merge(args);
-            split(args);
+            merge();
+            split();
         }	
         if (ledDivider.process())
-            updateLeds(args);
+            updateLeds();
     }
 };
 

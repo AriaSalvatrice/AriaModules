@@ -250,7 +250,7 @@ struct Arcane : ArcaneBase {
     bool cardDirty = true;
     int cardDelayCounter = 0;
         
-    void sendStaticVoltage(const ProcessArgs& args) {
+    void sendStaticVoltage() {
         outputs[ARCANA_OUTPUT].setVoltage( arcana * 0.1f );
         outputs[BPM_NUM_OUTPUT].setVoltage (log2f(1.0f / (120.f / bpm)));
         
@@ -270,7 +270,7 @@ struct Arcane : ArcaneBase {
     }
     
     
-    void processReset(const ProcessArgs& args){
+    void processReset(){
         if (resetCvTrigger.process(inputs[RESET_INPUT].getVoltage()) or resetButtonTrigger.process(params[RESET_PARAM].getValue())){
             phase = 0.f;
             phaseCounter = 0;
@@ -288,7 +288,7 @@ struct Arcane : ArcaneBase {
         }
     }
     
-    void processRunStatus(const ProcessArgs& args){
+    void processRunStatus(){
         if (runCvTrigger.process(inputs[RUN_INPUT].getVoltage())){
             running = !running;
             params[RUN_PARAM].setValue(running);
@@ -343,7 +343,7 @@ struct Arcane : ArcaneBase {
         pulseThirtySecond = pulseThirtySecondGenerator.process(args.sampleTime);
     }
 
-    void sendClock(const ProcessArgs& args) {
+    void sendClock() {
         if (params[PULSE_RAMP_PARAM].getValue()) { // Ramp
             outputs[BPM_1_OUTPUT].setVoltage(  ((phase + phaseCounter)      / 512.f * 2.5f) + quarterInBarCounter * 2.5f );
             outputs[BPM_4_OUTPUT].setVoltage(  (phase + phaseCounter)       / 512.f * 10.f );  
@@ -361,7 +361,7 @@ struct Arcane : ArcaneBase {
     
     // Yeah I know, copy-paste cowgirl coding in here. But it works, punk. 
     // This is where the bulk of the CPU time goes. Can I improve it? I don't see how, seems unsafe to skip steps on a clock.
-    void sendPatterns(const ProcessArgs& args) {
+    void sendPatterns() {
         outputs[PATTERN_B_32_OUTPUT].setVoltage( (pulseThirtySecond and patternB[thirtySecondCounter]) ? 10.f : 0.f );
         outputs[PATTERN_C_32_OUTPUT].setVoltage( (pulseThirtySecond and patternC[thirtySecondCounter]) ? 10.f : 0.f );
         outputs[PATTERN_D_32_OUTPUT].setVoltage( (pulseThirtySecond and patternD[thirtySecondCounter]) ? 10.f : 0.f );
@@ -388,7 +388,7 @@ struct Arcane : ArcaneBase {
         outputs[PATTERN_E_1_OUTPUT].setVoltage(  (pulseBar          and patternE[barCounter])          ? 10.f : 0.f );		
     }
     
-    void processExpander(const ProcessArgs& args) {
+    void processExpander() {
         if (rightExpander.module and rightExpander.module->model == modelAleister) {
             lights[EXPANDER_LIGHT].setBrightness(1.f);
             
@@ -548,14 +548,14 @@ struct Arcane : ArcaneBase {
     void process(const ProcessArgs& args) override {
         if (!jsonParsed and readJsonDivider.process()) jsonParsed = readTodaysFortune();
         if (jsonParsed) {
-            if (refreshDivider.process()) sendStaticVoltage(args);
+            if (refreshDivider.process()) sendStaticVoltage();
             
-            processReset(args);
-            processRunStatus(args);
+            processReset();
+            processRunStatus();
             if (running) updateClock(args);
-            sendClock(args); // Send even if not running
+            sendClock(); // Send even if not running
             
-            sendPatterns(args);
+            sendPatterns();
             
             // Quantize
             for (int i = 0; i < inputs[QNT_INPUT].getChannels(); i++)
@@ -567,7 +567,7 @@ struct Arcane : ArcaneBase {
             outputs[QNT_OUTPUT].setChannels(inputs[QNT_INPUT].getChannels());
         }
         if (expanderDivider.process()) {
-            processExpander(args);
+            processExpander();
         }
         
         if (lcdDivider.process()) {
@@ -616,7 +616,7 @@ struct Aleister : ArcaneBase {
     
     int leftMessages[2][9] = {};
     
-    void sendVoltage(const ProcessArgs& args) {
+    void sendVoltage() {
         // If the user connects only the first cable, assume they want it polyphonic
         bool polyBRequested = true, polyCRequested = true, polyDRequested = true, polyERequested = true;
         for (size_t i = 1; i < 16; i++) {
@@ -658,7 +658,7 @@ struct Aleister : ArcaneBase {
         }
     }
 
-    void processLights(const ProcessArgs& args) {
+    void processLights() {
         for (size_t i = 0; i < 16; i++) {
             lights[PATTERN_B_LIGHT + i].setBrightness(patternB[i] ? 1.f : 0.f);
             lights[PATTERN_C_LIGHT + i].setBrightness(patternC[i] ? 1.f : 0.f);
@@ -676,19 +676,19 @@ struct Aleister : ArcaneBase {
     }
     
     // Turn on a step and turn off the others
-    void turnOnPatternLight(size_t light, size_t step, const ProcessArgs& args) {
+    void turnOnPatternLight(size_t light, size_t step) {
         for (size_t i = 0; i < 16; i++) {
             lights[light + i ].setBrightness( (i == step) ? 1.f : 0.f);
         }
     }
     
-    void turnOffPatternLight(int light, const ProcessArgs& args) {
+    void turnOffPatternLight(int light) {
         for (size_t i = 0; i < 16; i++) {
             lights[light + i].setBrightness(0.f);
         }
     }
     
-    void processExpander(const ProcessArgs& args) {
+    void processExpander() {
         if (leftExpander.module and ( leftExpander.module->model == modelArcane or leftExpander.module->model == modelAtout ) ) {
             lights[EXPANDER_LIGHT].setBrightness(1.f);
             int *message = (int*) leftExpander.consumerMessage;
@@ -697,31 +697,31 @@ struct Aleister : ArcaneBase {
                 4..8: Bar, 1/4, 1/8, 1/16, 1/32 step
             */
             if (message[0]) {
-                turnOnPatternLight(PATTERN_B_STEP_LIGHT, message[ message[0] + 3 ], args );
+                turnOnPatternLight(PATTERN_B_STEP_LIGHT, message[ message[0] + 3 ]);
             } else {
-                turnOffPatternLight(PATTERN_B_STEP_LIGHT, args );
+                turnOffPatternLight(PATTERN_B_STEP_LIGHT);
             }
             if (message[1]) {
-                turnOnPatternLight(PATTERN_C_STEP_LIGHT, message[ message[1] + 3 ], args );
+                turnOnPatternLight(PATTERN_C_STEP_LIGHT, message[ message[1] + 3 ]);
             } else {
-                turnOffPatternLight(PATTERN_C_STEP_LIGHT, args );
+                turnOffPatternLight(PATTERN_C_STEP_LIGHT);
             }
             if (message[2]) {
-                turnOnPatternLight(PATTERN_D_STEP_LIGHT, message[ message[2] + 3 ], args );
+                turnOnPatternLight(PATTERN_D_STEP_LIGHT, message[ message[2] + 3 ]);
             } else {
-                turnOffPatternLight(PATTERN_D_STEP_LIGHT, args );
+                turnOffPatternLight(PATTERN_D_STEP_LIGHT);
             }
             if (message[3]) {
-                turnOnPatternLight(PATTERN_E_STEP_LIGHT, message[ message[3] + 3 ], args );
+                turnOnPatternLight(PATTERN_E_STEP_LIGHT, message[ message[3] + 3 ]);
             } else {
-                turnOffPatternLight(PATTERN_E_STEP_LIGHT, args );
+                turnOffPatternLight(PATTERN_E_STEP_LIGHT);
             }
         } else {
             lights[EXPANDER_LIGHT].setBrightness(0.f);
-            turnOffPatternLight(PATTERN_B_STEP_LIGHT, args );
-            turnOffPatternLight(PATTERN_C_STEP_LIGHT, args );
-            turnOffPatternLight(PATTERN_D_STEP_LIGHT, args );
-            turnOffPatternLight(PATTERN_E_STEP_LIGHT, args );
+            turnOffPatternLight(PATTERN_B_STEP_LIGHT);
+            turnOffPatternLight(PATTERN_C_STEP_LIGHT);
+            turnOffPatternLight(PATTERN_D_STEP_LIGHT);
+            turnOffPatternLight(PATTERN_E_STEP_LIGHT);
         }
     }
     
@@ -731,13 +731,13 @@ struct Aleister : ArcaneBase {
         }
         if (jsonParsed) {
             if (refreshDivider.process()){
-                sendVoltage(args);
-                processLights(args);
+                sendVoltage();
+                processLights();
             }
         }
         
         if (expanderDivider.process()) {
-            processExpander(args);
+            processExpander();
         }
     }
 }; // Aleister

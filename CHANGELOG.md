@@ -6,6 +6,11 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 
 ## Unreleased
 
+### Changed
+
+- [CHANGE] Many small code improvements to most modules, to keep the collection more maintainable in the future. 
+
+
 
 
 ## [1.7.0] - 2020-08-17

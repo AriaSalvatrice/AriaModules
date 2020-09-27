@@ -3,6 +3,12 @@ This program is free software: you can redistribute it and/or modify it under th
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
+
+
+// Warning - this module was created with very little C++ experience, and features were 
+// added to it later without regard for code quality. This is maintained exploratory code, not good design.
+
+
 #include "plugin.hpp"
 
 namespace Spleet {
@@ -37,7 +43,7 @@ struct Spleet : Module {
     }
 
     // Split without sorting, faster
-    void split(const ProcessArgs& args) {
+    void split() {
         for (size_t i = 0; i < 4; i++) // First bank
             outputs[SPLIT_OUTPUT + i].setVoltage(inputs[POLY_INPUT + 0].getVoltage(i));
         if (chainMode) { // Second bank depends on chain mode
@@ -50,7 +56,7 @@ struct Spleet : Module {
     }
     
     // Split with sorting
-    void splitSort(const ProcessArgs& args) {
+    void splitSort() {
         std::array<float, 8> splitVoltages;	// First bank, or both if chained
         size_t connected = 0; // First bank, or both if chained
         std::array<float, 4> splitVoltagesSecond;	
@@ -76,7 +82,7 @@ struct Spleet : Module {
             outputs[SPLIT_OUTPUT + i + 4].setVoltage( (chainMode) ? (splitVoltages[i + 4]) : (splitVoltagesSecond[i]) );
     }
     
-    void updateLeds(const ProcessArgs& args) {
+    void updateLeds() {
         lights[CHAIN_LIGHT].setBrightness( (chainMode) ? 1.f : 0.f);
         
         // Split outputs
@@ -93,9 +99,9 @@ struct Spleet : Module {
     
     void process(const ProcessArgs& args) override {
         chainMode = (inputs[POLY_INPUT + 1].isConnected()) ? false : true;
-        (params[SORT_PARAM].getValue()) ? splitSort(args) : split(args);
+        (params[SORT_PARAM].getValue()) ? splitSort() : split();
         if (ledDivider.process())
-            updateLeds(args);
+            updateLeds();
     }	
 };
 

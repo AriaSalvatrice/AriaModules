@@ -4,10 +4,13 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
+
 // Warning - this module was created with very little C++ experience, and features were 
 // added to it later without regard for code quality. This is maintained exploratory code, not good design.
-//
+
+
 // Note: the module calls it a "path" internally, but they are called "routes" for the user.
+
 
 #include "plugin.hpp"
 #include "prng.hpp"
@@ -239,7 +242,7 @@ struct Darius : Module {
         }
     };
 
-    void randomizeCv(const ProcessArgs& args){
+    void randomizeCv(){
         std::array<float, 36> oldValues;
         std::array<float, 36> newValues;
        for (size_t i = 0; i < 36; i++) oldValues[i] = params[CV_PARAM + i].getValue();
@@ -248,7 +251,7 @@ struct Darius : Module {
         APP->history->push(new BulkCvAction(this->id, "randomize Darius CV", CV_PARAM, oldValues, newValues));
     }
     
-    void randomizeRoute(const ProcessArgs& args){
+    void randomizeRoute(){
         std::array<float, 36> oldValues;
         std::array<float, 36> newValues;
        for (size_t i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
@@ -257,7 +260,7 @@ struct Darius : Module {
         APP->history->push(new BulkCvAction(this->id, "randomize Darius Routes", ROUTE_PARAM, oldValues, newValues));
     }
     
-    void processResetCV(const ProcessArgs& args){
+    void processResetCV(){
         resetCV = false;
         std::array<float, 36> oldValues;
         std::array<float, 36> newValues;
@@ -267,7 +270,7 @@ struct Darius : Module {
         APP->history->push(new BulkCvAction(this->id, "reset Darius CV", CV_PARAM, oldValues, newValues));
     }
 
-    void processResetRoutes(const ProcessArgs& args){
+    void processResetRoutes(){
         resetRoutes = false;
         std::array<float, 36> oldValues;
         std::array<float, 36> newValues;
@@ -277,7 +280,7 @@ struct Darius : Module {
         APP->history->push(new BulkCvAction(this->id, "reset Darius Routes", ROUTE_PARAM, oldValues, newValues));
     }
 
-    void processRoutesToTop(const ProcessArgs& args){
+    void processRoutesToTop(){
         routesToTop = false;
         std::array<float, 36> oldValues;
         std::array<float, 36> newValues;
@@ -287,7 +290,7 @@ struct Darius : Module {
         APP->history->push(new BulkCvAction(this->id, "set Darius Routes to Top", ROUTE_PARAM, oldValues, newValues));
     }
 
-    void processRoutesToBottom(const ProcessArgs& args){
+    void processRoutesToBottom(){
         routesToBottom = false;
         std::array<float, 36> oldValues;
         std::array<float, 36> newValues;
@@ -297,7 +300,7 @@ struct Darius : Module {
         APP->history->push(new BulkCvAction(this->id, "set Darius Routes to Bottom", ROUTE_PARAM, oldValues, newValues));
     }
 
-    void processRoutesToEqualProbability(const ProcessArgs& args){
+    void processRoutesToEqualProbability(){
         routesToEqualProbability = false;
         std::array<float, 36> oldValues;
         std::array<float, 36> newValues;
@@ -315,7 +318,7 @@ struct Darius : Module {
 
     // Thanks to stoermelder for the idea!
     // https://community.vcvrack.com/t/arias-cool-and-nice-thread-of-barely-working-betas-and-bug-squashing-darius-update/8208/13?u=aria_salvatrice
-    void processRoutesToBinaryTree(const ProcessArgs& args){
+    void processRoutesToBinaryTree(){
         routesToBinaryTree = false;
         std::array<float, 36> oldValues;
         std::array<float, 36> newValues;
@@ -339,7 +342,7 @@ struct Darius : Module {
         APP->history->push(new BulkCvAction(this->id, "set Darius Routes to Binary tree", ROUTE_PARAM, oldValues, newValues));
     }
 
-    void importPortableSequence(const ProcessArgs& args){
+    void importPortableSequence(){
         pastePortableSequence = false;
         std::array<float, 36> oldValues;
         std::array<float, 36> newValues;
@@ -361,7 +364,7 @@ struct Darius : Module {
     }
 
     // OK, this one is gonna be messy lol
-    void exportPortableSequence(const ProcessArgs& args){
+    void exportPortableSequence(){
         copyPortableSequence = false;
         PortableSequence::Sequence sequence;
         PortableSequence::Note note;
@@ -398,12 +401,12 @@ struct Darius : Module {
         sequence.toClipboard();
     }
 
-    void resetPathTraveled(const ProcessArgs& args){
+    void resetPathTraveled(){
         pathTraveled[0] = 0;
        for (size_t i = 1; i < 8; i++) pathTraveled[i] = -1;
     }
     
-    void refreshSeed(const ProcessArgs& args){
+    void refreshSeed(){
         if (inputs[SEED_INPUT].isConnected() and (inputs[SEED_INPUT].getVoltage() != 0.f) ) {
             randomSeed = inputs[SEED_INPUT].getVoltage();
         } else {
@@ -412,12 +415,12 @@ struct Darius : Module {
     }
 
     // Reset to the first step
-    void reset(const ProcessArgs& args){
+    void reset(){
         step = 0;
         node = 0;
         lastNode = 0;
         lightsReset = true;
-        resetPathTraveled(args);
+        resetPathTraveled();
        for (size_t i = 0; i < 36; i++)
             outputs[GATE_OUTPUT + i].setVoltage(0.f);
         lcdStatus.lcdDirty = true;
@@ -430,7 +433,7 @@ struct Darius : Module {
     }
     
     // Sets running to the current run status
-    void setRunStatus(const ProcessArgs& args){
+    void setRunStatus(){
         if (runCvTrigger.process(inputs[RUN_INPUT].getVoltageSum())){
             running = !running;
             params[RUN_PARAM].setValue(running);
@@ -438,7 +441,7 @@ struct Darius : Module {
         running = params[RUN_PARAM].getValue();
     }
         
-    void setStepStatus(const ProcessArgs& args){
+    void setStepStatus(){
         stepFirst = std::round(params[STEPFIRST_PARAM].getValue());
         stepLast  = std::round(params[STEPCOUNT_PARAM].getValue());
         if (stepFirst > stepLast) stepFirst = stepLast;
@@ -486,13 +489,13 @@ struct Darius : Module {
             step = 0;
             node = 0;
             lastNode = 0;
-            resetPathTraveled(args);
+            resetPathTraveled();
             lightsReset = true;
             slideCounter = 0.f;
             lastOutput = outputs[CV_OUTPUT].getVoltage();
             for(int i = 0; i < stepFirst - 1; i++) {
                 step++;
-                nodeForward(args);
+                nodeForward();
             }
         }
     }
@@ -513,7 +516,7 @@ struct Darius : Module {
         return getUpChild(parent) + 1;
     }
 
-    void updateRoutes(const ProcessArgs& args){
+    void updateRoutes(){
         // This is hard to think about, so I did it by hand, lol
         probabilities[0]  = 1.f;
 
@@ -564,7 +567,7 @@ struct Darius : Module {
     // Using this code as reference:
     // https://github.com/mgunyho/Little-Utils/blob/master/src/PulseGenerator.cpp
     // This has a bit of a performance impact so it's not called every sample.
-    void setSlide(const ProcessArgs& args){
+    void setSlide(){
         slideDuration = params[SLIDE_PARAM].getValue();
         if (slideDuration > 0.00001f ) {
             slideDuration = rescale(slideDuration, 0.f, 10.f, -3.0f, 1.0f);
@@ -574,17 +577,17 @@ struct Darius : Module {
         }
     }
     
-    void nodeForward(const ProcessArgs& args){
+    void nodeForward(){
         steppedForward = false;
         
         // Refresh seed at start of sequences, and on external seeds
         // Refresh at the last minute: when about to move the second step (step == 1), not when entering the first (step == 0).
         if (step == 1){
-            refreshSeed(args);
+            refreshSeed();
             prng.init(randomSeed, randomSeed);
         } else {
             if (params[SEED_MODE_PARAM].getValue() == 1.0f && inputs[SEED_INPUT].isConnected()){
-                refreshSeed(args);
+                refreshSeed();
                 prng.init(randomSeed, randomSeed);
             }
         }
@@ -626,7 +629,7 @@ struct Darius : Module {
         lcdStatus.lcdDirty = true;
     }
     
-    void nodeBack(const ProcessArgs& args){
+    void nodeBack(){
         lightsReset = true;
         node = pathTraveled[step];
         // NOTE: This conditional avoids a bizarre problem where randomSeed goes NaN.
@@ -636,7 +639,7 @@ struct Darius : Module {
         lcdStatus.lcdDirty = true;
     }
 
-    void updateScale(const ProcessArgs& args){
+    void updateScale(){
         if (inputs[EXT_SCALE_INPUT].isConnected()) {
             for(int i = 0; i < 12; i++) {
                 scale [i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.1f) ? true : false;
@@ -698,7 +701,7 @@ struct Darius : Module {
         outputs[CV_OUTPUT].setVoltage(output);
     }
     
-    void updateLights(const ProcessArgs& args){
+    void updateLights(){
         // The Seed input light
         lights[SEED_LIGHT].setBrightness( ( inputs[SEED_INPUT].getVoltage() == 0.f ) ? 0.f : 1.f );
 
@@ -931,18 +934,18 @@ struct Darius : Module {
 
     void process(const ProcessArgs& args) override {
         if (copyPortableSequence)
-            exportPortableSequence(args);
+            exportPortableSequence();
 
         if (pastePortableSequence)
-            importPortableSequence(args);
+            importPortableSequence();
 
 
         if (randomizeCvTrigger.process(params[RANDCV_PARAM].getValue()))
-            randomizeCv(args);
+            randomizeCv();
         if (randomizeRouteTrigger.process(params[RANDROUTE_PARAM].getValue()))
-            randomizeRoute(args);
+            randomizeRoute();
         if (resetCvTrigger.process(inputs[RESET_INPUT].getVoltageSum()) or resetButtonTrigger.process(params[RESET_PARAM].getValue()))
-            reset(args);
+            reset();
         if (resetDelay >= 0.f) {
             if (wait1msOnReset(args.sampleTime)) {
                 // Done with reset
@@ -954,42 +957,42 @@ struct Darius : Module {
 
 
         if (resetCV)
-            processResetCV(args);
+            processResetCV();
         if (resetRoutes)
-            processResetRoutes(args);
+            processResetRoutes();
         if (routesToTop)
-            processRoutesToTop(args);
+            processRoutesToTop();
         if (routesToBottom)
-            processRoutesToBottom(args);
+            processRoutesToBottom();
         if (routesToEqualProbability)
-            processRoutesToEqualProbability(args);
+            processRoutesToEqualProbability();
         if (routesToBinaryTree)
-            processRoutesToBinaryTree(args);
+            processRoutesToBinaryTree();
 
-        setRunStatus(args);
-        setStepStatus(args);
+        setRunStatus();
+        setStepStatus();
 
-        updateRoutes(args);
+        updateRoutes();
 
         // Refreshing slide knobs often has a performance impact
         // so the divider will remain quite high unless someone complains
         // it breaks their art. 
         if (knobDivider.process()) {
-            setSlide(args);
+            setSlide();
         }
 
         if (steppedForward)
-            nodeForward(args);
+            nodeForward();
         if (steppedBack)
-            nodeBack(args);
+            nodeBack();
 
-        updateScale(args);
+        updateScale();
 
         sendGateOutput(args);
         setVoltageOutput(args);
         
         if (displayDivider.process()) {
-            updateLights(args);
+            updateLights();
             updateLcd(args);
         }
     }

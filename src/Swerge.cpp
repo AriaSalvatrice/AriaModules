@@ -3,6 +3,12 @@ This program is free software: you can redistribute it and/or modify it under th
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
+
+
+// Warning - this module was created with very little C++ experience, and features were 
+// added to it later without regard for code quality. This is maintained exploratory code, not good design.
+
+
 #include "plugin.hpp"
 
 namespace Swerge {
@@ -36,7 +42,7 @@ struct Swerge : Module {
     }
     
     // Merge without sorting, faster
-    void merge(const ProcessArgs& args) {
+    void merge() {
         int lastMergeChannel = 0;
         
         // Set first bank normally
@@ -76,7 +82,7 @@ struct Swerge : Module {
     }
     
     // Merge with sorting. Ugly CTRL-V code but it gets the job done.
-    void mergeSort(const ProcessArgs& args) {
+    void mergeSort() {
         std::array<float, 8> mergedVoltages;
         size_t connected = 0;
         
@@ -127,7 +133,7 @@ struct Swerge : Module {
         }
     }
     
-    void updateLeds(const ProcessArgs& args) {
+    void updateLeds() {
         lights[CHAIN_LIGHT].setBrightness( (chainMode) ? 1.f : 0.f);
         
         // Poly outputs
@@ -146,9 +152,9 @@ struct Swerge : Module {
     
     void process(const ProcessArgs& args) override {
         chainMode = (outputs[POLY_OUTPUT + 0].isConnected()) ? false : true;
-        (params[SORT_PARAM].getValue()) ? mergeSort(args) : merge(args);
+        (params[SORT_PARAM].getValue()) ? mergeSort() : merge();
         if (ledDivider.process())
-            updateLeds(args);
+            updateLeds();
     }	
 };
 

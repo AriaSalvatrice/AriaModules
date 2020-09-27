@@ -3,6 +3,12 @@ This program is free software: you can redistribute it and/or modify it under th
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
+
+
+// Warning - this module was created with very little C++ experience, and features were 
+// added to it later without regard for code quality. This is maintained exploratory code, not good design.
+
+
 #include "plugin.hpp"
 
 namespace Splort {
@@ -38,13 +44,13 @@ struct Splort : Module {
     }
     
     // Split without sorting, faster
-    void split(const ProcessArgs& args) {
+    void split() {
         for (size_t i = 0; i < 16; i++)
             outputs[SPLIT_OUTPUT + i].setVoltage(inputs[POLY_INPUT].getVoltage(i));
     }
     
     // Split with sorting, and send Link output
-    void splitSortLink(const ProcessArgs& args) {
+    void splitSortLink() {
         std::array<std::array<float, 2>, 16> splitVoltages;	
         size_t connected = 0;
 
@@ -83,7 +89,7 @@ struct Splort : Module {
         }
     }
     
-    void chainLink(const ProcessArgs& args) {
+    void chainLink() {
         if (inputs[LINK_INPUT].isConnected()) {
             outputs[LINK_OUTPUT].setChannels(inputs[LINK_INPUT].getChannels());
             for (size_t i = 0; i < 16; i++)
@@ -94,7 +100,7 @@ struct Splort : Module {
         }
     }
     
-    void updateLeds(const ProcessArgs& args) {
+    void updateLeds() {
         if ( (params[SORT_PARAM].getValue()) or (inputs[LINK_INPUT].isConnected()) ) {
             lights[LINK_IN_LIGHT].setBrightness(1.f);
             lights[LINK_OUT_LIGHT].setBrightness(1.f);
@@ -107,10 +113,10 @@ struct Splort : Module {
     }
     
     void process(const ProcessArgs& args) override {
-        (params[SORT_PARAM].getValue()) ? splitSortLink(args) : split(args);
-        chainLink(args); // Chain link inputs, whether sorting or not
+        (params[SORT_PARAM].getValue()) ? splitSortLink() : split();
+        chainLink(); // Chain link inputs, whether sorting or not
         if (ledDivider.process())
-            updateLeds(args);
+            updateLeds();
     }
 };
 

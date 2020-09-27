@@ -3,6 +3,12 @@ This program is free software: you can redistribute it and/or modify it under th
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
+
+
+// Warning - this module was created with very little C++ experience, and features were 
+// added to it later without regard for code quality. This is maintained exploratory code, not good design.
+
+
 #include "plugin.hpp"
 
 namespace Smerge{
@@ -37,7 +43,7 @@ struct Smerge : Module {
     }
     
     // Merge without sorting, faster
-    void merge(const ProcessArgs& args) {
+    void merge() {
         int lastMergeChannel = 0;
         for (size_t i = 0; i < 16; i++) {
             if (inputs[MERGE_INPUT + i].isConnected()) {
@@ -51,7 +57,7 @@ struct Smerge : Module {
     }
     
     // Merge with sorting, and send Link output
-    void mergeSortLink(const ProcessArgs& args) {
+    void mergeSortLink() {
         std::array<std::array<float, 2>, 16> mergedVoltages;	
         size_t connected = 0;
         
@@ -101,7 +107,7 @@ struct Smerge : Module {
         }
     }
     
-    void chainLink(const ProcessArgs& args) {
+    void chainLink() {
         if (inputs[LINK_INPUT].isConnected()) {
             outputs[LINK_OUTPUT].setChannels(inputs[LINK_INPUT].getChannels());
             for (size_t i = 0; i < 16; i++) {
@@ -115,7 +121,7 @@ struct Smerge : Module {
     }
     
     
-    void updateLeds(const ProcessArgs& args) {
+    void updateLeds() {
         if ( (params[SORT_PARAM].getValue()) or (inputs[LINK_INPUT].isConnected()) ) {
             lights[LINK_IN_LIGHT].setBrightness(1.f);
             lights[LINK_OUT_LIGHT].setBrightness(1.f);
@@ -127,10 +133,10 @@ struct Smerge : Module {
 
 
     void process(const ProcessArgs& args) override {
-        (params[SORT_PARAM].getValue()) ? mergeSortLink(args) : merge(args);
-        chainLink(args); // Chain link inputs, whether sorting or not
+        (params[SORT_PARAM].getValue()) ? mergeSortLink() : merge();
+        chainLink(); // Chain link inputs, whether sorting or not
         if (ledDivider.process())
-            updateLeds(args);
+            updateLeds();
     }	
 };
 
