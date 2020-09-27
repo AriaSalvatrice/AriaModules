@@ -72,9 +72,6 @@ struct Qqqq : Module {
 
     bool lastExtInConnected = false;
     bool sceneChanged = false;
-    // FIXME: I am supposed to free it manually but didn't figure out how.
-    // FIXME: IDK how to use a std::array for this - assuming I even can
-    bool leftMessages[2][12];
     bool isExpander = false;
     bool lastIsExpander = false;
     bool sceneTrigSelection = false;
@@ -98,6 +95,7 @@ struct Qqqq : Module {
     std::array<std::array<float, 16>, 4> shVoltage;
     std::array<int, 4> inputChannels;
     std::array<int, 4> shChannels;
+    std::array<std::array<bool, 12>, 2> leftMessages;
     Lcd::LcdStatus lcdStatus;
     dsp::ClockDivider processDivider;
     dsp::ClockDivider lcdDivider;
@@ -146,8 +144,8 @@ struct Qqqq : Module {
         // C Minor in first scene
         scale[0][0] = true; scale[0][2] = true; scale[0][3] = true; scale[0][5] = true; scale[0][7] = true; scale[0][8] = true; scale[0][10] = true;
         // Expander
-        leftExpander.producerMessage = leftMessages[0];
-        leftExpander.consumerMessage = leftMessages[1];
+        leftExpander.producerMessage = &leftMessages[0];
+        leftExpander.consumerMessage = &leftMessages[1];
     }
 
 

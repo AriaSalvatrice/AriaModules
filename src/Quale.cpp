@@ -34,15 +34,15 @@ struct Quale : Module {
         NUM_LIGHTS
     };
 
-    bool leftMessages[2][12];
+    std::array<std::array<bool, 12>, 2> leftMessages;
     std::array<bool, 12> scale;
     dsp::ClockDivider processDivider;
     
     Quale() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         processDivider.setDivision(PROCESSDIVIDER);
-        leftExpander.producerMessage = leftMessages[0];
-        leftExpander.consumerMessage = leftMessages[1];
+        leftExpander.producerMessage = &leftMessages[0];
+        leftExpander.consumerMessage = &leftMessages[1];
     }
 
     void processScaleToChord() {
