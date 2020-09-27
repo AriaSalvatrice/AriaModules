@@ -22,17 +22,28 @@ The documentation of the modules is only available [from my website](https://ari
 Compatibility, Download & Installation
 --------------------------------------
 
-Those modules should work with any 1.x version of VCV Rack. They are part of VCV's onlinne library: by [subscribing to my plugin](https://library.vcvrack.com/AriaSalvatrice/), you will receive every stable update a few days after it's released. Installing my modules from the VCV library the recommended way.
+Those modules should work with any 1.x version of VCV Rack, on Linux, Windows, and OS X. 
 
-Forks and ports of VCV Rack such as the [Sonaremin](https://github.com/hexdump0815/sonaremin) might bundle my modules in their preferred way. 
+They are part of VCV's online library: by [subscribing to my plugin](https://library.vcvrack.com/AriaSalvatrice/), you will receive every stable update a few days after it's released. Installing my modules from the VCV library is the recommended way.
 
-No efforts will be made to support forks based on the 0.x series such as [miRack](https://mirack.app/modules/) - they will probably never be supported.
+Forks and ports of VCV Rack such as the [Sonaremin](https://github.com/hexdump0815/sonaremin) project might bundle my modules in their preferred way. 
 
-The only downloads you will find here are [automatic development builds](https://github.com/AriaSalvatrice/AriaVCVModules/releases/tag/AzureCI), which are never guaranteed to work properly.
+No efforts will be made to support forks based on the 0.x series such as [miRack](https://mirack.app/modules/), as their API is not compatible. They will probably never be supported.
+
+The only downloads you will find on Github are [automatic development builds](https://github.com/AriaSalvatrice/AriaVCVModules/releases/tag/AzureCI), which are never guaranteed to work properly.
 
 You can also do things the hard way and [build the plugin yourself](https://vcvrack.com/manual/Building#building-rack-plugins) if you have a good reason to do so, for example, if you hate yourself, or if you enjoy building random C++ projects off github as a hobby.
 
 If you build my plugin locally, you have to `make dep` before you `make dist`. 
+
+
+
+Donations
+---------
+
+If you wish to send me a tip for my modules, at this time, donations can only be accepted in the form of [pay-what-you-want album purchases](https://ariasalvatrice.bandcamp.com/releases). Feel free to send me a message along with the donation: <woof@aria.dog>!
+
+I am looking into providing more convenient donation options in the future, since bandcamp takes their cut and requires you to make a purchase you might not be interested in. It is unfortunately difficult to find a payment processor that operates legally in France but respects the choice of individuals to go by a chosen name. Thank you for your understanding.
 
 
 
@@ -54,7 +65,7 @@ Thanks to everyone who created open-source modules I could learn from and make s
 
 Thanks to [Andrew Belt](https://vcvrack.com/) for creating VCV Rack and providing code suggestions.
 
-Thanks to [Jerry Sievert](https://legitimatesounding.com/) and [cschol](https://github.com/cschol) for their help with [QuickJS](https://github.com/tonaljs/tonal) integration.
+Thanks to [Jerry Sievert](https://legitimatesounding.com/) and [cschol](https://github.com/cschol) for their help with [QuickJS](https://bellard.org/quickjs/) integration.
 
 Thanks to [Squinky Labs](https://github.com/squinkylabs/SquinkyVCV), [Stoermelder](https://github.com/stoermelder/vcvrack-packone), [David O'Rourke](https://github.com/david-c14/SubmarineFree) for technical advice.
 
@@ -70,8 +81,7 @@ Thanks to [my dog Ornstein](https://ornstein.neocities.org/) for being a good do
 
 Thanks to my music-making LGBBQT internet shitposting gang for introducing me to VCV and modular synthesis as something that's not just for old guys with more disposable income than impetus to write fresh songs.
 
-
-<big>But most of all, thanks to YOU for using my art.</big>
+<big>**But most of all, thanks to YOU for using my art.**</big>
 
 The modules use the following fonts:
 - [Francois One](https://fonts.google.com/specimen/Francois+One) by [Vernon Adams](http://sansoxygen.com/) for titles.
@@ -109,12 +119,12 @@ The code of the Aria Salvatrice Signature Series Synthesizer Modules is distribu
 
 ### Re-usable .hpp libraries
 
-Not that the code is very good, but some libraries I created for my own use are available under the less restrictive terms of the [Do What The Fuck You Want To Public License](https://spdx.org/licenses/WTFPL.html), to allow every VCV creator to do what the fuck they want. The files in question are [`src/components.hpp`](src/components.hpp), [`src/javascript.hpp`](src/javascript.hpp), [`src/lcd.hpp`](src/lcd.hpp), [`src/portablesequence.hpp`](src/portablesequence.hpp), [`src/prng.hpp`](src/prng.hpp), and [`src/quantizer.hpp`](src/quantizer.hpp).
+Not that the code is very good, but some libraries I created for my own use are available under the less restrictive terms of the [Do What The Fuck You Want To Public License](https://spdx.org/licenses/WTFPL.html), to allow every VCV creator to do what the fuck they want. The files in question are [`src/javascript.hpp`](src/javascript.hpp), [`src/lcd.hpp`](src/lcd.hpp), [`src/portablesequence.hpp`](src/portablesequence.hpp), [`src/prng.hpp`](src/prng.hpp), [`src/quantizer.hpp`](src/quantizer.hpp), and [`src/widgets.hpp`](src/widgets.hpp).
 
 
 ### Faceplates 
 
- [CC-BY-SA-4.0](https://creativecommons.org/licenses/by-sa/4.0/), with the exception of my signature logo, which is copyrighted, and generally not directly baked into my faceplate SVG files. You may freely distribute your faceplate edits to the VCV community.
+ [CC-BY-SA-4.0](https://creativecommons.org/licenses/by-sa/4.0/), with the exception of my signature logo, which is copyrighted, and generally not directly baked into my faceplate SVG files. You may freely distribute your faceplate edits.
 
 
 ### Components (knobs, jacks, etc)

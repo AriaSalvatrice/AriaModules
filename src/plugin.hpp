@@ -5,7 +5,8 @@ You should have received a copy of the GNU General Public License along with thi
 */
 #pragma once
 #include <rack.hpp>
-#include "components.hpp"
+#include "widgets.hpp"
+#include "components_old.hpp"
 // Explicit <array> include required on OS X
 #include <array> 
 
@@ -51,4 +52,4 @@ extern Model *modelUndular;
 extern Model *modelBlank;
 
 // extern Model *modelBendlet;
-// extern Model *modelTest;
+extern Model *modelTest;

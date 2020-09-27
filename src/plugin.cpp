@@ -47,6 +47,6 @@ void init(Plugin* p) {
     p->addModel(modelBlank);
 
     // p->addModel(modelBendlet);
-    // p->addModel(modelTest);
+    p->addModel(modelTest);
 
 }

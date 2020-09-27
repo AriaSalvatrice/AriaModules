@@ -233,6 +233,15 @@
       ]
     },
     {
+      "slug": "Test",
+      "name": "Signature Series Test",
+      "description": "Yay",
+      "manualUrl": "https://aria.dog/modules/blank",
+      "tags": [
+        "Blank"
+      ]
+    },
+    {
       "slug": "Blank",
       "name": "Signature Series 8hp Blank Plate",
       "description": "A complimentary blank plate and ♥-head screwdriver are included with every Signature Series module purchase",
