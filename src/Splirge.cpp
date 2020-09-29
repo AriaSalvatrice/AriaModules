@@ -171,27 +171,27 @@ struct SplirgeWidget : ModuleWidget {
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Splirge.svg")));
         
         // Signature 
-        addChild(createWidget<AriaSignature>(mm2px(Vec(1.0, 114.538))));
+        addChild(createWidget<W::Signature>(mm2px(Vec(1.f, 114.5f))));
 
         // Screws
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         
         // Pushbutton
         addParam(createParam<AriaPushButton500>(mm2px(Vec(1.0, 62.8)), module, Splirge::SORT_PARAM));
 
         // Jacks, top to bottom.
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 20.0)), module, Splirge::MERGE_INPUT + 0));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 28.0)), module, Splirge::MERGE_INPUT + 1));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 36.0)), module, Splirge::MERGE_INPUT + 2));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 44.0)), module, Splirge::MERGE_INPUT + 3));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 20.0)), module, Splirge::MERGE_INPUT + 0));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 28.0)), module, Splirge::MERGE_INPUT + 1));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 36.0)), module, Splirge::MERGE_INPUT + 2));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 44.0)), module, Splirge::MERGE_INPUT + 3));
         
         addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 54.0)), module, Splirge::POLY_LIGHT));
         addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 54.0)), module, Splirge::POLY_OUTPUT));
         
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 72.5)), module, Splirge::POLY_INPUT));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 72.5)), module, Splirge::POLY_INPUT));
         
         addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 85.0)), module, Splirge::SPLIT_LIGHT  + 0));
         addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 93.0)), module, Splirge::SPLIT_LIGHT  + 1));

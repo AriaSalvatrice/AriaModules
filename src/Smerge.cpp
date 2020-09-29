@@ -151,34 +151,34 @@ struct SmergeWidget : ModuleWidget {
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Smerge.svg")));
         
         // Signature 
-        addChild(createWidget<AriaSignature>(mm2px(Vec(5.899, 114.538))));
+        addChild(createWidget<W::Signature>(mm2px(Vec(5.9f, 114.5f))));
 
         // Screws
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
         // Merge Output
-        addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(12.7, 20.0)),  module, Smerge::POLY_OUTPUT));
+        addOutput(createOutputCentered<W::JackOut>(mm2px(Vec(12.7, 20.0)),  module, Smerge::POLY_OUTPUT));
         
         // Merge Inputs
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 29.5)),  module, Smerge::MERGE_INPUT + 0));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 37.5)),  module, Smerge::MERGE_INPUT + 1));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 45.5)),  module, Smerge::MERGE_INPUT + 2));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 53.5)),  module, Smerge::MERGE_INPUT + 3));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 61.5)),  module, Smerge::MERGE_INPUT + 4));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 69.5)),  module, Smerge::MERGE_INPUT + 5));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 77.5)),  module, Smerge::MERGE_INPUT + 6));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 85.5)),  module, Smerge::MERGE_INPUT + 7));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(17.78, 29.5)), module, Smerge::MERGE_INPUT + 8));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(17.78, 37.5)), module, Smerge::MERGE_INPUT + 9));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(17.78, 45.5)), module, Smerge::MERGE_INPUT + 10));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(17.78, 53.5)), module, Smerge::MERGE_INPUT + 11));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(17.78, 61.5)), module, Smerge::MERGE_INPUT + 12));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(17.78, 69.5)), module, Smerge::MERGE_INPUT + 13));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(17.78, 77.5)), module, Smerge::MERGE_INPUT + 14));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(17.78, 85.5)), module, Smerge::MERGE_INPUT + 15));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 29.5)),  module, Smerge::MERGE_INPUT + 0));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 37.5)),  module, Smerge::MERGE_INPUT + 1));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 45.5)),  module, Smerge::MERGE_INPUT + 2));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 53.5)),  module, Smerge::MERGE_INPUT + 3));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 61.5)),  module, Smerge::MERGE_INPUT + 4));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 69.5)),  module, Smerge::MERGE_INPUT + 5));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 77.5)),  module, Smerge::MERGE_INPUT + 6));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 85.5)),  module, Smerge::MERGE_INPUT + 7));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(17.78, 29.5)), module, Smerge::MERGE_INPUT + 8));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(17.78, 37.5)), module, Smerge::MERGE_INPUT + 9));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(17.78, 45.5)), module, Smerge::MERGE_INPUT + 10));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(17.78, 53.5)), module, Smerge::MERGE_INPUT + 11));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(17.78, 61.5)), module, Smerge::MERGE_INPUT + 12));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(17.78, 69.5)), module, Smerge::MERGE_INPUT + 13));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(17.78, 77.5)), module, Smerge::MERGE_INPUT + 14));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(17.78, 85.5)), module, Smerge::MERGE_INPUT + 15));
 
         // Sort button
         addParam(createParamCentered<AriaPushButton700>(mm2px(Vec(12.7, 95.0)), module, Smerge::SORT_PARAM));

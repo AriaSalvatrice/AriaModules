@@ -1148,10 +1148,10 @@ struct SceneButton16 : SceneButton {
 struct QqqqWidget : ModuleWidget {
 
     void drawScrews() {
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
     }
 
     void drawPianoKeys(float xOffset, float yOffset, Qqqq* module) {
@@ -1172,7 +1172,7 @@ struct QqqqWidget : ModuleWidget {
     }
 
     void drawQuantizerColumn(float xOffset, float yOffset, Qqqq* module, int col) {
-        addInput(createInput<AriaJackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 0.f)), module, Qqqq::CV_INPUT + col));
+        addInput(createInput<W::JackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 0.f)), module, Qqqq::CV_INPUT + col));
         addParam(createParam<QqqqWidgets::ScalingKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 10.f)), module, Qqqq::SCALING_PARAM + col));
         addParam(createParam<QqqqWidgets::OffsetKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 20.f)), module, Qqqq::OFFSET_PARAM + col));
         addParam(createParam<QqqqWidgets::TransposeKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 30.f)), module, Qqqq::TRANSPOSE_PARAM + col));
@@ -1180,9 +1180,9 @@ struct QqqqWidget : ModuleWidget {
         addParam(createParam<QqqqWidgets::TransposeButton>(mm2px(Vec(xOffset + 3.5f, yOffset + 40.f)), module, Qqqq::TRANSPOSE_MODE_PARAM + col));
         addParam(createParam<QqqqWidgets::ShButton>(mm2px(Vec(xOffset + -0.5f, yOffset + 42.5f)), module, Qqqq::SH_MODE_PARAM + col));
 
-        addInput(createInput<AriaJackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 50.f)), module, Qqqq::SH_INPUT + col));
+        addInput(createInput<W::JackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 50.f)), module, Qqqq::SH_INPUT + col));
         addParam(createParam<QqqqWidgets::VisualizeButton>(mm2px(Vec(xOffset + 0.f, yOffset + 60.f)), module, Qqqq::VISUALIZE_PARAM + col));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 0.f, yOffset + 70.f)), module, Qqqq::CV_OUTPUT + col));
+        addOutput(createOutput<W::JackOut>(mm2px(Vec(xOffset + 0.f, yOffset + 70.f)), module, Qqqq::CV_OUTPUT + col));
     }
 
     void drawSceneSlots(float xOffset, float yOffset, Qqqq* module) {
@@ -1209,7 +1209,7 @@ struct QqqqWidget : ModuleWidget {
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Qqqq.svg")));
         
         // Signature
-        addChild(createWidget<AriaSignature>(mm2px(Vec(65.f, 114.5f))));
+        addChild(createWidget<W::Signature>(mm2px(Vec(65.f, 114.5f))));
 
         drawScrews();
         drawPianoKeys(4.7f, 102.8f, module);
@@ -1223,12 +1223,12 @@ struct QqqqWidget : ModuleWidget {
         // Scale, Key, External
         addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(25.f, 29.f)), module, Qqqq::KEY_PARAM));
         addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(35.f, 29.f)), module, Qqqq::SCALE_PARAM));
-        addInput(createInput<AriaJackIn>(mm2px(Vec(45.f, 29.f)), module, Qqqq::EXT_SCALE_INPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(55.f, 29.f)), module, Qqqq::EXT_SCALE_OUTPUT));
+        addInput(createInput<W::JackIn>(mm2px(Vec(45.f, 29.f)), module, Qqqq::EXT_SCALE_INPUT));
+        addOutput(createOutput<W::JackOut>(mm2px(Vec(55.f, 29.f)), module, Qqqq::EXT_SCALE_OUTPUT));
 
         // Scene programmer. Offset by 0.1mm because it looks better that way
         drawSceneSlots(67.6f, 42.5f, module);
-        addInput(createInput<AriaJackIn>(mm2px(Vec(84.f, 53.f)), module, Qqqq::SCENE_INPUT));
+        addInput(createInput<W::JackIn>(mm2px(Vec(84.f, 53.f)), module, Qqqq::SCENE_INPUT));
 
         // Keyboard inputs
         addParam(createParam<QqqqWidgets::PushButtonKeyboard>(mm2px(Vec(83.f, 66.5f)), module, Qqqq::KEYBOARD_INPUT_PARAM));
@@ -1293,10 +1293,10 @@ struct QqqqWidget : ModuleWidget {
 struct QuackWidget : ModuleWidget {
 
     void drawScrews() {
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
     }
 
     void drawPianoKeys(float xOffset, float yOffset, Qqqq* module) {
@@ -1317,7 +1317,7 @@ struct QuackWidget : ModuleWidget {
     }
 
     void drawQuantizerColumn(float xOffset, float yOffset, Qqqq* module, int col) {
-        addInput(createInput<AriaJackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 0.f)), module, Qqqq::CV_INPUT + col));
+        addInput(createInput<W::JackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 0.f)), module, Qqqq::CV_INPUT + col));
         addParam(createParam<QqqqWidgets::ScalingKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 10.f)), module, Qqqq::SCALING_PARAM + col));
         addParam(createParam<QqqqWidgets::OffsetKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 20.f)), module, Qqqq::OFFSET_PARAM + col));
         addParam(createParam<QqqqWidgets::TransposeKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 30.f)), module, Qqqq::TRANSPOSE_PARAM + col));
@@ -1325,8 +1325,8 @@ struct QuackWidget : ModuleWidget {
         addParam(createParam<QqqqWidgets::TransposeButton>(mm2px(Vec(xOffset + 3.5f, yOffset + 40.f)), module, Qqqq::TRANSPOSE_MODE_PARAM + col));
         addParam(createParam<QqqqWidgets::ShButton>(mm2px(Vec(xOffset + -0.5f, yOffset + 42.5f)), module, Qqqq::SH_MODE_PARAM + col));
 
-        addInput(createInput<AriaJackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 50.f)), module, Qqqq::SH_INPUT + col));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 0.f, yOffset + 60.f)), module, Qqqq::CV_OUTPUT + col));
+        addInput(createInput<W::JackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 50.f)), module, Qqqq::SH_INPUT + col));
+        addOutput(createOutput<W::JackOut>(mm2px(Vec(xOffset + 0.f, yOffset + 60.f)), module, Qqqq::CV_OUTPUT + col));
     }
 
     QuackWidget(Qqqq* module) {
@@ -1334,7 +1334,7 @@ struct QuackWidget : ModuleWidget {
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Quack.svg")));
         
         // Signature
-        addChild(createWidget<AriaSignature>(mm2px(Vec(20.0f, 114.5f))));
+        addChild(createWidget<W::Signature>(mm2px(Vec(20.0f, 114.5f))));
 
         drawScrews();
         drawPianoKeys(1.7f, 102.8f, module);
@@ -1342,8 +1342,8 @@ struct QuackWidget : ModuleWidget {
         // Scale, Key, External
         addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(18.1f, 18.f)), module, Qqqq::KEY_PARAM));
         addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(26.4f, 18.f)), module, Qqqq::SCALE_PARAM));
-        addInput(createInput<AriaJackIn>(mm2px(Vec(18.1f, 31.f)), module, Qqqq::EXT_SCALE_INPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(26.4f, 31.f)), module, Qqqq::EXT_SCALE_OUTPUT));
+        addInput(createInput<W::JackIn>(mm2px(Vec(18.1f, 31.f)), module, Qqqq::EXT_SCALE_INPUT));
+        addOutput(createOutput<W::JackOut>(mm2px(Vec(26.4f, 31.f)), module, Qqqq::EXT_SCALE_OUTPUT));
 
         // The quantizer column
         drawQuantizerColumn(22.f, 43.f, module, 0);
@@ -1367,15 +1367,15 @@ struct QuackWidget : ModuleWidget {
 struct QWidget : ModuleWidget {
 
     void drawScrews() {
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
     }
 
     // No visualize button in this version
     void drawQuantizerColumn(float xOffset, float yOffset, Qqqq* module, int col) {
-        addInput(createInput<AriaJackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 0.f)), module, Qqqq::CV_INPUT + col));
+        addInput(createInput<W::JackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 0.f)), module, Qqqq::CV_INPUT + col));
         addParam(createParam<QqqqWidgets::ScalingKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 10.f)), module, Qqqq::SCALING_PARAM + col));
         addParam(createParam<QqqqWidgets::OffsetKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 20.f)), module, Qqqq::OFFSET_PARAM + col));
         addParam(createParam<QqqqWidgets::TransposeKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 30.f)), module, Qqqq::TRANSPOSE_PARAM + col));
@@ -1383,8 +1383,8 @@ struct QWidget : ModuleWidget {
         addParam(createParam<QqqqWidgets::TransposeButton>(mm2px(Vec(xOffset + 3.5f, yOffset + 40.f)), module, Qqqq::TRANSPOSE_MODE_PARAM + col));
         addParam(createParam<QqqqWidgets::ShButton>(mm2px(Vec(xOffset + -0.5f, yOffset + 42.5f)), module, Qqqq::SH_MODE_PARAM + col));
 
-        addInput(createInput<AriaJackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 50.f)), module, Qqqq::SH_INPUT + col));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 0.f, yOffset + 60.f)), module, Qqqq::CV_OUTPUT + col));
+        addInput(createInput<W::JackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 50.f)), module, Qqqq::SH_INPUT + col));
+        addOutput(createOutput<W::JackOut>(mm2px(Vec(xOffset + 0.f, yOffset + 60.f)), module, Qqqq::CV_OUTPUT + col));
     }
 
     QWidget(Qqqq* module) {
@@ -1392,12 +1392,12 @@ struct QWidget : ModuleWidget {
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Q.svg")));
         
         // Signature
-        addChild(createWidget<AriaSignature>(mm2px(Vec(1.0f, 114.5f))));
+        addChild(createWidget<W::Signature>(mm2px(Vec(1.0f, 114.5f))));
 
         drawScrews();
 
         // External
-        addInput(createInput<AriaJackIn>(mm2px(Vec(3.52f, 29.f)), module, Qqqq::EXT_SCALE_INPUT));
+        addInput(createInput<W::JackIn>(mm2px(Vec(3.52f, 29.f)), module, Qqqq::EXT_SCALE_INPUT));
 
         // Quantizer column
         drawQuantizerColumn(3.52f, 43.f, module, 0);

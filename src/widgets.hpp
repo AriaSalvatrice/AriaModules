@@ -13,26 +13,29 @@
   0. You just DO WHAT THE FUCK YOU WANT TO.
 */
 
-// Widgets are only added to my library as the need arises.
-// They are pruned if no longer used.
+// NOTE: My signature SVG graphic is copyrighted. If you reuse my components, remove my signature.
+
+// NOTE: Widgets are only added to my library as the need arises. If I'm not using a specific variant,
+// I do not create it until I need it. And if I need it only once, I create it in tne module instead.
 // Widgets are only moved to my library once used in more than a single module.
-// If you want to re-use one of my one-off widgets covered by the GPL, but wish to receive
-// its code under the WTFPL, contact me.
+
+// NOTE: If you want to re-use one of my one-off widgets that is not in this file but in a module, thus
+// covered by the GPL, and wish to receive its code under the WTFPL, contact me.
+
+
 
 #pragma once
-
 using namespace rack;
 extern Plugin* pluginInstance;
-
-namespace W {
-
-// - TODO: Remove every single dependency on the component library, since it is not open-source. 
-// - TODO: Namespace instead of prefix
+namespace W { // I don't want to type Widgets:: every damn time, thank you
 
 
 
-/*                          Base                       */
 
+/* --------------------------------------------------------------------------------------------- */
+/* ---- Base ----------------------------------------------------------------------------------- */
+/* --------------------------------------------------------------------------------------------- */
+// TODO: Reimplement cleaner, without a shadow, instead of just hiding it.
 struct SvgSwitchUnshadowed : SvgSwitch {
     SvgSwitchUnshadowed() {
         shadow->opacity = 0.f;
@@ -41,7 +44,11 @@ struct SvgSwitchUnshadowed : SvgSwitch {
 };
 
 
-/*                          Decorative                       */
+
+
+/* --------------------------------------------------------------------------------------------- */
+/* ---- Decorative ----------------------------------------------------------------------------- */
+/* --------------------------------------------------------------------------------------------- */
 
 // These require a standard <3-shaped screwdriver, provided complimentary with every purchasee. 
 struct Screw : SvgScrew {
@@ -50,10 +57,11 @@ struct Screw : SvgScrew {
     }
 };
 
-// My personal brand, featuring the Cool S.
-// If you reuse those components, change this SVG file. Do not reuse my signature in your own works.
-// See the README for the full details. 
-struct Signature : SvgWidget {
+// My personal brand, featuring the Cool S. Standard vertical position is 114.5mm.
+// Using a SvgScrew for the handy built-in framebuffer.
+// If you reuse this components, change the corresponding SVG file. Do not reuse my signature in your own works.
+// See the README for the full legal details. 
+struct Signature : SvgScrew {
     Signature() {
         setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/signature/signature.svg")));
     }
@@ -61,209 +69,64 @@ struct Signature : SvgWidget {
 
 
 
-/*                          Jacks                       */
 
-// Input jacks are always lit yellow.
-struct JackIn : SVGPort {
+/* --------------------------------------------------------------------------------------------- */
+/* ---- Jacks ---------------------------------------------------------------------------------- */
+/* --------------------------------------------------------------------------------------------- */
+
+// Base jack is a SVGPort without customizations.
+struct Jack : SVGPort {
+
+};
+
+// Dynamic jacks can be toggled.
+// TODO: Add a light (that is cut off) or an overlay with dynamic opacity.
+// See https://github.com/david-c14/ModularFungi/issues/15#issuecomment-657193438 how to cut off a light
+struct DJack : Jack {
+    void draw(const DrawArgs& args) override {
+        Jack::draw(args);
+    }
+};
+
+// Non-dynamic input jacks are constantly lit yellow.
+struct JackIn : Jack {
     JackIn() {
         setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/jack-in.svg")));
+        Jack();
     }
 };
 
-// This output jack is always lit pink.
-struct JackOut : SVGPort {
+// Non-dynamic output jacks are constantly lit pink.
+struct JackOut : Jack {
     JackOut() {
         setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/jack-out.svg")));
+        Jack();
     }
 };
 
-// This output jack has a transparent ring, to display a light behind it. 
-struct JackTransparent : SVGPort {
-    JackTransparent() {
-        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/jack-transparent.svg")));
-    }
+// Dynamic input jacks are constantly lit yellow when active.
+struct DJackIn : DJack {
+
 };
 
-/*                          Old style lights - TODO: Remove dependency on component library                       */
-
-template <typename TBase = GrayModuleLightWidget>
-struct TOutputLight : TBase {
-    TOutputLight() {
-        this->addBaseColor(nvgRGB(0xfc, 0xae, 0xbb));
-    }
-};
-typedef TOutputLight<> OutputLight;
-
-template <typename TBase = GrayModuleLightWidget>
-struct TInputLight : TBase {
-    TInputLight() {
-        this->addBaseColor(nvgRGB(0xff, 0xcc, 0x03));
-    }
-};
-typedef TInputLight<> InputLight;
-
-
-/*                          Jack Lights                       */
-
-// Those lights should be added before transparent jacks, at the same position.
-struct JackLight : app::ModuleLightWidget {
-    JackLight() {
-        this->box.size = app::mm2px(math::Vec(8.0, 8.0));
-        this->bgColor = nvgRGB(0x0e, 0x69, 0x77);
-        this->borderColor = nvgRGB(0x0e, 0x69, 0x77);
-    }
-    
-    void drawLight(const widget::Widget::DrawArgs& args) override {
-        float radius = std::min(this->box.size.x, this->box.size.y) / 2.0;
-        nvgBeginPath(args.vg);
-        nvgCircle(args.vg, radius, radius, radius);
-
-        // Background
-        if (this->bgColor.a > 0.0) {
-            nvgFillColor(args.vg, this->bgColor);
-            nvgFill(args.vg);
-        }
-
-        // Foreground
-        if (this->color.a > 0.0) {
-            nvgFillColor(args.vg, this->color);
-            nvgFill(args.vg);
-        }
-
-        // Border
-        if (this->borderColor.a > 0.0) {
-            nvgStrokeWidth(args.vg, app::mm2px(0.2));
-            nvgStrokeColor(args.vg, this->borderColor);
-            nvgStroke(args.vg);
-        }
-    }
-};
-
-// These don't build properly but are slated for removal anyway.
-
-// struct InputLight : JackLight {
-//     InputLight() {
-//         this->addBaseColor(nvgRGB(0xff, 0xcc, 0x03));
-//     }
-// };
-
-// struct OutputLight : JackLight {
-//     OutputLight() {
-//         this->addBaseColor(nvgRGB(0xfc, 0xae, 0xbb));
-//     }
-// };
+// TODO: Make a helper to create a dynamic light
 
 
 
 
-/*                          Switches                       */
 
-// 5.00mm switch. Yellow when lit.
-struct PushButton500 : SvgSwitch {
-    PushButton500() {
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-500-off.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-500-on.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-500-pink.svg")));
-    }
-};
-
-struct PushButton500Momentary : SvgSwitch {
-    PushButton500Momentary() {
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-500-off.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-500-on.svg")));
-        momentary = true;
-    }
-};
-
-// 7.00mm switch. Samesies.
-struct PushButton700 : SvgSwitch {
-    PushButton700() {
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-700-off.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-700-on.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-700-pink.svg")));
-    }
-};
-
-struct PushButton700Momentary : SvgSwitch {
-    PushButton700Momentary() {
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-700-off.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-700-on.svg")));
-        momentary = true;
-    }
-};
-
-// 8.20mm switch. Yes.
-struct PushButton820 : SvgSwitch {
-    PushButton820() {
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-820-off.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-820-on.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-820-pink.svg")));
-    }
-};
-
-struct PushButton820Momentary : SvgSwitch {
-    PushButton820Momentary() {
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-820-off.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-820-on.svg")));
-        momentary = true;
-    }
-};
-
-// You won't guess its color when you press it.
-struct PushButton820Pink : SvgSwitch {
-    PushButton820Pink() {
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-820-off.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-820-pink.svg")));
-    }
-};
-
-// Rocker siwtch, horizontal. Left is default
-struct RockerSwitchHorizontal800 : SvgSwitchUnshadowed {
-    RockerSwitchHorizontal800() {
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-l.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-r.svg")));
-    }
-};
-
-// Rocker siwtch, horizontal. Right is default
-struct RockerSwitchHorizontal800Flipped : SvgSwitchUnshadowed {
-    RockerSwitchHorizontal800Flipped() {
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-r.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-l.svg")));
-    }
-};
-
-struct RockerSwitchVertical800 : SvgSwitchUnshadowed {
-    RockerSwitchVertical800() {
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-u.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-d.svg")));
-    }
-};
+/* --------------------------------------------------------------------------------------------- */
+/* ---- Switches ------------------------------------------------------------------------------- */
+/* --------------------------------------------------------------------------------------------- */
 
 
-/*                          Knobs                       */
 
-struct Knob820 : app::SvgKnob {
-    Knob820() {
-        minAngle = -0.83 * M_PI;
-        maxAngle = 0.83 * M_PI;
-        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/knob-820.svg")));
-    }
-};
 
-struct Knob820Snap : Knob820 {
-    Knob820Snap() {
-        snap = true;
-        Knob820();
-    }
-};
+/* --------------------------------------------------------------------------------------------- */
+/* ---- Knobs ---------------------------------------------------------------------------------- */
+/* --------------------------------------------------------------------------------------------- */
 
-struct Knob820Transparent : app::SvgKnob {
-    Knob820Transparent() {
-        minAngle = -0.83 * M_PI;
-        maxAngle = 0.83 * M_PI;
-        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/knob-820-transparent.svg")));
-    }
-};
 
-} // namespace W
+
+
+} // Namespace W

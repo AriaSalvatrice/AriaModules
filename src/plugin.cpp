@@ -10,13 +10,13 @@ Plugin* pluginInstance;
 void init(Plugin* p) {
     pluginInstance = p;
 
-    // Split series
+    // Split & Merge series
     p->addModel(modelSplort);
     p->addModel(modelSmerge);
     p->addModel(modelSpleet);
     p->addModel(modelSwerge);
     p->addModel(modelSplirge);
-    // p->addModel(modelSrot);
+    p->addModel(modelSrot);
 
     // Quantizers
     p->addModel(modelQqqq);

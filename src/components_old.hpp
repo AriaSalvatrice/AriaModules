@@ -22,7 +22,8 @@
 
 
 
-// DEPRECATED. Using the namespaced, cleaned up widgets.hpp instead.
+// DEPRECATED. This file is slated for complete removal.
+// Declarations are removed from this file as I remake them cleaner in widgets.hpp, which contains more maintainable code.
 
 
 
@@ -33,9 +34,6 @@
 
 using namespace rack;
 extern Plugin* pluginInstance;
-
-// - TODO: Remove every single dependency on the component library, since it is not open-source. 
-// - TODO: Namespace instead of prefix
 
 
 
@@ -49,41 +47,9 @@ struct SvgSwitchUnshadowed : SvgSwitch {
 };
 
 
-/*                          Decorative                       */
-
-// These require a standard <3-shaped screwdriver, provided complimentary with every purchasee. 
-struct AriaScrew : SvgScrew {
-    AriaScrew() {
-        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/screw.svg")));
-    }
-};
-
-// My personal brand, featuring the Cool S.
-// If you reuse those components, change this SVG file. Do not reuse my signature in your own works.
-// See the README for the full details. 
-struct AriaSignature : SvgWidget {
-    AriaSignature() {
-        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/signature/signature.svg")));
-    }
-};
-
-
-
 /*                          Jacks                       */
 
-// Input jacks are always lit yellow.
-struct AriaJackIn : SVGPort {
-    AriaJackIn() {
-        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/jack-in.svg")));
-    }
-};
 
-// This output jack is always lit pink.
-struct AriaJackOut : SVGPort {
-    AriaJackOut() {
-        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/jack-out.svg")));
-    }
-};
 
 // This output jack has a transparent ring, to display a light behind it. 
 struct AriaJackTransparent : SVGPort {

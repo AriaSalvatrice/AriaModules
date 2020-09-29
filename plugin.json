@@ -71,6 +71,17 @@
       ]
     },
     {
+      "slug": "Srot",
+      "name": "Signature Series Srot",
+      "description": "Sort, rotate, and randomize the channels of polyphonic cables.",
+      "manualUrl": "https://aria.dog/modules/splitmerge",
+      "tags": [
+        "Polyphonic",
+        "Utility",
+        "Logic"
+      ]
+    },
+    {
       "slug": "Qqqq",
       "name": "Quatherina's Quality Quad Quantizer",
       "description": "Quatherina the Quantum Duck's Quantizer with custom & Poly External Scales, 16 scenes, offset, sample and hold,\ntransposition, lead sheet chords parsing, 4 polyphonic quantizer columns, and a licensed illustration of Quatherina",
@@ -201,7 +212,8 @@
       "description": "4 tiny buttons for automation or manual performance of CV parameters. Right-click options to change output values, and use in latch mode.",
       "tags": [
         "Controller",
-        "Utility"
+        "Utility",
+        "Quad"
       ]
     },
     {
@@ -219,7 +231,8 @@
       "description": "4 tiny knobs for automation or manual performance of CV parameters. Right-click options to offset and invert output.\n Support for Poly External Scales from Quatherina's Quantizer.",
       "tags": [
         "Controller",
-        "Utility"
+        "Utility",
+        "Quad"
       ]
     },
     {

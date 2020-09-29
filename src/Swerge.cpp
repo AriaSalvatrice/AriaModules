@@ -171,28 +171,28 @@ struct SwergeWidget : ModuleWidget {
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Swerge.svg")));
         
         // Signature 
-        addChild(createWidget<AriaSignature>(mm2px(Vec(1.0, 114.538))));
+        addChild(createWidget<W::Signature>(mm2px(Vec(1.f, 114.5f))));
 
         // Screws
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         
         // Jacks, top to bottom.
         
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 20.0)), module, Swerge::MERGE_INPUT + 0));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 28.0)), module, Swerge::MERGE_INPUT + 1));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 36.0)), module, Swerge::MERGE_INPUT + 2));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 44.0)), module, Swerge::MERGE_INPUT + 3));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 20.0)), module, Swerge::MERGE_INPUT + 0));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 28.0)), module, Swerge::MERGE_INPUT + 1));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 36.0)), module, Swerge::MERGE_INPUT + 2));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 44.0)), module, Swerge::MERGE_INPUT + 3));
         
         addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 54.0)), module, Swerge::POLY_LIGHT + 0));
         addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 54.0)), module, Swerge::POLY_OUTPUT + 0));
         
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 67.0)), module, Swerge::MERGE_INPUT + 4));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 75.0)), module, Swerge::MERGE_INPUT + 5));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 83.0)), module, Swerge::MERGE_INPUT + 6));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 91.0)), module, Swerge::MERGE_INPUT + 7));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 67.0)), module, Swerge::MERGE_INPUT + 4));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 75.0)), module, Swerge::MERGE_INPUT + 5));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 83.0)), module, Swerge::MERGE_INPUT + 6));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 91.0)), module, Swerge::MERGE_INPUT + 7));
         
         addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 101.0)), module, Swerge::POLY_LIGHT + 1));
         addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 101.0)), module, Swerge::POLY_OUTPUT + 1));

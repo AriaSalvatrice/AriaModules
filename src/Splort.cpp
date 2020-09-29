@@ -127,16 +127,16 @@ struct SplortWidget : ModuleWidget {
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Splort.svg")));
         
         // Signature 
-        addChild(createWidget<AriaSignature>(mm2px(Vec(5.899, 114.538))));
+        addChild(createWidget<W::Signature>(mm2px(Vec(5.9f, 114.5f))));
 
         // Screws
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
         // Split input
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(12.7, 20.0)), module, Splort::POLY_INPUT));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(12.7, 20.0)), module, Splort::POLY_INPUT));
 
         // Split outputs with lights
         addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 29.5)),  module, Splort::SPLIT_LIGHT + 0));

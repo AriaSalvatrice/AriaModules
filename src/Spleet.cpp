@@ -113,16 +113,16 @@ struct SpleetWidget : ModuleWidget {
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Spleet.svg")));
         
         // Signature 
-        addChild(createWidget<AriaSignature>(mm2px(Vec(1.0, 114.538))));
+        addChild(createWidget<W::Signature>(mm2px(Vec(1.f, 114.5f))));
 
         // Screws
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         
         // Jacks, top to bottom.
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 20.0)), module, Spleet::POLY_INPUT + 0));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 20.0)), module, Spleet::POLY_INPUT + 0));
         
         addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 30.0)), module, Spleet::SPLIT_LIGHT + 0));
         addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 38.0)), module, Spleet::SPLIT_LIGHT + 1));
@@ -134,7 +134,7 @@ struct SpleetWidget : ModuleWidget {
         addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 46.0)), module, Spleet::SPLIT_OUTPUT + 2));
         addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 54.0)), module, Spleet::SPLIT_OUTPUT + 3));
         
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 67.0)), module, Spleet::POLY_INPUT + 1));
+        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 67.0)), module, Spleet::POLY_INPUT + 1));
         
         addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 77.0)), module, Spleet::SPLIT_LIGHT + 4));
         addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 85.0)), module, Spleet::SPLIT_LIGHT + 5));

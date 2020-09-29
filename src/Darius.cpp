@@ -1122,13 +1122,13 @@ struct DariusWidget : ModuleWidget {
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Darius.svg")));
         
         // Signature
-        addChild(createWidget<AriaSignature>(mm2px(Vec(120.0, 114.538))));
+        addChild(createWidget<W::Signature>(mm2px(Vec(120.0, 114.5f))));
         
         // Screws
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
         // The main area - lights, knobs and trigger outputs.
        for (size_t i = 0; i < 1; i++) {
@@ -1188,18 +1188,18 @@ struct DariusWidget : ModuleWidget {
         }
         
         // Step < ^ v >
-        addInput(createInput<AriaJackIn>(mm2px(Vec(4.5, 22.5)), module, Darius::STEP_BACK_INPUT));
-        addInput(createInput<AriaJackIn>(mm2px(Vec(14.5, 18.0)), module, Darius::STEP_UP_INPUT));
-        addInput(createInput<AriaJackIn>(mm2px(Vec(14.5, 27.0)), module, Darius::STEP_DOWN_INPUT));
-        addInput(createInput<AriaJackIn>(mm2px(Vec(24.5, 22.5)), module, Darius::STEP_INPUT));
+        addInput(createInput<W::JackIn>(mm2px(Vec(4.5, 22.5)), module, Darius::STEP_BACK_INPUT));
+        addInput(createInput<W::JackIn>(mm2px(Vec(14.5, 18.0)), module, Darius::STEP_UP_INPUT));
+        addInput(createInput<W::JackIn>(mm2px(Vec(14.5, 27.0)), module, Darius::STEP_DOWN_INPUT));
+        addInput(createInput<W::JackIn>(mm2px(Vec(24.5, 22.5)), module, Darius::STEP_INPUT));
         addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(24.5, 32.5)), module, Darius::STEP_PARAM));
         
         // Run
-        addInput(createInput<AriaJackIn>(mm2px(Vec(4.5, 42.5)), module, Darius::RUN_INPUT));
+        addInput(createInput<W::JackIn>(mm2px(Vec(4.5, 42.5)), module, Darius::RUN_INPUT));
         addParam(createParam<AriaPushButton820>(mm2px(Vec(14.5, 42.5)), module, Darius::RUN_PARAM));
         
         // Reset
-        addInput(createInput<AriaJackIn>(mm2px(Vec(24.5, 42.5)), module, Darius::RESET_INPUT));
+        addInput(createInput<W::JackIn>(mm2px(Vec(24.5, 42.5)), module, Darius::RESET_INPUT));
         addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(34.5, 42.5)), module, Darius::RESET_PARAM));
         
         // Step count & First step
@@ -1212,7 +1212,7 @@ struct DariusWidget : ModuleWidget {
         
         // Seed
         addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(103.0, 112.0)), module, Darius::SEED_MODE_PARAM));
-        addInput(createInput<AriaJackIn>(mm2px(Vec(109.5, 112.0)), module, Darius::SEED_INPUT));
+        addInput(createInput<W::JackIn>(mm2px(Vec(109.5, 112.0)), module, Darius::SEED_INPUT));
         addChild(createLightCentered<SmallLight<InputLight>>(mm2px(Vec(108.7, 121.4)), module, Darius::SEED_LIGHT));
 
         // Output area //////////////////
@@ -1237,14 +1237,14 @@ struct DariusWidget : ModuleWidget {
         addParam(createParam<DariusWidgets::AriaKnob820Scale>(mm2px(Vec(59.5f, 99.f)), module, Darius::SCALE_PARAM));
 
         // External Scale
-        addInput(createInput<AriaJackIn>(mm2px(Vec(69.5, 99.0)), module, Darius::EXT_SCALE_INPUT));
+        addInput(createInput<W::JackIn>(mm2px(Vec(69.5, 99.0)), module, Darius::EXT_SCALE_INPUT));
 
         // Slide
         addParam(createParam<DariusWidgets::AriaKnob820Slide>(mm2px(Vec(69.5, 112.0)), module, Darius::SLIDE_PARAM));
 
         // Output!
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(79.5, 112.0)), module, Darius::GLOBAL_GATE_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(89.5, 112.0)), module, Darius::CV_OUTPUT));
+        addOutput(createOutput<W::JackOut>(mm2px(Vec(79.5, 112.0)), module, Darius::GLOBAL_GATE_OUTPUT));
+        addOutput(createOutput<W::JackOut>(mm2px(Vec(89.5, 112.0)), module, Darius::CV_OUTPUT));
     }
 
 

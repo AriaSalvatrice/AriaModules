@@ -15,13 +15,13 @@ using namespace rack;
 // Declare the Plugin, defined in plugin.cpp
 extern Plugin* pluginInstance;
 
-// Split and Merge series
+// Split & Merge series
 extern Model *modelSplort;
 extern Model *modelSmerge;
 extern Model *modelSpleet;
 extern Model *modelSwerge;
 extern Model *modelSplirge;
-// extern Model *modelSrot;
+extern Model *modelSrot;
 
 // Quantizers
 extern Model *modelQqqq;

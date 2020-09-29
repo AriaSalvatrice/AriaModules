@@ -118,20 +118,20 @@ struct QualeWidget : ModuleWidget {
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Quale.svg")));
 
         // Signature
-        addChild(createWidget<AriaSignature>(mm2px(Vec(1.0f, 114.5f))));
+        addChild(createWidget<W::Signature>(mm2px(Vec(1.0f, 114.5f))));
         
         // Screws
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
         // Jacks
-        addInput(createInput<AriaJackIn>(mm2px(Vec(3.52f, 39.f)), module, Quale::CHORD_INPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(3.52f, 59.f)), module, Quale::SCALE_OUTPUT));
+        addInput(createInput<W::JackIn>(mm2px(Vec(3.52f, 39.f)), module, Quale::CHORD_INPUT));
+        addOutput(createOutput<W::JackOut>(mm2px(Vec(3.52f, 59.f)), module, Quale::SCALE_OUTPUT));
 
-        addInput(createInput<AriaJackIn>(mm2px(Vec(3.52f, 83.f)), module, Quale::SCALE_INPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(3.52f, 103.f)), module, Quale::CHORD_OUTPUT));
+        addInput(createInput<W::JackIn>(mm2px(Vec(3.52f, 83.f)), module, Quale::SCALE_INPUT));
+        addOutput(createOutput<W::JackOut>(mm2px(Vec(3.52f, 103.f)), module, Quale::CHORD_OUTPUT));
 
         // Operation lights
         addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(3.5f, 96.f)), module, Quale::SCALE_TO_CHORD_LIGHT));

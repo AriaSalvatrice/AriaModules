@@ -291,19 +291,19 @@ struct UndularWidget : ModuleWidget {
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Undular.svg")));
         
         // Signature 
-        addChild(createWidget<AriaSignature>(mm2px(Vec(5.9, 114.538))));
+        addChild(createWidget<W::Signature>(mm2px(Vec(5.9f, 114.5f))));
 
         // Screws
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         
         // UDLR
-        addInput(createInput<AriaJackIn>(mm2px(Vec(8.5, 18.0)), module, Undular::U_INPUT));
-        addInput(createInput<AriaJackIn>(mm2px(Vec(8.5, 30.0)), module, Undular::D_INPUT));
-        addInput(createInput<AriaJackIn>(mm2px(Vec(2.5, 24.0)), module, Undular::L_INPUT));
-        addInput(createInput<AriaJackIn>(mm2px(Vec(14.5, 24.0)), module, Undular::R_INPUT));
+        addInput(createInput<W::JackIn>(mm2px(Vec(8.5, 18.0)), module, Undular::U_INPUT));
+        addInput(createInput<W::JackIn>(mm2px(Vec(8.5, 30.0)), module, Undular::D_INPUT));
+        addInput(createInput<W::JackIn>(mm2px(Vec(2.5, 24.0)), module, Undular::L_INPUT));
+        addInput(createInput<W::JackIn>(mm2px(Vec(14.5, 24.0)), module, Undular::R_INPUT));
         
         // Step
         addParam(createParam<AriaKnob820>(mm2px(Vec(2.6, 36.0)), module, Undular::X_STEP_PARAM));
@@ -313,22 +313,22 @@ struct UndularWidget : ModuleWidget {
         addParam(createParam<AriaKnob820>(mm2px(Vec(2.6, 50.2)), module, Undular::PADDING_PARAM));
 
         // Y & Lock
-        addInput(createInput<AriaJackIn>(mm2px(Vec(14.5, 50.0)), module, Undular::Y_INPUT));
+        addInput(createInput<W::JackIn>(mm2px(Vec(14.5, 50.0)), module, Undular::Y_INPUT));
         addParam(createParam<AriaPushButtonPadlock820>(mm2px(Vec(14.5, 58.5)), module, Undular::Y_LOCK_PARAM));
 
         // X & Lock
-        addInput(createInput<AriaJackIn>(mm2px(Vec(2.5, 66.0)), module, Undular::X_INPUT));	
+        addInput(createInput<W::JackIn>(mm2px(Vec(2.5, 66.0)), module, Undular::X_INPUT));	
         addParam(createParam<AriaPushButtonPadlock820>(mm2px(Vec(11.0, 66.0)), module, Undular::X_LOCK_PARAM));
         
         // Zoom
-        addInput(createInput<AriaJackIn>(mm2px(Vec(8.5, 82.0)), module, Undular::Z_INPUT));
+        addInput(createInput<W::JackIn>(mm2px(Vec(8.5, 82.0)), module, Undular::Z_INPUT));
         
         // Cables
-        addInput(createInput<AriaJackIn>(mm2px(Vec(8.5, 95.0)), module, Undular::OPACITY_INPUT));
-        addInput(createInput<AriaJackIn>(mm2px(Vec(8.5, 103.0)), module, Undular::TENSION_INPUT));
+        addInput(createInput<W::JackIn>(mm2px(Vec(8.5, 95.0)), module, Undular::OPACITY_INPUT));
+        addInput(createInput<W::JackIn>(mm2px(Vec(8.5, 103.0)), module, Undular::TENSION_INPUT));
 
         // Debug
-        // addOutput(createOutput<AriaJackOut>(mm2px(Vec(8.5, 120.0)), module, Undular::DEBUG_OUTPUT));
+        // addOutput(createOutput<W::JackOut>(mm2px(Vec(8.5, 120.0)), module, Undular::DEBUG_OUTPUT));
     }
 };
 

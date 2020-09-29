@@ -389,7 +389,7 @@ struct Rotatoes4Widget : ModuleWidget {
 
     void drawRotato(Rotatoes<4>* module, float y, int num) {
         addParam(createParam<KnobRotato>(mm2px(Vec(3.52f, y)), module, Rotatoes<4>::ROTATO_PARAM + num));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(3.52f, y + 10.f)), module, Rotatoes<4>::CV_OUTPUT + num));
+        addOutput(createOutput<W::JackOut>(mm2px(Vec(3.52f, y + 10.f)), module, Rotatoes<4>::CV_OUTPUT + num));
         addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(2.25f, y + 6.9f)), module, Rotatoes<4>::QUANTIZE_LIGHT + num));
     }
 
@@ -398,10 +398,10 @@ struct Rotatoes4Widget : ModuleWidget {
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Rotatoes.svg")));
 
         // Signature
-        addChild(createWidget<AriaSignature>(mm2px(Vec(1.0f, 114.5f))));
+        addChild(createWidget<W::Signature>(mm2px(Vec(1.0f, 114.5f))));
 
         // External
-        addInput(createInput<AriaJackIn>(mm2px(Vec(3.52f, 15.9f)), module, Rotatoes<4>::EXT_SCALE_INPUT));
+        addInput(createInput<W::JackIn>(mm2px(Vec(3.52f, 15.9f)), module, Rotatoes<4>::EXT_SCALE_INPUT));
 
         // Rotatoes
         drawRotato(module, 31.f, 0);
@@ -410,10 +410,10 @@ struct Rotatoes4Widget : ModuleWidget {
         drawRotato(module, 94.f, 3);
 
         // Screws
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
     }
 
     void appendContextMenu(ui::Menu *menu) override {	
@@ -450,21 +450,21 @@ struct GrabbyWidget : ModuleWidget {
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Grabby.svg")));
 
         // Signature
-        addChild(createWidget<AriaSignature>(mm2px(Vec(1.0f, 114.5f))));
+        addChild(createWidget<W::Signature>(mm2px(Vec(1.0f, 114.5f))));
 
         // External
-        addInput(createInput<AriaJackIn>(mm2px(Vec(3.52f, 15.9f)), module, Rotatoes<1>::EXT_SCALE_INPUT));
+        addInput(createInput<W::JackIn>(mm2px(Vec(3.52f, 15.9f)), module, Rotatoes<1>::EXT_SCALE_INPUT));
 
         // Grabby
         addParam(createParam<GrabbySlider>(mm2px(Vec(2.62f, 31.f)), module, Rotatoes<1>::ROTATO_PARAM + 0));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(3.52f, 104.f)), module, Rotatoes<1>::CV_OUTPUT + 0));
+        addOutput(createOutput<W::JackOut>(mm2px(Vec(3.52f, 104.f)), module, Rotatoes<1>::CV_OUTPUT + 0));
         addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(2.25f, 100.9f)), module, Rotatoes<1>::QUANTIZE_LIGHT + 0));
 
         // Screws
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
     }
 
     void appendContextMenu(ui::Menu *menu) override {	
