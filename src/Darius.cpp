@@ -1053,12 +1053,20 @@ struct AriaKnob820Slide : AriaKnob820Lcd {
     }
 };
 
-struct AriaRockerSwitchHorizontal800ModeReset : AriaRockerSwitchHorizontal800 {
+struct RockerSwitchHorizontal800ModeReset : W::RockerSwitchHorizontal800 {
     void onDragStart(const event::DragStart& e) override {
         dynamic_cast<Darius*>(paramQuantity->module)->lcdMode = DEFAULT_MODE;
         dynamic_cast<Darius*>(paramQuantity->module)->lcdLastInteraction = 0.f;
         dynamic_cast<Darius*>(paramQuantity->module)->lcdStatus.lcdDirty = true;
-        AriaRockerSwitchHorizontal800::onDragStart(e);
+        W::RockerSwitchHorizontal800::onDragStart(e);
+    }
+};
+
+// Rocker siwtch, horizontal, flipped for backwards compatibility.
+struct RockerSwitchHorizontal800Flipped : W::SvgSwitchUnshadowed {
+    RockerSwitchHorizontal800Flipped() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-r.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-l.svg")));
     }
 };
 
@@ -1211,7 +1219,7 @@ struct DariusWidget : ModuleWidget {
         addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(74.5, 22.5)), module, Darius::RANDROUTE_PARAM));
         
         // Seed
-        addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(103.0, 112.0)), module, Darius::SEED_MODE_PARAM));
+        addParam(createParam<W::RockerSwitchVertical800>(mm2px(Vec(103.0, 112.0)), module, Darius::SEED_MODE_PARAM));
         addInput(createInput<W::JackIn>(mm2px(Vec(109.5, 112.0)), module, Darius::SEED_INPUT));
         addChild(createLightCentered<SmallLight<InputLight>>(mm2px(Vec(108.7, 121.4)), module, Darius::SEED_LIGHT));
 
@@ -1223,10 +1231,10 @@ struct DariusWidget : ModuleWidget {
         addChild(lcd);
 
         // Quantizer toggle
-        addParam(createParam<DariusWidgets::AriaRockerSwitchHorizontal800ModeReset>(mm2px(Vec(11.1, 99.7)), module, Darius::QUANTIZE_TOGGLE_PARAM));
+        addParam(createParam<DariusWidgets::RockerSwitchHorizontal800ModeReset>(mm2px(Vec(11.1, 99.7)), module, Darius::QUANTIZE_TOGGLE_PARAM));
 
         // Voltage Range
-        addParam(createParam<AriaRockerSwitchHorizontal800Flipped>(mm2px(Vec(28.0, 118.8)), module, Darius::RANGE_PARAM));
+        addParam(createParam<DariusWidgets::RockerSwitchHorizontal800Flipped>(mm2px(Vec(28.0, 118.8)), module, Darius::RANGE_PARAM));
 
         // Min & Max
         addParam(createParam<DariusWidgets::AriaKnob820MinMax>(mm2px(Vec(49.5f, 112.f)), module, Darius::MIN_PARAM)); 

@@ -834,7 +834,7 @@ struct ArcaneWidget : ModuleWidget {
         addOutput(createOutput<W::JackOut>(mm2px(Vec(x + 32.f, y + 36.f)), module, Arcane::BPM_NUM_OUTPUT));
         
         // Pulse/Ramp
-        addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(x - 6.f, y + 54.f)), module, Arcane::PULSE_RAMP_PARAM));
+        addParam(createParam<W::RockerSwitchVertical800>(mm2px(Vec(x - 6.f, y + 54.f)), module, Arcane::PULSE_RAMP_PARAM));
         addOutput(createOutput<W::JackOut>(mm2px(Vec(x + 00.f, y + 54.f)), module, Arcane::BPM_1_OUTPUT));
         addOutput(createOutput<W::JackOut>(mm2px(Vec(x + 08.f, y + 54.f)), module, Arcane::BPM_4_OUTPUT));
         addOutput(createOutput<W::JackOut>(mm2px(Vec(x + 16.f, y + 54.f)), module, Arcane::BPM_8_OUTPUT));
@@ -957,7 +957,7 @@ struct AtoutWidget : ModuleWidget {
         addParam(createParam<AriaKnob820>(mm2px(Vec(x + 3.8f, y + 96.f)), module, Arcane::PULSE_WIDTH_PARAM));	
         
         // On Atout, the Pulse/Ramp rocker is at the bottom
-        addParam(createParam<AriaRockerSwitchHorizontal800>(mm2px(Vec(x + 3.8f, y + 105.5f)), module, Arcane::PULSE_RAMP_PARAM));
+        addParam(createParam<W::RockerSwitchHorizontal800>(mm2px(Vec(x + 3.8f, y + 105.5f)), module, Arcane::PULSE_RAMP_PARAM));
         
         // Expander light
         addChild(createLight<SmallLight<OutputLight>>(mm2px(Vec(x + 39.f, 125.2f)), module, Arcane::EXPANDER_LIGHT));

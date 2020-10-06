@@ -121,6 +121,35 @@ struct DJackIn : DJack {
 
 
 
+// ------------------------- Rocker switches ------------------------------------------------------
+
+// Rocker siwtch, horizontal. Left is default
+struct RockerSwitchHorizontal800 : SvgSwitchUnshadowed {
+    RockerSwitchHorizontal800() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-l.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-r.svg")));
+    }
+};
+
+// Rocker siwtch, horizontal. Right is default
+struct RockerSwitchHorizontal800Flipped : SvgSwitchUnshadowed {
+    RockerSwitchHorizontal800Flipped() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-r.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-l.svg")));
+    }
+};
+
+// Rocker siwtch, vertical. Up is default
+struct RockerSwitchVertical800 : SvgSwitchUnshadowed {
+    RockerSwitchVertical800() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-u.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-d.svg")));
+    }
+};
+
+
+
+
 
 /* --------------------------------------------------------------------------------------------- */
 /* ---- Knobs ---------------------------------------------------------------------------------- */

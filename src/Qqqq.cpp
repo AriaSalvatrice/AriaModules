@@ -833,7 +833,7 @@ struct VisualizeButton : AriaPushButton820Pink {
 
 // The piano display
 // https://community.vcvrack.com/t/whats-the-best-way-to-implement-a-pushbutton-with-three-visual-states-but-only-two-user-controllable-states/10351/8?u=aria_salvatrice
-struct PianoKey : SvgSwitchUnshadowed {
+struct PianoKey : W::SvgSwitchUnshadowed {
     bool lastPianoDisplay = false;
     bool currentPianoDisplay = false;
     int note = 0;
@@ -853,7 +853,7 @@ struct PianoKey : SvgSwitchUnshadowed {
             }
             lastPianoDisplay = currentPianoDisplay;
         }
-        SvgSwitchUnshadowed::step();
+        W::SvgSwitchUnshadowed::step();
     }
 };
 
@@ -959,12 +959,12 @@ struct PastePortableSequenceItem : MenuItem {
     }
 };
 
-struct PushButtonKeyboard : SvgSwitchUnshadowed {
+struct PushButtonKeyboard : W::SvgSwitchUnshadowed {
     PushButtonKeyboard() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/button-keyboard.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/button-keyboard-pressed.svg")));
         momentary = true;
-        SvgSwitchUnshadowed();
+        W::SvgSwitchUnshadowed();
     }
 
     void onButton(const event::Button& e) override {
@@ -1013,7 +1013,7 @@ struct PasteScenePortableSequenceItem : MenuItem {
     }
 };
 
-struct SceneButton : SvgSwitchUnshadowed {
+struct SceneButton : W::SvgSwitchUnshadowed {
     void onButton(const event::Button& e) override {
         if (e.button == GLFW_MOUSE_BUTTON_RIGHT) {
             ui::Menu* menu = createMenu();
@@ -1032,7 +1032,7 @@ struct SceneButton : SvgSwitchUnshadowed {
 
             e.consume(this);
         } else {
-            SvgSwitchUnshadowed::onButton(e);
+            W::SvgSwitchUnshadowed::onButton(e);
         }
     }
 };

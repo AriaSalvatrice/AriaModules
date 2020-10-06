@@ -1139,10 +1139,10 @@ struct SolomonWidget8 : ModuleWidget {
         addChild(createWidget<W::Signature>(mm2px(Vec(37.5f, 114.5f))));
 
         // Queue clear mode
-        addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(28.4f, 17.1f)), module, Solomon<8>::QUEUE_CLEAR_MODE_PARAM));
+        addParam(createParam<W::RockerSwitchVertical800>(mm2px(Vec(28.4f, 17.1f)), module, Solomon<8>::QUEUE_CLEAR_MODE_PARAM));
 
         // Repeat mode
-        addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(42.4f, 17.1f)), module, Solomon<8>::REPEAT_MODE_PARAM));
+        addParam(createParam<W::RockerSwitchVertical800>(mm2px(Vec(42.4f, 17.1f)), module, Solomon<8>::REPEAT_MODE_PARAM));
 
         // Global step inputs. Ordered counterclockwise.
         addInput(createInput<W::JackIn>(mm2px(Vec(20.f, 17.f)), module, Solomon<8>::STEP_QUEUE_INPUT));
@@ -1307,10 +1307,10 @@ struct SolomonWidget4 : ModuleWidget {
         addChild(createWidget<W::Signature>(mm2px(Vec(37.5f, 114.5f))));
 
         // Queue clear mode
-        addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(28.4f, 17.1f)), module, Solomon<4>::QUEUE_CLEAR_MODE_PARAM));
+        addParam(createParam<W::RockerSwitchVertical800>(mm2px(Vec(28.4f, 17.1f)), module, Solomon<4>::QUEUE_CLEAR_MODE_PARAM));
 
         // Repeat mode
-        addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(42.4f, 17.1f)), module, Solomon<4>::REPEAT_MODE_PARAM));
+        addParam(createParam<W::RockerSwitchVertical800>(mm2px(Vec(42.4f, 17.1f)), module, Solomon<4>::REPEAT_MODE_PARAM));
 
         // Global step inputs. Ordered counterclockwise.
         addInput(createInput<W::JackIn>(mm2px(Vec(20.f, 17.f)), module, Solomon<4>::STEP_QUEUE_INPUT));
@@ -1473,10 +1473,10 @@ struct SolomonWidget16 : ModuleWidget {
         addChild(createWidget<W::Signature>(mm2px(Vec(37.5f, 114.5f))));
 
         // Queue clear mode
-        addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(28.4f, 17.1f)), module, Solomon<16>::QUEUE_CLEAR_MODE_PARAM));
+        addParam(createParam<W::RockerSwitchVertical800>(mm2px(Vec(28.4f, 17.1f)), module, Solomon<16>::QUEUE_CLEAR_MODE_PARAM));
 
         // Repeat mode
-        addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(42.4f, 17.1f)), module, Solomon<16>::REPEAT_MODE_PARAM));
+        addParam(createParam<W::RockerSwitchVertical800>(mm2px(Vec(42.4f, 17.1f)), module, Solomon<16>::REPEAT_MODE_PARAM));
 
         // Global step inputs. Ordered counterclockwise.
         addInput(createInput<W::JackIn>(mm2px(Vec(20.f, 17.f)), module, Solomon<16>::STEP_QUEUE_INPUT));

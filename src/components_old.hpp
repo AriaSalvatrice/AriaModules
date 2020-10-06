@@ -36,17 +36,6 @@ using namespace rack;
 extern Plugin* pluginInstance;
 
 
-
-/*                          Base                       */
-
-struct SvgSwitchUnshadowed : SvgSwitch {
-    SvgSwitchUnshadowed() {
-        shadow->opacity = 0.f;
-        SvgSwitch();
-    }
-};
-
-
 /*                          Jacks                       */
 
 
@@ -186,29 +175,6 @@ struct AriaPushButton820Pink : SvgSwitch {
     AriaPushButton820Pink() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-820-off.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-820-pink.svg")));
-    }
-};
-
-// Rocker siwtch, horizontal. Left is default
-struct AriaRockerSwitchHorizontal800 : SvgSwitchUnshadowed {
-    AriaRockerSwitchHorizontal800() {
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-l.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-r.svg")));
-    }
-};
-
-// Rocker siwtch, horizontal. Right is default
-struct AriaRockerSwitchHorizontal800Flipped : SvgSwitchUnshadowed {
-    AriaRockerSwitchHorizontal800Flipped() {
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-r.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-l.svg")));
-    }
-};
-
-struct AriaRockerSwitchVertical800 : SvgSwitchUnshadowed {
-    AriaRockerSwitchVertical800() {
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-u.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-d.svg")));
     }
 };
 
