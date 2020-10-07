@@ -26,9 +26,10 @@
 
 #pragma once
 using namespace rack;
-extern Plugin* pluginInstance;
-namespace W { // I don't want to type Widgets:: every damn time, thank you
+Simplerextern Plugin* pluginInstance;
 
+
+namespace W { // I don't want to type MyCoolPersonalWidgets:: every damn time, thank you
 
 
 
@@ -74,19 +75,15 @@ struct Signature : SvgScrew {
 /* ---- Jacks ---------------------------------------------------------------------------------- */
 /* --------------------------------------------------------------------------------------------- */
 
+// TODO: Cut off jack light.
+// See https://github.com/david-c14/ModularFungi/issues/15#issuecomment-657193438 how to cut off a light
+
+
 // Base jack is a SVGPort without customizations.
 struct Jack : SVGPort {
 
 };
 
-// Dynamic jacks can be toggled.
-// TODO: Add a light (that is cut off) or an overlay with dynamic opacity.
-// See https://github.com/david-c14/ModularFungi/issues/15#issuecomment-657193438 how to cut off a light
-struct DJack : Jack {
-    void draw(const DrawArgs& args) override {
-        Jack::draw(args);
-    }
-};
 
 // Non-dynamic input jacks are constantly lit yellow.
 struct JackIn : Jack {
@@ -104,13 +101,53 @@ struct JackOut : Jack {
     }
 };
 
-// Dynamic input jacks are constantly lit yellow when active.
-struct DJackIn : DJack {
-
+// Transparent jacks are shown above a light.
+struct JackTransparent : Jack {
+    JackTransparent() {
+        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/jack-transparent.svg")));
+        Jack();
+    }
 };
 
-// TODO: Make a helper to create a dynamic light
+// Helper to create a lit input comprised of a LED and a transparent Jack
+template <class TPortWidget, class TModuleLightWidget>
+Widget* createLitInput(math::Vec pos, engine::Module* module, int inputId, int firstLightId) {
+	Widget* o = new Widget;
+    TModuleLightWidget* light = new TModuleLightWidget;
+    TPortWidget* jack = new TPortWidget;
 
+	light->module = module;
+	light->firstLightId = firstLightId;
+
+	jack->module = module;
+	jack->type = app::PortWidget::INPUT;
+	jack->portId = inputId;
+
+    o->box.pos = pos;
+    o->addChild(light);
+    o->addChild(jack);
+	return o;
+}
+
+// Helper to create a lit output comprised of a LED and a transparent Jack
+template <class TPortWidget, class TModuleLightWidget>
+Widget* createLitOutput(math::Vec pos, engine::Module* module, int outputId, int firstLightId) {
+	Widget* o = new Widget;
+    TModuleLightWidget* light = new TModuleLightWidget;
+    TPortWidget* jack = new TPortWidget;
+
+	light->module = module;
+	light->firstLightId = firstLightId;
+
+	jack->module = module;
+	jack->type = app::PortWidget::OUTPUT;
+	jack->portId = outputId;
+
+    o->box.pos = pos;
+    o->addChild(light);
+    o->addChild(jack);
+	return o;
+}
 
 
 
