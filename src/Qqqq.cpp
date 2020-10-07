@@ -763,11 +763,11 @@ struct Qqqq : Module {
 namespace QqqqWidgets {
 
 // The LCD knobs
-struct LcdKnob : AriaKnob820 {
+struct LcdKnob : W::Knob {
     void onDragMove(const event::DragMove& e) override {
          dynamic_cast<Qqqq*>(paramQuantity->module)->lcdLastInteraction = 0.f;
          dynamic_cast<Qqqq*>(paramQuantity->module)->lcdStatus.lcdDirty = true;
-        AriaKnob820::onDragMove(e);
+        W::Knob::onDragMove(e);
     }
 };
 struct ScaleKnob : LcdKnob {
@@ -806,27 +806,27 @@ struct TransposeKnob : LcdKnob {
     }
 };
 // The LCD buttons. They're not sending ongoing events so no point setting Lcd dirty from here.
-struct TransposeButton : AriaPushButton500 {
+struct TransposeButton : W::SmallButton {
     void onDragStart(const event::DragStart& e) override {
         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdLastInteraction = 0.f;
         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdMode = TRANSPOSE_TYPE_MODE;
         dynamic_cast<Qqqq*>(paramQuantity->module)->lastTransposeModeTouchedId = paramQuantity->paramId;
-        AriaPushButton500::onDragStart(e);
+        W::SmallButton::onDragStart(e);
     }
 };
-struct ShButton : AriaPushButton500 {
+struct ShButton : W::SmallButton {
     void onDragStart(const event::DragStart& e) override {
         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdLastInteraction = 0.f;
         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdMode = SH_MODE;
         dynamic_cast<Qqqq*>(paramQuantity->module)->lastShTouchedId = paramQuantity->paramId;
-        AriaPushButton500::onDragStart(e);
+        W::SmallButton::onDragStart(e);
     }
 };
-struct VisualizeButton : AriaPushButton820Pink {
+struct VisualizeButton : W::ButtonPink {
     void onDragStart(const event::DragStart& e) override {
         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdLastInteraction = 0.f;
         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdMode = VISUALIZE_MODE;
-        AriaPushButton820Pink::onDragStart(e);
+        W::ButtonPink::onDragStart(e);
     }
 };
 
@@ -1240,8 +1240,8 @@ struct QqqqWidget : ModuleWidget {
         drawQuantizerColumn(55.f, 43.f, module, 3);
 
         // Expander lights (right is 3.5mm from edge)
-        addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(1.4, 125.2)), module, Qqqq::EXPANDER_IN_LIGHT));
-        addChild(createLight<SmallLight<OutputLight>>(mm2px(Vec(98.1, 125.2)), module, Qqqq::EXPANDER_OUT_LIGHT));
+        addChild(createLight<W::InputStatusLight>(mm2px(Vec(1.4, 125.2)), module, Qqqq::EXPANDER_IN_LIGHT));
+        addChild(createLight<W::OutputStatusLight>(mm2px(Vec(98.1, 125.2)), module, Qqqq::EXPANDER_OUT_LIGHT));
     }
 
 
@@ -1349,8 +1349,8 @@ struct QuackWidget : ModuleWidget {
         drawQuantizerColumn(22.f, 43.f, module, 0);
 
         // Expander lights (right is 3.5mm from edge)
-        addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(1.4, 125.2)), module, Qqqq::EXPANDER_IN_LIGHT));
-        addChild(createLight<SmallLight<OutputLight>>(mm2px(Vec(32.06, 125.2)), module, Qqqq::EXPANDER_OUT_LIGHT));
+        addChild(createLight<W::InputStatusLight>(mm2px(Vec(1.4, 125.2)), module, Qqqq::EXPANDER_IN_LIGHT));
+        addChild(createLight<W::OutputStatusLight>(mm2px(Vec(32.06, 125.2)), module, Qqqq::EXPANDER_OUT_LIGHT));
     }
 };
 
@@ -1403,8 +1403,8 @@ struct QWidget : ModuleWidget {
         drawQuantizerColumn(3.52f, 43.f, module, 0);
 
         // Expander lights (right is 3.5mm from edge)
-        addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(1.4, 125.2)), module, Qqqq::EXPANDER_IN_LIGHT));
-        addChild(createLight<SmallLight<OutputLight>>(mm2px(Vec(11.74, 125.2)), module, Qqqq::EXPANDER_OUT_LIGHT));
+        addChild(createLight<W::InputStatusLight>(mm2px(Vec(1.4, 125.2)), module, Qqqq::EXPANDER_IN_LIGHT));
+        addChild(createLight<W::OutputStatusLight>(mm2px(Vec(11.74, 125.2)), module, Qqqq::EXPANDER_OUT_LIGHT));
     }
 };
 

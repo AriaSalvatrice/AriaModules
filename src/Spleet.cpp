@@ -122,35 +122,23 @@ struct SpleetWidget : ModuleWidget {
         addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         
         // Jacks, top to bottom.
-        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 20.0)), module, Spleet::POLY_INPUT + 0));
-        
-        addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 30.0)), module, Spleet::SPLIT_LIGHT + 0));
-        addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 38.0)), module, Spleet::SPLIT_LIGHT + 1));
-        addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 46.0)), module, Spleet::SPLIT_LIGHT + 2));
-        addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 54.0)), module, Spleet::SPLIT_LIGHT + 3));
-        
-        addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 30.0)), module, Spleet::SPLIT_OUTPUT + 0));
-        addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 38.0)), module, Spleet::SPLIT_OUTPUT + 1));
-        addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 46.0)), module, Spleet::SPLIT_OUTPUT + 2));
-        addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 54.0)), module, Spleet::SPLIT_OUTPUT + 3));
-        
-        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 67.0)), module, Spleet::POLY_INPUT + 1));
-        
-        addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 77.0)), module, Spleet::SPLIT_LIGHT + 4));
-        addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 85.0)), module, Spleet::SPLIT_LIGHT + 5));
-        addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 93.0)), module, Spleet::SPLIT_LIGHT + 6));
-        addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 101.0)), module, Spleet::SPLIT_LIGHT + 7));
-        
-        addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 77.0)), module, Spleet::SPLIT_OUTPUT + 4));
-        addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 85.0)), module, Spleet::SPLIT_OUTPUT + 5));
-        addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 93.0)), module, Spleet::SPLIT_OUTPUT + 6));
-        addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 101.0)), module, Spleet::SPLIT_OUTPUT + 7));
-        
+        addInput(createInput<W::JackIn>(mm2px(Vec(3.52f, 15.9f)), module, Spleet::POLY_INPUT + 0));       
+        addChild(W::createLitOutput(mm2px(Vec(3.52f, 25.9f)), module, Spleet::SPLIT_OUTPUT + 0, Spleet::SPLIT_LIGHT + 0));
+        addChild(W::createLitOutput(mm2px(Vec(3.52f, 33.9f)), module, Spleet::SPLIT_OUTPUT + 1, Spleet::SPLIT_LIGHT + 1));
+        addChild(W::createLitOutput(mm2px(Vec(3.52f, 41.9f)), module, Spleet::SPLIT_OUTPUT + 2, Spleet::SPLIT_LIGHT + 2));
+        addChild(W::createLitOutput(mm2px(Vec(3.52f, 49.9f)), module, Spleet::SPLIT_OUTPUT + 3, Spleet::SPLIT_LIGHT + 3));
+
+        addInput(createInput<W::JackIn>(mm2px(Vec(3.52f, 62.9f)), module, Spleet::POLY_INPUT + 1));
+        addChild(W::createLitOutput(mm2px(Vec(3.52f, 72.9f)), module, Spleet::SPLIT_OUTPUT + 4, Spleet::SPLIT_LIGHT + 4));
+        addChild(W::createLitOutput(mm2px(Vec(3.52f, 80.9f)), module, Spleet::SPLIT_OUTPUT + 5, Spleet::SPLIT_LIGHT + 5));
+        addChild(W::createLitOutput(mm2px(Vec(3.52f, 88.9f)), module, Spleet::SPLIT_OUTPUT + 6, Spleet::SPLIT_LIGHT + 6));
+        addChild(W::createLitOutput(mm2px(Vec(3.52f, 96.9f)), module, Spleet::SPLIT_OUTPUT + 7, Spleet::SPLIT_LIGHT + 7));
+                
         // Pushbutton
-        addParam(createParam<AriaPushButton500>(mm2px(Vec(1.0, 107)), module, Spleet::SORT_PARAM));
+        addParam(createParam<W::SmallButton>(mm2px(Vec(1.f, 107.f)), module, Spleet::SORT_PARAM));
         
         // Chain light
-        addChild(createLightCentered<SmallLight<InputLight>>(mm2px(Vec(13.6, 63.6)), module, Spleet::CHAIN_LIGHT));
+        addChild(createLight<W::InputStatusLight>(mm2px(Vec(12.6f, 62.6f)), module, Spleet::CHAIN_LIGHT));
 
     }
 };

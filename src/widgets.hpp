@@ -13,16 +13,19 @@
   0. You just DO WHAT THE FUCK YOU WANT TO.
 */
 
-// NOTE: My signature SVG graphic is copyrighted. If you reuse my components, remove my signature.
-
-// NOTE: Widgets are only added to my library as the need arises. If I'm not using a specific variant,
-// I do not create it until I need it. And if I need it only once, I create it in tne module instead.
-// Widgets are only moved to my library once used in more than a single module.
-
-// NOTE: If you want to re-use one of my one-off widgets that is not in this file but in a module, thus
+// My signature SVG graphic is copyrighted. If you reuse my components, remove my signature.
+//
+// Other than that, This widget library is unencumbered by the licensing restrictions of VCV's component library,
+// as it doesn't use its graphics or call its code.
+// 
+// Widgets are only added to my library as the need arises. If I'm not using a specific variant,
+// I do not create it until I need it.
+//
+// If you want to re-use one of my one-off widgets that is not in this file but in a module, thus
 // covered by the GPL, and wish to receive its code under the WTFPL, contact me.
 
 
+// FIXME: Prefix/Suffix
 
 #pragma once
 using namespace rack;
@@ -92,9 +95,9 @@ struct JackLight : app::ModuleLightWidget {
 
 
 // Those lights must be added before transparent knobs, at the same position.
-struct KnobLight : app::ModuleLightWidget {
+struct KnobLight : ModuleLightWidget {
     KnobLight() {
-        this->box.size = app::mm2px(math::Vec(8.0, 8.0));
+        this->box.size = app::mm2px(math::Vec(8.0f, 8.0f));
         this->bgColor = nvgRGB(0x0e, 0x69, 0x77);
     }
     
@@ -139,6 +142,63 @@ struct OutputJackLight : JackLight {
 
 struct YellowKnobLight : KnobLight {
     YellowKnobLight() {
+        this->addBaseColor(nvgRGB(0xff, 0xcc, 0x03));
+    }
+};
+
+
+///////////////
+
+
+// Those lights must be added before transparent knobs, at the same position.
+struct StatusLight : ModuleLightWidget {
+    StatusLight() {
+        this->box.size = app::mm2px(math::Vec(2.176f, 2.176f));
+        this->bgColor = nvgRGB(0x0e, 0x69, 0x77);
+        this->borderColor = nvgRGB(0x08, 0x3d, 0x45);
+    }
+    
+    void drawLight(const widget::Widget::DrawArgs& args) override {
+        float radius = std::min(this->box.size.x, this->box.size.y) / 2.0 - 0.5f;
+
+        nvgBeginPath(args.vg);
+        nvgCircle(args.vg, radius, radius , radius);
+
+        // Background
+        if (this->bgColor.a > 0.0) {
+            nvgFillColor(args.vg, this->bgColor);
+            nvgFill(args.vg);
+        }
+
+        // Foreground
+        if (this->color.a > 0.0) {
+            nvgFillColor(args.vg, this->color);
+            nvgFill(args.vg);
+        }
+
+        // Border
+        if (this->borderColor.a > 0.0) {
+            nvgStrokeWidth(args.vg, app::mm2px(0.2));
+            nvgStrokeColor(args.vg, this->borderColor);
+            nvgStroke(args.vg);
+        }
+    }
+
+    void drawHalo(const DrawArgs& args) override {
+        // We don't want a halo - they're too visible on my faceplates, and slated for removal in VCV 2.0 anyway
+    }
+};
+
+
+struct OutputStatusLight : StatusLight {
+    OutputStatusLight() {
+        this->addBaseColor(nvgRGB(0xfc, 0xae, 0xbb));
+    }
+};
+
+
+struct InputStatusLight : StatusLight {
+    InputStatusLight() {
         this->addBaseColor(nvgRGB(0xff, 0xcc, 0x03));
     }
 };
@@ -231,6 +291,67 @@ inline Widget* createLitOutput(math::Vec pos, engine::Module* module, int output
 /* ---- Switches ------------------------------------------------------------------------------- */
 /* --------------------------------------------------------------------------------------------- */
 
+// ------------------------- Pushbuttons ----------------------------------------------------------
+
+// 5mm
+struct SmallButton : SvgSwitch {
+    SmallButton() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-500-off.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-500-on.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-500-pink.svg")));
+    }
+};
+
+
+// 5mm
+struct SmallButtonMomentary : SvgSwitch {
+    SmallButtonMomentary() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-500-off.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-500-on.svg")));
+        momentary = true;
+    }
+};
+
+
+// 7mm
+struct ReducedButton : SvgSwitch {
+    ReducedButton() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-700-off.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-700-on.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-700-pink.svg")));
+    }
+};
+
+
+// 8.20mm.
+struct Button : SvgSwitch {
+    Button() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-820-off.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-820-on.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-820-pink.svg")));
+    }
+};
+
+
+// 8.20mm.
+struct ButtonMomentary : SvgSwitch {
+    ButtonMomentary() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-820-off.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-820-on.svg")));
+        momentary = true;
+    }
+};
+
+
+// 8.20mm. You won't guess its color when you press it.
+struct ButtonPink : SvgSwitch {
+    ButtonPink() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-820-off.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-820-pink.svg")));
+    }
+};
+
+
 
 // ------------------------- Rocker switches ------------------------------------------------------
 
@@ -240,15 +361,6 @@ struct RockerSwitchHorizontal800 : SvgSwitchUnshadowed {
     RockerSwitchHorizontal800() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-l.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-r.svg")));
-    }
-};
-
-
-// Rocker siwtch, horizontal. Right is default
-struct RockerSwitchHorizontal800Flipped : SvgSwitchUnshadowed {
-    RockerSwitchHorizontal800Flipped() {
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-r.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-l.svg")));
     }
 };
 
@@ -270,7 +382,7 @@ struct RockerSwitchVertical800 : SvgSwitchUnshadowed {
 /* --------------------------------------------------------------------------------------------- */
 
 
-// 82mm
+// 8.2mm
 struct Knob : app::SvgKnob {
     Knob() {
         minAngle = -0.83 * M_PI;
@@ -279,7 +391,7 @@ struct Knob : app::SvgKnob {
     }
 };
 
-// 82mm
+// 8.2mm
 struct KnobSnap : Knob {
     KnobSnap() {
         snap = true;
@@ -287,7 +399,7 @@ struct KnobSnap : Knob {
     }
 };
 
-// 82mm
+// 8.2mm
 struct KnobTransparent : app::SvgKnob {
     KnobTransparent() {
         minAngle = -0.83 * M_PI;

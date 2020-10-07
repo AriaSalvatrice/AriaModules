@@ -134,11 +134,11 @@ struct QualeWidget : ModuleWidget {
         addOutput(createOutput<W::JackOut>(mm2px(Vec(3.52f, 103.f)), module, Quale::CHORD_OUTPUT));
 
         // Operation lights
-        addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(3.5f, 96.f)), module, Quale::SCALE_TO_CHORD_LIGHT));
+        addChild(createLight<W::InputStatusLight>(mm2px(Vec(3.5f, 96.f)), module, Quale::SCALE_TO_CHORD_LIGHT));
 
         // Expander lights (right is 3.5mm from edge)
-        addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(1.4f, 125.2f)), module, Quale::EXPANDER_IN_LIGHT));
-        addChild(createLight<SmallLight<OutputLight>>(mm2px(Vec(11.74f, 125.2f)), module, Quale::EXPANDER_OUT_LIGHT));
+        addChild(createLight<W::InputStatusLight>(mm2px(Vec(1.4f, 125.2f)), module, Quale::EXPANDER_IN_LIGHT));
+        addChild(createLight<W::OutputStatusLight>(mm2px(Vec(11.74f, 125.2f)), module, Quale::EXPANDER_OUT_LIGHT));
     }
 };
 

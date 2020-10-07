@@ -147,9 +147,9 @@ struct Rotatoes : Module {
 
 // Add a margin to my normal knob, so the square that shows it's bound to MIDI is offset a bit.
 // A black placeholder square is added to the faceplate. Positioning of the rectangle is yolo'd.
-struct KnobRotato : AriaKnob820 {
+struct KnobRotato : W::Knob {
     KnobRotato() {
-        AriaKnob820();
+        W::Knob();
         box.size.x += mm2px(1.35f);
         box.size.y += mm2px(0.71f);
     }
@@ -390,7 +390,7 @@ struct Rotatoes4Widget : ModuleWidget {
     void drawRotato(Rotatoes<4>* module, float y, int num) {
         addParam(createParam<KnobRotato>(mm2px(Vec(3.52f, y)), module, Rotatoes<4>::ROTATO_PARAM + num));
         addOutput(createOutput<W::JackOut>(mm2px(Vec(3.52f, y + 10.f)), module, Rotatoes<4>::CV_OUTPUT + num));
-        addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(2.25f, y + 6.9f)), module, Rotatoes<4>::QUANTIZE_LIGHT + num));
+        addChild(createLight<W::InputStatusLight>(mm2px(Vec(2.25f, y + 6.9f)), module, Rotatoes<4>::QUANTIZE_LIGHT + num));
     }
 
     Rotatoes4Widget(Rotatoes<4>* module) {
@@ -458,7 +458,7 @@ struct GrabbyWidget : ModuleWidget {
         // Grabby
         addParam(createParam<GrabbySlider>(mm2px(Vec(2.62f, 31.f)), module, Rotatoes<1>::ROTATO_PARAM + 0));
         addOutput(createOutput<W::JackOut>(mm2px(Vec(3.52f, 104.f)), module, Rotatoes<1>::CV_OUTPUT + 0));
-        addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(2.25f, 100.9f)), module, Rotatoes<1>::QUANTIZE_LIGHT + 0));
+        addChild(createLight<W::InputStatusLight>(mm2px(Vec(2.25f, 100.9f)), module, Rotatoes<1>::QUANTIZE_LIGHT + 0));
 
         // Screws
         addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));

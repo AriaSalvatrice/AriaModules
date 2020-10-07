@@ -1182,28 +1182,28 @@ struct DariusWidget : ModuleWidget {
         addInput(createInput<W::JackIn>(mm2px(Vec(14.5, 18.0)), module, Darius::STEP_UP_INPUT));
         addInput(createInput<W::JackIn>(mm2px(Vec(14.5, 27.0)), module, Darius::STEP_DOWN_INPUT));
         addInput(createInput<W::JackIn>(mm2px(Vec(24.5, 22.5)), module, Darius::STEP_INPUT));
-        addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(24.5, 32.5)), module, Darius::STEP_PARAM));
+        addParam(createParam<W::ButtonMomentary>(mm2px(Vec(24.5, 32.5)), module, Darius::STEP_PARAM));
         
         // Run
         addInput(createInput<W::JackIn>(mm2px(Vec(4.5, 42.5)), module, Darius::RUN_INPUT));
-        addParam(createParam<AriaPushButton820>(mm2px(Vec(14.5, 42.5)), module, Darius::RUN_PARAM));
+        addParam(createParam<W::Button>(mm2px(Vec(14.5, 42.5)), module, Darius::RUN_PARAM));
         
         // Reset
         addInput(createInput<W::JackIn>(mm2px(Vec(24.5, 42.5)), module, Darius::RESET_INPUT));
-        addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(34.5, 42.5)), module, Darius::RESET_PARAM));
+        addParam(createParam<W::ButtonMomentary>(mm2px(Vec(34.5, 42.5)), module, Darius::RESET_PARAM));
         
         // Step count & First step
         addParam(createParam<W::KnobSnap>(mm2px(Vec(44.5, 22.5)), module, Darius::STEPFIRST_PARAM));
         addParam(createParam<W::KnobSnap>(mm2px(Vec(54.5, 22.5)), module, Darius::STEPCOUNT_PARAM));
         
         // Randomize
-        addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(64.5, 22.5)), module, Darius::RANDCV_PARAM));
-        addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(74.5, 22.5)), module, Darius::RANDROUTE_PARAM));
+        addParam(createParam<W::ButtonMomentary>(mm2px(Vec(64.5, 22.5)), module, Darius::RANDCV_PARAM));
+        addParam(createParam<W::ButtonMomentary>(mm2px(Vec(74.5, 22.5)), module, Darius::RANDROUTE_PARAM));
         
         // Seed
         addParam(createParam<W::RockerSwitchVertical800>(mm2px(Vec(103.0, 112.0)), module, Darius::SEED_MODE_PARAM));
         addInput(createInput<W::JackIn>(mm2px(Vec(109.5, 112.0)), module, Darius::SEED_INPUT));
-        addChild(createLightCentered<SmallLight<InputLight>>(mm2px(Vec(108.7, 121.4)), module, Darius::SEED_LIGHT));
+        addChild(createLight<W::InputStatusLight>(mm2px(Vec(107.7, 120.4)), module, Darius::SEED_LIGHT));
 
         // Output area //////////////////
 

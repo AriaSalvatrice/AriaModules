@@ -825,8 +825,8 @@ struct ArcaneWidget : ModuleWidget {
         addOutput(createOutput<W::JackOut>(mm2px(Vec(x + 00.f, y + 36.f)), module, Arcane::ARCANA_OUTPUT));
         
         // Reset/Run inputs and jacks
-        addParam(createParam<AriaPushButton500Momentary>(mm2px(Vec(x + 16.f, y + 36.f)), module, Arcane::RESET_PARAM));
-        addParam(createParam<AriaPushButton500>(mm2px(Vec(x + 19.4f, y + 39.4f)), module, Arcane::RUN_PARAM));
+        addParam(createParam<W::SmallButtonMomentary>(mm2px(Vec(x + 16.f, y + 36.f)), module, Arcane::RESET_PARAM));
+        addParam(createParam<W::SmallButton>(mm2px(Vec(x + 19.4f, y + 39.4f)), module, Arcane::RUN_PARAM));
         addInput(createInput<W::JackIn>(   mm2px(Vec(x + 08.f, y + 36.f)), module, Arcane::RESET_INPUT));
         addInput(createInput<W::JackIn>(   mm2px(Vec(x + 24.f, y + 36.f)), module, Arcane::RUN_INPUT));
         
@@ -867,10 +867,10 @@ struct ArcaneWidget : ModuleWidget {
         addOutput(createOutput<W::JackOut>(mm2px(Vec(x + 32.f, y + 88.f)), module, Arcane::PATTERN_E_32_OUTPUT));
         
         // Pulse width
-        addParam(createParam<AriaKnob820>(mm2px(Vec(x + 3.8f, y + 98.f)), module, Arcane::PULSE_WIDTH_PARAM));	
+        addParam(createParam<W::Knob>(mm2px(Vec(x + 3.8f, y + 98.f)), module, Arcane::PULSE_WIDTH_PARAM));	
         
         // Expander light (3.5mm from edge)
-        addChild(createLight<SmallLight<OutputLight>>(mm2px(Vec(x + 38.1f, 125.2f)), module, Arcane::EXPANDER_LIGHT));
+        addChild(createLight<W::OutputStatusLight>(mm2px(Vec(x + 38.1f, 125.2f)), module, Arcane::EXPANDER_LIGHT));
     }
 }; // ArcaneWidget
 
@@ -913,8 +913,8 @@ struct AtoutWidget : ModuleWidget {
         addOutput(createOutput<W::JackOut>(mm2px(Vec(x + 00.f, y + 36.f)), module, Arcane::ARCANA_OUTPUT));
 
         // Reset/Run inputs and jacks
-        addParam(createParam<AriaPushButton500Momentary>(mm2px(Vec(x + 16.f, y + 36.f)), module, Arcane::RESET_PARAM));
-        addParam(createParam<AriaPushButton500>(mm2px(Vec(x + 19.4f, y + 39.4f)), module, Arcane::RUN_PARAM));
+        addParam(createParam<W::SmallButtonMomentary>(mm2px(Vec(x + 16.f, y + 36.f)), module, Arcane::RESET_PARAM));
+        addParam(createParam<W::SmallButton>(mm2px(Vec(x + 19.4f, y + 39.4f)), module, Arcane::RUN_PARAM));
         addInput(createInput<W::JackIn>(   mm2px(Vec(x + 08.f, y + 36.f)), module, Arcane::RESET_INPUT));
         addInput(createInput<W::JackIn>(   mm2px(Vec(x + 24.f, y + 36.f)), module, Arcane::RUN_INPUT));
 
@@ -954,13 +954,13 @@ struct AtoutWidget : ModuleWidget {
         addOutput(createOutput<W::JackOut>(mm2px(Vec(x + 32.f, y + 88.f)), module, Arcane::PATTERN_E_32_OUTPUT));
         
         // Pulse width
-        addParam(createParam<AriaKnob820>(mm2px(Vec(x + 3.8f, y + 96.f)), module, Arcane::PULSE_WIDTH_PARAM));	
+        addParam(createParam<W::Knob>(mm2px(Vec(x + 3.8f, y + 96.f)), module, Arcane::PULSE_WIDTH_PARAM));	
         
         // On Atout, the Pulse/Ramp rocker is at the bottom
         addParam(createParam<W::RockerSwitchHorizontal800>(mm2px(Vec(x + 3.8f, y + 105.5f)), module, Arcane::PULSE_RAMP_PARAM));
         
         // Expander light
-        addChild(createLight<SmallLight<OutputLight>>(mm2px(Vec(x + 39.f, 125.2f)), module, Arcane::EXPANDER_LIGHT));
+        addChild(createLight<W::OutputStatusLight>(mm2px(Vec(x + 39.f, 125.2f)), module, Arcane::EXPANDER_LIGHT));
     }
 }; // AtoutWidget
 
@@ -972,7 +972,7 @@ struct AleisterWidget : ModuleWidget {
     
     // No BG, so I can overlay it on top of the normal light.
     // Would have preferred to go light blue, but yellow is the only color that feels readable but not jarring.
-    struct AriaStepLight : AriaJackLight {
+    struct AriaStepLight : W::JackLight {
         AriaStepLight() {
             this->addBaseColor(nvgRGB(0xff, 0xcc, 0x03));
             this->bgColor = nvgRGBA(0xff, 0xff, 0xff, 0x00);
@@ -997,14 +997,14 @@ struct AleisterWidget : ModuleWidget {
         float startY = 18.0;
         
         for (size_t i = 0; i < 8; i++) {
-            addChild(createLight<AriaOutputLight>(mm2px(Vec(startX + (i * 8.f), startY + 00.f)), module, Aleister::PATTERN_B_LIGHT + i + 0));
-            addChild(createLight<AriaOutputLight>(mm2px(Vec(startX + (i * 8.f), startY + 08.f)), module, Aleister::PATTERN_B_LIGHT + i + 8));
-            addChild(createLight<AriaOutputLight>(mm2px(Vec(startX + (i * 8.f), startY + 24.f)), module, Aleister::PATTERN_C_LIGHT + i + 0));
-            addChild(createLight<AriaOutputLight>(mm2px(Vec(startX + (i * 8.f), startY + 32.f)), module, Aleister::PATTERN_C_LIGHT + i + 8));
-            addChild(createLight<AriaOutputLight>(mm2px(Vec(startX + (i * 8.f), startY + 48.f)), module, Aleister::PATTERN_D_LIGHT + i + 0));
-            addChild(createLight<AriaOutputLight>(mm2px(Vec(startX + (i * 8.f), startY + 56.f)), module, Aleister::PATTERN_D_LIGHT + i + 8));
-            addChild(createLight<AriaOutputLight>(mm2px(Vec(startX + (i * 8.f), startY + 72.f)), module, Aleister::PATTERN_E_LIGHT + i + 0));
-            addChild(createLight<AriaOutputLight>(mm2px(Vec(startX + (i * 8.f), startY + 80.f)), module, Aleister::PATTERN_E_LIGHT + i + 8));
+            addChild(createLight<W::OutputJackLight>(mm2px(Vec(startX + (i * 8.f), startY + 00.f)), module, Aleister::PATTERN_B_LIGHT + i + 0));
+            addChild(createLight<W::OutputJackLight>(mm2px(Vec(startX + (i * 8.f), startY + 08.f)), module, Aleister::PATTERN_B_LIGHT + i + 8));
+            addChild(createLight<W::OutputJackLight>(mm2px(Vec(startX + (i * 8.f), startY + 24.f)), module, Aleister::PATTERN_C_LIGHT + i + 0));
+            addChild(createLight<W::OutputJackLight>(mm2px(Vec(startX + (i * 8.f), startY + 32.f)), module, Aleister::PATTERN_C_LIGHT + i + 8));
+            addChild(createLight<W::OutputJackLight>(mm2px(Vec(startX + (i * 8.f), startY + 48.f)), module, Aleister::PATTERN_D_LIGHT + i + 0));
+            addChild(createLight<W::OutputJackLight>(mm2px(Vec(startX + (i * 8.f), startY + 56.f)), module, Aleister::PATTERN_D_LIGHT + i + 8));
+            addChild(createLight<W::OutputJackLight>(mm2px(Vec(startX + (i * 8.f), startY + 72.f)), module, Aleister::PATTERN_E_LIGHT + i + 0));
+            addChild(createLight<W::OutputJackLight>(mm2px(Vec(startX + (i * 8.f), startY + 80.f)), module, Aleister::PATTERN_E_LIGHT + i + 8));
             
             addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.f), startY + 00.f)), module, Aleister::PATTERN_B_STEP_LIGHT + i + 0));
             addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.f), startY + 08.f)), module, Aleister::PATTERN_B_STEP_LIGHT + i + 8));
@@ -1015,18 +1015,18 @@ struct AleisterWidget : ModuleWidget {
             addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.f), startY + 72.f)), module, Aleister::PATTERN_E_STEP_LIGHT + i + 0));
             addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.f), startY + 80.f)), module, Aleister::PATTERN_E_STEP_LIGHT + i + 8));
                         
-            addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(startX + (i * 8.f), startY + 00.f)), module, Aleister::PATTERN_B_OUTPUT + i + 0));
-            addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(startX + (i * 8.f), startY + 08.f)), module, Aleister::PATTERN_B_OUTPUT + i + 8));
-            addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(startX + (i * 8.f), startY + 24.f)), module, Aleister::PATTERN_C_OUTPUT + i + 0));
-            addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(startX + (i * 8.f), startY + 32.f)), module, Aleister::PATTERN_C_OUTPUT + i + 8));
-            addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(startX + (i * 8.f), startY + 48.f)), module, Aleister::PATTERN_D_OUTPUT + i + 0));
-            addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(startX + (i * 8.f), startY + 56.f)), module, Aleister::PATTERN_D_OUTPUT + i + 8));
-            addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(startX + (i * 8.f), startY + 72.f)), module, Aleister::PATTERN_E_OUTPUT + i + 0));
-            addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(startX + (i * 8.f), startY + 80.f)), module, Aleister::PATTERN_E_OUTPUT + i + 8));
+            addOutput(createOutput<W::JackTransparent>(mm2px(Vec(startX + (i * 8.f), startY + 00.f)), module, Aleister::PATTERN_B_OUTPUT + i + 0));
+            addOutput(createOutput<W::JackTransparent>(mm2px(Vec(startX + (i * 8.f), startY + 08.f)), module, Aleister::PATTERN_B_OUTPUT + i + 8));
+            addOutput(createOutput<W::JackTransparent>(mm2px(Vec(startX + (i * 8.f), startY + 24.f)), module, Aleister::PATTERN_C_OUTPUT + i + 0));
+            addOutput(createOutput<W::JackTransparent>(mm2px(Vec(startX + (i * 8.f), startY + 32.f)), module, Aleister::PATTERN_C_OUTPUT + i + 8));
+            addOutput(createOutput<W::JackTransparent>(mm2px(Vec(startX + (i * 8.f), startY + 48.f)), module, Aleister::PATTERN_D_OUTPUT + i + 0));
+            addOutput(createOutput<W::JackTransparent>(mm2px(Vec(startX + (i * 8.f), startY + 56.f)), module, Aleister::PATTERN_D_OUTPUT + i + 8));
+            addOutput(createOutput<W::JackTransparent>(mm2px(Vec(startX + (i * 8.f), startY + 72.f)), module, Aleister::PATTERN_E_OUTPUT + i + 0));
+            addOutput(createOutput<W::JackTransparent>(mm2px(Vec(startX + (i * 8.f), startY + 80.f)), module, Aleister::PATTERN_E_OUTPUT + i + 8));
         }
         
         // Expander light
-        addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(1.4, 125.2)), module, Aleister::EXPANDER_LIGHT));
+        addChild(createLight<W::InputStatusLight>(mm2px(Vec(1.4, 125.2)), module, Aleister::EXPANDER_LIGHT));
     }
 }; // AleisterWidget
 

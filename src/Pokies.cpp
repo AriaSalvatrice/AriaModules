@@ -154,9 +154,9 @@ struct Pokies : Module {
 // Add a margin to my normal button, so the square that shows it's bound to MIDI is offset a bit.
 // A black placeholder square is added to the faceplate. Positioning of the rectangle is yolo'd.
 // The button is always momentary: we display an overlay when it's in toggle mode.
-struct Pokie : AriaPushButton820Momentary {
+struct Pokie : W::ButtonMomentary {
     Pokie() {
-        AriaPushButton820Momentary();
+        W::ButtonMomentary();
         box.size.x += mm2px(1.35f);
         box.size.y += mm2px(0.71f);
     }

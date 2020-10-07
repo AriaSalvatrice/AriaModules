@@ -160,28 +160,28 @@ struct SmergeWidget : ModuleWidget {
         addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
         // Merge Output
-        addOutput(createOutputCentered<W::JackOut>(mm2px(Vec(12.7f, 20.f)),  module, Smerge::POLY_OUTPUT));
+        addOutput(createOutput<W::JackOut>(mm2px(Vec(8.6f, 15.9f)),  module, Smerge::POLY_OUTPUT));
         
         // Merge Inputs
-        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62f, 29.5f)),  module, Smerge::MERGE_INPUT + 0));
-        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62f, 37.5f)),  module, Smerge::MERGE_INPUT + 1));
-        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62f, 45.5f)),  module, Smerge::MERGE_INPUT + 2));
-        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62f, 53.5f)),  module, Smerge::MERGE_INPUT + 3));
-        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62f, 61.5f)),  module, Smerge::MERGE_INPUT + 4));
-        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62f, 69.5f)),  module, Smerge::MERGE_INPUT + 5));
-        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62f, 77.5f)),  module, Smerge::MERGE_INPUT + 6));
-        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62f, 85.5f)),  module, Smerge::MERGE_INPUT + 7));
-        addInput(createInputCentered<W::JackIn>(mm2px(Vec(17.78f, 29.5f)), module, Smerge::MERGE_INPUT + 8));
-        addInput(createInputCentered<W::JackIn>(mm2px(Vec(17.78f, 37.5f)), module, Smerge::MERGE_INPUT + 9));
-        addInput(createInputCentered<W::JackIn>(mm2px(Vec(17.78f, 45.5f)), module, Smerge::MERGE_INPUT + 10));
-        addInput(createInputCentered<W::JackIn>(mm2px(Vec(17.78f, 53.5f)), module, Smerge::MERGE_INPUT + 11));
-        addInput(createInputCentered<W::JackIn>(mm2px(Vec(17.78f, 61.5f)), module, Smerge::MERGE_INPUT + 12));
-        addInput(createInputCentered<W::JackIn>(mm2px(Vec(17.78f, 69.5f)), module, Smerge::MERGE_INPUT + 13));
-        addInput(createInputCentered<W::JackIn>(mm2px(Vec(17.78f, 77.5f)), module, Smerge::MERGE_INPUT + 14));
-        addInput(createInputCentered<W::JackIn>(mm2px(Vec(17.78f, 85.5f)), module, Smerge::MERGE_INPUT + 15));
+        addInput(createInput<W::JackIn>(mm2px(Vec( 3.52f, 25.4f)), module, Smerge::MERGE_INPUT + 0));
+        addInput(createInput<W::JackIn>(mm2px(Vec( 3.52f, 33.4f)), module, Smerge::MERGE_INPUT + 1));
+        addInput(createInput<W::JackIn>(mm2px(Vec( 3.52f, 41.4f)), module, Smerge::MERGE_INPUT + 2));
+        addInput(createInput<W::JackIn>(mm2px(Vec( 3.52f, 49.4f)), module, Smerge::MERGE_INPUT + 3));
+        addInput(createInput<W::JackIn>(mm2px(Vec( 3.52f, 57.4f)), module, Smerge::MERGE_INPUT + 4));
+        addInput(createInput<W::JackIn>(mm2px(Vec( 3.52f, 65.4f)), module, Smerge::MERGE_INPUT + 5));
+        addInput(createInput<W::JackIn>(mm2px(Vec( 3.52f, 73.4f)), module, Smerge::MERGE_INPUT + 6));
+        addInput(createInput<W::JackIn>(mm2px(Vec( 3.52f, 81.4f)), module, Smerge::MERGE_INPUT + 7));
+        addInput(createInput<W::JackIn>(mm2px(Vec(13.68f, 25.4f)), module, Smerge::MERGE_INPUT + 8));
+        addInput(createInput<W::JackIn>(mm2px(Vec(13.68f, 33.4f)), module, Smerge::MERGE_INPUT + 9));
+        addInput(createInput<W::JackIn>(mm2px(Vec(13.68f, 41.4f)), module, Smerge::MERGE_INPUT + 10));
+        addInput(createInput<W::JackIn>(mm2px(Vec(13.68f, 49.4f)), module, Smerge::MERGE_INPUT + 11));
+        addInput(createInput<W::JackIn>(mm2px(Vec(13.68f, 57.4f)), module, Smerge::MERGE_INPUT + 12));
+        addInput(createInput<W::JackIn>(mm2px(Vec(13.68f, 65.4f)), module, Smerge::MERGE_INPUT + 13));
+        addInput(createInput<W::JackIn>(mm2px(Vec(13.68f, 73.4f)), module, Smerge::MERGE_INPUT + 14));
+        addInput(createInput<W::JackIn>(mm2px(Vec(13.68f, 81.4f)), module, Smerge::MERGE_INPUT + 15));
 
         // Sort button
-        addParam(createParamCentered<AriaPushButton700>(mm2px(Vec(12.7f, 95.f)), module, Smerge::SORT_PARAM));
+        addParam(createParam<W::ReducedButton>(mm2px(Vec(8.6f, 90.9f)), module, Smerge::SORT_PARAM));
 
         // Link jacks with lights
         addChild(W::createLitInput(mm2px(Vec(1.52f, 104.9f)), module, Smerge::LINK_INPUT, Smerge::LINK_IN_LIGHT));

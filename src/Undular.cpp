@@ -306,11 +306,11 @@ struct UndularWidget : ModuleWidget {
         addInput(createInput<W::JackIn>(mm2px(Vec(14.5, 24.0)), module, Undular::R_INPUT));
         
         // Step
-        addParam(createParam<AriaKnob820>(mm2px(Vec(2.6, 36.0)), module, Undular::X_STEP_PARAM));
-        addParam(createParam<AriaKnob820>(mm2px(Vec(14.6, 36.0)), module, Undular::Y_STEP_PARAM));
+        addParam(createParam<W::Knob>(mm2px(Vec(2.6, 36.0)), module, Undular::X_STEP_PARAM));
+        addParam(createParam<W::Knob>(mm2px(Vec(14.6, 36.0)), module, Undular::Y_STEP_PARAM));
         
         // Padding
-        addParam(createParam<AriaKnob820>(mm2px(Vec(2.6, 50.2)), module, Undular::PADDING_PARAM));
+        addParam(createParam<W::Knob>(mm2px(Vec(2.6, 50.2)), module, Undular::PADDING_PARAM));
 
         // Y & Lock
         addInput(createInput<W::JackIn>(mm2px(Vec(14.5, 50.0)), module, Undular::Y_INPUT));

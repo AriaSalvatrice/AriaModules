@@ -180,31 +180,24 @@ struct SplirgeWidget : ModuleWidget {
         addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         
         // Pushbutton
-        addParam(createParam<AriaPushButton500>(mm2px(Vec(1.0, 62.8)), module, Splirge::SORT_PARAM));
+        addParam(createParam<W::SmallButton>(mm2px(Vec(1.0, 62.8)), module, Splirge::SORT_PARAM));
 
-        // Jacks, top to bottom.
-        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 20.0)), module, Splirge::MERGE_INPUT + 0));
-        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 28.0)), module, Splirge::MERGE_INPUT + 1));
-        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 36.0)), module, Splirge::MERGE_INPUT + 2));
-        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 44.0)), module, Splirge::MERGE_INPUT + 3));
-        
-        addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 54.0)), module, Splirge::POLY_LIGHT));
-        addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 54.0)), module, Splirge::POLY_OUTPUT));
-        
-        addInput(createInputCentered<W::JackIn>(mm2px(Vec(7.62, 72.5)), module, Splirge::POLY_INPUT));
-        
-        addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 85.0)), module, Splirge::SPLIT_LIGHT  + 0));
-        addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 93.0)), module, Splirge::SPLIT_LIGHT  + 1));
-        addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 101.0)), module, Splirge::SPLIT_LIGHT + 2));
-        addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 109.0)), module, Splirge::SPLIT_LIGHT + 3));
-        
-        addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62,  85.0)), module, Splirge::SPLIT_OUTPUT   + 0));
-        addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62,  93.0)), module, Splirge::SPLIT_OUTPUT   + 1));
-        addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 101.0)), module, Splirge::SPLIT_OUTPUT   + 2));
-        addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 109.0)), module, Splirge::SPLIT_OUTPUT   + 3));
+        // Merge jacks
+        addInput(createInput<W::JackIn>(mm2px(Vec(3.52f, 15.9f)), module, Splirge::MERGE_INPUT + 0));
+        addInput(createInput<W::JackIn>(mm2px(Vec(3.52f, 23.9f)), module, Splirge::MERGE_INPUT + 1));
+        addInput(createInput<W::JackIn>(mm2px(Vec(3.52f, 31.9f)), module, Splirge::MERGE_INPUT + 2));
+        addInput(createInput<W::JackIn>(mm2px(Vec(3.52f, 39.9f)), module, Splirge::MERGE_INPUT + 3));
+        addChild(W::createLitOutput(    mm2px(Vec(3.52f, 49.9f)), module, Splirge::POLY_OUTPUT, Splirge::POLY_LIGHT));
+
+        // Split jacks        
+        addInput(createInput<W::JackIn>(mm2px(Vec(3.52f,  68.4f)), module, Splirge::POLY_INPUT));
+        addChild(W::createLitOutput(    mm2px(Vec(3.52f,  80.9f)), module, Splirge::SPLIT_OUTPUT + 0, Splirge::SPLIT_LIGHT + 0));
+        addChild(W::createLitOutput(    mm2px(Vec(3.52f,  88.9f)), module, Splirge::SPLIT_OUTPUT + 1, Splirge::SPLIT_LIGHT + 1));
+        addChild(W::createLitOutput(    mm2px(Vec(3.52f,  96.9f)), module, Splirge::SPLIT_OUTPUT + 2, Splirge::SPLIT_LIGHT + 2));
+        addChild(W::createLitOutput(    mm2px(Vec(3.52f, 104.9f)), module, Splirge::SPLIT_OUTPUT + 3, Splirge::SPLIT_LIGHT + 3));
         
         // Chain light
-        addChild(createLightCentered<SmallLight<InputLight>>(mm2px(Vec(13.6, 69.0)), module, Splirge::CHAIN_LIGHT));
+        addChild(createLight<W::InputStatusLight>(mm2px(Vec(12.6f, 68.0f)), module, Splirge::CHAIN_LIGHT));
 
     }
 };
