@@ -9,7 +9,7 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 ### Changed
 
 - [CHANGE] Many small code improvements to most modules, to keep the collection more maintainable in the future. 
-
+- [CHANGE] Many small improvements to widgets, most of them not user-visible. The most noticeable is the removal of halos from LEDs, as they are slated for removal in VCV 2.0 anyway.
 
 
 

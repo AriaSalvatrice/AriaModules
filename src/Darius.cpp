@@ -1010,46 +1010,37 @@ struct Darius : Module {
 
 
 
-namespace DariusWidgets {
-
-struct AriaKnob820Snap : AriaKnob820 {
-    AriaKnob820Snap() {
-        snap = true;
-        AriaKnob820();
-    }
-};
-
-struct AriaKnob820Lcd : AriaKnob820 {
+struct KnobLcd : W::Knob {
     void onDragMove(const event::DragMove& e) override {
          dynamic_cast<Darius*>(paramQuantity->module)->lcdLastInteraction = 0.f;
          dynamic_cast<Darius*>(paramQuantity->module)->lcdStatus.lcdDirty = true;
-        AriaKnob820::onDragMove(e);
+        W::Knob::onDragMove(e);
     }
 };
 
 
-struct AriaKnob820MinMax : AriaKnob820Lcd {
+struct KnobMinMax : KnobLcd {
     void onDragMove(const event::DragMove& e) override {
          dynamic_cast<Darius*>(paramQuantity->module)->lcdMode = MINMAX_MODE;
-        AriaKnob820Lcd::onDragMove(e);
+        KnobLcd::onDragMove(e);
     }
 };
 
-struct AriaKnob820Scale : AriaKnob820Lcd {
-    AriaKnob820Scale() {
+struct KnobScale : KnobLcd {
+    KnobScale() {
         snap = true;
-        AriaKnob820();
+        KnobLcd();
     }
     void onDragMove(const event::DragMove& e) override {
        dynamic_cast<Darius*>(paramQuantity->module)->lcdMode = SCALE_MODE;
-        AriaKnob820Lcd::onDragMove(e);
+        KnobLcd::onDragMove(e);
     }
 };
 
-struct AriaKnob820Slide : AriaKnob820Lcd {
+struct KnobSlide : KnobLcd {
     void onDragMove(const event::DragMove& e) override {
         dynamic_cast<Darius*>(paramQuantity->module)->lcdMode = SLIDE_MODE;
-        AriaKnob820Lcd::onDragMove(e);
+        KnobLcd::onDragMove(e);
     }
 };
 
@@ -1081,17 +1072,17 @@ TParamWidget* createMainParam(math::Vec pos, Darius* module, int paramId, int la
     return o;
 }
 
-struct AriaKnob820Route : AriaKnob820 {
+struct KnobRoute : W::Knob {
     Darius *module;
     int lastChanged;
 
-    AriaKnob820Route(Darius* module, int lastChanged) {
+    KnobRoute(Darius* module, int lastChanged) {
         this->module = module;
         this->lastChanged = lastChanged;
         setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/knob-820-arrow.svg")));
         minAngle = 0.25 * M_PI;
         maxAngle = 0.75 * M_PI;
-        AriaKnob820();
+        W::Knob();
     }
 
     void onDragMove(const event::DragMove& e) override {
@@ -1099,18 +1090,18 @@ struct AriaKnob820Route : AriaKnob820 {
         module->lcdLastInteraction = 0.f;
         module->lcdStatus.lcdDirty = true;
         module->lastRouteChanged = lastChanged;
-        AriaKnob820::onDragMove(e);
+        W::Knob::onDragMove(e);
     }
 };
 
-struct AriaKnob820TransparentCV : AriaKnob820Transparent {
+struct KnobTransparentCV : W::KnobTransparent {
     Darius *module;
     int lastChanged;
 
-    AriaKnob820TransparentCV(Darius* module, int lastChanged) {
+    KnobTransparentCV(Darius* module, int lastChanged) {
         this->module = module;
         this->lastChanged = lastChanged;
-        AriaKnob820Transparent();
+        W::KnobTransparent();
     }
 
     void onDragMove(const event::DragMove& e) override {
@@ -1118,11 +1109,10 @@ struct AriaKnob820TransparentCV : AriaKnob820Transparent {
         module->lcdLastInteraction = 0.f;
         module->lcdStatus.lcdDirty = true;
         module->lastCvChanged = lastChanged;
-        AriaKnob820Transparent::onDragMove(e);
+        W::KnobTransparent::onDragMove(e);
     }
 };
 
-} // Namespace DariusWidgets
 
 struct DariusWidget : ModuleWidget {
     DariusWidget(Darius* module) {
@@ -1140,50 +1130,50 @@ struct DariusWidget : ModuleWidget {
 
         // The main area - lights, knobs and trigger outputs.
        for (size_t i = 0; i < 1; i++) {
-            addChild(createLight<AriaInputLight>(mm2px(Vec( 4.5, (16.0 + (6.5 * 7) + i * 13.0))), module, Darius::CV_LIGHT +    i));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820TransparentCV>(mm2px(Vec( 4.5, (16.0 + (6.5 * 7) + i * 13.0))), module, Darius::CV_PARAM +    i, i));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820Route>(mm2px(Vec(14.5, (16.0 + (6.5 * 7) + i * 13.0))), module, Darius::ROUTE_PARAM + i, i));
+            addChild(createLight<W::YellowKnobLight>(mm2px(Vec( 4.5, (16.0 + (6.5 * 7) + i * 13.0))), module, Darius::CV_LIGHT + i));
+            addParam(createMainParam<KnobTransparentCV>(mm2px(Vec( 4.5, (16.0 + (6.5 * 7) + i * 13.0))), module, Darius::CV_PARAM + i, i));
+            addParam(createMainParam<KnobRoute>(mm2px(Vec(14.5, (16.0 + (6.5 * 7) + i * 13.0))), module, Darius::ROUTE_PARAM + i, i));
             addChild(W::createLitOutput(mm2px(Vec( 9.5, (22.5 + (6.5 * 7) + i * 13.0))), module, Darius::GATE_OUTPUT + i, Darius::GATE_LIGHT +  i));
         }
        for (size_t i = 0; i < 2; i++) {
-            addChild(createLight<AriaInputLight>(mm2px(Vec(24.5, (16.0 + (6.5 * 6) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP2START));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820TransparentCV>(mm2px(Vec(24.5, (16.0 + (6.5 * 6) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP2START, i + STEP2START));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820Route>(mm2px(Vec(34.5, (16.0 + (6.5 * 6) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP2START, i + STEP2START));
+            addChild(createLight<W::YellowKnobLight>(mm2px(Vec(24.5, (16.0 + (6.5 * 6) + i * 13.0))), module, Darius::CV_LIGHT + i + STEP2START));
+            addParam(createMainParam<KnobTransparentCV>(mm2px(Vec(24.5, (16.0 + (6.5 * 6) + i * 13.0))), module, Darius::CV_PARAM + i + STEP2START, i + STEP2START));
+            addParam(createMainParam<KnobRoute>(mm2px(Vec(34.5, (16.0 + (6.5 * 6) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP2START, i + STEP2START));
             addChild(W::createLitOutput(mm2px(Vec(29.5, (22.5 + (6.5 * 6) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP2START, Darius::GATE_LIGHT +  i + STEP2START));
         }
        for (size_t i = 0; i < 3; i++) {
-            addChild(createLight<AriaInputLight>(mm2px(Vec(44.5, (16.0 + (6.5 * 5) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP3START));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820TransparentCV>(mm2px(Vec(44.5, (16.0 + (6.5 * 5) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP3START, i + STEP3START));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820Route>(mm2px(Vec(54.5, (16.0 + (6.5 * 5) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP3START, i + STEP3START));
+            addChild(createLight<W::YellowKnobLight>(mm2px(Vec(44.5, (16.0 + (6.5 * 5) + i * 13.0))), module, Darius::CV_LIGHT + i + STEP3START));
+            addParam(createMainParam<KnobTransparentCV>(mm2px(Vec(44.5, (16.0 + (6.5 * 5) + i * 13.0))), module, Darius::CV_PARAM + i + STEP3START, i + STEP3START));
+            addParam(createMainParam<KnobRoute>(mm2px(Vec(54.5, (16.0 + (6.5 * 5) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP3START, i + STEP3START));
             addChild(W::createLitOutput(mm2px(Vec(49.5, (22.5 + (6.5 * 5) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP3START, Darius::GATE_LIGHT +  i + STEP3START));
         }
        for (size_t i = 0; i < 4; i++) {
-            addChild(createLight<AriaInputLight>(mm2px(Vec(64.5, (16.0 + (6.5 * 4) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP4START));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820TransparentCV>(mm2px(Vec(64.5, (16.0 + (6.5 * 4) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP4START, i + STEP4START));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820Route>(mm2px(Vec(74.5, (16.0 + (6.5 * 4) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP4START, i + STEP4START));
+            addChild(createLight<W::YellowKnobLight>(mm2px(Vec(64.5, (16.0 + (6.5 * 4) + i * 13.0))), module, Darius::CV_LIGHT + i + STEP4START));
+            addParam(createMainParam<KnobTransparentCV>(mm2px(Vec(64.5, (16.0 + (6.5 * 4) + i * 13.0))), module, Darius::CV_PARAM + i + STEP4START, i + STEP4START));
+            addParam(createMainParam<KnobRoute>(mm2px(Vec(74.5, (16.0 + (6.5 * 4) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP4START, i + STEP4START));
             addChild(W::createLitOutput(mm2px(Vec(69.5, (22.5 + (6.5 * 4) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP4START, Darius::GATE_LIGHT +  i + STEP4START));
         }
        for (size_t i = 0; i < 5; i++) {
-            addChild(createLight<AriaInputLight>(mm2px(Vec(84.5, (16.0 + (6.5 * 3) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP5START));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820TransparentCV>(mm2px(Vec(84.5, (16.0 + (6.5 * 3) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP5START, i + STEP5START));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820Route>(mm2px(Vec(94.5, (16.0 + (6.5 * 3) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP5START, i + STEP5START));
+            addChild(createLight<W::YellowKnobLight>(mm2px(Vec(84.5, (16.0 + (6.5 * 3) + i * 13.0))), module, Darius::CV_LIGHT + i + STEP5START));
+            addParam(createMainParam<KnobTransparentCV>(mm2px(Vec(84.5, (16.0 + (6.5 * 3) + i * 13.0))), module, Darius::CV_PARAM + i + STEP5START, i + STEP5START));
+            addParam(createMainParam<KnobRoute>(mm2px(Vec(94.5, (16.0 + (6.5 * 3) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP5START, i + STEP5START));
             addChild(W::createLitOutput(mm2px(Vec(89.5, (22.5 + (6.5 * 3) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP5START, Darius::GATE_LIGHT +  i + STEP5START));
         }
        for (size_t i = 0; i < 6; i++) {
-            addChild(createLight<AriaInputLight>(mm2px(Vec(104.5, (16.0 + (6.5 * 2) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP6START));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820TransparentCV>(mm2px(Vec(104.5, (16.0 + (6.5 * 2) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP6START, i + STEP6START));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820Route>(mm2px(Vec(114.5, (16.0 + (6.5 * 2) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP6START, i + STEP6START));
+            addChild(createLight<W::YellowKnobLight>(mm2px(Vec(104.5, (16.0 + (6.5 * 2) + i * 13.0))), module, Darius::CV_LIGHT + i + STEP6START));
+            addParam(createMainParam<KnobTransparentCV>(mm2px(Vec(104.5, (16.0 + (6.5 * 2) + i * 13.0))), module, Darius::CV_PARAM + i + STEP6START, i + STEP6START));
+            addParam(createMainParam<KnobRoute>(mm2px(Vec(114.5, (16.0 + (6.5 * 2) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP6START, i + STEP6START));
             addChild(W::createLitOutput(mm2px(Vec(109.5, (22.5 + (6.5 * 2) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP6START, Darius::GATE_LIGHT +  i + STEP6START));
         }
        for (size_t i = 0; i < 7; i++) {
-            addChild(createLight<AriaInputLight>(mm2px(Vec(124.5, (16.0 + (6.5 * 1) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP7START));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820TransparentCV>(mm2px(Vec(124.5, (16.0 + (6.5 * 1) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP7START, i + STEP7START));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820Route>(mm2px(Vec(134.5, (16.0 + (6.5 * 1) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP7START, i + STEP7START));
+            addChild(createLight<W::YellowKnobLight>(mm2px(Vec(124.5, (16.0 + (6.5 * 1) + i * 13.0))), module, Darius::CV_LIGHT + i + STEP7START));
+            addParam(createMainParam<KnobTransparentCV>(mm2px(Vec(124.5, (16.0 + (6.5 * 1) + i * 13.0))), module, Darius::CV_PARAM + i + STEP7START, i + STEP7START));
+            addParam(createMainParam<KnobRoute>(mm2px(Vec(134.5, (16.0 + (6.5 * 1) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP7START, i + STEP7START));
             addChild(W::createLitOutput(mm2px(Vec(129.5, (22.5 + (6.5 * 1) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP7START, Darius::GATE_LIGHT +  i + STEP7START));
         }
        for (size_t i = 0; i < 8; i++) {
-            addChild(createLight<AriaInputLight>(mm2px(Vec(144.5, (16.0 + (6.5 * 0) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP8START));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820TransparentCV>(mm2px(Vec(144.5, (16.0 + (6.5 * 0) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP8START, i + STEP8START));
+            addChild(createLight<W::YellowKnobLight>(mm2px(Vec(144.5, (16.0 + (6.5 * 0) + i * 13.0))), module, Darius::CV_LIGHT + i + STEP8START));
+            addParam(createMainParam<KnobTransparentCV>(mm2px(Vec(144.5, (16.0 + (6.5 * 0) + i * 13.0))), module, Darius::CV_PARAM + i + STEP8START, i + STEP8START));
             addChild(W::createLitOutput(mm2px(Vec(149.5, (22.5 + (6.5 * 0) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP8START, Darius::GATE_LIGHT +  i + STEP8START));
         }
         
@@ -1203,8 +1193,8 @@ struct DariusWidget : ModuleWidget {
         addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(34.5, 42.5)), module, Darius::RESET_PARAM));
         
         // Step count & First step
-        addParam(createParam<DariusWidgets::AriaKnob820Snap>(mm2px(Vec(44.5, 22.5)), module, Darius::STEPFIRST_PARAM));
-        addParam(createParam<DariusWidgets::AriaKnob820Snap>(mm2px(Vec(54.5, 22.5)), module, Darius::STEPCOUNT_PARAM));
+        addParam(createParam<W::KnobSnap>(mm2px(Vec(44.5, 22.5)), module, Darius::STEPFIRST_PARAM));
+        addParam(createParam<W::KnobSnap>(mm2px(Vec(54.5, 22.5)), module, Darius::STEPCOUNT_PARAM));
         
         // Randomize
         addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(64.5, 22.5)), module, Darius::RANDCV_PARAM));
@@ -1223,24 +1213,24 @@ struct DariusWidget : ModuleWidget {
         addChild(lcd);
 
         // Quantizer toggle
-        addParam(createParam<DariusWidgets::RockerSwitchHorizontal800ModeReset>(mm2px(Vec(11.1, 99.7)), module, Darius::QUANTIZE_TOGGLE_PARAM));
+        addParam(createParam<RockerSwitchHorizontal800ModeReset>(mm2px(Vec(11.1, 99.7)), module, Darius::QUANTIZE_TOGGLE_PARAM));
 
         // Voltage Range
-        addParam(createParam<DariusWidgets::RockerSwitchHorizontal800Flipped>(mm2px(Vec(28.0, 118.8)), module, Darius::RANGE_PARAM));
+        addParam(createParam<RockerSwitchHorizontal800Flipped>(mm2px(Vec(28.0, 118.8)), module, Darius::RANGE_PARAM));
 
         // Min & Max
-        addParam(createParam<DariusWidgets::AriaKnob820MinMax>(mm2px(Vec(49.5f, 112.f)), module, Darius::MIN_PARAM)); 
-        addParam(createParam<DariusWidgets::AriaKnob820MinMax>(mm2px(Vec(59.5f, 112.f)), module, Darius::MAX_PARAM)); 
+        addParam(createParam<KnobMinMax>(mm2px(Vec(49.5f, 112.f)), module, Darius::MIN_PARAM)); 
+        addParam(createParam<KnobMinMax>(mm2px(Vec(59.5f, 112.f)), module, Darius::MAX_PARAM)); 
 
         // Quantizer Key & Scale
-        addParam(createParam<DariusWidgets::AriaKnob820Scale>(mm2px(Vec(49.5f, 99.f)), module, Darius::KEY_PARAM));
-        addParam(createParam<DariusWidgets::AriaKnob820Scale>(mm2px(Vec(59.5f, 99.f)), module, Darius::SCALE_PARAM));
+        addParam(createParam<KnobScale>(mm2px(Vec(49.5f, 99.f)), module, Darius::KEY_PARAM));
+        addParam(createParam<KnobScale>(mm2px(Vec(59.5f, 99.f)), module, Darius::SCALE_PARAM));
 
         // External Scale
         addInput(createInput<W::JackIn>(mm2px(Vec(69.5, 99.0)), module, Darius::EXT_SCALE_INPUT));
 
         // Slide
-        addParam(createParam<DariusWidgets::AriaKnob820Slide>(mm2px(Vec(69.5, 112.0)), module, Darius::SLIDE_PARAM));
+        addParam(createParam<KnobSlide>(mm2px(Vec(69.5, 112.0)), module, Darius::SLIDE_PARAM));
 
         // Output!
         addOutput(createOutput<W::JackOut>(mm2px(Vec(79.5, 112.0)), module, Darius::GLOBAL_GATE_OUTPUT));

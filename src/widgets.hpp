@@ -51,11 +51,13 @@ struct SvgSwitchUnshadowed : SvgSwitch {
 /* --------------------------------------------------------------------------------------------- */
 
 
+// Values are kinda yolo'd by trial and error here.
+
+
 // Those lights must be added before transparent jacks, at the same position.
 // They are cut off in the middle for Lights Off compatibility.
-// Values are kinda yolo'd by trial and error here.
-struct WidgetLight : app::ModuleLightWidget {
-    WidgetLight() {
+struct JackLight : app::ModuleLightWidget {
+    JackLight() {
         this->box.size = app::mm2px(math::Vec(8.0, 8.0));
         this->bgColor = nvgRGB(0x0e, 0x69, 0x77);
     }
@@ -81,19 +83,63 @@ struct WidgetLight : app::ModuleLightWidget {
             nvgFill(args.vg);
         }
     }
+
+    void drawHalo(const DrawArgs& args) override {
+        // We don't want a halo - they're too visible on my faceplates, and slated for removal in VCV 2.0 anyway
+    }
+
 };
 
 
-struct InputWidgetLight : WidgetLight {
-    InputWidgetLight() {
+// Those lights must be added before transparent knobs, at the same position.
+struct KnobLight : app::ModuleLightWidget {
+    KnobLight() {
+        this->box.size = app::mm2px(math::Vec(8.0, 8.0));
+        this->bgColor = nvgRGB(0x0e, 0x69, 0x77);
+    }
+    
+    void drawLight(const widget::Widget::DrawArgs& args) override {
+        float radius = std::min(this->box.size.x, this->box.size.y) / 2.0 - 0.5f;
+
+        nvgBeginPath(args.vg);
+        nvgCircle(args.vg, radius + 1.f, radius + 1.f, radius);
+
+        // Background
+        if (this->bgColor.a > 0.0) {
+            nvgFillColor(args.vg, this->bgColor);
+            nvgFill(args.vg);
+        }
+
+        // Foreground
+        if (this->color.a > 0.0) {
+            nvgFillColor(args.vg, this->color);
+            nvgFill(args.vg);
+        }
+    }
+
+    void drawHalo(const DrawArgs& args) override {
+        // We don't want a halo - they're too visible on my faceplates, and slated for removal in VCV 2.0 anyway
+    }
+
+};
+
+
+struct InputJackLight : JackLight {
+    InputJackLight() {
         this->addBaseColor(nvgRGB(0xff, 0xcc, 0x03));
     }
 };
 
 
-struct OutputWidgetLight : WidgetLight {
-    OutputWidgetLight() {
+struct OutputJackLight : JackLight {
+    OutputJackLight() {
         this->addBaseColor(nvgRGB(0xfc, 0xae, 0xbb));
+    }
+};
+
+struct YellowKnobLight : KnobLight {
+    YellowKnobLight() {
+        this->addBaseColor(nvgRGB(0xff, 0xcc, 0x03));
     }
 };
 
@@ -104,9 +150,7 @@ struct OutputWidgetLight : WidgetLight {
 /* ---- Jacks ---------------------------------------------------------------------------------- */
 /* --------------------------------------------------------------------------------------------- */
 
-// TODO: Cut off jack light.
-// See https://github.com/david-c14/ModularFungi/issues/15#issuecomment-657193438 how to cut off a light
-
+// TODO: Make all my jacks usee a light widget, including the non-dynamic ones, for Lights Off consistency.
 
 // Base jack is a SVGPort without customizations.
 struct Jack : SVGPort {
@@ -144,7 +188,7 @@ struct JackTransparent : Jack {
 // Helper to create a lit input comprised of a LED and a transparent Jack
 inline Widget* createLitInput(math::Vec pos, engine::Module* module, int inputId, int firstLightId) {
 	Widget* o = new Widget;
-    InputWidgetLight* light = new InputWidgetLight;
+    InputJackLight* light = new InputJackLight;
     JackTransparent* jack = new JackTransparent;
 
 	light->module = module;
@@ -164,7 +208,7 @@ inline Widget* createLitInput(math::Vec pos, engine::Module* module, int inputId
 // Helper to create a lit output comprised of a LED and a transparent Jack
 inline Widget* createLitOutput(math::Vec pos, engine::Module* module, int outputId, int firstLightId) {
 	Widget* o = new Widget;
-    OutputWidgetLight* light = new OutputWidgetLight;
+    OutputJackLight* light = new OutputJackLight;
     JackTransparent* jack = new JackTransparent;
 
 	light->module = module;
@@ -225,6 +269,32 @@ struct RockerSwitchVertical800 : SvgSwitchUnshadowed {
 /* ---- Knobs ---------------------------------------------------------------------------------- */
 /* --------------------------------------------------------------------------------------------- */
 
+
+// 82mm
+struct Knob : app::SvgKnob {
+    Knob() {
+        minAngle = -0.83 * M_PI;
+        maxAngle = 0.83 * M_PI;
+        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/knob-820.svg")));
+    }
+};
+
+// 82mm
+struct KnobSnap : Knob {
+    KnobSnap() {
+        snap = true;
+        Knob();
+    }
+};
+
+// 82mm
+struct KnobTransparent : app::SvgKnob {
+    KnobTransparent() {
+        minAngle = -0.83 * M_PI;
+        maxAngle = 0.83 * M_PI;
+        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/knob-820-transparent.svg")));
+    }
+};
 
 
 
