@@ -6,10 +6,16 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 
 ## Unreleased
 
+### Added
+
+- [NEW] All modules: Partial support for Lights Off ( https://library.vcvrack.com/ModularFungi/LightsOff ). It is currently very difficult to provide full support, so modules such as Darius will still not look perfect.
+
 ### Changed
 
-- [CHANGE] Many small code improvements to most modules, to keep the collection more maintainable in the future. 
+- [CHANGE] Darius: When the first step is greater than 1, the path leading up to the first node is now dimmer, to make it easier to see which step is the first.
 - [CHANGE] Many small improvements to widgets, most of them not user-visible. The most noticeable is the removal of halos from LEDs, as they are slated for removal in VCV 2.0 anyway.
+- [CHANGE] Many small code improvements to most modules, most of them not user-visible, to keep the collection more maintainable in the future. 
+
 
 
 

@@ -401,7 +401,7 @@ struct KnobSnap : Knob {
 };
 
 // 8.2mm
-struct KnobTransparent : app::SvgKnob {
+struct KnobTransparent : Knob {
     KnobTransparent() {
         minAngle = -0.83 * M_PI;
         maxAngle = 0.83 * M_PI;
