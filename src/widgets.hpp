@@ -15,17 +15,18 @@
 
 // My signature SVG graphic is copyrighted. If you reuse my components, remove my signature.
 //
-// Other than that, This widget library is unencumbered by the licensing restrictions of VCV's component library,
-// as it doesn't use its graphics or call its code.
+// Other than that, this widget library is unencumbered by the licensing restrictions of
+// VCV's component library, as it doesn't use its graphics or call its code.
 // 
 // Widgets are only added to my library as the need arises. If I'm not using a specific variant,
 // I do not create it until I need it.
 //
 // If you want to re-use one of my one-off widgets that is not in this file but in a module, thus
-// covered by the GPL, and wish to receive its code under the WTFPL, contact me.
+// covered by the GPL, and wish to receive the code of that widget under the WTFPL, contact me.
 
 
 // FIXME: Prefix/Suffix
+// TODO: Figure out a way to make the lit knobs work with lights off.
 
 #pragma once
 using namespace rack;
@@ -53,8 +54,8 @@ struct SvgSwitchUnshadowed : SvgSwitch {
 /* ---- Lights --------------------------------------------------------------------------------- */
 /* --------------------------------------------------------------------------------------------- */
 
-
 // Values are kinda yolo'd by trial and error here.
+// We don't want a halo - they're too visible on my faceplates, and slated for removal in VCV 2.0 anyway
 
 
 // Those lights must be added before transparent jacks, at the same position.
@@ -88,10 +89,26 @@ struct JackLight : app::ModuleLightWidget {
     }
 
     void drawHalo(const DrawArgs& args) override {
-        // We don't want a halo - they're too visible on my faceplates, and slated for removal in VCV 2.0 anyway
+        
     }
 
 };
+
+
+struct JackLightInput : JackLight {
+    JackLightInput() {
+        this->addBaseColor(nvgRGB(0xff, 0xcc, 0x03));
+    }
+};
+
+
+struct JackLightOutput : JackLight {
+    JackLightOutput() {
+        this->addBaseColor(nvgRGB(0xfc, 0xae, 0xbb));
+    }
+};
+
+
 
 
 // Those lights must be added before transparent knobs, at the same position.
@@ -121,27 +138,12 @@ struct KnobLight : ModuleLightWidget {
     }
 
     void drawHalo(const DrawArgs& args) override {
-        // We don't want a halo - they're too visible on my faceplates, and slated for removal in VCV 2.0 anyway
     }
 
 };
 
-
-struct InputJackLight : JackLight {
-    InputJackLight() {
-        this->addBaseColor(nvgRGB(0xff, 0xcc, 0x03));
-    }
-};
-
-
-struct OutputJackLight : JackLight {
-    OutputJackLight() {
-        this->addBaseColor(nvgRGB(0xfc, 0xae, 0xbb));
-    }
-};
-
-struct YellowKnobLight : KnobLight {
-    YellowKnobLight() {
+struct KnobLightYellow : KnobLight {
+    KnobLightYellow() {
         this->addBaseColor(nvgRGB(0xff, 0xcc, 0x03));
     }
 };
@@ -185,20 +187,19 @@ struct StatusLight : ModuleLightWidget {
     }
 
     void drawHalo(const DrawArgs& args) override {
-        // We don't want a halo - they're too visible on my faceplates, and slated for removal in VCV 2.0 anyway
     }
 };
 
 
-struct OutputStatusLight : StatusLight {
-    OutputStatusLight() {
+struct StatusLightOutput : StatusLight {
+    StatusLightOutput() {
         this->addBaseColor(nvgRGB(0xfc, 0xae, 0xbb));
     }
 };
 
 
-struct InputStatusLight : StatusLight {
-    InputStatusLight() {
+struct StatusLightInput : StatusLight {
+    StatusLightInput() {
         this->addBaseColor(nvgRGB(0xff, 0xcc, 0x03));
     }
 };
@@ -219,8 +220,8 @@ struct Jack : SVGPort {
 
 
 // Non-dynamic input jacks are constantly lit yellow.
-struct JackIn : Jack {
-    JackIn() {
+struct JackInput : Jack {
+    JackInput() {
         setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/jack-in.svg")));
         Jack();
     }
@@ -228,8 +229,8 @@ struct JackIn : Jack {
 
 
 // Non-dynamic output jacks are constantly lit pink.
-struct JackOut : Jack {
-    JackOut() {
+struct JackOutput : Jack {
+    JackOutput() {
         setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/jack-out.svg")));
         Jack();
     }
@@ -248,7 +249,7 @@ struct JackTransparent : Jack {
 // Helper to create a lit input comprised of a LED and a transparent Jack
 inline Widget* createLitInput(math::Vec pos, engine::Module* module, int inputId, int firstLightId) {
 	Widget* o = new Widget;
-    InputJackLight* light = new InputJackLight;
+    JackLightInput* light = new JackLightInput;
     JackTransparent* jack = new JackTransparent;
 
 	light->module = module;
@@ -268,7 +269,7 @@ inline Widget* createLitInput(math::Vec pos, engine::Module* module, int inputId
 // Helper to create a lit output comprised of a LED and a transparent Jack
 inline Widget* createLitOutput(math::Vec pos, engine::Module* module, int outputId, int firstLightId) {
 	Widget* o = new Widget;
-    OutputJackLight* light = new OutputJackLight;
+    JackLightOutput* light = new JackLightOutput;
     JackTransparent* jack = new JackTransparent;
 
 	light->module = module;
@@ -357,8 +358,8 @@ struct ButtonPink : SvgSwitch {
 
 
 // Rocker siwtch, horizontal. Left is default
-struct RockerSwitchHorizontal800 : SvgSwitchUnshadowed {
-    RockerSwitchHorizontal800() {
+struct RockerSwitchHorizontal : SvgSwitchUnshadowed {
+    RockerSwitchHorizontal() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-l.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-r.svg")));
     }
@@ -366,8 +367,8 @@ struct RockerSwitchHorizontal800 : SvgSwitchUnshadowed {
 
 
 // Rocker siwtch, vertical. Up is default
-struct RockerSwitchVertical800 : SvgSwitchUnshadowed {
-    RockerSwitchVertical800() {
+struct RockerSwitchVertical : SvgSwitchUnshadowed {
+    RockerSwitchVertical() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-u.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-d.svg")));
     }
@@ -425,8 +426,8 @@ struct Screw : SvgScrew {
 
 // My personal brand, featuring the Cool S. Standard vertical position is 114.5mm.
 // Using a SvgScrew for the handy built-in framebuffer.
-// If you reuse this components, change the corresponding SVG file. Do not reuse my signature in your own works.
-// See the README for the full legal details. 
+// If you reuse these components, change the corresponding SVG file. Do not reuse my signature in your own works.
+// See the README for full legal details. 
 struct Signature : SvgScrew {
     Signature() {
         setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/signature/signature.svg")));

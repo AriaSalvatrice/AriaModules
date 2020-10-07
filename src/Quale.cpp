@@ -127,18 +127,18 @@ struct QualeWidget : ModuleWidget {
         addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
         // Jacks
-        addInput(createInput<W::JackIn>(mm2px(Vec(3.52f, 39.f)), module, Quale::CHORD_INPUT));
-        addOutput(createOutput<W::JackOut>(mm2px(Vec(3.52f, 59.f)), module, Quale::SCALE_OUTPUT));
+        addInput(createInput<W::JackInput>(mm2px(Vec(3.52f, 39.f)), module, Quale::CHORD_INPUT));
+        addOutput(createOutput<W::JackOutput>(mm2px(Vec(3.52f, 59.f)), module, Quale::SCALE_OUTPUT));
 
-        addInput(createInput<W::JackIn>(mm2px(Vec(3.52f, 83.f)), module, Quale::SCALE_INPUT));
-        addOutput(createOutput<W::JackOut>(mm2px(Vec(3.52f, 103.f)), module, Quale::CHORD_OUTPUT));
+        addInput(createInput<W::JackInput>(mm2px(Vec(3.52f, 83.f)), module, Quale::SCALE_INPUT));
+        addOutput(createOutput<W::JackOutput>(mm2px(Vec(3.52f, 103.f)), module, Quale::CHORD_OUTPUT));
 
         // Operation lights
-        addChild(createLight<W::InputStatusLight>(mm2px(Vec(3.5f, 96.f)), module, Quale::SCALE_TO_CHORD_LIGHT));
+        addChild(createLight<W::StatusLightInput>(mm2px(Vec(3.5f, 96.f)), module, Quale::SCALE_TO_CHORD_LIGHT));
 
         // Expander lights (right is 3.5mm from edge)
-        addChild(createLight<W::InputStatusLight>(mm2px(Vec(1.4f, 125.2f)), module, Quale::EXPANDER_IN_LIGHT));
-        addChild(createLight<W::OutputStatusLight>(mm2px(Vec(11.74f, 125.2f)), module, Quale::EXPANDER_OUT_LIGHT));
+        addChild(createLight<W::StatusLightInput>(mm2px(Vec(1.4f, 125.2f)), module, Quale::EXPANDER_IN_LIGHT));
+        addChild(createLight<W::StatusLightOutput>(mm2px(Vec(11.74f, 125.2f)), module, Quale::EXPANDER_OUT_LIGHT));
     }
 };
 

@@ -1139,17 +1139,17 @@ struct SolomonWidget8 : ModuleWidget {
         addChild(createWidget<W::Signature>(mm2px(Vec(37.5f, 114.5f))));
 
         // Queue clear mode
-        addParam(createParam<W::RockerSwitchVertical800>(mm2px(Vec(28.4f, 17.1f)), module, Solomon<8>::QUEUE_CLEAR_MODE_PARAM));
+        addParam(createParam<W::RockerSwitchVertical>(mm2px(Vec(28.4f, 17.1f)), module, Solomon<8>::QUEUE_CLEAR_MODE_PARAM));
 
         // Repeat mode
-        addParam(createParam<W::RockerSwitchVertical800>(mm2px(Vec(42.4f, 17.1f)), module, Solomon<8>::REPEAT_MODE_PARAM));
+        addParam(createParam<W::RockerSwitchVertical>(mm2px(Vec(42.4f, 17.1f)), module, Solomon<8>::REPEAT_MODE_PARAM));
 
         // Global step inputs. Ordered counterclockwise.
-        addInput(createInput<W::JackIn>(mm2px(Vec(20.f, 17.f)), module, Solomon<8>::STEP_QUEUE_INPUT));
-        addInput(createInput<W::JackIn>(mm2px(Vec( 5.f, 32.f)), module, Solomon<8>::STEP_TELEPORT_INPUT));
-        addInput(createInput<W::JackIn>(mm2px(Vec(35.f, 32.f)), module, Solomon<8>::STEP_FORWARD_INPUT));
-        addInput(createInput<W::JackIn>(mm2px(Vec(10.f, 47.f)), module, Solomon<8>::STEP_WALK_INPUT));
-        addInput(createInput<W::JackIn>(mm2px(Vec(30.f, 47.f)), module, Solomon<8>::STEP_BACK_INPUT));
+        addInput(createInput<W::JackInput>(mm2px(Vec(20.f, 17.f)), module, Solomon<8>::STEP_QUEUE_INPUT));
+        addInput(createInput<W::JackInput>(mm2px(Vec( 5.f, 32.f)), module, Solomon<8>::STEP_TELEPORT_INPUT));
+        addInput(createInput<W::JackInput>(mm2px(Vec(35.f, 32.f)), module, Solomon<8>::STEP_FORWARD_INPUT));
+        addInput(createInput<W::JackInput>(mm2px(Vec(10.f, 47.f)), module, Solomon<8>::STEP_WALK_INPUT));
+        addInput(createInput<W::JackInput>(mm2px(Vec(30.f, 47.f)), module, Solomon<8>::STEP_BACK_INPUT));
 
         // Total Steps
         addParam(createParam<TotalNodesKnob<Solomon<8>>>(mm2px(Vec(20.f, 32.f)), module, Solomon<8>::TOTAL_NODES_PARAM));
@@ -1161,18 +1161,18 @@ struct SolomonWidget8 : ModuleWidget {
 
         addParam(createParam<ScaleKnob<Solomon<8>>>(mm2px(Vec(15.f, 81.f)), module, Solomon<8>::KEY_PARAM));
         addParam(createParam<ScaleKnob<Solomon<8>>>(mm2px(Vec(27.f, 81.f)), module, Solomon<8>::SCALE_PARAM));
-        addInput(createInput<W::JackIn>(mm2px(Vec(39.f, 81.f)), module, Solomon<8>::EXT_SCALE_INPUT));
+        addInput(createInput<W::JackInput>(mm2px(Vec(39.f, 81.f)), module, Solomon<8>::EXT_SCALE_INPUT));
 
         addParam(createParam<MinMaxKnob<Solomon<8>>>(mm2px(Vec(15.f, 94.f)), module, Solomon<8>::MIN_PARAM));
         addParam(createParam<MinMaxKnob<Solomon<8>>>(mm2px(Vec(27.f, 94.f)), module, Solomon<8>::MAX_PARAM));
         addParam(createParam<SlideKnob<Solomon<8>>>(mm2px(Vec(39.f, 94.f)), module, Solomon<8>::SLIDE_PARAM));
 
         // Reset
-        addInput(createInput<W::JackIn>(mm2px(Vec(3.f, 107.f)), module, Solomon<8>::RESET_INPUT));
+        addInput(createInput<W::JackInput>(mm2px(Vec(3.f, 107.f)), module, Solomon<8>::RESET_INPUT));
 
         // Global output
-        addOutput(createOutput<W::JackOut>(mm2px(Vec(15.f, 107.f)), module, Solomon<8>::GLOBAL_TRIG_OUTPUT));
-        addOutput(createOutput<W::JackOut>(mm2px(Vec(27.f, 107.f)), module, Solomon<8>::GLOBAL_CV_OUTPUT));
+        addOutput(createOutput<W::JackOutput>(mm2px(Vec(15.f, 107.f)), module, Solomon<8>::GLOBAL_TRIG_OUTPUT));
+        addOutput(createOutput<W::JackOutput>(mm2px(Vec(27.f, 107.f)), module, Solomon<8>::GLOBAL_CV_OUTPUT));
 
         // Load and Save
         addParam(createParam<W::ButtonMomentary>(mm2px(Vec(3.f, 81.f)), module, Solomon<8>::SAVE_PARAM));
@@ -1183,15 +1183,15 @@ struct SolomonWidget8 : ModuleWidget {
         float yOffset = 17.f;
         for(size_t i = 0; i < 8; i++) {
             // Inputs
-            addInput(createInput<W::JackIn>(mm2px(Vec(xOffset +  5.f, yOffset +  0.f)), module, Solomon<8>::NODE_QUEUE_INPUT     + i));
-            addInput(createInput<W::JackIn>(mm2px(Vec(xOffset +  0.f, yOffset + 10.f)), module, Solomon<8>::NODE_SUB_1_OCT_INPUT + i));
-            addInput(createInput<W::JackIn>(mm2px(Vec(xOffset +  0.f, yOffset + 20.f)), module, Solomon<8>::NODE_SUB_3_SD_INPUT  + i));
-            addInput(createInput<W::JackIn>(mm2px(Vec(xOffset +  0.f, yOffset + 30.f)), module, Solomon<8>::NODE_SUB_2_SD_INPUT  + i));
-            addInput(createInput<W::JackIn>(mm2px(Vec(xOffset +  0.f, yOffset + 40.f)), module, Solomon<8>::NODE_SUB_1_SD_INPUT  + i));
-            addInput(createInput<W::JackIn>(mm2px(Vec(xOffset + 10.f, yOffset + 10.f)), module, Solomon<8>::NODE_ADD_1_OCT_INPUT + i));
-            addInput(createInput<W::JackIn>(mm2px(Vec(xOffset + 10.f, yOffset + 20.f)), module, Solomon<8>::NODE_ADD_3_SD_INPUT  + i));
-            addInput(createInput<W::JackIn>(mm2px(Vec(xOffset + 10.f, yOffset + 30.f)), module, Solomon<8>::NODE_ADD_2_SD_INPUT  + i));
-            addInput(createInput<W::JackIn>(mm2px(Vec(xOffset + 10.f, yOffset + 40.f)), module, Solomon<8>::NODE_ADD_1_SD_INPUT  + i));
+            addInput(createInput<W::JackInput>(mm2px(Vec(xOffset +  5.f, yOffset +  0.f)), module, Solomon<8>::NODE_QUEUE_INPUT     + i));
+            addInput(createInput<W::JackInput>(mm2px(Vec(xOffset +  0.f, yOffset + 10.f)), module, Solomon<8>::NODE_SUB_1_OCT_INPUT + i));
+            addInput(createInput<W::JackInput>(mm2px(Vec(xOffset +  0.f, yOffset + 20.f)), module, Solomon<8>::NODE_SUB_3_SD_INPUT  + i));
+            addInput(createInput<W::JackInput>(mm2px(Vec(xOffset +  0.f, yOffset + 30.f)), module, Solomon<8>::NODE_SUB_2_SD_INPUT  + i));
+            addInput(createInput<W::JackInput>(mm2px(Vec(xOffset +  0.f, yOffset + 40.f)), module, Solomon<8>::NODE_SUB_1_SD_INPUT  + i));
+            addInput(createInput<W::JackInput>(mm2px(Vec(xOffset + 10.f, yOffset + 10.f)), module, Solomon<8>::NODE_ADD_1_OCT_INPUT + i));
+            addInput(createInput<W::JackInput>(mm2px(Vec(xOffset + 10.f, yOffset + 20.f)), module, Solomon<8>::NODE_ADD_3_SD_INPUT  + i));
+            addInput(createInput<W::JackInput>(mm2px(Vec(xOffset + 10.f, yOffset + 30.f)), module, Solomon<8>::NODE_ADD_2_SD_INPUT  + i));
+            addInput(createInput<W::JackInput>(mm2px(Vec(xOffset + 10.f, yOffset + 40.f)), module, Solomon<8>::NODE_ADD_1_SD_INPUT  + i));
 
             // Segment Display
             SegmentDisplay<Solomon<8>>* display = new SegmentDisplay<Solomon<8>>();
@@ -1226,11 +1226,11 @@ struct SolomonWidget8 : ModuleWidget {
             addParam(createParam<W::ButtonMomentary>(mm2px(Vec(xOffset +  5.f, yOffset + 71.f)), module, Solomon<8>::NODE_QUEUE_PARAM + i));
 
             // Outputs
-            addOutput(createOutput<W::JackOut>(mm2px(Vec(xOffset +  0.f, yOffset +  80.f)), module, Solomon<8>::NODE_GATE_OUTPUT + i));
-            addOutput(createOutput<W::JackOut>(mm2px(Vec(xOffset + 10.f, yOffset +  80.f)), module, Solomon<8>::NODE_RANDOM_OUTPUT  + i));
-            addOutput(createOutput<W::JackOut>(mm2px(Vec(xOffset +  5.f, yOffset +  88.f)), module, Solomon<8>::NODE_CV_OUTPUT + i));
-            addOutput(createOutput<W::JackOut>(mm2px(Vec(xOffset +  0.f, yOffset +  96.f)), module, Solomon<8>::NODE_LATCH_OUTPUT   + i));
-            addOutput(createOutput<W::JackOut>(mm2px(Vec(xOffset + 10.f, yOffset +  96.f)), module, Solomon<8>::NODE_DELAY_OUTPUT    + i));
+            addOutput(createOutput<W::JackOutput>(mm2px(Vec(xOffset +  0.f, yOffset +  80.f)), module, Solomon<8>::NODE_GATE_OUTPUT + i));
+            addOutput(createOutput<W::JackOutput>(mm2px(Vec(xOffset + 10.f, yOffset +  80.f)), module, Solomon<8>::NODE_RANDOM_OUTPUT  + i));
+            addOutput(createOutput<W::JackOutput>(mm2px(Vec(xOffset +  5.f, yOffset +  88.f)), module, Solomon<8>::NODE_CV_OUTPUT + i));
+            addOutput(createOutput<W::JackOutput>(mm2px(Vec(xOffset +  0.f, yOffset +  96.f)), module, Solomon<8>::NODE_LATCH_OUTPUT   + i));
+            addOutput(createOutput<W::JackOutput>(mm2px(Vec(xOffset + 10.f, yOffset +  96.f)), module, Solomon<8>::NODE_DELAY_OUTPUT    + i));
 
             xOffset += 25.f;
         }
@@ -1307,17 +1307,17 @@ struct SolomonWidget4 : ModuleWidget {
         addChild(createWidget<W::Signature>(mm2px(Vec(37.5f, 114.5f))));
 
         // Queue clear mode
-        addParam(createParam<W::RockerSwitchVertical800>(mm2px(Vec(28.4f, 17.1f)), module, Solomon<4>::QUEUE_CLEAR_MODE_PARAM));
+        addParam(createParam<W::RockerSwitchVertical>(mm2px(Vec(28.4f, 17.1f)), module, Solomon<4>::QUEUE_CLEAR_MODE_PARAM));
 
         // Repeat mode
-        addParam(createParam<W::RockerSwitchVertical800>(mm2px(Vec(42.4f, 17.1f)), module, Solomon<4>::REPEAT_MODE_PARAM));
+        addParam(createParam<W::RockerSwitchVertical>(mm2px(Vec(42.4f, 17.1f)), module, Solomon<4>::REPEAT_MODE_PARAM));
 
         // Global step inputs. Ordered counterclockwise.
-        addInput(createInput<W::JackIn>(mm2px(Vec(20.f, 17.f)), module, Solomon<4>::STEP_QUEUE_INPUT));
-        addInput(createInput<W::JackIn>(mm2px(Vec( 5.f, 32.f)), module, Solomon<4>::STEP_TELEPORT_INPUT));
-        addInput(createInput<W::JackIn>(mm2px(Vec(35.f, 32.f)), module, Solomon<4>::STEP_FORWARD_INPUT));
-        addInput(createInput<W::JackIn>(mm2px(Vec(10.f, 47.f)), module, Solomon<4>::STEP_WALK_INPUT));
-        addInput(createInput<W::JackIn>(mm2px(Vec(30.f, 47.f)), module, Solomon<4>::STEP_BACK_INPUT));
+        addInput(createInput<W::JackInput>(mm2px(Vec(20.f, 17.f)), module, Solomon<4>::STEP_QUEUE_INPUT));
+        addInput(createInput<W::JackInput>(mm2px(Vec( 5.f, 32.f)), module, Solomon<4>::STEP_TELEPORT_INPUT));
+        addInput(createInput<W::JackInput>(mm2px(Vec(35.f, 32.f)), module, Solomon<4>::STEP_FORWARD_INPUT));
+        addInput(createInput<W::JackInput>(mm2px(Vec(10.f, 47.f)), module, Solomon<4>::STEP_WALK_INPUT));
+        addInput(createInput<W::JackInput>(mm2px(Vec(30.f, 47.f)), module, Solomon<4>::STEP_BACK_INPUT));
 
         // Total Steps
         addParam(createParam<TotalNodesKnob<Solomon<4>>>(mm2px(Vec(20.f, 32.f)), module, Solomon<4>::TOTAL_NODES_PARAM));
@@ -1329,18 +1329,18 @@ struct SolomonWidget4 : ModuleWidget {
 
         addParam(createParam<ScaleKnob<Solomon<4>>>(mm2px(Vec(15.f, 81.f)), module, Solomon<4>::KEY_PARAM));
         addParam(createParam<ScaleKnob<Solomon<4>>>(mm2px(Vec(27.f, 81.f)), module, Solomon<4>::SCALE_PARAM));
-        addInput(createInput<W::JackIn>(mm2px(Vec(39.f, 81.f)), module, Solomon<4>::EXT_SCALE_INPUT));
+        addInput(createInput<W::JackInput>(mm2px(Vec(39.f, 81.f)), module, Solomon<4>::EXT_SCALE_INPUT));
 
         addParam(createParam<MinMaxKnob<Solomon<4>>>(mm2px(Vec(15.f, 94.f)), module, Solomon<4>::MIN_PARAM));
         addParam(createParam<MinMaxKnob<Solomon<4>>>(mm2px(Vec(27.f, 94.f)), module, Solomon<4>::MAX_PARAM));
         addParam(createParam<SlideKnob<Solomon<4>>>(mm2px(Vec(39.f, 94.f)), module, Solomon<4>::SLIDE_PARAM));
 
         // Reset
-        addInput(createInput<W::JackIn>(mm2px(Vec(3.f, 107.f)), module, Solomon<4>::RESET_INPUT));
+        addInput(createInput<W::JackInput>(mm2px(Vec(3.f, 107.f)), module, Solomon<4>::RESET_INPUT));
 
         // Global output
-        addOutput(createOutput<W::JackOut>(mm2px(Vec(15.f, 107.f)), module, Solomon<4>::GLOBAL_TRIG_OUTPUT));
-        addOutput(createOutput<W::JackOut>(mm2px(Vec(27.f, 107.f)), module, Solomon<4>::GLOBAL_CV_OUTPUT));
+        addOutput(createOutput<W::JackOutput>(mm2px(Vec(15.f, 107.f)), module, Solomon<4>::GLOBAL_TRIG_OUTPUT));
+        addOutput(createOutput<W::JackOutput>(mm2px(Vec(27.f, 107.f)), module, Solomon<4>::GLOBAL_CV_OUTPUT));
 
         // Load and Save
         addParam(createParam<W::ButtonMomentary>(mm2px(Vec(3.f, 81.f)), module, Solomon<4>::SAVE_PARAM));
@@ -1351,15 +1351,15 @@ struct SolomonWidget4 : ModuleWidget {
         float yOffset = 17.f;
         for(size_t i = 0; i < 4; i++) {
             // Inputs
-            addInput(createInput<W::JackIn>(mm2px(Vec(xOffset +  5.f, yOffset +  0.f)), module, Solomon<4>::NODE_QUEUE_INPUT     + i));
-            addInput(createInput<W::JackIn>(mm2px(Vec(xOffset +  0.f, yOffset + 10.f)), module, Solomon<4>::NODE_SUB_1_OCT_INPUT + i));
-            addInput(createInput<W::JackIn>(mm2px(Vec(xOffset +  0.f, yOffset + 20.f)), module, Solomon<4>::NODE_SUB_3_SD_INPUT  + i));
-            addInput(createInput<W::JackIn>(mm2px(Vec(xOffset +  0.f, yOffset + 30.f)), module, Solomon<4>::NODE_SUB_2_SD_INPUT  + i));
-            addInput(createInput<W::JackIn>(mm2px(Vec(xOffset +  0.f, yOffset + 40.f)), module, Solomon<4>::NODE_SUB_1_SD_INPUT  + i));
-            addInput(createInput<W::JackIn>(mm2px(Vec(xOffset + 10.f, yOffset + 10.f)), module, Solomon<4>::NODE_ADD_1_OCT_INPUT + i));
-            addInput(createInput<W::JackIn>(mm2px(Vec(xOffset + 10.f, yOffset + 20.f)), module, Solomon<4>::NODE_ADD_3_SD_INPUT  + i));
-            addInput(createInput<W::JackIn>(mm2px(Vec(xOffset + 10.f, yOffset + 30.f)), module, Solomon<4>::NODE_ADD_2_SD_INPUT  + i));
-            addInput(createInput<W::JackIn>(mm2px(Vec(xOffset + 10.f, yOffset + 40.f)), module, Solomon<4>::NODE_ADD_1_SD_INPUT  + i));
+            addInput(createInput<W::JackInput>(mm2px(Vec(xOffset +  5.f, yOffset +  0.f)), module, Solomon<4>::NODE_QUEUE_INPUT     + i));
+            addInput(createInput<W::JackInput>(mm2px(Vec(xOffset +  0.f, yOffset + 10.f)), module, Solomon<4>::NODE_SUB_1_OCT_INPUT + i));
+            addInput(createInput<W::JackInput>(mm2px(Vec(xOffset +  0.f, yOffset + 20.f)), module, Solomon<4>::NODE_SUB_3_SD_INPUT  + i));
+            addInput(createInput<W::JackInput>(mm2px(Vec(xOffset +  0.f, yOffset + 30.f)), module, Solomon<4>::NODE_SUB_2_SD_INPUT  + i));
+            addInput(createInput<W::JackInput>(mm2px(Vec(xOffset +  0.f, yOffset + 40.f)), module, Solomon<4>::NODE_SUB_1_SD_INPUT  + i));
+            addInput(createInput<W::JackInput>(mm2px(Vec(xOffset + 10.f, yOffset + 10.f)), module, Solomon<4>::NODE_ADD_1_OCT_INPUT + i));
+            addInput(createInput<W::JackInput>(mm2px(Vec(xOffset + 10.f, yOffset + 20.f)), module, Solomon<4>::NODE_ADD_3_SD_INPUT  + i));
+            addInput(createInput<W::JackInput>(mm2px(Vec(xOffset + 10.f, yOffset + 30.f)), module, Solomon<4>::NODE_ADD_2_SD_INPUT  + i));
+            addInput(createInput<W::JackInput>(mm2px(Vec(xOffset + 10.f, yOffset + 40.f)), module, Solomon<4>::NODE_ADD_1_SD_INPUT  + i));
 
             // Segment Display
             SegmentDisplay<Solomon<4>>* display = new SegmentDisplay<Solomon<4>>();
@@ -1394,11 +1394,11 @@ struct SolomonWidget4 : ModuleWidget {
             addParam(createParam<W::ButtonMomentary>(mm2px(Vec(xOffset +  5.f, yOffset + 71.f)), module, Solomon<4>::NODE_QUEUE_PARAM + i));
 
             // Outputs
-            addOutput(createOutput<W::JackOut>(mm2px(Vec(xOffset +  0.f, yOffset +  80.f)), module, Solomon<4>::NODE_GATE_OUTPUT + i));
-            addOutput(createOutput<W::JackOut>(mm2px(Vec(xOffset + 10.f, yOffset +  80.f)), module, Solomon<4>::NODE_RANDOM_OUTPUT  + i));
-            addOutput(createOutput<W::JackOut>(mm2px(Vec(xOffset +  5.f, yOffset +  88.f)), module, Solomon<4>::NODE_CV_OUTPUT + i));
-            addOutput(createOutput<W::JackOut>(mm2px(Vec(xOffset +  0.f, yOffset +  96.f)), module, Solomon<4>::NODE_LATCH_OUTPUT   + i));
-            addOutput(createOutput<W::JackOut>(mm2px(Vec(xOffset + 10.f, yOffset +  96.f)), module, Solomon<4>::NODE_DELAY_OUTPUT    + i));
+            addOutput(createOutput<W::JackOutput>(mm2px(Vec(xOffset +  0.f, yOffset +  80.f)), module, Solomon<4>::NODE_GATE_OUTPUT + i));
+            addOutput(createOutput<W::JackOutput>(mm2px(Vec(xOffset + 10.f, yOffset +  80.f)), module, Solomon<4>::NODE_RANDOM_OUTPUT  + i));
+            addOutput(createOutput<W::JackOutput>(mm2px(Vec(xOffset +  5.f, yOffset +  88.f)), module, Solomon<4>::NODE_CV_OUTPUT + i));
+            addOutput(createOutput<W::JackOutput>(mm2px(Vec(xOffset +  0.f, yOffset +  96.f)), module, Solomon<4>::NODE_LATCH_OUTPUT   + i));
+            addOutput(createOutput<W::JackOutput>(mm2px(Vec(xOffset + 10.f, yOffset +  96.f)), module, Solomon<4>::NODE_DELAY_OUTPUT    + i));
 
             xOffset += 25.f;
         }
@@ -1473,17 +1473,17 @@ struct SolomonWidget16 : ModuleWidget {
         addChild(createWidget<W::Signature>(mm2px(Vec(37.5f, 114.5f))));
 
         // Queue clear mode
-        addParam(createParam<W::RockerSwitchVertical800>(mm2px(Vec(28.4f, 17.1f)), module, Solomon<16>::QUEUE_CLEAR_MODE_PARAM));
+        addParam(createParam<W::RockerSwitchVertical>(mm2px(Vec(28.4f, 17.1f)), module, Solomon<16>::QUEUE_CLEAR_MODE_PARAM));
 
         // Repeat mode
-        addParam(createParam<W::RockerSwitchVertical800>(mm2px(Vec(42.4f, 17.1f)), module, Solomon<16>::REPEAT_MODE_PARAM));
+        addParam(createParam<W::RockerSwitchVertical>(mm2px(Vec(42.4f, 17.1f)), module, Solomon<16>::REPEAT_MODE_PARAM));
 
         // Global step inputs. Ordered counterclockwise.
-        addInput(createInput<W::JackIn>(mm2px(Vec(20.f, 17.f)), module, Solomon<16>::STEP_QUEUE_INPUT));
-        addInput(createInput<W::JackIn>(mm2px(Vec( 5.f, 32.f)), module, Solomon<16>::STEP_TELEPORT_INPUT));
-        addInput(createInput<W::JackIn>(mm2px(Vec(35.f, 32.f)), module, Solomon<16>::STEP_FORWARD_INPUT));
-        addInput(createInput<W::JackIn>(mm2px(Vec(10.f, 47.f)), module, Solomon<16>::STEP_WALK_INPUT));
-        addInput(createInput<W::JackIn>(mm2px(Vec(30.f, 47.f)), module, Solomon<16>::STEP_BACK_INPUT));
+        addInput(createInput<W::JackInput>(mm2px(Vec(20.f, 17.f)), module, Solomon<16>::STEP_QUEUE_INPUT));
+        addInput(createInput<W::JackInput>(mm2px(Vec( 5.f, 32.f)), module, Solomon<16>::STEP_TELEPORT_INPUT));
+        addInput(createInput<W::JackInput>(mm2px(Vec(35.f, 32.f)), module, Solomon<16>::STEP_FORWARD_INPUT));
+        addInput(createInput<W::JackInput>(mm2px(Vec(10.f, 47.f)), module, Solomon<16>::STEP_WALK_INPUT));
+        addInput(createInput<W::JackInput>(mm2px(Vec(30.f, 47.f)), module, Solomon<16>::STEP_BACK_INPUT));
 
         // Total Steps
         addParam(createParam<TotalNodesKnob<Solomon<16>>>(mm2px(Vec(20.f, 32.f)), module, Solomon<16>::TOTAL_NODES_PARAM));
@@ -1495,18 +1495,18 @@ struct SolomonWidget16 : ModuleWidget {
 
         addParam(createParam<ScaleKnob<Solomon<16>>>(mm2px(Vec(15.f, 81.f)), module, Solomon<16>::KEY_PARAM));
         addParam(createParam<ScaleKnob<Solomon<16>>>(mm2px(Vec(27.f, 81.f)), module, Solomon<16>::SCALE_PARAM));
-        addInput(createInput<W::JackIn>(mm2px(Vec(39.f, 81.f)), module, Solomon<16>::EXT_SCALE_INPUT));
+        addInput(createInput<W::JackInput>(mm2px(Vec(39.f, 81.f)), module, Solomon<16>::EXT_SCALE_INPUT));
 
         addParam(createParam<MinMaxKnob<Solomon<16>>>(mm2px(Vec(15.f, 94.f)), module, Solomon<16>::MIN_PARAM));
         addParam(createParam<MinMaxKnob<Solomon<16>>>(mm2px(Vec(27.f, 94.f)), module, Solomon<16>::MAX_PARAM));
         addParam(createParam<SlideKnob<Solomon<16>>>(mm2px(Vec(39.f, 94.f)), module, Solomon<16>::SLIDE_PARAM));
 
         // Reset
-        addInput(createInput<W::JackIn>(mm2px(Vec(3.f, 107.f)), module, Solomon<16>::RESET_INPUT));
+        addInput(createInput<W::JackInput>(mm2px(Vec(3.f, 107.f)), module, Solomon<16>::RESET_INPUT));
 
         // Global output
-        addOutput(createOutput<W::JackOut>(mm2px(Vec(15.f, 107.f)), module, Solomon<16>::GLOBAL_TRIG_OUTPUT));
-        addOutput(createOutput<W::JackOut>(mm2px(Vec(27.f, 107.f)), module, Solomon<16>::GLOBAL_CV_OUTPUT));
+        addOutput(createOutput<W::JackOutput>(mm2px(Vec(15.f, 107.f)), module, Solomon<16>::GLOBAL_TRIG_OUTPUT));
+        addOutput(createOutput<W::JackOutput>(mm2px(Vec(27.f, 107.f)), module, Solomon<16>::GLOBAL_CV_OUTPUT));
 
         // Load and Save
         addParam(createParam<W::ButtonMomentary>(mm2px(Vec(3.f, 81.f)), module, Solomon<16>::SAVE_PARAM));
@@ -1517,15 +1517,15 @@ struct SolomonWidget16 : ModuleWidget {
         float yOffset = 17.f;
         for(size_t i = 0; i < 16; i++) {
             // Inputs
-            addInput(createInput<W::JackIn>(mm2px(Vec(xOffset +  5.f, yOffset +  0.f)), module, Solomon<16>::NODE_QUEUE_INPUT     + i));
-            addInput(createInput<W::JackIn>(mm2px(Vec(xOffset +  0.f, yOffset + 10.f)), module, Solomon<16>::NODE_SUB_1_OCT_INPUT + i));
-            addInput(createInput<W::JackIn>(mm2px(Vec(xOffset +  0.f, yOffset + 20.f)), module, Solomon<16>::NODE_SUB_3_SD_INPUT  + i));
-            addInput(createInput<W::JackIn>(mm2px(Vec(xOffset +  0.f, yOffset + 30.f)), module, Solomon<16>::NODE_SUB_2_SD_INPUT  + i));
-            addInput(createInput<W::JackIn>(mm2px(Vec(xOffset +  0.f, yOffset + 40.f)), module, Solomon<16>::NODE_SUB_1_SD_INPUT  + i));
-            addInput(createInput<W::JackIn>(mm2px(Vec(xOffset + 10.f, yOffset + 10.f)), module, Solomon<16>::NODE_ADD_1_OCT_INPUT + i));
-            addInput(createInput<W::JackIn>(mm2px(Vec(xOffset + 10.f, yOffset + 20.f)), module, Solomon<16>::NODE_ADD_3_SD_INPUT  + i));
-            addInput(createInput<W::JackIn>(mm2px(Vec(xOffset + 10.f, yOffset + 30.f)), module, Solomon<16>::NODE_ADD_2_SD_INPUT  + i));
-            addInput(createInput<W::JackIn>(mm2px(Vec(xOffset + 10.f, yOffset + 40.f)), module, Solomon<16>::NODE_ADD_1_SD_INPUT  + i));
+            addInput(createInput<W::JackInput>(mm2px(Vec(xOffset +  5.f, yOffset +  0.f)), module, Solomon<16>::NODE_QUEUE_INPUT     + i));
+            addInput(createInput<W::JackInput>(mm2px(Vec(xOffset +  0.f, yOffset + 10.f)), module, Solomon<16>::NODE_SUB_1_OCT_INPUT + i));
+            addInput(createInput<W::JackInput>(mm2px(Vec(xOffset +  0.f, yOffset + 20.f)), module, Solomon<16>::NODE_SUB_3_SD_INPUT  + i));
+            addInput(createInput<W::JackInput>(mm2px(Vec(xOffset +  0.f, yOffset + 30.f)), module, Solomon<16>::NODE_SUB_2_SD_INPUT  + i));
+            addInput(createInput<W::JackInput>(mm2px(Vec(xOffset +  0.f, yOffset + 40.f)), module, Solomon<16>::NODE_SUB_1_SD_INPUT  + i));
+            addInput(createInput<W::JackInput>(mm2px(Vec(xOffset + 10.f, yOffset + 10.f)), module, Solomon<16>::NODE_ADD_1_OCT_INPUT + i));
+            addInput(createInput<W::JackInput>(mm2px(Vec(xOffset + 10.f, yOffset + 20.f)), module, Solomon<16>::NODE_ADD_3_SD_INPUT  + i));
+            addInput(createInput<W::JackInput>(mm2px(Vec(xOffset + 10.f, yOffset + 30.f)), module, Solomon<16>::NODE_ADD_2_SD_INPUT  + i));
+            addInput(createInput<W::JackInput>(mm2px(Vec(xOffset + 10.f, yOffset + 40.f)), module, Solomon<16>::NODE_ADD_1_SD_INPUT  + i));
 
             // Segment Display
             SegmentDisplay<Solomon<16>>* display = new SegmentDisplay<Solomon<16>>();
@@ -1560,11 +1560,11 @@ struct SolomonWidget16 : ModuleWidget {
             addParam(createParam<W::ButtonMomentary>(mm2px(Vec(xOffset +  5.f, yOffset + 71.f)), module, Solomon<16>::NODE_QUEUE_PARAM + i));
 
             // Outputs
-            addOutput(createOutput<W::JackOut>(mm2px(Vec(xOffset +  0.f, yOffset +  80.f)), module, Solomon<16>::NODE_GATE_OUTPUT + i));
-            addOutput(createOutput<W::JackOut>(mm2px(Vec(xOffset + 10.f, yOffset +  80.f)), module, Solomon<16>::NODE_RANDOM_OUTPUT  + i));
-            addOutput(createOutput<W::JackOut>(mm2px(Vec(xOffset +  5.f, yOffset +  88.f)), module, Solomon<16>::NODE_CV_OUTPUT + i));
-            addOutput(createOutput<W::JackOut>(mm2px(Vec(xOffset +  0.f, yOffset +  96.f)), module, Solomon<16>::NODE_LATCH_OUTPUT   + i));
-            addOutput(createOutput<W::JackOut>(mm2px(Vec(xOffset + 10.f, yOffset +  96.f)), module, Solomon<16>::NODE_DELAY_OUTPUT    + i));
+            addOutput(createOutput<W::JackOutput>(mm2px(Vec(xOffset +  0.f, yOffset +  80.f)), module, Solomon<16>::NODE_GATE_OUTPUT + i));
+            addOutput(createOutput<W::JackOutput>(mm2px(Vec(xOffset + 10.f, yOffset +  80.f)), module, Solomon<16>::NODE_RANDOM_OUTPUT  + i));
+            addOutput(createOutput<W::JackOutput>(mm2px(Vec(xOffset +  5.f, yOffset +  88.f)), module, Solomon<16>::NODE_CV_OUTPUT + i));
+            addOutput(createOutput<W::JackOutput>(mm2px(Vec(xOffset +  0.f, yOffset +  96.f)), module, Solomon<16>::NODE_LATCH_OUTPUT   + i));
+            addOutput(createOutput<W::JackOutput>(mm2px(Vec(xOffset + 10.f, yOffset +  96.f)), module, Solomon<16>::NODE_DELAY_OUTPUT    + i));
 
             xOffset += 25.f;
         }

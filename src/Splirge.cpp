@@ -183,21 +183,21 @@ struct SplirgeWidget : ModuleWidget {
         addParam(createParam<W::SmallButton>(mm2px(Vec(1.0, 62.8)), module, Splirge::SORT_PARAM));
 
         // Merge jacks
-        addInput(createInput<W::JackIn>(mm2px(Vec(3.52f, 15.9f)), module, Splirge::MERGE_INPUT + 0));
-        addInput(createInput<W::JackIn>(mm2px(Vec(3.52f, 23.9f)), module, Splirge::MERGE_INPUT + 1));
-        addInput(createInput<W::JackIn>(mm2px(Vec(3.52f, 31.9f)), module, Splirge::MERGE_INPUT + 2));
-        addInput(createInput<W::JackIn>(mm2px(Vec(3.52f, 39.9f)), module, Splirge::MERGE_INPUT + 3));
+        addInput(createInput<W::JackInput>(mm2px(Vec(3.52f, 15.9f)), module, Splirge::MERGE_INPUT + 0));
+        addInput(createInput<W::JackInput>(mm2px(Vec(3.52f, 23.9f)), module, Splirge::MERGE_INPUT + 1));
+        addInput(createInput<W::JackInput>(mm2px(Vec(3.52f, 31.9f)), module, Splirge::MERGE_INPUT + 2));
+        addInput(createInput<W::JackInput>(mm2px(Vec(3.52f, 39.9f)), module, Splirge::MERGE_INPUT + 3));
         addChild(W::createLitOutput(    mm2px(Vec(3.52f, 49.9f)), module, Splirge::POLY_OUTPUT, Splirge::POLY_LIGHT));
 
         // Split jacks        
-        addInput(createInput<W::JackIn>(mm2px(Vec(3.52f,  68.4f)), module, Splirge::POLY_INPUT));
+        addInput(createInput<W::JackInput>(mm2px(Vec(3.52f,  68.4f)), module, Splirge::POLY_INPUT));
         addChild(W::createLitOutput(    mm2px(Vec(3.52f,  80.9f)), module, Splirge::SPLIT_OUTPUT + 0, Splirge::SPLIT_LIGHT + 0));
         addChild(W::createLitOutput(    mm2px(Vec(3.52f,  88.9f)), module, Splirge::SPLIT_OUTPUT + 1, Splirge::SPLIT_LIGHT + 1));
         addChild(W::createLitOutput(    mm2px(Vec(3.52f,  96.9f)), module, Splirge::SPLIT_OUTPUT + 2, Splirge::SPLIT_LIGHT + 2));
         addChild(W::createLitOutput(    mm2px(Vec(3.52f, 104.9f)), module, Splirge::SPLIT_OUTPUT + 3, Splirge::SPLIT_LIGHT + 3));
         
         // Chain light
-        addChild(createLight<W::InputStatusLight>(mm2px(Vec(12.6f, 68.0f)), module, Splirge::CHAIN_LIGHT));
+        addChild(createLight<W::StatusLightInput>(mm2px(Vec(12.6f, 68.0f)), module, Splirge::CHAIN_LIGHT));
 
     }
 };
