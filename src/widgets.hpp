@@ -26,7 +26,7 @@
 
 #pragma once
 using namespace rack;
-Simplerextern Plugin* pluginInstance;
+extern Plugin* pluginInstance;
 
 
 namespace W { // I don't want to type MyCoolPersonalWidgets:: every damn time, thank you
@@ -46,25 +46,54 @@ struct SvgSwitchUnshadowed : SvgSwitch {
 
 
 
-
 /* --------------------------------------------------------------------------------------------- */
-/* ---- Decorative ----------------------------------------------------------------------------- */
+/* ---- Lights --------------------------------------------------------------------------------- */
 /* --------------------------------------------------------------------------------------------- */
 
-// These require a standard <3-shaped screwdriver, provided complimentary with every purchasee. 
-struct Screw : SvgScrew {
-    Screw() {
-        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/screw.svg")));
+
+// Those lights must be added before transparent jacks, at the same position.
+// They are cut off in the middle for Lights Off compatibility.
+// Values are kinda yolo'd by trial and error here.
+struct WidgetLight : app::ModuleLightWidget {
+    WidgetLight() {
+        this->box.size = app::mm2px(math::Vec(8.0, 8.0));
+        this->bgColor = nvgRGB(0x0e, 0x69, 0x77);
+    }
+    
+    void drawLight(const widget::Widget::DrawArgs& args) override {
+        float radius = std::min(this->box.size.x, this->box.size.y) / 2.0 - 0.5f;
+        float holeRadius = app::mm2px(3.f);
+
+        nvgBeginPath(args.vg);
+        nvgCircle(args.vg, radius + 1.f, radius + 1.f, radius);
+        nvgCircle(args.vg, radius + 1.f, radius + 1.f, holeRadius);
+        nvgPathWinding(args.vg, NVG_HOLE);
+
+        // Background
+        if (this->bgColor.a > 0.0) {
+            nvgFillColor(args.vg, this->bgColor);
+            nvgFill(args.vg);
+        }
+
+        // Foreground
+        if (this->color.a > 0.0) {
+            nvgFillColor(args.vg, this->color);
+            nvgFill(args.vg);
+        }
     }
 };
 
-// My personal brand, featuring the Cool S. Standard vertical position is 114.5mm.
-// Using a SvgScrew for the handy built-in framebuffer.
-// If you reuse this components, change the corresponding SVG file. Do not reuse my signature in your own works.
-// See the README for the full legal details. 
-struct Signature : SvgScrew {
-    Signature() {
-        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/signature/signature.svg")));
+
+struct InputWidgetLight : WidgetLight {
+    InputWidgetLight() {
+        this->addBaseColor(nvgRGB(0xff, 0xcc, 0x03));
+    }
+};
+
+
+struct OutputWidgetLight : WidgetLight {
+    OutputWidgetLight() {
+        this->addBaseColor(nvgRGB(0xfc, 0xae, 0xbb));
     }
 };
 
@@ -93,6 +122,7 @@ struct JackIn : Jack {
     }
 };
 
+
 // Non-dynamic output jacks are constantly lit pink.
 struct JackOut : Jack {
     JackOut() {
@@ -100,6 +130,7 @@ struct JackOut : Jack {
         Jack();
     }
 };
+
 
 // Transparent jacks are shown above a light.
 struct JackTransparent : Jack {
@@ -109,12 +140,12 @@ struct JackTransparent : Jack {
     }
 };
 
+
 // Helper to create a lit input comprised of a LED and a transparent Jack
-template <class TPortWidget, class TModuleLightWidget>
-Widget* createLitInput(math::Vec pos, engine::Module* module, int inputId, int firstLightId) {
+inline Widget* createLitInput(math::Vec pos, engine::Module* module, int inputId, int firstLightId) {
 	Widget* o = new Widget;
-    TModuleLightWidget* light = new TModuleLightWidget;
-    TPortWidget* jack = new TPortWidget;
+    InputWidgetLight* light = new InputWidgetLight;
+    JackTransparent* jack = new JackTransparent;
 
 	light->module = module;
 	light->firstLightId = firstLightId;
@@ -129,12 +160,12 @@ Widget* createLitInput(math::Vec pos, engine::Module* module, int inputId, int f
 	return o;
 }
 
+
 // Helper to create a lit output comprised of a LED and a transparent Jack
-template <class TPortWidget, class TModuleLightWidget>
-Widget* createLitOutput(math::Vec pos, engine::Module* module, int outputId, int firstLightId) {
+inline Widget* createLitOutput(math::Vec pos, engine::Module* module, int outputId, int firstLightId) {
 	Widget* o = new Widget;
-    TModuleLightWidget* light = new TModuleLightWidget;
-    TPortWidget* jack = new TPortWidget;
+    OutputWidgetLight* light = new OutputWidgetLight;
+    JackTransparent* jack = new JackTransparent;
 
 	light->module = module;
 	light->firstLightId = firstLightId;
@@ -157,8 +188,8 @@ Widget* createLitOutput(math::Vec pos, engine::Module* module, int outputId, int
 /* --------------------------------------------------------------------------------------------- */
 
 
-
 // ------------------------- Rocker switches ------------------------------------------------------
+
 
 // Rocker siwtch, horizontal. Left is default
 struct RockerSwitchHorizontal800 : SvgSwitchUnshadowed {
@@ -168,6 +199,7 @@ struct RockerSwitchHorizontal800 : SvgSwitchUnshadowed {
     }
 };
 
+
 // Rocker siwtch, horizontal. Right is default
 struct RockerSwitchHorizontal800Flipped : SvgSwitchUnshadowed {
     RockerSwitchHorizontal800Flipped() {
@@ -175,6 +207,7 @@ struct RockerSwitchHorizontal800Flipped : SvgSwitchUnshadowed {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-l.svg")));
     }
 };
+
 
 // Rocker siwtch, vertical. Up is default
 struct RockerSwitchVertical800 : SvgSwitchUnshadowed {
@@ -195,4 +228,31 @@ struct RockerSwitchVertical800 : SvgSwitchUnshadowed {
 
 
 
-} // Namespace W
+
+/* --------------------------------------------------------------------------------------------- */
+/* ---- Decorative ----------------------------------------------------------------------------- */
+/* --------------------------------------------------------------------------------------------- */
+
+// These require a standard <3-shaped screwdriver, provided complimentary with every purchasee. 
+struct Screw : SvgScrew {
+    Screw() {
+        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/screw.svg")));
+    }
+};
+
+
+// My personal brand, featuring the Cool S. Standard vertical position is 114.5mm.
+// Using a SvgScrew for the handy built-in framebuffer.
+// If you reuse this components, change the corresponding SVG file. Do not reuse my signature in your own works.
+// See the README for the full legal details. 
+struct Signature : SvgScrew {
+    Signature() {
+        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/signature/signature.svg")));
+    }
+};
+
+
+
+
+
+} // namespace W

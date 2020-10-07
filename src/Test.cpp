@@ -37,6 +37,7 @@ struct Test : Module {
 
     void process(const ProcessArgs& args) override {
         lights[TEST_LIGHT + 2].setBrightness(1.f);
+        lights[TEST_LIGHT + 5].setBrightness(1.f);
     }
 };
 
@@ -53,8 +54,8 @@ struct TestWidget : ModuleWidget {
         addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
                 
         for (size_t i = 0; i < 12; i++) {
-            // addInput(createInput<W::JackIn>(mm2px(Vec(10.f, 8.0 + i * 10.f)), module, Test::TEST_INPUT + i));
-            addChild(W::createLitInput<W::JackTransparent, AriaOutputLight>(mm2px(Vec(10.f, 8.0 + i * 10.f)), module, Test::TEST_INPUT + i, Test::TEST_LIGHT + i));
+            addChild(W::createLitInput(mm2px(Vec(10.f, 8.0 + i * 10.f)), module, Test::TEST_INPUT + i, Test::TEST_LIGHT + i));
+            addChild(W::createLitOutput(mm2px(Vec(10.f, 8.0 + i * 10.f)), module, Test::TEST_INPUT + i, Test::TEST_LIGHT + i));
             addOutput(createOutput<W::JackOut>(mm2px(Vec(20.f, 8.f + i * 10.f)), module, Test::TEST_OUTPUT + i));
             addChild(createLight<AriaOutputLight>(mm2px(Vec(30.f, 8.f + i * 10.f)), module, Test::TEST_LIGHT + i));
         }

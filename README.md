@@ -24,7 +24,9 @@ Compatibility, Download & Installation
 
 Those modules should work with any 1.x version of VCV Rack, on Linux, Windows, and OS X. 
 
-They are part of VCV's online library: by [subscribing to my plugin](https://library.vcvrack.com/AriaSalvatrice/), you will receive every stable update a few days after it's released. Installing my modules from the VCV library is the recommended way.
+They are part of VCV's online library: by [subscribing to my plugin](https://library.vcvrack.com/AriaSalvatrice/), you will receive every stable update a few days after it's released, including every new module. Installing my modules from the VCV library is the recommended way.
+
+These moduless are expected to be compatible with VCV Rack 2.0, and VCV for DAWs, a commercial product allowing to run VCV Rack as a VST, once they are released.
 
 Forks and ports of VCV Rack such as the [Sonaremin](https://github.com/hexdump0815/sonaremin) project might bundle my modules in their preferred way. 
 
@@ -109,7 +111,7 @@ Yeah, the rules are a bit complicated. If they cause licensing incompatibilities
 
 It should go without saying that no sane courtroom would ever humor the idea the output of my modules is original enough to be my copyright, even that of Arcane, which directly outputs random data obtained from a server under my control.
 
-Since courtooms are rarely sane, **I explicitly relinquish any claim of intellectual propery over the output you obtain by operating my modules**, not that I believe I ever had any. Any song you make with them is yours alone.
+Since courtooms are rarely sane, **I explicitly relinquish any claim of intellectual property over the output you obtain by operating my modules**, not that I believe I ever had any. Any song you make with them is yours alone.
 
 
 ### Source code of individual modules
@@ -129,7 +131,7 @@ Not that the code is very good, but some libraries I created for my own use are 
 
 ### Components (knobs, jacks, etc)
 
-CC-BY-SA-4.0. If you re-use them, I request you do not entirely re-use my signature color scheme in your own modules, but this request is not legally binding. Because I use a limited palette, it's easy to replace most colors in my SVG files using search and replace in a text editor.
+CC-BY-SA-4.0 graphics, WTFPL [`src/widgets.hpp`](src/widgets.hpp). If you re-use them, I request you do not entirely re-use my signature color scheme in your own modules, but this request is not legally binding. Because I use a limited palette, it's easy to replace most colors in my SVG files using search and replace in a text editor.
 
 
 ### Signature / Logo
