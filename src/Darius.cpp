@@ -1201,18 +1201,18 @@ struct DariusWidget : ModuleWidget {
         }
         
         // Step < ^ v >
-        addInput(createInput<W::JackInput>(mm2px(Vec(4.5, 22.5)), module, Darius::STEP_BACK_INPUT));
-        addInput(createInput<W::JackInput>(mm2px(Vec(14.5, 18.0)), module, Darius::STEP_UP_INPUT));
-        addInput(createInput<W::JackInput>(mm2px(Vec(14.5, 27.0)), module, Darius::STEP_DOWN_INPUT));
-        addInput(createInput<W::JackInput>(mm2px(Vec(24.5, 22.5)), module, Darius::STEP_INPUT));
+        addChild(W::createInput(mm2px(Vec(4.5, 22.5)), module, Darius::STEP_BACK_INPUT));
+        addChild(W::createInput(mm2px(Vec(14.5, 18.0)), module, Darius::STEP_UP_INPUT));
+        addChild(W::createInput(mm2px(Vec(14.5, 27.0)), module, Darius::STEP_DOWN_INPUT));
+        addChild(W::createInput(mm2px(Vec(24.5, 22.5)), module, Darius::STEP_INPUT));
         addParam(createParam<W::ButtonMomentary>(mm2px(Vec(24.5, 32.5)), module, Darius::STEP_PARAM));
         
         // Run
-        addInput(createInput<W::JackInput>(mm2px(Vec(4.5, 42.5)), module, Darius::RUN_INPUT));
+        addChild(W::createInput(mm2px(Vec(4.5, 42.5)), module, Darius::RUN_INPUT));
         addParam(createParam<W::Button>(mm2px(Vec(14.5, 42.5)), module, Darius::RUN_PARAM));
         
         // Reset
-        addInput(createInput<W::JackInput>(mm2px(Vec(24.5, 42.5)), module, Darius::RESET_INPUT));
+        addChild(W::createInput(mm2px(Vec(24.5, 42.5)), module, Darius::RESET_INPUT));
         addParam(createParam<W::ButtonMomentary>(mm2px(Vec(34.5, 42.5)), module, Darius::RESET_PARAM));
         
         // Step count & First step
@@ -1225,7 +1225,7 @@ struct DariusWidget : ModuleWidget {
         
         // Seed
         addParam(createParam<W::RockerSwitchVertical>(mm2px(Vec(103.0, 112.0)), module, Darius::SEED_MODE_PARAM));
-        addInput(createInput<W::JackInput>(mm2px(Vec(109.5, 112.0)), module, Darius::SEED_INPUT));
+        addChild(W::createInput(mm2px(Vec(109.5, 112.0)), module, Darius::SEED_INPUT));
         addChild(createLight<W::StatusLightInput>(mm2px(Vec(107.7, 120.4)), module, Darius::SEED_LIGHT));
 
         // Output area //////////////////
@@ -1250,14 +1250,14 @@ struct DariusWidget : ModuleWidget {
         addParam(createParam<KnobScale>(mm2px(Vec(59.5f, 99.f)), module, Darius::SCALE_PARAM));
 
         // External Scale
-        addInput(createInput<W::JackInput>(mm2px(Vec(69.5, 99.0)), module, Darius::EXT_SCALE_INPUT));
+        addChild(W::createInput(mm2px(Vec(69.5, 99.0)), module, Darius::EXT_SCALE_INPUT));
 
         // Slide
         addParam(createParam<KnobSlide>(mm2px(Vec(69.5, 112.0)), module, Darius::SLIDE_PARAM));
 
         // Output!
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(79.5, 112.0)), module, Darius::GLOBAL_GATE_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(89.5, 112.0)), module, Darius::CV_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(79.5, 112.0)), module, Darius::GLOBAL_GATE_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(89.5, 112.0)), module, Darius::CV_OUTPUT));
     }
 
 

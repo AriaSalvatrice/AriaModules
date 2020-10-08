@@ -813,58 +813,58 @@ struct ArcaneWidget : ModuleWidget {
         addChild(lcd);
 
         // Quantizer
-        addInput(createInput<W::JackInput>(   mm2px(Vec(x + 00.f, y + 00.f)), module, Arcane::QNT_INPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 32.f, y + 00.f)), module, Arcane::QNT_OUTPUT));
+        addChild(W::createInput(   mm2px(Vec(x + 00.f, y + 00.f)), module, Arcane::QNT_INPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 32.f, y + 00.f)), module, Arcane::QNT_OUTPUT));
         
         // Scale
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 00.f, y + 08.f)), module, Arcane::SCALE_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 16.f, y + 08.f)), module, Arcane::SCALE_PADDED_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 32.f, y + 08.f)), module, Arcane::EXTERNAL_SCALE_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 00.f, y + 08.f)), module, Arcane::SCALE_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 16.f, y + 08.f)), module, Arcane::SCALE_PADDED_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 32.f, y + 08.f)), module, Arcane::EXTERNAL_SCALE_OUTPUT));
 
         // Arcane
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 00.f, y + 36.f)), module, Arcane::ARCANA_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 00.f, y + 36.f)), module, Arcane::ARCANA_OUTPUT));
         
         // Reset/Run inputs and jacks
         addParam(createParam<W::SmallButtonMomentary>(mm2px(Vec(x + 16.f, y + 36.f)), module, Arcane::RESET_PARAM));
         addParam(createParam<W::SmallButton>(mm2px(Vec(x + 19.4f, y + 39.4f)), module, Arcane::RUN_PARAM));
-        addInput(createInput<W::JackInput>(   mm2px(Vec(x + 08.f, y + 36.f)), module, Arcane::RESET_INPUT));
-        addInput(createInput<W::JackInput>(   mm2px(Vec(x + 24.f, y + 36.f)), module, Arcane::RUN_INPUT));
+        addChild(W::createInput(   mm2px(Vec(x + 08.f, y + 36.f)), module, Arcane::RESET_INPUT));
+        addChild(W::createInput(   mm2px(Vec(x + 24.f, y + 36.f)), module, Arcane::RUN_INPUT));
         
         // BPM
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 32.f, y + 36.f)), module, Arcane::BPM_NUM_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 32.f, y + 36.f)), module, Arcane::BPM_NUM_OUTPUT));
         
         // Pulse/Ramp
         addParam(createParam<W::RockerSwitchVertical>(mm2px(Vec(x - 6.f, y + 54.f)), module, Arcane::PULSE_RAMP_PARAM));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 00.f, y + 54.f)), module, Arcane::BPM_1_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 08.f, y + 54.f)), module, Arcane::BPM_4_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 16.f, y + 54.f)), module, Arcane::BPM_8_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 24.f, y + 54.f)), module, Arcane::BPM_16_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 32.f, y + 54.f)), module, Arcane::BPM_32_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 00.f, y + 54.f)), module, Arcane::BPM_1_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 08.f, y + 54.f)), module, Arcane::BPM_4_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 16.f, y + 54.f)), module, Arcane::BPM_8_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 24.f, y + 54.f)), module, Arcane::BPM_16_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 32.f, y + 54.f)), module, Arcane::BPM_32_OUTPUT));
                 
         // B C D E
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 00.f, y + 64.f)), module, Arcane::PATTERN_B_1_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 08.f, y + 64.f)), module, Arcane::PATTERN_B_4_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 16.f, y + 64.f)), module, Arcane::PATTERN_B_8_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 24.f, y + 64.f)), module, Arcane::PATTERN_B_16_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 32.f, y + 64.f)), module, Arcane::PATTERN_B_32_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 00.f, y + 64.f)), module, Arcane::PATTERN_B_1_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 08.f, y + 64.f)), module, Arcane::PATTERN_B_4_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 16.f, y + 64.f)), module, Arcane::PATTERN_B_8_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 24.f, y + 64.f)), module, Arcane::PATTERN_B_16_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 32.f, y + 64.f)), module, Arcane::PATTERN_B_32_OUTPUT));
         
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 00.f, y + 72.f)), module, Arcane::PATTERN_C_1_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 08.f, y + 72.f)), module, Arcane::PATTERN_C_4_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 16.f, y + 72.f)), module, Arcane::PATTERN_C_8_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 24.f, y + 72.f)), module, Arcane::PATTERN_C_16_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 32.f, y + 72.f)), module, Arcane::PATTERN_C_32_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 00.f, y + 72.f)), module, Arcane::PATTERN_C_1_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 08.f, y + 72.f)), module, Arcane::PATTERN_C_4_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 16.f, y + 72.f)), module, Arcane::PATTERN_C_8_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 24.f, y + 72.f)), module, Arcane::PATTERN_C_16_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 32.f, y + 72.f)), module, Arcane::PATTERN_C_32_OUTPUT));
         
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 00.f, y + 80.f)), module, Arcane::PATTERN_D_1_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 08.f, y + 80.f)), module, Arcane::PATTERN_D_4_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 16.f, y + 80.f)), module, Arcane::PATTERN_D_8_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 24.f, y + 80.f)), module, Arcane::PATTERN_D_16_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 32.f, y + 80.f)), module, Arcane::PATTERN_D_32_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 00.f, y + 80.f)), module, Arcane::PATTERN_D_1_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 08.f, y + 80.f)), module, Arcane::PATTERN_D_4_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 16.f, y + 80.f)), module, Arcane::PATTERN_D_8_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 24.f, y + 80.f)), module, Arcane::PATTERN_D_16_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 32.f, y + 80.f)), module, Arcane::PATTERN_D_32_OUTPUT));
         
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 00.f, y + 88.f)), module, Arcane::PATTERN_E_1_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 08.f, y + 88.f)), module, Arcane::PATTERN_E_4_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 16.f, y + 88.f)), module, Arcane::PATTERN_E_8_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 24.f, y + 88.f)), module, Arcane::PATTERN_E_16_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 32.f, y + 88.f)), module, Arcane::PATTERN_E_32_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 00.f, y + 88.f)), module, Arcane::PATTERN_E_1_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 08.f, y + 88.f)), module, Arcane::PATTERN_E_4_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 16.f, y + 88.f)), module, Arcane::PATTERN_E_8_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 24.f, y + 88.f)), module, Arcane::PATTERN_E_16_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 32.f, y + 88.f)), module, Arcane::PATTERN_E_32_OUTPUT));
         
         // Pulse width
         addParam(createParam<W::Knob>(mm2px(Vec(x + 3.8f, y + 98.f)), module, Arcane::PULSE_WIDTH_PARAM));	
@@ -901,57 +901,57 @@ struct AtoutWidget : ModuleWidget {
         addChild(createWidget<W::Screw>(Vec(box.size.x - 5 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
     
         // Quantizer
-        addInput(createInput<W::JackInput>(   mm2px(Vec(x + 00.f, y + 00.f)), module, Arcane::QNT_INPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 32.f, y + 00.f)), module, Arcane::QNT_OUTPUT));
+        addChild(W::createInput(   mm2px(Vec(x + 00.f, y + 00.f)), module, Arcane::QNT_INPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 32.f, y + 00.f)), module, Arcane::QNT_OUTPUT));
         
         // Scale
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 00.f, y + 08.f)), module, Arcane::SCALE_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 16.f, y + 08.f)), module, Arcane::SCALE_PADDED_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 32.f, y + 08.f)), module, Arcane::EXTERNAL_SCALE_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 00.f, y + 08.f)), module, Arcane::SCALE_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 16.f, y + 08.f)), module, Arcane::SCALE_PADDED_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 32.f, y + 08.f)), module, Arcane::EXTERNAL_SCALE_OUTPUT));
 
         // Arcane
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 00.f, y + 36.f)), module, Arcane::ARCANA_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 00.f, y + 36.f)), module, Arcane::ARCANA_OUTPUT));
 
         // Reset/Run inputs and jacks
         addParam(createParam<W::SmallButtonMomentary>(mm2px(Vec(x + 16.f, y + 36.f)), module, Arcane::RESET_PARAM));
         addParam(createParam<W::SmallButton>(mm2px(Vec(x + 19.4f, y + 39.4f)), module, Arcane::RUN_PARAM));
-        addInput(createInput<W::JackInput>(   mm2px(Vec(x + 08.f, y + 36.f)), module, Arcane::RESET_INPUT));
-        addInput(createInput<W::JackInput>(   mm2px(Vec(x + 24.f, y + 36.f)), module, Arcane::RUN_INPUT));
+        addChild(W::createInput(   mm2px(Vec(x + 08.f, y + 36.f)), module, Arcane::RESET_INPUT));
+        addChild(W::createInput(   mm2px(Vec(x + 24.f, y + 36.f)), module, Arcane::RUN_INPUT));
 
         // BPM
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 32.f, y + 36.f)), module, Arcane::BPM_NUM_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 32.f, y + 36.f)), module, Arcane::BPM_NUM_OUTPUT));
         
         // Pulse/Ramp
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 00.f, y + 54.f)), module, Arcane::BPM_1_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 08.f, y + 54.f)), module, Arcane::BPM_4_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 16.f, y + 54.f)), module, Arcane::BPM_8_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 24.f, y + 54.f)), module, Arcane::BPM_16_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 32.f, y + 54.f)), module, Arcane::BPM_32_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 00.f, y + 54.f)), module, Arcane::BPM_1_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 08.f, y + 54.f)), module, Arcane::BPM_4_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 16.f, y + 54.f)), module, Arcane::BPM_8_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 24.f, y + 54.f)), module, Arcane::BPM_16_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 32.f, y + 54.f)), module, Arcane::BPM_32_OUTPUT));
                 
         // B C D E
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 00.f, y + 64.f)), module, Arcane::PATTERN_B_1_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 08.f, y + 64.f)), module, Arcane::PATTERN_B_4_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 16.f, y + 64.f)), module, Arcane::PATTERN_B_8_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 24.f, y + 64.f)), module, Arcane::PATTERN_B_16_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 32.f, y + 64.f)), module, Arcane::PATTERN_B_32_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 00.f, y + 64.f)), module, Arcane::PATTERN_B_1_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 08.f, y + 64.f)), module, Arcane::PATTERN_B_4_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 16.f, y + 64.f)), module, Arcane::PATTERN_B_8_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 24.f, y + 64.f)), module, Arcane::PATTERN_B_16_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 32.f, y + 64.f)), module, Arcane::PATTERN_B_32_OUTPUT));
         
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 00.f, y + 72.f)), module, Arcane::PATTERN_C_1_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 08.f, y + 72.f)), module, Arcane::PATTERN_C_4_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 16.f, y + 72.f)), module, Arcane::PATTERN_C_8_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 24.f, y + 72.f)), module, Arcane::PATTERN_C_16_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 32.f, y + 72.f)), module, Arcane::PATTERN_C_32_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 00.f, y + 72.f)), module, Arcane::PATTERN_C_1_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 08.f, y + 72.f)), module, Arcane::PATTERN_C_4_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 16.f, y + 72.f)), module, Arcane::PATTERN_C_8_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 24.f, y + 72.f)), module, Arcane::PATTERN_C_16_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 32.f, y + 72.f)), module, Arcane::PATTERN_C_32_OUTPUT));
         
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 00.f, y + 80.f)), module, Arcane::PATTERN_D_1_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 08.f, y + 80.f)), module, Arcane::PATTERN_D_4_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 16.f, y + 80.f)), module, Arcane::PATTERN_D_8_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 24.f, y + 80.f)), module, Arcane::PATTERN_D_16_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 32.f, y + 80.f)), module, Arcane::PATTERN_D_32_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 00.f, y + 80.f)), module, Arcane::PATTERN_D_1_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 08.f, y + 80.f)), module, Arcane::PATTERN_D_4_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 16.f, y + 80.f)), module, Arcane::PATTERN_D_8_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 24.f, y + 80.f)), module, Arcane::PATTERN_D_16_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 32.f, y + 80.f)), module, Arcane::PATTERN_D_32_OUTPUT));
         
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 00.f, y + 88.f)), module, Arcane::PATTERN_E_1_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 08.f, y + 88.f)), module, Arcane::PATTERN_E_4_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 16.f, y + 88.f)), module, Arcane::PATTERN_E_8_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 24.f, y + 88.f)), module, Arcane::PATTERN_E_16_OUTPUT));
-        addOutput(createOutput<W::JackOutput>(mm2px(Vec(x + 32.f, y + 88.f)), module, Arcane::PATTERN_E_32_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 00.f, y + 88.f)), module, Arcane::PATTERN_E_1_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 08.f, y + 88.f)), module, Arcane::PATTERN_E_4_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 16.f, y + 88.f)), module, Arcane::PATTERN_E_8_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 24.f, y + 88.f)), module, Arcane::PATTERN_E_16_OUTPUT));
+        addChild(W::createOutput(mm2px(Vec(x + 32.f, y + 88.f)), module, Arcane::PATTERN_E_32_OUTPUT));
         
         // Pulse width
         addParam(createParam<W::Knob>(mm2px(Vec(x + 3.8f, y + 96.f)), module, Arcane::PULSE_WIDTH_PARAM));	

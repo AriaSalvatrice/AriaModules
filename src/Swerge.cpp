@@ -181,16 +181,16 @@ struct SwergeWidget : ModuleWidget {
         
         // Jacks, top to bottom.
         
-        addInput(createInput<W::JackInput>(mm2px(Vec(3.52f, 15.9f)), module, Swerge::MERGE_INPUT + 0));
-        addInput(createInput<W::JackInput>(mm2px(Vec(3.52f, 23.9f)), module, Swerge::MERGE_INPUT + 1));
-        addInput(createInput<W::JackInput>(mm2px(Vec(3.52f, 31.9f)), module, Swerge::MERGE_INPUT + 2));
-        addInput(createInput<W::JackInput>(mm2px(Vec(3.52f, 39.9f)), module, Swerge::MERGE_INPUT + 3));
+        addChild(W::createInput(mm2px(Vec(3.52f, 15.9f)), module, Swerge::MERGE_INPUT + 0));
+        addChild(W::createInput(mm2px(Vec(3.52f, 23.9f)), module, Swerge::MERGE_INPUT + 1));
+        addChild(W::createInput(mm2px(Vec(3.52f, 31.9f)), module, Swerge::MERGE_INPUT + 2));
+        addChild(W::createInput(mm2px(Vec(3.52f, 39.9f)), module, Swerge::MERGE_INPUT + 3));
         addChild(W::createLitOutput(mm2px(Vec(3.52f, 49.9f)), module, Swerge::POLY_OUTPUT + 0, Swerge::POLY_LIGHT + 0));
         
-        addInput(createInput<W::JackInput>(mm2px(Vec(3.52f, 62.9f)), module, Swerge::MERGE_INPUT + 4));
-        addInput(createInput<W::JackInput>(mm2px(Vec(3.52f, 70.9f)), module, Swerge::MERGE_INPUT + 5));
-        addInput(createInput<W::JackInput>(mm2px(Vec(3.52f, 78.9f)), module, Swerge::MERGE_INPUT + 6));
-        addInput(createInput<W::JackInput>(mm2px(Vec(3.52f, 86.9f)), module, Swerge::MERGE_INPUT + 7));
+        addChild(W::createInput(mm2px(Vec(3.52f, 62.9f)), module, Swerge::MERGE_INPUT + 4));
+        addChild(W::createInput(mm2px(Vec(3.52f, 70.9f)), module, Swerge::MERGE_INPUT + 5));
+        addChild(W::createInput(mm2px(Vec(3.52f, 78.9f)), module, Swerge::MERGE_INPUT + 6));
+        addChild(W::createInput(mm2px(Vec(3.52f, 86.9f)), module, Swerge::MERGE_INPUT + 7));
         addChild(W::createLitOutput(mm2px(Vec(3.52f, 96.9f)), module, Swerge::POLY_OUTPUT + 1, Swerge::POLY_LIGHT + 1));
         
         // Pushbutton

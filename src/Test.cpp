@@ -56,7 +56,7 @@ struct TestWidget : ModuleWidget {
         for (size_t i = 0; i < 12; i++) {
             addChild(W::createLitInput(mm2px(Vec(10.f, 8.0 + i * 10.f)), module, Test::TEST_INPUT + i, Test::TEST_LIGHT + i));
             addChild(W::createLitOutput(mm2px(Vec(10.f, 8.0 + i * 10.f)), module, Test::TEST_INPUT + i, Test::TEST_LIGHT + i));
-            addOutput(createOutput<W::JackOutput>(mm2px(Vec(20.f, 8.f + i * 10.f)), module, Test::TEST_OUTPUT + i));
+            addChild(W::createOutput(mm2px(Vec(20.f, 8.f + i * 10.f)), module, Test::TEST_OUTPUT + i));
         }
 
     }

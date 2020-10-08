@@ -93,11 +93,11 @@ struct BendletWidget : ModuleWidget {
         addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
         // Input
-        addInput(createInputCentered<W::JackInput>(mm2px(Vec(7.62, 79.0)), module, Bendlet::PITCH_INPUT));
-        addInput(createInputCentered<W::JackInput>(mm2px(Vec(7.62, 92.0)), module, Bendlet::PB_INPUT));
+        // addInput(createInputCentered<W::JackInput>(mm2px(Vec(7.62, 79.0)), module, Bendlet::PITCH_INPUT));
+        // addInput(createInputCentered<W::JackInput>(mm2px(Vec(7.62, 92.0)), module, Bendlet::PB_INPUT));
 
-        // Output
-        addOutput(createOutputCentered<W::JackOutput>(mm2px(Vec(7.62, 105.0)), module, Bendlet::BENT_OUTPUT));
+        // // Output
+        // addOutput(createOutputCentered<W::JackOutput>(mm2px(Vec(7.62, 105.0)), module, Bendlet::BENT_OUTPUT));
 
         // PB Wheel
         addParam(createParam<AriaPbSlider>(mm2px(Vec(2.12, 18.0)), module, Bendlet::PB_PARAM));

@@ -136,7 +136,7 @@ struct SplortWidget : ModuleWidget {
         addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
         // Split input
-        addInput(createInput<W::JackInput>(mm2px(Vec(8.6f, 15.9f)), module, Splort::POLY_INPUT));
+        addChild(W::createInput(mm2px(Vec(8.6f, 15.9f)), module, Splort::POLY_INPUT));
 
         // Split outputs with lights
         addChild(W::createLitOutput(mm2px(Vec( 3.52f, 25.4f)), module, Splort::SPLIT_OUTPUT +  0, Splort::SPLIT_LIGHT +  0));

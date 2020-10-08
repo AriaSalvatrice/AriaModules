@@ -25,8 +25,6 @@
 // covered by the GPL, and wish to receive the code of that widget under the WTFPL, contact me.
 
 
-// FIXME: Prefix/Suffix
-// TODO: Figure out a way to make the lit knobs work with lights off.
 
 #pragma once
 using namespace rack;
@@ -40,11 +38,15 @@ namespace W { // I don't want to type MyCoolPersonalWidgets:: every damn time, t
 /* --------------------------------------------------------------------------------------------- */
 /* ---- Base ----------------------------------------------------------------------------------- */
 /* --------------------------------------------------------------------------------------------- */
-// TODO: Reimplement cleaner, without a shadow, instead of just hiding it.
+
+// All the features, none of the shade
 struct SvgSwitchUnshadowed : SvgSwitch {
     SvgSwitchUnshadowed() {
-        shadow->opacity = 0.f;
-        SvgSwitch();
+        fb = new widget::FramebufferWidget;
+        addChild(fb);
+
+        sw = new widget::SvgWidget;
+        fb->addChild(sw);
     }
 };
 
@@ -58,7 +60,8 @@ struct SvgSwitchUnshadowed : SvgSwitch {
 // We don't want a halo - they're too visible on my faceplates, and slated for removal in VCV 2.0 anyway
 
 
-// Those lights must be added before transparent jacks, at the same position.
+// Those lights are used for dynamic jacks.
+// They must be added before transparent jacks, at the same position (use the helper).
 // They are cut off in the middle for Lights Off compatibility.
 struct JackLight : app::ModuleLightWidget {
     JackLight() {
@@ -66,7 +69,7 @@ struct JackLight : app::ModuleLightWidget {
         this->bgColor = nvgRGB(0x0e, 0x69, 0x77);
     }
     
-    void drawLight(const widget::Widget::DrawArgs& args) override {
+    void draw(const widget::Widget::DrawArgs& args) override {
         float radius = std::min(this->box.size.x, this->box.size.y) / 2.0 - 0.5f;
         float holeRadius = app::mm2px(3.f);
 
@@ -88,10 +91,6 @@ struct JackLight : app::ModuleLightWidget {
         }
     }
 
-    void drawHalo(const DrawArgs& args) override {
-        
-    }
-
 };
 
 
@@ -109,6 +108,41 @@ struct JackLightOutput : JackLight {
 };
 
 
+// Those lights are used for static jacks.
+// They must be added before transparent jacks, at the same position (use the helper).
+// They are cut off in the middle for Lights Off compatibility.
+struct JackStaticLight : app::LightWidget {
+    JackStaticLight() {
+        this->box.size = app::mm2px(math::Vec(8.0, 8.0));
+    }
+    
+    void draw(const widget::Widget::DrawArgs& args) override {
+        float radius = std::min(this->box.size.x, this->box.size.y) / 2.0 - 0.5f;
+        float holeRadius = app::mm2px(3.f);
+
+        nvgBeginPath(args.vg);
+        nvgCircle(args.vg, radius + 1.f, radius + 1.f, radius);
+        nvgCircle(args.vg, radius + 1.f, radius + 1.f, holeRadius);
+        nvgPathWinding(args.vg, NVG_HOLE);
+
+        // Foreground
+        nvgFillColor(args.vg, this->color);
+        nvgFill(args.vg);
+    }
+
+};
+
+struct JackStaticLightInput : JackStaticLight {
+    JackStaticLightInput() {
+        this->color = nvgRGB(0xff, 0xcc, 0x03);
+    }
+};
+
+struct JackStaticLightOutput : JackStaticLight {
+    JackStaticLightOutput() {
+        this->color = nvgRGB(0xfc, 0xae, 0xbb);
+    }
+};
 
 
 // Those lights must be added before transparent knobs, at the same position.
@@ -123,7 +157,7 @@ struct KnobLight : ModuleLightWidget {
         this->bgColor = nvgRGB(0x0e, 0x69, 0x77);
     }
     
-    void drawLight(const widget::Widget::DrawArgs& args) override {
+    void draw(const widget::Widget::DrawArgs& args) override {
         float radius = std::min(this->box.size.x, this->box.size.y) / 2.0 - 2.6f;
 
         nvgBeginPath(args.vg);
@@ -156,9 +190,6 @@ struct KnobLight : ModuleLightWidget {
         }        
     }
 
-    void drawHalo(const DrawArgs& args) override {
-    }
-
 };
 
 // Helper to create a KnobLight that goes below the knob, with a little dark segment for Lights Off mode.
@@ -181,10 +212,7 @@ struct KnobLightYellow : KnobLight {
 };
 
 
-///////////////
-
-
-// Those lights must be added before transparent knobs, at the same position.
+// Tiny little status lights. 2.17mm
 struct StatusLight : ModuleLightWidget {
     StatusLight() {
         this->box.size = app::mm2px(math::Vec(2.176f, 2.176f));
@@ -192,7 +220,7 @@ struct StatusLight : ModuleLightWidget {
         this->borderColor = nvgRGB(0x08, 0x3d, 0x45);
     }
     
-    void drawLight(const widget::Widget::DrawArgs& args) override {
+    void draw(const widget::Widget::DrawArgs& args) override {
         float radius = std::min(this->box.size.x, this->box.size.y) / 2.0 - 0.5f;
 
         nvgBeginPath(args.vg);
@@ -218,11 +246,10 @@ struct StatusLight : ModuleLightWidget {
         }
     }
 
-    void drawHalo(const DrawArgs& args) override {
-    }
 };
 
 
+// 2.17mm
 struct StatusLightOutput : StatusLight {
     StatusLightOutput() {
         this->addBaseColor(nvgRGB(0xfc, 0xae, 0xbb));
@@ -230,6 +257,7 @@ struct StatusLightOutput : StatusLight {
 };
 
 
+// 2.17mm
 struct StatusLightInput : StatusLight {
     StatusLightInput() {
         this->addBaseColor(nvgRGB(0xff, 0xcc, 0x03));
@@ -243,29 +271,11 @@ struct StatusLightInput : StatusLight {
 /* ---- Jacks ---------------------------------------------------------------------------------- */
 /* --------------------------------------------------------------------------------------------- */
 
-// TODO: Make all my jacks usee a light widget, including the non-dynamic ones, for Lights Off consistency.
+// TODO: Make all my jacks use a light widget, including the non-dynamic ones, for Lights Off consistency.
 
 // Base jack is a SVGPort without customizations.
 struct Jack : SVGPort {
 
-};
-
-
-// Non-dynamic input jacks are constantly lit yellow.
-struct JackInput : Jack {
-    JackInput() {
-        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/jack-in.svg")));
-        Jack();
-    }
-};
-
-
-// Non-dynamic output jacks are constantly lit pink.
-struct JackOutput : Jack {
-    JackOutput() {
-        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/jack-out.svg")));
-        Jack();
-    }
 };
 
 
@@ -278,7 +288,7 @@ struct JackTransparent : Jack {
 };
 
 
-// Helper to create a lit input comprised of a LED and a transparent Jack
+// Helper to create a lit input comprised of a LED and a transparent Jack. The light is dynamic.
 inline Widget* createLitInput(math::Vec pos, engine::Module* module, int inputId, int firstLightId) {
 	Widget* o = new Widget;
     JackLightInput* light = new JackLightInput;
@@ -298,7 +308,7 @@ inline Widget* createLitInput(math::Vec pos, engine::Module* module, int inputId
 }
 
 
-// Helper to create a lit output comprised of a LED and a transparent Jack
+// Helper to create a lit output comprised of a LED and a transparent Jack. The light is dynamic.
 inline Widget* createLitOutput(math::Vec pos, engine::Module* module, int outputId, int firstLightId) {
 	Widget* o = new Widget;
     JackLightOutput* light = new JackLightOutput;
@@ -318,6 +328,37 @@ inline Widget* createLitOutput(math::Vec pos, engine::Module* module, int output
 }
 
 
+// Helper to create an input comprised of a LED and a transparent Jack. The light is constantly lit.
+inline Widget* createInput(math::Vec pos, engine::Module* module, int inputId) {
+	Widget* o = new Widget;
+    JackStaticLightInput* light = new JackStaticLightInput;
+    JackTransparent* jack = new JackTransparent;
+
+	jack->module = module;
+	jack->type = app::PortWidget::INPUT;
+	jack->portId = inputId;
+
+    o->box.pos = pos;
+    o->addChild(light);
+    o->addChild(jack);
+	return o;
+}
+
+// Helper to create an output comprised of a LED and a transparent Jack. The light is constantly lit.
+inline Widget* createOutput(math::Vec pos, engine::Module* module, int inputId) {
+	Widget* o = new Widget;
+    JackStaticLightOutput* light = new JackStaticLightOutput;
+    JackTransparent* jack = new JackTransparent;
+
+	jack->module = module;
+	jack->type = app::PortWidget::OUTPUT;
+	jack->portId = inputId;
+
+    o->box.pos = pos;
+    o->addChild(light);
+    o->addChild(jack);
+	return o;
+}
 
 
 /* --------------------------------------------------------------------------------------------- */
