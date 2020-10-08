@@ -112,17 +112,22 @@ struct JackLightOutput : JackLight {
 
 
 // Those lights must be added before transparent knobs, at the same position.
+// If given a ParamQuantity pointer, draws a little dark segment for Lights Off mode.
 struct KnobLight : ModuleLightWidget {
+    ParamQuantity* paramQuantity = NULL;
+    float min = 0.f;
+    float max = 10.f;
+
     KnobLight() {
         this->box.size = app::mm2px(math::Vec(8.0f, 8.0f));
         this->bgColor = nvgRGB(0x0e, 0x69, 0x77);
     }
     
     void drawLight(const widget::Widget::DrawArgs& args) override {
-        float radius = std::min(this->box.size.x, this->box.size.y) / 2.0 - 0.5f;
+        float radius = std::min(this->box.size.x, this->box.size.y) / 2.0 - 2.6f;
 
         nvgBeginPath(args.vg);
-        nvgCircle(args.vg, radius + 1.f, radius + 1.f, radius);
+        nvgCircle(args.vg, radius + 2.6f, radius + 2.6f, radius);
 
         // Background
         if (this->bgColor.a > 0.0) {
@@ -135,12 +140,39 @@ struct KnobLight : ModuleLightWidget {
             nvgFillColor(args.vg, this->color);
             nvgFill(args.vg);
         }
+
+        // Draw a dark segment to show the position of the knob, for Lights Off support. 
+        if (module && paramQuantity) {
+            nvgBeginPath(args.vg);
+            nvgMoveTo(args.vg, mm2px(4.f), mm2px(4.f));
+            // Rotates by -90 degrees in radians
+            float value = rescale(paramQuantity->getValue(), min, max, -0.83f * M_PI - 1.570796f, 0.83f * M_PI - 1.570796f);
+            float targetX = mm2px(4.f + 3.2f * cos(value));
+            float targetY = mm2px(4.f + 3.2f * sin(value));
+            nvgLineTo(args.vg, targetX, targetY);
+            nvgStrokeColor(args.vg, nvgRGB(0x33, 0x00, 0x00));
+            nvgStrokeWidth(args.vg, 2.f);
+            nvgStroke(args.vg);
+        }        
     }
 
     void drawHalo(const DrawArgs& args) override {
     }
 
 };
+
+// Helper to create a KnobLight that goes below the knob, with a little dark segment for Lights Off mode.
+template <class TKnobLight>
+TKnobLight* createKnobLight(math::Vec pos, Module* module, int lightId, int paramId, float min, float max) {
+    TKnobLight* o = new TKnobLight;
+    o->box.pos = pos;
+    o->module = module;
+    o->firstLightId = lightId;
+    if (module) o->paramQuantity = module->paramQuantities[paramId];
+    o->min = min;
+    o->max = max;
+    return o;
+}
 
 struct KnobLightYellow : KnobLight {
     KnobLightYellow() {
