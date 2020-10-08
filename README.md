@@ -123,9 +123,9 @@ Not that the code is very good, but some libraries I created for my own use are 
 
 ### Components (knobs, jacks, etc)
 
-CC-BY-SA-4.0 graphics, WTFPL [`src/widgets.hpp`](src/widgets.hpp). If you re-use them, I request you do not entirely re-use my signature color scheme in your own modules, but this request is not legally binding. Because I use a limited palette, it's easy to replace most colors in my SVG files using search and replace in a text editor.
+WTFPL graphics and code (in [`src/widgets.hpp`](src/widgets.hpp)). But if you re-use them, I request you do not entirely re-use my signature color scheme in your own modules. Because I use a limited palette, it's easy to replace most colors in my SVG files using search and replace in a text editor. This request is not legally binding. 
 
-My collection of modules does not use VCV's component library at all and is thus unencumbered by its licensing restrictions.
+My collection of modules does not use VCV's component library at all, and is thus unencumbered by its licensing restrictions.
 
 
 ### Signature / Logo
@@ -146,20 +146,17 @@ The **Arcane** module uses Tarot cards altered from [Yoav Ben-Dov's CBD Tarot](h
 
 ### Fonts used
 
-The LCD Font is a SVG export of the [Fixed_v01 font by Orgdot](http://www.orgdot.com/aliasfonts/index.htm), released under [a custom MIT-style license](res/components/lcd/Fixed_v01/LICENSE.txt).
-
-The Segment Display Font [DSEG](https://www.keshikan.net/fonts-e.html) by [Keshikan](https://www.keshikan.net/), released under the [OFL 1.1](res/dseg/LICENSE.txt). Is is used embedded.
-
-Titles are typeset in [Francois One](https://fonts.google.com/specimen/Francois+One) by [Vernon Adams](http://sansoxygen.com/). This font is not redistributed with the modules. 
-
-Labels are typeset in [Nova](https://fontlibrary.org/en/font/nova) by [Wojciech Kalinowski](https://fontlibrary.org/en/member/wmk69). This font family is not redistributed with the modules. 
+- The LCD Font is a SVG export of the [Fixed_v01 font by Orgdot](http://www.orgdot.com/aliasfonts/index.htm), released under [a custom MIT-style license](res/components/lcd/Fixed_v01/LICENSE.txt).
+- The segment display font is [DSEG](https://www.keshikan.net/fonts-e.html) by [Keshikan](https://www.keshikan.net/), released under the [OFL 1.1](res/dseg/LICENSE.txt). The TTF file is distributed with the modules.
+- Titles are typeset in [Francois One](https://fonts.google.com/specimen/Francois+One) by [Vernon Adams](http://sansoxygen.com/). This font is not redistributed with the modules. 
+- Labels are typeset in [Nova](https://fontlibrary.org/en/font/nova) by [Wojciech Kalinowski](https://fontlibrary.org/en/member/wmk69). This font family is not redistributed with the modules. 
 
 
 ### Libraries used
 
-[TonalJS](https://github.com/tonaljs/tonal) by [danigb](https://github.com/danigb) is used in some modules under the terms of the [MIT license](https://github.com/AriaSalvatrice/AriaVCVModules/tree/master/doc/LICENSE_TonalJs.txt)
+- [QuickJS](https://bellard.org/quickjs/) by [Fabrice Bellard](https://bellard.org/) is used in some modules under the terms of the [MIT license](https://github.com/AriaSalvatrice/AriaVCVModules/tree/master/doc/LICENSE_QuickJS.txt)
+- [TonalJS](https://github.com/tonaljs/tonal) by [danigb](https://github.com/danigb) is used in some modules under the terms of the [MIT license](https://github.com/AriaSalvatrice/AriaVCVModules/tree/master/doc/LICENSE_TonalJs.txt)
 
-[QuickJS](https://bellard.org/quickjs/) by [Fabrice Bellard](https://bellard.org/) is used in some modules under the terms of the [MIT license](https://github.com/AriaSalvatrice/AriaVCVModules/tree/master/doc/LICENSE_QuickJS.txt)
 
 
 ### Copyright assignment

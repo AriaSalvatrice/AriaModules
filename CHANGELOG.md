@@ -8,7 +8,7 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 
 ### Added
 
-- [NEW] All modules: Partial support for Lights Off ( https://library.vcvrack.com/ModularFungi/LightsOff ). It is currently very difficult to provide full support, so modules such as Darius will still not look perfect.
+- [NEW] All modules: Partial support for [Lights Off](https://library.vcvrack.com/ModularFungi/LightsOff). It is currently very difficult to provide high quality support for it, so most modules won't look perfect.
 
 ### Changed
 
