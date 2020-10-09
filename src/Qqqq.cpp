@@ -830,10 +830,9 @@ struct VisualizeButton : W::ButtonPink {
     }
 };
 
-
 // The piano display
 // https://community.vcvrack.com/t/whats-the-best-way-to-implement-a-pushbutton-with-three-visual-states-but-only-two-user-controllable-states/10351/8?u=aria_salvatrice
-struct PianoKey : W::SvgSwitchUnshadowed {
+struct PianoKey : W::LitSvgSwitchUnshadowed {
     bool lastPianoDisplay = false;
     bool currentPianoDisplay = false;
     int note = 0;
@@ -842,18 +841,22 @@ struct PianoKey : W::SvgSwitchUnshadowed {
         if (paramQuantity){
             currentPianoDisplay = dynamic_cast<Qqqq*>(paramQuantity->module)->litKeys[note];
             if (currentPianoDisplay == true && currentPianoDisplay != lastPianoDisplay) {
-                sw->setSvg(frames[2]);
+                lsw->setSvg(frames[2]);
                 fb->dirty = true;
             }
             if (currentPianoDisplay == false && currentPianoDisplay != lastPianoDisplay) {
                 int index = (int) std::round(paramQuantity->getValue() - paramQuantity->getMinValue());
                 index = math::clamp(index, 0, (int) frames.size() - 1);
-                sw->setSvg(frames[index]);
+                if (index > 0) {
+                    lsw->setSvg(frames[index]);
+                } else {
+                    lsw->hide();
+                }
                 fb->dirty = true; 
             }
             lastPianoDisplay = currentPianoDisplay;
         }
-        W::SvgSwitchUnshadowed::step();
+        W::LitSvgSwitchUnshadowed::step();
     }
 };
 
@@ -1013,7 +1016,7 @@ struct PasteScenePortableSequenceItem : MenuItem {
     }
 };
 
-struct SceneButton : W::SvgSwitchUnshadowed {
+struct SceneButton : W::LitSvgSwitchUnshadowed {
     void onButton(const event::Button& e) override {
         if (e.button == GLFW_MOUSE_BUTTON_RIGHT) {
             ui::Menu* menu = createMenu();
@@ -1032,7 +1035,7 @@ struct SceneButton : W::SvgSwitchUnshadowed {
 
             e.consume(this);
         } else {
-            W::SvgSwitchUnshadowed::onButton(e);
+            W::LitSvgSwitchUnshadowed::onButton(e);
         }
     }
 };
