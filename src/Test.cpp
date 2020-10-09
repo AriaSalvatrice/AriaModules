@@ -42,7 +42,7 @@ struct Test : Module {
 };
 
 
-struct TestWidget : ModuleWidget {
+struct TestWidget : W::ModuleWidget {
 
     TestWidget(Test* module) {
         setModule(module);

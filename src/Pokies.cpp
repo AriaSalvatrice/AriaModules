@@ -379,7 +379,7 @@ struct PokieSettingsItem : MenuItem {
 
 
 
-struct PokiesWidget : ModuleWidget {
+struct PokiesWidget : W::ModuleWidget {
 
     void drawPokie(Pokies<4>* module, float y, int num) {
         addParam(createParam<Pokie>(mm2px(Vec(3.52f, y)), module, Pokies<4>::POKIE_PARAM + num));

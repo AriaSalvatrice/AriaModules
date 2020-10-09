@@ -121,7 +121,7 @@ struct Splort : Module {
 };
 
 
-struct SplortWidget : ModuleWidget {
+struct SplortWidget : W::ModuleWidget {
     SplortWidget(Splort* module) {
         setModule(module);
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Splort.svg")));

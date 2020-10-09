@@ -385,7 +385,7 @@ struct RotatoSettingsItem : MenuItem {
 
 
 
-struct Rotatoes4Widget : ModuleWidget {
+struct Rotatoes4Widget : W::ModuleWidget {
 
     void drawRotato(Rotatoes<4>* module, float y, int num) {
         addParam(createParam<KnobRotato>(mm2px(Vec(3.52f, y)), module, Rotatoes<4>::ROTATO_PARAM + num));
@@ -443,7 +443,7 @@ struct Rotatoes4Widget : ModuleWidget {
 
 
 
-struct GrabbyWidget : ModuleWidget {
+struct GrabbyWidget : W::ModuleWidget {
 
     GrabbyWidget(Rotatoes<1>* module) {
         setModule(module);

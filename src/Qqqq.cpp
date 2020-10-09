@@ -1148,7 +1148,7 @@ struct SceneButton16 : SceneButton {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-struct QqqqWidget : ModuleWidget {
+struct QqqqWidget : W::ModuleWidget {
 
     void drawScrews() {
         addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));
@@ -1293,7 +1293,7 @@ struct QqqqWidget : ModuleWidget {
 
 
 
-struct QuackWidget : ModuleWidget {
+struct QuackWidget : W::ModuleWidget {
 
     void drawScrews() {
         addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));
@@ -1367,7 +1367,7 @@ struct QuackWidget : ModuleWidget {
 
 
 
-struct QWidget : ModuleWidget {
+struct QWidget : W::ModuleWidget {
 
     void drawScrews() {
         addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));

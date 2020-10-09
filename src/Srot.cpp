@@ -47,7 +47,7 @@ struct Srot : Module {
 };
 
 
-struct SrotWidget : ModuleWidget {
+struct SrotWidget : W::ModuleWidget {
     SrotWidget(Srot* module) {
         setModule(module);
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Srot.svg")));

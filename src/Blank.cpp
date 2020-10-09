@@ -31,7 +31,7 @@ struct Blank : Module {
 };
 
 
-struct BlankWidget : ModuleWidget {
+struct BlankWidget : W::ModuleWidget {
     BlankWidget(Blank* module) {
         setModule(module);
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Blank.svg")));

@@ -78,7 +78,7 @@ struct AriaPbSlider : SvgSlider {
 };
 
 
-struct BendletWidget : ModuleWidget {
+struct BendletWidget : W::ModuleWidget {
     BendletWidget(Bendlet* module) {
         setModule(module);
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Bendlet.svg")));

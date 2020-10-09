@@ -41,6 +41,7 @@ namespace W { // I don't want to type MyCoolPersonalWidgets:: every damn time, t
 /* ---- Base ----------------------------------------------------------------------------------- */
 /* --------------------------------------------------------------------------------------------- */
 
+
 // All the features, none of the shade
 struct SvgSwitchUnshadowed : SvgSwitch {
     SvgSwitchUnshadowed() {
@@ -274,17 +275,55 @@ struct JackStaticLight : app::LightWidget {
 
 };
 
+
 struct JackStaticLightInput : JackStaticLight {
     JackStaticLightInput() {
         this->color = nvgRGB(0xff, 0xcc, 0x03);
     }
 };
 
+
 struct JackStaticLightOutput : JackStaticLight {
     JackStaticLightOutput() {
         this->color = nvgRGB(0xfc, 0xae, 0xbb);
     }
 };
+
+
+// Helper to create a LED that goes behind a static input Jack. The light is constantly lit.
+inline JackStaticLightInput* createStaticLightInput(math::Vec pos) {
+    JackStaticLightInput* light = new JackStaticLightInput;
+    light->box.pos = pos;
+	return light;
+}
+
+
+// Helper to create a LED that goes behind a static output Jack. The light is constantly lit.
+inline JackStaticLightOutput* createStaticLightOutput(math::Vec pos) {
+    JackStaticLightOutput* light = new JackStaticLightOutput;
+    light->box.pos = pos;
+	return light;
+}
+
+
+// Helper to create a LED that goes behind a dynamically lit input Jack.
+inline JackLightInput* createDynamicLightInput(math::Vec pos, engine::Module* module, int lightId) {
+    JackLightInput* light = new JackLightInput;
+	light->module = module;
+	light->firstLightId = lightId;
+    light->box.pos = pos;
+	return light;
+}
+
+
+// Helper to create a LED that goes behind a dynamically lit output Jack.
+inline JackLightOutput* createDynamicLightOutput(math::Vec pos, engine::Module* module, int lightId) {
+    JackLightOutput* light = new JackLightOutput;
+	light->module = module;
+	light->firstLightId = lightId;
+    light->box.pos = pos;
+	return light;
+}
 
 
 // Those lights must be added before transparent knobs, at the same position.
@@ -333,6 +372,7 @@ struct KnobLight : ModuleLightWidget {
     }
 
 };
+
 
 // Helper to create a KnobLight that goes below the knob, with a little dark segment for Lights Off mode.
 template <class TKnobLight>
@@ -413,7 +453,6 @@ struct StatusLightInput : StatusLight {
 /* ---- Jacks ---------------------------------------------------------------------------------- */
 /* --------------------------------------------------------------------------------------------- */
 
-// TODO: Make all my jacks use a light widget, including the non-dynamic ones, for Lights Off consistency.
 
 // Base jack is a SVGPort without customizations.
 struct Jack : SVGPort {
@@ -429,7 +468,7 @@ struct JackTransparent : Jack {
     }
 };
 
-
+// DEPRECATED
 // Helper to create a lit input comprised of a LED and a transparent Jack. The light is dynamic.
 inline Widget* createLitInput(math::Vec pos, engine::Module* module, int inputId, int firstLightId) {
 	Widget* o = new Widget;
@@ -450,7 +489,7 @@ inline Widget* createLitInput(math::Vec pos, engine::Module* module, int inputId
 	return o;
 }
 
-
+// DEPRECATED
 // Helper to create a lit output comprised of a LED and a transparent Jack. The light is dynamic.
 inline Widget* createLitOutput(math::Vec pos, engine::Module* module, int outputId, int firstLightId) {
 	Widget* o = new Widget;
@@ -470,7 +509,7 @@ inline Widget* createLitOutput(math::Vec pos, engine::Module* module, int output
 	return o;
 }
 
-
+// DEPRECATED
 // Helper to create an input comprised of a LED and a transparent Jack. The light is constantly lit.
 inline Widget* createInput(math::Vec pos, engine::Module* module, int inputId) {
 	Widget* o = new Widget;
@@ -487,6 +526,7 @@ inline Widget* createInput(math::Vec pos, engine::Module* module, int inputId) {
 	return o;
 }
 
+// DEPRECATED
 // Helper to create an output comprised of a LED and a transparent Jack. The light is constantly lit.
 inline Widget* createOutput(math::Vec pos, engine::Module* module, int inputId) {
 	Widget* o = new Widget;
@@ -502,20 +542,6 @@ inline Widget* createOutput(math::Vec pos, engine::Module* module, int inputId) 
     o->addChild(jack);
 	return o;
 }
-
-// // Helper to create a LED that goes behind a static input Jack. The light is constantly lit.
-// inline JackStaticLightInput* createStaticLightInput(math::Vec pos) {
-//     JackStaticLightInput* light = new JackStaticLightInput;
-//     light->box.pos = pos;
-// 	return light;
-// }
-
-// // Helper to create a LED that goes behind a static output Jack. The light is constantly lit.
-// inline JackStaticLightOutput* createStaticLightOutput(math::Vec pos) {
-//     JackStaticLightOutput* light = new JackStaticLightOutput;
-//     light->box.pos = pos;
-// 	return light;
-// }
 
 
 /* --------------------------------------------------------------------------------------------- */
@@ -665,7 +691,33 @@ struct Signature : SvgScrew {
 };
 
 
+/* --------------------------------------------------------------------------------------------- */
+/* ---- Custom ModuleWidget -------------------------------------------------------------------- */
+/* --------------------------------------------------------------------------------------------- */
 
+
+struct ModuleWidget : app::ModuleWidget {
+
+    void addStaticInput(math::Vec pos, engine::Module* module, int inputId) {
+        addChild(W::createStaticLightInput(pos));
+        addInput(rack::createInput<W::JackTransparent>(pos, module, inputId));
+    }
+
+    void addStaticOutput(math::Vec pos, engine::Module* module, int inputId) {
+        addChild(W::createStaticLightOutput(pos));
+        addOutput(rack::createOutput<W::JackTransparent>(pos, module, inputId));
+    }
+
+    void addDynamicInput(math::Vec pos, engine::Module* module, int inputId, int lightId) {
+        if (module) addChild(W::createDynamicLightInput(pos, module, lightId));
+        addInput(rack::createInput<W::JackTransparent>(pos, module, inputId));
+    }
+
+    void addDynamicOutput(math::Vec pos, engine::Module* module, int inputId, int lightId) {
+        if (module) addChild(W::createDynamicLightOutput(pos, module, lightId));
+        addOutput(rack::createOutput<W::JackTransparent>(pos, module, inputId));
+    }
+};
 
 
 } // namespace W

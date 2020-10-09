@@ -1123,7 +1123,7 @@ struct QuantizePitchesRequestedItem : MenuItem {
 
 
 // 8 is the main version, from which the others are copied
-struct SolomonWidget8 : ModuleWidget {
+struct SolomonWidget8 : W::ModuleWidget {
 
     SolomonWidget8(Solomon<8>* module) {
         setModule(module);
@@ -1291,7 +1291,7 @@ struct SolomonWidget8 : ModuleWidget {
 
 
 
-struct SolomonWidget4 : ModuleWidget {
+struct SolomonWidget4 : W::ModuleWidget {
 
     SolomonWidget4(Solomon<4>* module) {
         setModule(module);
@@ -1457,7 +1457,7 @@ struct SolomonWidget4 : ModuleWidget {
 
 
 
-struct SolomonWidget16 : ModuleWidget {
+struct SolomonWidget16 : W::ModuleWidget {
 
     SolomonWidget16(Solomon<16>* module) {
         setModule(module);

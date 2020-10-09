@@ -285,7 +285,7 @@ struct AriaPushButtonPadlock820 : W::LitSvgSwitch {
 };
 
 
-struct UndularWidget : ModuleWidget {
+struct UndularWidget : W::ModuleWidget {
     UndularWidget(Undular* module) {
         setModule(module);
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Undular.svg")));

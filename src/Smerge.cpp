@@ -145,7 +145,7 @@ struct Smerge : Module {
 };
 
 
-struct SmergeWidget : ModuleWidget {
+struct SmergeWidget : W::ModuleWidget {
     SmergeWidget(Smerge* module) {
         setModule(module);
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Smerge.svg")));
@@ -160,32 +160,32 @@ struct SmergeWidget : ModuleWidget {
         addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
         // Merge Output
-        addChild(W::createOutput(mm2px(Vec(8.6f, 15.9f)),  module, Smerge::POLY_OUTPUT));
+        addStaticOutput(mm2px(Vec(8.6f, 15.9f)),  module, Smerge::POLY_OUTPUT);
         
         // Merge Inputs
-        addInput(createInput<W::JackTransparent>(mm2px(Vec( 3.52f, 25.4f)), module, Smerge::MERGE_INPUT + 0));
-        addInput(createInput<W::JackTransparent>(mm2px(Vec( 3.52f, 33.4f)), module, Smerge::MERGE_INPUT + 1));
-        addInput(createInput<W::JackTransparent>(mm2px(Vec( 3.52f, 41.4f)), module, Smerge::MERGE_INPUT + 2));
-        addInput(createInput<W::JackTransparent>(mm2px(Vec( 3.52f, 49.4f)), module, Smerge::MERGE_INPUT + 3));
-        addInput(createInput<W::JackTransparent>(mm2px(Vec( 3.52f, 57.4f)), module, Smerge::MERGE_INPUT + 4));
-        addInput(createInput<W::JackTransparent>(mm2px(Vec( 3.52f, 65.4f)), module, Smerge::MERGE_INPUT + 5));
-        addInput(createInput<W::JackTransparent>(mm2px(Vec( 3.52f, 73.4f)), module, Smerge::MERGE_INPUT + 6));
-        addInput(createInput<W::JackTransparent>(mm2px(Vec( 3.52f, 81.4f)), module, Smerge::MERGE_INPUT + 7));
-        addInput(createInput<W::JackTransparent>(mm2px(Vec(13.68f, 25.4f)), module, Smerge::MERGE_INPUT + 8));
-        addInput(createInput<W::JackTransparent>(mm2px(Vec(13.68f, 33.4f)), module, Smerge::MERGE_INPUT + 9));
-        addInput(createInput<W::JackTransparent>(mm2px(Vec(13.68f, 41.4f)), module, Smerge::MERGE_INPUT + 10));
-        addInput(createInput<W::JackTransparent>(mm2px(Vec(13.68f, 49.4f)), module, Smerge::MERGE_INPUT + 11));
-        addInput(createInput<W::JackTransparent>(mm2px(Vec(13.68f, 57.4f)), module, Smerge::MERGE_INPUT + 12));
-        addInput(createInput<W::JackTransparent>(mm2px(Vec(13.68f, 65.4f)), module, Smerge::MERGE_INPUT + 13));
-        addInput(createInput<W::JackTransparent>(mm2px(Vec(13.68f, 73.4f)), module, Smerge::MERGE_INPUT + 14));
-        addInput(createInput<W::JackTransparent>(mm2px(Vec(13.68f, 81.4f)), module, Smerge::MERGE_INPUT + 15));
+        addStaticInput(mm2px(Vec( 3.52f, 25.4f)), module, Smerge::MERGE_INPUT + 0);
+        addStaticInput(mm2px(Vec( 3.52f, 33.4f)), module, Smerge::MERGE_INPUT + 1);
+        addStaticInput(mm2px(Vec( 3.52f, 41.4f)), module, Smerge::MERGE_INPUT + 2);
+        addStaticInput(mm2px(Vec( 3.52f, 49.4f)), module, Smerge::MERGE_INPUT + 3);
+        addStaticInput(mm2px(Vec( 3.52f, 57.4f)), module, Smerge::MERGE_INPUT + 4);
+        addStaticInput(mm2px(Vec( 3.52f, 65.4f)), module, Smerge::MERGE_INPUT + 5);
+        addStaticInput(mm2px(Vec( 3.52f, 73.4f)), module, Smerge::MERGE_INPUT + 6);
+        addStaticInput(mm2px(Vec( 3.52f, 81.4f)), module, Smerge::MERGE_INPUT + 7);
+        addStaticInput(mm2px(Vec(13.68f, 25.4f)), module, Smerge::MERGE_INPUT + 8);
+        addStaticInput(mm2px(Vec(13.68f, 33.4f)), module, Smerge::MERGE_INPUT + 9);
+        addStaticInput(mm2px(Vec(13.68f, 41.4f)), module, Smerge::MERGE_INPUT + 10);
+        addStaticInput(mm2px(Vec(13.68f, 49.4f)), module, Smerge::MERGE_INPUT + 11);
+        addStaticInput(mm2px(Vec(13.68f, 57.4f)), module, Smerge::MERGE_INPUT + 12);
+        addStaticInput(mm2px(Vec(13.68f, 65.4f)), module, Smerge::MERGE_INPUT + 13);
+        addStaticInput(mm2px(Vec(13.68f, 73.4f)), module, Smerge::MERGE_INPUT + 14);
+        addStaticInput(mm2px(Vec(13.68f, 81.4f)), module, Smerge::MERGE_INPUT + 15);
 
         // Sort button
         addParam(createParam<W::ReducedButton>(mm2px(Vec(8.6f, 90.9f)), module, Smerge::SORT_PARAM));
 
         // Link jacks with lights
-        addChild(W::createLitInput(mm2px(Vec(1.52f, 104.9f)), module, Smerge::LINK_INPUT, Smerge::LINK_IN_LIGHT));
-        addChild(W::createLitOutput(mm2px(Vec(15.68f, 104.9f)), module, Smerge::LINK_OUTPUT, Smerge::LINK_OUT_LIGHT));
+        addDynamicInput(mm2px(Vec(1.52f, 104.9f)), module, Smerge::LINK_INPUT, Smerge::LINK_IN_LIGHT);
+        addDynamicOutput(mm2px(Vec(15.68f, 104.9f)), module, Smerge::LINK_OUTPUT, Smerge::LINK_OUT_LIGHT);
     }
 };
 

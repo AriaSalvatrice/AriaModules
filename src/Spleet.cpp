@@ -107,7 +107,7 @@ struct Spleet : Module {
 };
 
 
-struct SpleetWidget : ModuleWidget {
+struct SpleetWidget : W::ModuleWidget {
     SpleetWidget(Spleet* module) {
         setModule(module);
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Spleet.svg")));

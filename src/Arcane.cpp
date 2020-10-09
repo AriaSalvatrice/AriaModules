@@ -779,7 +779,7 @@ struct CardDrawWidget : TransparentWidget {
 };
 
 
-struct ArcaneWidget : ModuleWidget {
+struct ArcaneWidget : W::ModuleWidget {
     // Offset
     float x = 80.32f;
     float y = 18.f;
@@ -877,7 +877,7 @@ struct ArcaneWidget : ModuleWidget {
 
 
 // Atout is a smaller version of Arcane, otherwise identical.
-struct AtoutWidget : ModuleWidget {
+struct AtoutWidget : W::ModuleWidget {
     // Offset
     float x = 3.2f;
     float y = 18.f;
@@ -968,7 +968,7 @@ struct AtoutWidget : ModuleWidget {
 
 
 // Aleister expresses the four binary patterns as gates instead of rhythms.
-struct AleisterWidget : ModuleWidget {
+struct AleisterWidget : W::ModuleWidget {
     
     // No BG, so I can overlay it on top of the normal light.
     // Would have preferred to go light blue, but yellow is the only color that feels readable but not jarring.

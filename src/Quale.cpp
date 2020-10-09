@@ -112,7 +112,7 @@ struct Quale : Module {
 };
 
 
-struct QualeWidget : ModuleWidget {
+struct QualeWidget : W::ModuleWidget {
     QualeWidget(Quale* module) {
         setModule(module);
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Quale.svg")));

@@ -1129,7 +1129,7 @@ struct KnobLightYellowTest : W::KnobLightYellow {
 };
 
 
-struct DariusWidget : ModuleWidget {
+struct DariusWidget : W::ModuleWidget {
     DariusWidget(Darius* module) {
         setModule(module);
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Darius.svg")));

@@ -165,7 +165,7 @@ struct Swerge : Module {
 };
 
 
-struct SwergeWidget : ModuleWidget {
+struct SwergeWidget : W::ModuleWidget {
     SwergeWidget(Swerge* module) {
         setModule(module);
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Swerge.svg")));
