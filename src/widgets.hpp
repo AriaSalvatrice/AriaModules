@@ -77,6 +77,10 @@ struct LitSvgWidget : LightWidget {
         hidden = true;
     }
 
+    void show() {
+        hidden = false;
+    }
+
     void draw(const DrawArgs& args) override {
         if (svg && svg->handle && !hidden) {
             svgDraw(args.vg, svg->handle);
@@ -635,9 +639,9 @@ struct ModuleWidget : app::ModuleWidget {
         addInput(rack::createInput<W::JackTransparent>(pos, module, inputId));
     }
 
-    void addStaticOutput(math::Vec pos, engine::Module* module, int inputId) {
+    void addStaticOutput(math::Vec pos, engine::Module* module, int outputId) {
         addChild(W::createStaticLightOutput(pos));
-        addOutput(rack::createOutput<W::JackTransparent>(pos, module, inputId));
+        addOutput(rack::createOutput<W::JackTransparent>(pos, module, outputId));
     }
 
     void addDynamicInput(math::Vec pos, engine::Module* module, int inputId, int lightId) {
@@ -645,10 +649,11 @@ struct ModuleWidget : app::ModuleWidget {
         addInput(rack::createInput<W::JackTransparent>(pos, module, inputId));
     }
 
-    void addDynamicOutput(math::Vec pos, engine::Module* module, int inputId, int lightId) {
+    void addDynamicOutput(math::Vec pos, engine::Module* module, int outputId, int lightId) {
         if (module) addChild(W::createDynamicLightOutput(pos, module, lightId));
-        addOutput(rack::createOutput<W::JackTransparent>(pos, module, inputId));
+        addOutput(rack::createOutput<W::JackTransparent>(pos, module, outputId));
     }
+    
 };
 
 

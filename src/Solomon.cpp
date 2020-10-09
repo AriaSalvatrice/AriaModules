@@ -975,13 +975,13 @@ struct QueueWidget : TransparentWidget {
 	TModule* module;
     size_t node;
 	FramebufferWidget* framebuffer;
-	SvgWidget* svgWidget;
+	W::LitSvgWidget* svgWidget;
     bool lastStatus;
 
     QueueWidget() {
         framebuffer = new FramebufferWidget;
         addChild(framebuffer);
-        svgWidget = new SvgWidget;
+        svgWidget = new W::LitSvgWidget;
         svgWidget->setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/solomon-queue-lit.svg")));
         framebuffer->box.size = svgWidget->box.size;
         box.size = svgWidget->box.size;
@@ -992,7 +992,12 @@ struct QueueWidget : TransparentWidget {
     void step() override {
         if(module) {
             if (module->queue[node] != lastStatus) {
-                framebuffer->visible = (module->queue[node] == true) ? true : false;
+                if (module->queue[node] == true) {
+                    svgWidget->show();
+                } else {
+                    svgWidget->hide();
+                }
+                framebuffer->dirty = true;
             }
             lastStatus = module->queue[node];
         }
@@ -1007,13 +1012,13 @@ struct DelayWidget : TransparentWidget {
 	TModule* module;
     size_t node;
 	FramebufferWidget* framebuffer;
-	SvgWidget* svgWidget;
+	W::LitSvgWidget* svgWidget;
     bool lastStatus;
 
     DelayWidget() {
         framebuffer = new FramebufferWidget;
         addChild(framebuffer);
-        svgWidget = new SvgWidget;
+        svgWidget = new W::LitSvgWidget;
         svgWidget->setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/solomon-delay-lit.svg")));
         framebuffer->box.size = svgWidget->box.size;
         box.size = svgWidget->box.size;
@@ -1024,7 +1029,12 @@ struct DelayWidget : TransparentWidget {
     void step() override {
         if(module) {
             if (module->queue[node] != lastStatus) {
-                framebuffer->visible = (module->delay[node] == true) ? true : false;
+                if (module->delay[node] == true) {
+                    svgWidget->show();
+                } else {
+                    svgWidget->hide();
+                }
+                framebuffer->dirty = true;
             }
             lastStatus = module->delay[node];
         }
@@ -1039,13 +1049,13 @@ struct PlayWidget : TransparentWidget {
 	TModule* module;
     size_t node;
 	FramebufferWidget* framebuffer;
-	SvgWidget* svgWidget;
+	W::LitSvgWidget* svgWidget;
     size_t lastStatus; 
 
     PlayWidget() {
         framebuffer = new FramebufferWidget;
         addChild(framebuffer);
-        svgWidget = new SvgWidget;
+        svgWidget = new W::LitSvgWidget;
         svgWidget->setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/solomon-play-lit.svg")));
         framebuffer->box.size = svgWidget->box.size;
         box.size = svgWidget->box.size;
@@ -1056,7 +1066,12 @@ struct PlayWidget : TransparentWidget {
     void step() override {
         if(module) {
             if (module->currentNode != lastStatus) {
-                framebuffer->visible = (module->currentNode == node) ? true : false;
+                if (module->currentNode == node) {
+                    svgWidget->show();
+                } else {
+                    svgWidget->hide();
+                }
+                framebuffer->dirty = true;
             }
             lastStatus = module->currentNode;
         }
