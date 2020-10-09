@@ -1175,7 +1175,7 @@ struct QqqqWidget : W::ModuleWidget {
     }
 
     void drawQuantizerColumn(float xOffset, float yOffset, Qqqq* module, int col) {
-        addChild(W::createInput(mm2px(Vec(xOffset + 0.f, yOffset + 0.f)), module, Qqqq::CV_INPUT + col));
+        addStaticInput(mm2px(Vec(xOffset + 0.f, yOffset + 0.f)), module, Qqqq::CV_INPUT + col);
         addParam(createParam<QqqqWidgets::ScalingKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 10.f)), module, Qqqq::SCALING_PARAM + col));
         addParam(createParam<QqqqWidgets::OffsetKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 20.f)), module, Qqqq::OFFSET_PARAM + col));
         addParam(createParam<QqqqWidgets::TransposeKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 30.f)), module, Qqqq::TRANSPOSE_PARAM + col));
@@ -1183,9 +1183,9 @@ struct QqqqWidget : W::ModuleWidget {
         addParam(createParam<QqqqWidgets::TransposeButton>(mm2px(Vec(xOffset + 3.5f, yOffset + 40.f)), module, Qqqq::TRANSPOSE_MODE_PARAM + col));
         addParam(createParam<QqqqWidgets::ShButton>(mm2px(Vec(xOffset + -0.5f, yOffset + 42.5f)), module, Qqqq::SH_MODE_PARAM + col));
 
-        addChild(W::createInput(mm2px(Vec(xOffset + 0.f, yOffset + 50.f)), module, Qqqq::SH_INPUT + col));
+        addStaticInput(mm2px(Vec(xOffset + 0.f, yOffset + 50.f)), module, Qqqq::SH_INPUT + col);
         addParam(createParam<QqqqWidgets::VisualizeButton>(mm2px(Vec(xOffset + 0.f, yOffset + 60.f)), module, Qqqq::VISUALIZE_PARAM + col));
-        addChild(W::createOutput(mm2px(Vec(xOffset + 0.f, yOffset + 70.f)), module, Qqqq::CV_OUTPUT + col));
+        addStaticOutput(mm2px(Vec(xOffset + 0.f, yOffset + 70.f)), module, Qqqq::CV_OUTPUT + col);
     }
 
     void drawSceneSlots(float xOffset, float yOffset, Qqqq* module) {
@@ -1226,12 +1226,12 @@ struct QqqqWidget : W::ModuleWidget {
         // Scale, Key, External
         addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(25.f, 29.f)), module, Qqqq::KEY_PARAM));
         addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(35.f, 29.f)), module, Qqqq::SCALE_PARAM));
-        addChild(W::createInput(mm2px(Vec(45.f, 29.f)), module, Qqqq::EXT_SCALE_INPUT));
-        addChild(W::createOutput(mm2px(Vec(55.f, 29.f)), module, Qqqq::EXT_SCALE_OUTPUT));
+        addStaticInput(mm2px(Vec(45.f, 29.f)), module, Qqqq::EXT_SCALE_INPUT);
+        addStaticOutput(mm2px(Vec(55.f, 29.f)), module, Qqqq::EXT_SCALE_OUTPUT);
 
         // Scene programmer. Offset by 0.1mm because it looks better that way
         drawSceneSlots(67.6f, 42.5f, module);
-        addChild(W::createInput(mm2px(Vec(84.f, 53.f)), module, Qqqq::SCENE_INPUT));
+        addStaticInput(mm2px(Vec(84.f, 53.f)), module, Qqqq::SCENE_INPUT);
 
         // Keyboard inputs
         addParam(createParam<QqqqWidgets::PushButtonKeyboard>(mm2px(Vec(83.f, 66.5f)), module, Qqqq::KEYBOARD_INPUT_PARAM));
@@ -1320,7 +1320,7 @@ struct QuackWidget : W::ModuleWidget {
     }
 
     void drawQuantizerColumn(float xOffset, float yOffset, Qqqq* module, int col) {
-        addChild(W::createInput(mm2px(Vec(xOffset + 0.f, yOffset + 0.f)), module, Qqqq::CV_INPUT + col));
+        addStaticInput(mm2px(Vec(xOffset + 0.f, yOffset + 0.f)), module, Qqqq::CV_INPUT + col);
         addParam(createParam<QqqqWidgets::ScalingKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 10.f)), module, Qqqq::SCALING_PARAM + col));
         addParam(createParam<QqqqWidgets::OffsetKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 20.f)), module, Qqqq::OFFSET_PARAM + col));
         addParam(createParam<QqqqWidgets::TransposeKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 30.f)), module, Qqqq::TRANSPOSE_PARAM + col));
@@ -1328,8 +1328,8 @@ struct QuackWidget : W::ModuleWidget {
         addParam(createParam<QqqqWidgets::TransposeButton>(mm2px(Vec(xOffset + 3.5f, yOffset + 40.f)), module, Qqqq::TRANSPOSE_MODE_PARAM + col));
         addParam(createParam<QqqqWidgets::ShButton>(mm2px(Vec(xOffset + -0.5f, yOffset + 42.5f)), module, Qqqq::SH_MODE_PARAM + col));
 
-        addChild(W::createInput(mm2px(Vec(xOffset + 0.f, yOffset + 50.f)), module, Qqqq::SH_INPUT + col));
-        addChild(W::createOutput(mm2px(Vec(xOffset + 0.f, yOffset + 60.f)), module, Qqqq::CV_OUTPUT + col));
+        addStaticInput(mm2px(Vec(xOffset + 0.f, yOffset + 50.f)), module, Qqqq::SH_INPUT + col);
+        addStaticOutput(mm2px(Vec(xOffset + 0.f, yOffset + 60.f)), module, Qqqq::CV_OUTPUT + col);
     }
 
     QuackWidget(Qqqq* module) {
@@ -1345,8 +1345,8 @@ struct QuackWidget : W::ModuleWidget {
         // Scale, Key, External
         addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(18.1f, 18.f)), module, Qqqq::KEY_PARAM));
         addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(26.4f, 18.f)), module, Qqqq::SCALE_PARAM));
-        addChild(W::createInput(mm2px(Vec(18.1f, 31.f)), module, Qqqq::EXT_SCALE_INPUT));
-        addChild(W::createOutput(mm2px(Vec(26.4f, 31.f)), module, Qqqq::EXT_SCALE_OUTPUT));
+        addStaticInput(mm2px(Vec(18.1f, 31.f)), module, Qqqq::EXT_SCALE_INPUT);
+        addStaticOutput(mm2px(Vec(26.4f, 31.f)), module, Qqqq::EXT_SCALE_OUTPUT);
 
         // The quantizer column
         drawQuantizerColumn(22.f, 43.f, module, 0);
@@ -1378,7 +1378,7 @@ struct QWidget : W::ModuleWidget {
 
     // No visualize button in this version
     void drawQuantizerColumn(float xOffset, float yOffset, Qqqq* module, int col) {
-        addChild(W::createInput(mm2px(Vec(xOffset + 0.f, yOffset + 0.f)), module, Qqqq::CV_INPUT + col));
+        addStaticInput(mm2px(Vec(xOffset + 0.f, yOffset + 0.f)), module, Qqqq::CV_INPUT + col);
         addParam(createParam<QqqqWidgets::ScalingKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 10.f)), module, Qqqq::SCALING_PARAM + col));
         addParam(createParam<QqqqWidgets::OffsetKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 20.f)), module, Qqqq::OFFSET_PARAM + col));
         addParam(createParam<QqqqWidgets::TransposeKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 30.f)), module, Qqqq::TRANSPOSE_PARAM + col));
@@ -1386,8 +1386,8 @@ struct QWidget : W::ModuleWidget {
         addParam(createParam<QqqqWidgets::TransposeButton>(mm2px(Vec(xOffset + 3.5f, yOffset + 40.f)), module, Qqqq::TRANSPOSE_MODE_PARAM + col));
         addParam(createParam<QqqqWidgets::ShButton>(mm2px(Vec(xOffset + -0.5f, yOffset + 42.5f)), module, Qqqq::SH_MODE_PARAM + col));
 
-        addChild(W::createInput(mm2px(Vec(xOffset + 0.f, yOffset + 50.f)), module, Qqqq::SH_INPUT + col));
-        addChild(W::createOutput(mm2px(Vec(xOffset + 0.f, yOffset + 60.f)), module, Qqqq::CV_OUTPUT + col));
+        addStaticInput(mm2px(Vec(xOffset + 0.f, yOffset + 50.f)), module, Qqqq::SH_INPUT + col);
+        addStaticOutput(mm2px(Vec(xOffset + 0.f, yOffset + 60.f)), module, Qqqq::CV_OUTPUT + col);
     }
 
     QWidget(Qqqq* module) {
@@ -1400,7 +1400,7 @@ struct QWidget : W::ModuleWidget {
         drawScrews();
 
         // External
-        addChild(W::createInput(mm2px(Vec(3.52f, 29.f)), module, Qqqq::EXT_SCALE_INPUT));
+        addStaticInput(mm2px(Vec(3.52f, 29.f)), module, Qqqq::EXT_SCALE_INPUT);
 
         // Quantizer column
         drawQuantizerColumn(3.52f, 43.f, module, 0);

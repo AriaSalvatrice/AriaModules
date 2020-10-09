@@ -25,9 +25,6 @@
 // covered by the GPL, and wish to receive the code of that widget under the WTFPL, contact me.
 
 
-// FIXME: When removing a cable from one of my jacks then CTRL-Z'ing that action,
-// it crashes every time. It's likely due to my using addchild!
-
 #pragma once
 using namespace rack;
 extern Plugin* pluginInstance;
@@ -196,7 +193,7 @@ struct LitSvgSwitchUnshadowed : Switch {
 
 
 /* --------------------------------------------------------------------------------------------- */
-/* ---- Lights --------------------------------------------------------------------------------- */
+/* ---- Lights for Jacks ----------------------------------------------------------------------- */
 /* --------------------------------------------------------------------------------------------- */
 
 // Values are kinda yolo'd by trial and error here.
@@ -237,15 +234,15 @@ struct JackLight : app::ModuleLightWidget {
 };
 
 
-struct JackLightInput : JackLight {
-    JackLightInput() {
+struct JackDynamicLightInput : JackLight {
+    JackDynamicLightInput() {
         this->addBaseColor(nvgRGB(0xff, 0xcc, 0x03));
     }
 };
 
 
-struct JackLightOutput : JackLight {
-    JackLightOutput() {
+struct JackDynamicLightOutput : JackLight {
+    JackDynamicLightOutput() {
         this->addBaseColor(nvgRGB(0xfc, 0xae, 0xbb));
     }
 };
@@ -307,8 +304,8 @@ inline JackStaticLightOutput* createStaticLightOutput(math::Vec pos) {
 
 
 // Helper to create a LED that goes behind a dynamically lit input Jack.
-inline JackLightInput* createDynamicLightInput(math::Vec pos, engine::Module* module, int lightId) {
-    JackLightInput* light = new JackLightInput;
+inline JackDynamicLightInput* createDynamicLightInput(math::Vec pos, engine::Module* module, int lightId) {
+    JackDynamicLightInput* light = new JackDynamicLightInput;
 	light->module = module;
 	light->firstLightId = lightId;
     light->box.pos = pos;
@@ -317,13 +314,21 @@ inline JackLightInput* createDynamicLightInput(math::Vec pos, engine::Module* mo
 
 
 // Helper to create a LED that goes behind a dynamically lit output Jack.
-inline JackLightOutput* createDynamicLightOutput(math::Vec pos, engine::Module* module, int lightId) {
-    JackLightOutput* light = new JackLightOutput;
+inline JackDynamicLightOutput* createDynamicLightOutput(math::Vec pos, engine::Module* module, int lightId) {
+    JackDynamicLightOutput* light = new JackDynamicLightOutput;
 	light->module = module;
 	light->firstLightId = lightId;
     light->box.pos = pos;
 	return light;
 }
+
+
+
+
+/* --------------------------------------------------------------------------------------------- */
+/* ---- Lights for Knobs ----------------------------------------------------------------------- */
+/* --------------------------------------------------------------------------------------------- */
+
 
 
 // Those lights must be added before transparent knobs, at the same position.
@@ -394,6 +399,13 @@ struct KnobLightYellow : KnobLight {
 };
 
 
+
+
+/* --------------------------------------------------------------------------------------------- */
+/* ---- Other Lights --------------------------------------------------------------------------- */
+/* --------------------------------------------------------------------------------------------- */
+
+
 // Tiny little status lights. 2.17mm
 struct StatusLight : ModuleLightWidget {
     StatusLight() {
@@ -454,94 +466,14 @@ struct StatusLightInput : StatusLight {
 /* --------------------------------------------------------------------------------------------- */
 
 
-// Base jack is a SVGPort without customizations.
-struct Jack : SVGPort {
-
-};
-
-
 // Transparent jacks are shown above a light.
-struct JackTransparent : Jack {
+struct JackTransparent : SVGPort {
     JackTransparent() {
         setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/jack-transparent.svg")));
-        Jack();
+        SVGPort();
     }
 };
 
-// DEPRECATED
-// Helper to create a lit input comprised of a LED and a transparent Jack. The light is dynamic.
-inline Widget* createLitInput(math::Vec pos, engine::Module* module, int inputId, int firstLightId) {
-	Widget* o = new Widget;
-    JackLightInput* light = new JackLightInput;
-    JackTransparent* jack = new JackTransparent;
-
-	light->module = module;
-	light->firstLightId = firstLightId;
-
-	jack->module = module;
-	jack->type = app::PortWidget::INPUT;
-	jack->portId = inputId;
-
-    o->box.pos = pos;
-    o->addChild(light);
-    o->addChild(jack);
-    
-	return o;
-}
-
-// DEPRECATED
-// Helper to create a lit output comprised of a LED and a transparent Jack. The light is dynamic.
-inline Widget* createLitOutput(math::Vec pos, engine::Module* module, int outputId, int firstLightId) {
-	Widget* o = new Widget;
-    JackLightOutput* light = new JackLightOutput;
-    JackTransparent* jack = new JackTransparent;
-
-	light->module = module;
-	light->firstLightId = firstLightId;
-
-	jack->module = module;
-	jack->type = app::PortWidget::OUTPUT;
-	jack->portId = outputId;
-
-    o->box.pos = pos;
-    o->addChild(light);
-    o->addChild(jack);
-	return o;
-}
-
-// DEPRECATED
-// Helper to create an input comprised of a LED and a transparent Jack. The light is constantly lit.
-inline Widget* createInput(math::Vec pos, engine::Module* module, int inputId) {
-	Widget* o = new Widget;
-    JackStaticLightInput* light = new JackStaticLightInput;
-    JackTransparent* jack = new JackTransparent;
-
-	jack->module = module;
-	jack->type = app::PortWidget::INPUT;
-	jack->portId = inputId;
-
-    o->box.pos = pos;
-    o->addChild(light);
-    o->addChild(jack);
-	return o;
-}
-
-// DEPRECATED
-// Helper to create an output comprised of a LED and a transparent Jack. The light is constantly lit.
-inline Widget* createOutput(math::Vec pos, engine::Module* module, int inputId) {
-	Widget* o = new Widget;
-    JackStaticLightOutput* light = new JackStaticLightOutput;
-    JackTransparent* jack = new JackTransparent;
-
-	jack->module = module;
-	jack->type = app::PortWidget::OUTPUT;
-	jack->portId = inputId;
-
-    o->box.pos = pos;
-    o->addChild(light);
-    o->addChild(jack);
-	return o;
-}
 
 
 /* --------------------------------------------------------------------------------------------- */

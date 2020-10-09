@@ -389,7 +389,7 @@ struct Rotatoes4Widget : W::ModuleWidget {
 
     void drawRotato(Rotatoes<4>* module, float y, int num) {
         addParam(createParam<KnobRotato>(mm2px(Vec(3.52f, y)), module, Rotatoes<4>::ROTATO_PARAM + num));
-        addChild(W::createOutput(mm2px(Vec(3.52f, y + 10.f)), module, Rotatoes<4>::CV_OUTPUT + num));
+        addStaticOutput(mm2px(Vec(3.52f, y + 10.f)), module, Rotatoes<4>::CV_OUTPUT + num);
         addChild(createLight<W::StatusLightInput>(mm2px(Vec(2.25f, y + 6.9f)), module, Rotatoes<4>::QUANTIZE_LIGHT + num));
     }
 
@@ -401,7 +401,7 @@ struct Rotatoes4Widget : W::ModuleWidget {
         addChild(createWidget<W::Signature>(mm2px(Vec(1.0f, 114.5f))));
 
         // External
-        addChild(W::createInput(mm2px(Vec(3.52f, 15.9f)), module, Rotatoes<4>::EXT_SCALE_INPUT));
+        addStaticInput(mm2px(Vec(3.52f, 15.9f)), module, Rotatoes<4>::EXT_SCALE_INPUT);
 
         // Rotatoes
         drawRotato(module, 31.f, 0);
@@ -453,11 +453,11 @@ struct GrabbyWidget : W::ModuleWidget {
         addChild(createWidget<W::Signature>(mm2px(Vec(1.0f, 114.5f))));
 
         // External
-        addChild(W::createInput(mm2px(Vec(3.52f, 15.9f)), module, Rotatoes<1>::EXT_SCALE_INPUT));
+        addStaticInput(mm2px(Vec(3.52f, 15.9f)), module, Rotatoes<1>::EXT_SCALE_INPUT);
 
         // Grabby
         addParam(createParam<GrabbySlider>(mm2px(Vec(2.62f, 31.f)), module, Rotatoes<1>::ROTATO_PARAM + 0));
-        addChild(W::createOutput(mm2px(Vec(3.52f, 104.f)), module, Rotatoes<1>::CV_OUTPUT + 0));
+        addStaticOutput(mm2px(Vec(3.52f, 104.f)), module, Rotatoes<1>::CV_OUTPUT + 0);
         addChild(createLight<W::StatusLightInput>(mm2px(Vec(2.25f, 100.9f)), module, Rotatoes<1>::QUANTIZE_LIGHT + 0));
 
         // Screws

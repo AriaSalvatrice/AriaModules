@@ -122,17 +122,17 @@ struct SpleetWidget : W::ModuleWidget {
         addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         
         // Jacks, top to bottom.
-        addChild(W::createInput(mm2px(Vec(3.52f, 15.9f)), module, Spleet::POLY_INPUT + 0));       
-        addChild(W::createLitOutput(mm2px(Vec(3.52f, 25.9f)), module, Spleet::SPLIT_OUTPUT + 0, Spleet::SPLIT_LIGHT + 0));
-        addChild(W::createLitOutput(mm2px(Vec(3.52f, 33.9f)), module, Spleet::SPLIT_OUTPUT + 1, Spleet::SPLIT_LIGHT + 1));
-        addChild(W::createLitOutput(mm2px(Vec(3.52f, 41.9f)), module, Spleet::SPLIT_OUTPUT + 2, Spleet::SPLIT_LIGHT + 2));
-        addChild(W::createLitOutput(mm2px(Vec(3.52f, 49.9f)), module, Spleet::SPLIT_OUTPUT + 3, Spleet::SPLIT_LIGHT + 3));
+        addStaticInput(mm2px(Vec(3.52f, 15.9f)), module, Spleet::POLY_INPUT + 0);       
+        addDynamicOutput(mm2px(Vec(3.52f, 25.9f)), module, Spleet::SPLIT_OUTPUT + 0, Spleet::SPLIT_LIGHT + 0);
+        addDynamicOutput(mm2px(Vec(3.52f, 33.9f)), module, Spleet::SPLIT_OUTPUT + 1, Spleet::SPLIT_LIGHT + 1);
+        addDynamicOutput(mm2px(Vec(3.52f, 41.9f)), module, Spleet::SPLIT_OUTPUT + 2, Spleet::SPLIT_LIGHT + 2);
+        addDynamicOutput(mm2px(Vec(3.52f, 49.9f)), module, Spleet::SPLIT_OUTPUT + 3, Spleet::SPLIT_LIGHT + 3);
 
-        addChild(W::createInput(mm2px(Vec(3.52f, 62.9f)), module, Spleet::POLY_INPUT + 1));
-        addChild(W::createLitOutput(mm2px(Vec(3.52f, 72.9f)), module, Spleet::SPLIT_OUTPUT + 4, Spleet::SPLIT_LIGHT + 4));
-        addChild(W::createLitOutput(mm2px(Vec(3.52f, 80.9f)), module, Spleet::SPLIT_OUTPUT + 5, Spleet::SPLIT_LIGHT + 5));
-        addChild(W::createLitOutput(mm2px(Vec(3.52f, 88.9f)), module, Spleet::SPLIT_OUTPUT + 6, Spleet::SPLIT_LIGHT + 6));
-        addChild(W::createLitOutput(mm2px(Vec(3.52f, 96.9f)), module, Spleet::SPLIT_OUTPUT + 7, Spleet::SPLIT_LIGHT + 7));
+        addStaticInput(mm2px(Vec(3.52f, 62.9f)), module, Spleet::POLY_INPUT + 1);
+        addDynamicOutput(mm2px(Vec(3.52f, 72.9f)), module, Spleet::SPLIT_OUTPUT + 4, Spleet::SPLIT_LIGHT + 4);
+        addDynamicOutput(mm2px(Vec(3.52f, 80.9f)), module, Spleet::SPLIT_OUTPUT + 5, Spleet::SPLIT_LIGHT + 5);
+        addDynamicOutput(mm2px(Vec(3.52f, 88.9f)), module, Spleet::SPLIT_OUTPUT + 6, Spleet::SPLIT_LIGHT + 6);
+        addDynamicOutput(mm2px(Vec(3.52f, 96.9f)), module, Spleet::SPLIT_OUTPUT + 7, Spleet::SPLIT_LIGHT + 7);
                 
         // Pushbutton
         addParam(createParam<W::SmallButton>(mm2px(Vec(1.f, 107.f)), module, Spleet::SORT_PARAM));

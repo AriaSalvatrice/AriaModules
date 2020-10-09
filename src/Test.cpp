@@ -54,9 +54,9 @@ struct TestWidget : W::ModuleWidget {
         addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
                 
         for (size_t i = 0; i < 12; i++) {
-            addChild(W::createLitInput(mm2px(Vec(10.f, 8.0 + i * 10.f)), module, Test::TEST_INPUT + i, Test::TEST_LIGHT + i));
-            addChild(W::createLitOutput(mm2px(Vec(10.f, 8.0 + i * 10.f)), module, Test::TEST_INPUT + i, Test::TEST_LIGHT + i));
-            addChild(W::createOutput(mm2px(Vec(20.f, 8.f + i * 10.f)), module, Test::TEST_OUTPUT + i));
+            addDynamicInput(mm2px(Vec(10.f, 8.0 + i * 10.f)), module, Test::TEST_INPUT + i, Test::TEST_LIGHT + i);
+            addDynamicOutput(mm2px(Vec(10.f, 8.0 + i * 10.f)), module, Test::TEST_INPUT + i, Test::TEST_LIGHT + i);
+            addStaticOutput(mm2px(Vec(20.f, 8.f + i * 10.f)), module, Test::TEST_OUTPUT + i);
         }
 
     }

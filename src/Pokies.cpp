@@ -390,7 +390,7 @@ struct PokiesWidget : W::ModuleWidget {
         pokieLight->num = num;
         addChild(pokieLight);
 
-        addChild(W::createOutput(mm2px(Vec(3.52f, y + 10.f)), module, Pokies<4>::CV_OUTPUT + num));
+        addStaticOutput(mm2px(Vec(3.52f, y + 10.f)), module, Pokies<4>::CV_OUTPUT + num);
     }
 
     PokiesWidget(Pokies<4>* module) {
@@ -401,7 +401,7 @@ struct PokiesWidget : W::ModuleWidget {
         addChild(createWidget<W::Signature>(mm2px(Vec(1.0f, 114.5f))));
 
         // Global Input
-        addChild(W::createInput(mm2px(Vec(3.52f, 15.9f)), module, Pokies<4>::GLOBAL_INPUT));
+        addStaticInput(mm2px(Vec(3.52f, 15.9f)), module, Pokies<4>::GLOBAL_INPUT);
 
         // Pokies
         drawPokie(module, 31.f, 0);

@@ -136,32 +136,32 @@ struct SplortWidget : W::ModuleWidget {
         addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
         // Split input
-        addChild(W::createInput(mm2px(Vec(8.6f, 15.9f)), module, Splort::POLY_INPUT));
+        addStaticInput(mm2px(Vec(8.6f, 15.9f)), module, Splort::POLY_INPUT);
 
         // Split outputs with lights
-        addChild(W::createLitOutput(mm2px(Vec( 3.52f, 25.4f)), module, Splort::SPLIT_OUTPUT +  0, Splort::SPLIT_LIGHT +  0));
-        addChild(W::createLitOutput(mm2px(Vec( 3.52f, 33.4f)), module, Splort::SPLIT_OUTPUT +  1, Splort::SPLIT_LIGHT +  1));
-        addChild(W::createLitOutput(mm2px(Vec( 3.52f, 41.4f)), module, Splort::SPLIT_OUTPUT +  2, Splort::SPLIT_LIGHT +  2));
-        addChild(W::createLitOutput(mm2px(Vec( 3.52f, 49.4f)), module, Splort::SPLIT_OUTPUT +  3, Splort::SPLIT_LIGHT +  3));
-        addChild(W::createLitOutput(mm2px(Vec( 3.52f, 57.4f)), module, Splort::SPLIT_OUTPUT +  4, Splort::SPLIT_LIGHT +  4));
-        addChild(W::createLitOutput(mm2px(Vec( 3.52f, 65.4f)), module, Splort::SPLIT_OUTPUT +  5, Splort::SPLIT_LIGHT +  5));
-        addChild(W::createLitOutput(mm2px(Vec( 3.52f, 73.4f)), module, Splort::SPLIT_OUTPUT +  6, Splort::SPLIT_LIGHT +  6));
-        addChild(W::createLitOutput(mm2px(Vec( 3.52f, 81.4f)), module, Splort::SPLIT_OUTPUT +  7, Splort::SPLIT_LIGHT +  7));
-        addChild(W::createLitOutput(mm2px(Vec(13.68f, 25.4f)), module, Splort::SPLIT_OUTPUT +  8, Splort::SPLIT_LIGHT +  8));
-        addChild(W::createLitOutput(mm2px(Vec(13.68f, 33.4f)), module, Splort::SPLIT_OUTPUT +  9, Splort::SPLIT_LIGHT +  9));
-        addChild(W::createLitOutput(mm2px(Vec(13.68f, 41.4f)), module, Splort::SPLIT_OUTPUT + 10, Splort::SPLIT_LIGHT + 10));
-        addChild(W::createLitOutput(mm2px(Vec(13.68f, 49.4f)), module, Splort::SPLIT_OUTPUT + 11, Splort::SPLIT_LIGHT + 11));
-        addChild(W::createLitOutput(mm2px(Vec(13.68f, 57.4f)), module, Splort::SPLIT_OUTPUT + 12, Splort::SPLIT_LIGHT + 12));
-        addChild(W::createLitOutput(mm2px(Vec(13.68f, 65.4f)), module, Splort::SPLIT_OUTPUT + 13, Splort::SPLIT_LIGHT + 13));
-        addChild(W::createLitOutput(mm2px(Vec(13.68f, 73.4f)), module, Splort::SPLIT_OUTPUT + 14, Splort::SPLIT_LIGHT + 14));
-        addChild(W::createLitOutput(mm2px(Vec(13.68f, 81.4f)), module, Splort::SPLIT_OUTPUT + 15, Splort::SPLIT_LIGHT + 15));
+        addDynamicOutput(mm2px(Vec( 3.52f, 25.4f)), module, Splort::SPLIT_OUTPUT +  0, Splort::SPLIT_LIGHT +  0);
+        addDynamicOutput(mm2px(Vec( 3.52f, 33.4f)), module, Splort::SPLIT_OUTPUT +  1, Splort::SPLIT_LIGHT +  1);
+        addDynamicOutput(mm2px(Vec( 3.52f, 41.4f)), module, Splort::SPLIT_OUTPUT +  2, Splort::SPLIT_LIGHT +  2);
+        addDynamicOutput(mm2px(Vec( 3.52f, 49.4f)), module, Splort::SPLIT_OUTPUT +  3, Splort::SPLIT_LIGHT +  3);
+        addDynamicOutput(mm2px(Vec( 3.52f, 57.4f)), module, Splort::SPLIT_OUTPUT +  4, Splort::SPLIT_LIGHT +  4);
+        addDynamicOutput(mm2px(Vec( 3.52f, 65.4f)), module, Splort::SPLIT_OUTPUT +  5, Splort::SPLIT_LIGHT +  5);
+        addDynamicOutput(mm2px(Vec( 3.52f, 73.4f)), module, Splort::SPLIT_OUTPUT +  6, Splort::SPLIT_LIGHT +  6);
+        addDynamicOutput(mm2px(Vec( 3.52f, 81.4f)), module, Splort::SPLIT_OUTPUT +  7, Splort::SPLIT_LIGHT +  7);
+        addDynamicOutput(mm2px(Vec(13.68f, 25.4f)), module, Splort::SPLIT_OUTPUT +  8, Splort::SPLIT_LIGHT +  8);
+        addDynamicOutput(mm2px(Vec(13.68f, 33.4f)), module, Splort::SPLIT_OUTPUT +  9, Splort::SPLIT_LIGHT +  9);
+        addDynamicOutput(mm2px(Vec(13.68f, 41.4f)), module, Splort::SPLIT_OUTPUT + 10, Splort::SPLIT_LIGHT + 10);
+        addDynamicOutput(mm2px(Vec(13.68f, 49.4f)), module, Splort::SPLIT_OUTPUT + 11, Splort::SPLIT_LIGHT + 11);
+        addDynamicOutput(mm2px(Vec(13.68f, 57.4f)), module, Splort::SPLIT_OUTPUT + 12, Splort::SPLIT_LIGHT + 12);
+        addDynamicOutput(mm2px(Vec(13.68f, 65.4f)), module, Splort::SPLIT_OUTPUT + 13, Splort::SPLIT_LIGHT + 13);
+        addDynamicOutput(mm2px(Vec(13.68f, 73.4f)), module, Splort::SPLIT_OUTPUT + 14, Splort::SPLIT_LIGHT + 14);
+        addDynamicOutput(mm2px(Vec(13.68f, 81.4f)), module, Splort::SPLIT_OUTPUT + 15, Splort::SPLIT_LIGHT + 15);
         
         // Sort button
         addParam(createParam<W::ReducedButton>(mm2px(Vec(8.6f, 90.9f)), module, Splort::SORT_PARAM));
 
         // Link jacks with lights
-        addChild(W::createLitInput(mm2px(Vec(1.52f, 104.9f)), module, Splort::LINK_INPUT, Splort::LINK_IN_LIGHT));
-        addChild(W::createLitOutput(mm2px(Vec(15.68f, 104.9f)), module, Splort::LINK_OUTPUT, Splort::LINK_OUT_LIGHT));
+        addDynamicInput(mm2px(Vec(1.52f, 104.9f)), module, Splort::LINK_INPUT, Splort::LINK_IN_LIGHT);
+        addDynamicOutput(mm2px(Vec(15.68f, 104.9f)), module, Splort::LINK_OUTPUT, Splort::LINK_OUT_LIGHT);
         
     }
 };

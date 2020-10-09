@@ -127,11 +127,11 @@ struct QualeWidget : W::ModuleWidget {
         addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
         // Jacks
-        addChild(W::createInput(mm2px(Vec(3.52f, 39.f)), module, Quale::CHORD_INPUT));
-        addChild(W::createOutput(mm2px(Vec(3.52f, 59.f)), module, Quale::SCALE_OUTPUT));
+        addStaticInput(mm2px(Vec(3.52f, 39.f)), module, Quale::CHORD_INPUT);
+        addStaticOutput(mm2px(Vec(3.52f, 59.f)), module, Quale::SCALE_OUTPUT);
 
-        addChild(W::createInput(mm2px(Vec(3.52f, 83.f)), module, Quale::SCALE_INPUT));
-        addChild(W::createOutput(mm2px(Vec(3.52f, 103.f)), module, Quale::CHORD_OUTPUT));
+        addStaticInput(mm2px(Vec(3.52f, 83.f)), module, Quale::SCALE_INPUT);
+        addStaticOutput(mm2px(Vec(3.52f, 103.f)), module, Quale::CHORD_OUTPUT);
 
         // Operation lights
         addChild(createLight<W::StatusLightInput>(mm2px(Vec(3.5f, 96.f)), module, Quale::SCALE_TO_CHORD_LIGHT));

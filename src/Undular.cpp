@@ -300,10 +300,10 @@ struct UndularWidget : W::ModuleWidget {
         addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         
         // UDLR
-        addChild(W::createInput(mm2px(Vec(8.5, 18.0)), module, Undular::U_INPUT));
-        addChild(W::createInput(mm2px(Vec(8.5, 30.0)), module, Undular::D_INPUT));
-        addChild(W::createInput(mm2px(Vec(2.5, 24.0)), module, Undular::L_INPUT));
-        addChild(W::createInput(mm2px(Vec(14.5, 24.0)), module, Undular::R_INPUT));
+        addStaticInput(mm2px(Vec(8.5, 18.0)), module, Undular::U_INPUT);
+        addStaticInput(mm2px(Vec(8.5, 30.0)), module, Undular::D_INPUT);
+        addStaticInput(mm2px(Vec(2.5, 24.0)), module, Undular::L_INPUT);
+        addStaticInput(mm2px(Vec(14.5, 24.0)), module, Undular::R_INPUT);
         
         // Step
         addParam(createParam<W::Knob>(mm2px(Vec(2.6, 36.0)), module, Undular::X_STEP_PARAM));
@@ -313,22 +313,20 @@ struct UndularWidget : W::ModuleWidget {
         addParam(createParam<W::Knob>(mm2px(Vec(2.6, 50.2)), module, Undular::PADDING_PARAM));
 
         // Y & Lock
-        addChild(W::createInput(mm2px(Vec(14.5, 50.0)), module, Undular::Y_INPUT));
+        addStaticInput(mm2px(Vec(14.5, 50.0)), module, Undular::Y_INPUT);
         addParam(createParam<AriaPushButtonPadlock820>(mm2px(Vec(14.5, 58.5)), module, Undular::Y_LOCK_PARAM));
 
         // X & Lock
-        addChild(W::createInput(mm2px(Vec(2.5, 66.0)), module, Undular::X_INPUT));	
+        addStaticInput(mm2px(Vec(2.5, 66.0)), module, Undular::X_INPUT);	
         addParam(createParam<AriaPushButtonPadlock820>(mm2px(Vec(11.0, 66.0)), module, Undular::X_LOCK_PARAM));
         
         // Zoom
-        addChild(W::createInput(mm2px(Vec(8.5, 82.0)), module, Undular::Z_INPUT));
+        addStaticInput(mm2px(Vec(8.5, 82.0)), module, Undular::Z_INPUT);
         
         // Cables
-        addChild(W::createInput(mm2px(Vec(8.5, 95.0)), module, Undular::OPACITY_INPUT));
-        addChild(W::createInput(mm2px(Vec(8.5, 103.0)), module, Undular::TENSION_INPUT));
+        addStaticInput(mm2px(Vec(8.5, 95.0)), module, Undular::OPACITY_INPUT);
+        addStaticInput(mm2px(Vec(8.5, 103.0)), module, Undular::TENSION_INPUT);
 
-        // Debug
-        // addChild(W::createOutput(mm2px(Vec(8.5, 120.0)), module, Undular::DEBUG_OUTPUT));
     }
 };
 
