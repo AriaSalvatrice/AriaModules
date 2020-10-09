@@ -277,7 +277,7 @@ struct Undular : Module {
 };
 
 
-struct AriaPushButtonPadlock820 : SvgSwitch {
+struct AriaPushButtonPadlock820 : W::LitSvgSwitch {
     AriaPushButtonPadlock820() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-820-padlock-off.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-820-padlock-on.svg")));

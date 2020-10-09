@@ -446,6 +446,7 @@ inline Widget* createLitInput(math::Vec pos, engine::Module* module, int inputId
     o->box.pos = pos;
     o->addChild(light);
     o->addChild(jack);
+    
 	return o;
 }
 
@@ -502,7 +503,19 @@ inline Widget* createOutput(math::Vec pos, engine::Module* module, int inputId) 
 	return o;
 }
 
+// // Helper to create a LED that goes behind a static input Jack. The light is constantly lit.
+// inline JackStaticLightInput* createStaticLightInput(math::Vec pos) {
+//     JackStaticLightInput* light = new JackStaticLightInput;
+//     light->box.pos = pos;
+// 	return light;
+// }
 
+// // Helper to create a LED that goes behind a static output Jack. The light is constantly lit.
+// inline JackStaticLightOutput* createStaticLightOutput(math::Vec pos) {
+//     JackStaticLightOutput* light = new JackStaticLightOutput;
+//     light->box.pos = pos;
+// 	return light;
+// }
 
 
 /* --------------------------------------------------------------------------------------------- */
