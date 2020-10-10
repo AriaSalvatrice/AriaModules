@@ -12,23 +12,43 @@ They are the Aria Salvatrice Signature Series. They’re growing into an integra
 
 
 
+
 Documentation
 -------------
 
-The documentation of the modules is only available [from my website](https://aria.dog/modules/).
+The documentation of the modules is only available [from my website](https://aria.dog/modules/). It's beginner-friendly and detailed - please check it out.
 
 
 
-Download & Installation
------------------------
 
-Those modules are part of the VCV plugin library. By [subscribing to my plugin](https://library.vcvrack.com/AriaSalvatrice/), you will receive every stable update automatically. Installing my modules from the VCV library the only supported way.
+Compatibility, Download & Installation
+--------------------------------------
 
-The only downloads you will find here are [automatic development builds](https://github.com/AriaSalvatrice/AriaVCVModules/releases/tag/AzureCI), which are never guaranteed to work properly.
+Those modules will work with any 1.x version of VCV Rack, on Linux, Windows, and OS X. 
 
-You can also do things the hard way and [build the plugin yourself](https://vcvrack.com/manual/Building#building-rack-plugins) if you have a good reason to do so, for example, if you hate yourself, or if you enjoy building random C++ projects off github as a hobby.
+They are part of VCV's online library: by [subscribing to my plugin](https://library.vcvrack.com/AriaSalvatrice/), you will receive every stable update a few days after it's released, including every new module. Installing my modules from the VCV library is the recommended way.
 
+The only downloads you will find on Github are [automatic development builds](https://github.com/AriaSalvatrice/AriaVCVModules/releases/tag/AzureCI), which are never guaranteed to work properly.
+
+These modules will be made compatible with VCV Rack 2.0 and VCV for DAWs once they are available.
+
+Compatibility with forks and ports of VCV Rack to other platforms will be attempted on a best effort basis.    
+The [Sonaremin](https://github.com/hexdump0815/sonaremin) project for Raspberry Pi bundles my modules in its distribution.    
+[miRack](https://mirack.app/modules/) support will probably never happen, as its API is not compatible with VCV 1.x's.
+
+You can do things the hard way and [build this plugin yourself](https://vcvrack.com/manual/Building#building-rack-plugins) if you have a good reason to do so, for example, if you hate yourself, or if you enjoy building random C++ projects off github as a hobby.    
 If you build my plugin locally, you have to `make dep` before you `make dist`. 
+
+
+
+
+Donations
+---------
+
+If you wish to send me a tip for my modules, at this time, donations can only be accepted in the form of [pay-what-you-want album purchases](https://ariasalvatrice.bandcamp.com/releases). Feel free to send me a message along with the donation: <woof@aria.dog>!
+
+I am looking into providing more convenient donation options in the future, since bandcamp takes their cut and requires you to make a purchase you might not be interested in. It is unfortunately difficult to find a payment processor that operates legally in France but respects the choice of individuals to go by a chosen name. Thank you for your understanding.
+
 
 
 
@@ -37,22 +57,25 @@ Other thingies
 
 - [Changelog](CHANGELOG.md)
 - [Design language of the modules](doc/design.md)
-- [Future plans for the collection](doc/plans.md)
+- [Future plans for the collection](https://aria.dog/modules/plans/)
 - [How to contribute](CONTRIBUTING.md)
 - [Beta / pre-release thread on VCV forums](https://community.vcvrack.com/t/arias-cool-and-nice-thread-of-barely-working-betas-and-bug-squashing/8208)
 
 
 
-Acknowledgements & Credits & Other Assorted Namedrops
------------------------------------------------------
+
+Acknowledgements & Namedrops
+----------------------------
 
 Thanks to everyone who created open-source modules I could learn from and make songs with.
 
 Thanks to [Andrew Belt](https://vcvrack.com/) for creating VCV Rack and providing code suggestions.
 
-Thanks to [Jerry Sievert](https://legitimatesounding.com/) and [cschol](https://github.com/cschol) for their help with [QuickJS](https://github.com/tonaljs/tonal) integration.
+Thanks to [Jerry Sievert](https://legitimatesounding.com/) and [cschol](https://github.com/cschol) for their help with [QuickJS](https://bellard.org/quickjs/) integration.
 
-Thanks to [Squinky Labs](https://github.com/squinkylabs/SquinkyVCV), [Stoermelder](https://github.com/stoermelder/vcvrack-packone), [David O'Rourke](https://github.com/david-c14/SubmarineFree) for technical advice.
+Thanks to [Squinky Labs](https://github.com/squinkylabs/SquinkyVCV), [Stoermelder](https://github.com/stoermelder/vcvrack-packone), [David O'Rourke](https://github.com/david-c14/SubmarineFree), and [Anthony Lexander Matos](https://github.com/anlexmatos) for technical advice.
+
+Thanks to [Omri Cohen](https://www.youtube.com/channel/UCuWKHSHTHMV_nVSeNH4gYAg) for featuring my modules in livestreams.
 
 Thanks to [Ken McAloon](https://whatsinaname.xyz/) for Latin language translations.
 
@@ -66,36 +89,23 @@ Thanks to [my dog Ornstein](https://ornstein.neocities.org/) for being a good do
 
 Thanks to my music-making LGBBQT internet shitposting gang for introducing me to VCV and modular synthesis as something that's not just for old guys with more disposable income than impetus to write fresh songs.
 
+<big>**But most of all, thanks to YOU for using my art.**</big>
 
-<big>But most of all, thanks to YOU for using my art.</big>
-
-The modules use the following fonts:
-- [Francois One](https://fonts.google.com/specimen/Francois+One) by [Vernon Adams](http://sansoxygen.com/) for titles.
-- [Nova](https://fontlibrary.org/en/font/nova) by [Wojciech Kalinowski](https://fontlibrary.org/en/member/wmk69) for faceplages.
-- [Fixed_v01](http://www.orgdot.com/aliasfonts/index.htm) by [Orgdot](http://www.orgdot.com/aliasfonts/index.htm) for LCDs.
-- [DSEG](https://www.keshikan.net/fonts-e.html) by [Keshikan](https://www.keshikan.net/) for segment displays.
-
-
-The **Arcane** module uses Tarot cards altered from [Yoav Ben-Dov's CBD Tarot](https://www.cbdtarot.com/).
-
-The **UnDuLaR** module background uses the traditional yagasuri kimono pattern as provided by [ULOCO, UOTOMIZU](https://forallcreators.com/yagasuri-background/).
-
-[QuickJS](https://github.com/tonaljs/tonal) is used in some modules under the terms of the [MIT license](https://github.com/AriaSalvatrice/AriaVCVModules/tree/master/doc/LICENSE_TonalJs.txt)
-
-[TonalJS](https://bellard.org/quickjs/) is used in some modules under the terms of the [MIT license](https://github.com/AriaSalvatrice/AriaVCVModules/tree/master/doc/LICENSE_QuickJS.txt)
 
 
 
 Lawyer's corner
 ---------------
 
-Yeah, the rules are a bit complicated. If they cause licensing incompatibilities (besides the intended virality of the GPL) lemme know. Here goes the breakdown:
+Yeah, the licensing rules are a bit complicated. But the big idea is pretty simple: my modules are GPL3, my logo is copyrighted, the rest is less restrictive. If there's licensing incompatibilities (besides the intended virality of the GPL) lemme know and we'll figure out something.
+
+Here goes the detailed breakdown:
 
 ### The output of my modules belongs to you
 
 It should go without saying that no sane courtroom would ever humor the idea the output of my modules is original enough to be my copyright, even that of Arcane, which directly outputs random data obtained from a server under my control.
 
-Since courtooms are rarely sane, **I explicitly relinquish any claim of intellectual propery over the output you obtain by operating my modules**, not that I believe I ever had any. Any song you make with them is yours alone.
+Since courtooms are rarely sane, **I explicitly relinquish any claim of intellectual property over the output you obtain by operating my modules**, not that I believe I ever had any. Any song you make with them is yours alone.
 
 
 ### Source code of individual modules
@@ -103,19 +113,21 @@ Since courtooms are rarely sane, **I explicitly relinquish any claim of intellec
 The code of the Aria Salvatrice Signature Series Synthesizer Modules is distributed under the [GNU General Public License v3.0 only](https://spdx.org/licenses/GPL-3.0-only.html). The modules come without any warranty and might recklessly endanger life and limb, the usual.
 
 
-### Re-usable .hpp libraries
+### Re-usable libraries
 
-Not that the code is very good, but some libraries I created for my own use are available under the less restrictive terms of the [Do What The Fuck You Want To Public License](https://spdx.org/licenses/WTFPL.html), to allow every VCV creator to do what the fuck they want. The files in question are [`src/components.hpp`](src/components.hpp), [`src/javascript.hpp`](src/javascript.hpp), [`src/lcd.hpp`](src/lcd.hpp), [`src/portablesequence.hpp`](src/portablesequence.hpp), [`src/prng.hpp`](src/prng.hpp), and [`src/quantizer.hpp`](src/quantizer.hpp).
+Not that the code is very good, but some libraries I created for my own use are available under the less restrictive terms of the [Do What The Fuck You Want To Public License](https://spdx.org/licenses/WTFPL.html), to allow every VCV creator to do what the fuck they want. The files in question are [`src/javascript.hpp`](src/javascript.hpp), [`src/lcd.hpp`](src/lcd.hpp), [`src/polyexternalscale.hpp`](src/polyexternalscale.hpp), [`src/portablesequence.hpp`](src/portablesequence.hpp), [`src/prng.hpp`](src/prng.hpp), [`src/quantizer.hpp`](src/quantizer.hpp), and [`src/widgets.hpp`](src/widgets.hpp).
 
 
 ### Faceplates 
 
- [CC-BY-SA-4.0](https://creativecommons.org/licenses/by-sa/4.0/), with the exception of my signature logo, which is copyrighted, and generally not directly baked into my faceplate SVG files. You may freely distribute your faceplate edits to the VCV community.
+ [CC-BY-SA-4.0](https://creativecommons.org/licenses/by-sa/4.0/), with the exception of my signature logo, which is copyrighted, and generally not directly baked into my faceplate SVG files. You may freely distribute your faceplate edits. If you enjoy making custom skins, bear in mind that some of the colors used in my modules are defined in the code, not the SVG files.
 
 
 ### Components (knobs, jacks, etc)
 
-CC-BY-SA-4.0. If you re-use them, I request you do not entirely re-use my signature color scheme in your own modules, but this request is not legally binding. Because I use a limited palette, it's easy to replace most colors in my SVG files using search and replace in a text editor.
+WTFPL graphics and code (in [`src/widgets.hpp`](src/widgets.hpp)). But if you re-use them, I request you do not entirely re-use my signature color scheme in your own modules. This request is not legally binding, as it'd make licensing complicated. Because I use a limited palette, it's easy to replace most colors in my SVG files using search and replace in a text editor.
+
+My collection of modules and widgets does not use VCV's component library at all, and is thus unencumbered by its licensing restrictions.
 
 
 ### Signature / Logo
@@ -131,23 +143,30 @@ The easiest way to remove my signature from every module is by blanking or repla
 
 ### Graphics for the **Arcane** module 
 
-[CC-BY-NC-SA](https://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_US), as they are a derivative work of the [CBD Tarot](https://www.cbdtarot.com/) released under that license. That includes the faceplate, as it uses a pattern taken from that tarot deck.
+The **Arcane** module uses Tarot cards altered from [Yoav Ben-Dov's CBD Tarot](https://www.cbdtarot.com/). Its graphics are distributed under the [CC-BY-NC-SA](https://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_US), to comply with the license of the graphics used. That includes the faceplate, as it uses a pattern taken from that tarot deck.
 
 
-### LCD Font
+### Fonts used
 
-SVG export of the [Fixed_v01 font by Orgdot](http://www.orgdot.com/aliasfonts/index.htm), released under [a custom MIT-style license](res/components/lcd/Fixed_v01/LICENSE.txt).
+- The LCD Font is a SVG export of the [Fixed_v01 font by Orgdot](http://www.orgdot.com/aliasfonts/index.htm), released under [a custom MIT-style license](res/components/lcd/Fixed_v01/LICENSE.txt).
+- The segment display font is [DSEG](https://www.keshikan.net/fonts-e.html) by [Keshikan](https://www.keshikan.net/), released under the [OFL 1.1](res/dseg/LICENSE.txt). The TTF file is distributed with the modules.
+- Titles are typeset in [Francois One](https://fonts.google.com/specimen/Francois+One) by [Vernon Adams](http://sansoxygen.com/). This font is not redistributed with the modules. 
+- Labels are typeset in [Nova](https://fontlibrary.org/en/font/nova) by [Wojciech Kalinowski](https://fontlibrary.org/en/member/wmk69). This font family is not redistributed with the modules. 
 
-### Segment Display Font
 
-[DSEG](https://www.keshikan.net/fonts-e.html) by [Keshikan](https://www.keshikan.net/), released under the [OFL 1.1](res/dseg/LICENSE.txt).
+### Libraries used
+
+- [QuickJS](https://bellard.org/quickjs/) by [Fabrice Bellard](https://bellard.org/) is used in some modules under the terms of the [MIT license](https://github.com/AriaSalvatrice/AriaVCVModules/tree/master/doc/LICENSE_QuickJS.txt)
+- [TonalJS](https://github.com/tonaljs/tonal) by [danigb](https://github.com/danigb) is used in some modules under the terms of the [MIT license](https://github.com/AriaSalvatrice/AriaVCVModules/tree/master/doc/LICENSE_TonalJs.txt)
+
 
 
 ### Copyright assignment
 
 **By sending me pull requests, you assign their copyright to me, allowing me, in perpetuity, to license your contributions however I see fit**.    
 Right now, that means a mix of GPL-3.0-only and WTFPL, but I reserve the right to relicense it or re-use code in proprietary projects in the future.     
-This is a personal project where I don't expect external contributions to be any more complex than small-scale bugfixes and feature additions, so I think that's reasonable. If you think that's unreasonable, don't contribute. You will be asked to acknowledge this policy the first time you send me a pull request. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for more information.
+This is a personal project where I don't expect external contributions to be any more complex than small-scale bugfixes and feature additions, so I think that's reasonable. If you think that's unreasonable, don't contribute. You will be asked to acknowledge this policy the first time you send me a non-trivial pull request. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for more information.
+
 
 
 

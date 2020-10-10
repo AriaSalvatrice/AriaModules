@@ -86,38 +86,38 @@ struct ArcaneBase : Module {
         int patternBnum = 0;
         json_t* patternBnumJ = json_object_get(rootJ, "patternB");
         if (patternBnumJ) patternBnum = json_integer_value(patternBnumJ);
-        for (int i = 0; i < 16; ++i)
+        for (size_t i = 0; i < 16; ++i)
             patternB[15 - i] = (patternBnum >> i) & 1;
         
         int patternCnum = 0;
         json_t* patternCnumJ = json_object_get(rootJ, "patternC");
         if (patternCnumJ) patternCnum = json_integer_value(patternCnumJ);
-        for (int i = 0; i < 16; ++i)
+        for (size_t i = 0; i < 16; ++i)
             patternC[15 - i] = (patternCnum >> i) & 1;
         
         int patternDnum = 0;
         json_t* patternDnumJ = json_object_get(rootJ, "patternD");
         if (patternDnumJ) patternDnum = json_integer_value(patternDnumJ);
-        for (int i = 0; i < 16; ++i)
+        for (size_t i = 0; i < 16; ++i)
             patternD[15 - i] = (patternDnum >> i) & 1;
         
         int patternEnum = 0;
         json_t* patternEnumJ = json_object_get(rootJ, "patternE");
         if (patternEnumJ) patternEnum = json_integer_value(patternEnumJ);
-        for (int i = 0; i < 16; ++i)
+        for (size_t i = 0; i < 16; ++i)
             patternE[15 - i] = (patternEnum >> i) & 1;
         
         int scaleNum = 0;
         json_t* scaleNumJ = json_object_get(rootJ, "scale");
         if (scaleNumJ) scaleNum = json_integer_value(scaleNumJ);
-        for (int i = 0; i < 12; ++i){
+        for (size_t i = 0; i < 12; ++i){
             scale[11 - i] = (scaleNum >> i) & 1;
             lcdStatus.pianoDisplay[11 - i] = (scaleNum >> i) & 1;
         }
         
         json_t* notePatternJ = json_object_get(rootJ, "notePattern");		
         if (notePatternJ) {
-            for (int i = 0; i < 8; i++) {
+            for (size_t i = 0; i < 8; i++) {
                 json_t* noteJ = json_array_get(notePatternJ, i);
                 if (noteJ)
                     notePattern[i] = json_integer_value(noteJ);
@@ -250,27 +250,27 @@ struct Arcane : ArcaneBase {
     bool cardDirty = true;
     int cardDelayCounter = 0;
         
-    void sendStaticVoltage(const ProcessArgs& args) {
+    void sendStaticVoltage() {
         outputs[ARCANA_OUTPUT].setVoltage( arcana * 0.1f );
         outputs[BPM_NUM_OUTPUT].setVoltage (log2f(1.0f / (120.f / bpm)));
         
-        int notesInScale = 0;
-        for (int i = 0; i < 12; i++)
+        size_t notesInScale = 0;
+        for (size_t i = 0; i < 12; i++)
             if (scale[i]) notesInScale++;
-        for (int i = 0; i < 8; i++) {
+        for (size_t i = 0; i < 8; i++) {
             outputs[SCALE_OUTPUT].setVoltage( (notePattern[i] / 12.f), i);
             float paddedOutput = i < notesInScale ? (notePattern[i] / 12.f) : (notePattern[i] / 12.f + 1.f);
             outputs[SCALE_PADDED_OUTPUT].setVoltage(paddedOutput, i);
         }
         outputs[SCALE_OUTPUT].setChannels(notesInScale);
         outputs[SCALE_PADDED_OUTPUT].setChannels(8);
-        for (int i = 0; i < 12; i++)
+        for (size_t i = 0; i < 12; i++)
             outputs[EXTERNAL_SCALE_OUTPUT].setVoltage( (scale[i]) ? 8.f : 0.f, i);
         outputs[EXTERNAL_SCALE_OUTPUT].setChannels(12);
     }
     
     
-    void processReset(const ProcessArgs& args){
+    void processReset(){
         if (resetCvTrigger.process(inputs[RESET_INPUT].getVoltage()) or resetButtonTrigger.process(params[RESET_PARAM].getValue())){
             phase = 0.f;
             phaseCounter = 0;
@@ -288,7 +288,7 @@ struct Arcane : ArcaneBase {
         }
     }
     
-    void processRunStatus(const ProcessArgs& args){
+    void processRunStatus(){
         if (runCvTrigger.process(inputs[RUN_INPUT].getVoltage())){
             running = !running;
             params[RUN_PARAM].setValue(running);
@@ -343,7 +343,7 @@ struct Arcane : ArcaneBase {
         pulseThirtySecond = pulseThirtySecondGenerator.process(args.sampleTime);
     }
 
-    void sendClock(const ProcessArgs& args) {
+    void sendClock() {
         if (params[PULSE_RAMP_PARAM].getValue()) { // Ramp
             outputs[BPM_1_OUTPUT].setVoltage(  ((phase + phaseCounter)      / 512.f * 2.5f) + quarterInBarCounter * 2.5f );
             outputs[BPM_4_OUTPUT].setVoltage(  (phase + phaseCounter)       / 512.f * 10.f );  
@@ -361,7 +361,7 @@ struct Arcane : ArcaneBase {
     
     // Yeah I know, copy-paste cowgirl coding in here. But it works, punk. 
     // This is where the bulk of the CPU time goes. Can I improve it? I don't see how, seems unsafe to skip steps on a clock.
-    void sendPatterns(const ProcessArgs& args) {
+    void sendPatterns() {
         outputs[PATTERN_B_32_OUTPUT].setVoltage( (pulseThirtySecond and patternB[thirtySecondCounter]) ? 10.f : 0.f );
         outputs[PATTERN_C_32_OUTPUT].setVoltage( (pulseThirtySecond and patternC[thirtySecondCounter]) ? 10.f : 0.f );
         outputs[PATTERN_D_32_OUTPUT].setVoltage( (pulseThirtySecond and patternD[thirtySecondCounter]) ? 10.f : 0.f );
@@ -388,7 +388,7 @@ struct Arcane : ArcaneBase {
         outputs[PATTERN_E_1_OUTPUT].setVoltage(  (pulseBar          and patternE[barCounter])          ? 10.f : 0.f );		
     }
     
-    void processExpander(const ProcessArgs& args) {
+    void processExpander() {
         if (rightExpander.module and rightExpander.module->model == modelAleister) {
             lights[EXPANDER_LIGHT].setBrightness(1.f);
             
@@ -548,14 +548,14 @@ struct Arcane : ArcaneBase {
     void process(const ProcessArgs& args) override {
         if (!jsonParsed and readJsonDivider.process()) jsonParsed = readTodaysFortune();
         if (jsonParsed) {
-            if (refreshDivider.process()) sendStaticVoltage(args);
+            if (refreshDivider.process()) sendStaticVoltage();
             
-            processReset(args);
-            processRunStatus(args);
+            processReset();
+            processRunStatus();
             if (running) updateClock(args);
-            sendClock(args); // Send even if not running
+            sendClock(); // Send even if not running
             
-            sendPatterns(args);
+            sendPatterns();
             
             // Quantize
             for (int i = 0; i < inputs[QNT_INPUT].getChannels(); i++)
@@ -567,7 +567,7 @@ struct Arcane : ArcaneBase {
             outputs[QNT_OUTPUT].setChannels(inputs[QNT_INPUT].getChannels());
         }
         if (expanderDivider.process()) {
-            processExpander(args);
+            processExpander();
         }
         
         if (lcdDivider.process()) {
@@ -616,10 +616,10 @@ struct Aleister : ArcaneBase {
     
     int leftMessages[2][9] = {};
     
-    void sendVoltage(const ProcessArgs& args) {
+    void sendVoltage() {
         // If the user connects only the first cable, assume they want it polyphonic
         bool polyBRequested = true, polyCRequested = true, polyDRequested = true, polyERequested = true;
-        for (int i = 1; i < 16; i++) {
+        for (size_t i = 1; i < 16; i++) {
             if ( outputs[PATTERN_B_OUTPUT + i].isConnected() ) polyBRequested = false;
             if ( outputs[PATTERN_C_OUTPUT + i].isConnected() ) polyCRequested = false;
             if ( outputs[PATTERN_D_OUTPUT + i].isConnected() ) polyDRequested = false;
@@ -629,37 +629,37 @@ struct Aleister : ArcaneBase {
         // setChannels(16) throws warnings, but works normally.
         // https://github.com/VCVRack/Rack/issues/1524 - compiler bug
         if (polyBRequested) {
-            for (int i = 0; i < 16; i++) outputs[PATTERN_B_OUTPUT].setVoltage(patternB[i] ? 10.f : 0.f, i);
+            for (size_t i = 0; i < 16; i++) outputs[PATTERN_B_OUTPUT].setVoltage(patternB[i] ? 10.f : 0.f, i);
             outputs[PATTERN_B_OUTPUT].setChannels(16);
         } else {
-            for (int i = 0; i < 16; i++) outputs[PATTERN_B_OUTPUT + i].setVoltage(patternB[i] ? 10.f : 0.f);
+            for (size_t i = 0; i < 16; i++) outputs[PATTERN_B_OUTPUT + i].setVoltage(patternB[i] ? 10.f : 0.f);
             outputs[PATTERN_B_OUTPUT].setChannels(0);
         }
         if (polyCRequested) {
-            for (int i = 0; i < 16; i++) outputs[PATTERN_C_OUTPUT].setVoltage(patternC[i] ? 10.f : 0.f, i);
+            for (size_t i = 0; i < 16; i++) outputs[PATTERN_C_OUTPUT].setVoltage(patternC[i] ? 10.f : 0.f, i);
             outputs[PATTERN_C_OUTPUT].setChannels(16);
         } else {
-            for (int i = 0; i < 16; i++) outputs[PATTERN_C_OUTPUT + i].setVoltage(patternC[i] ? 10.f : 0.f);
+            for (size_t i = 0; i < 16; i++) outputs[PATTERN_C_OUTPUT + i].setVoltage(patternC[i] ? 10.f : 0.f);
             outputs[PATTERN_C_OUTPUT].setChannels(0);
         }
         if (polyDRequested) {
-            for (int i = 0; i < 16; i++) outputs[PATTERN_D_OUTPUT].setVoltage(patternD[i] ? 10.f : 0.f, i);
+            for (size_t i = 0; i < 16; i++) outputs[PATTERN_D_OUTPUT].setVoltage(patternD[i] ? 10.f : 0.f, i);
             outputs[PATTERN_D_OUTPUT].setChannels(16);
         } else {
-            for (int i = 0; i < 16; i++) outputs[PATTERN_D_OUTPUT + i].setVoltage(patternD[i] ? 10.f : 0.f);
+            for (size_t i = 0; i < 16; i++) outputs[PATTERN_D_OUTPUT + i].setVoltage(patternD[i] ? 10.f : 0.f);
             outputs[PATTERN_D_OUTPUT].setChannels(0);
         }
         if (polyERequested) {
-            for (int i = 0; i < 16; i++) outputs[PATTERN_E_OUTPUT].setVoltage(patternE[i] ? 10.f : 0.f, i);
+            for (size_t i = 0; i < 16; i++) outputs[PATTERN_E_OUTPUT].setVoltage(patternE[i] ? 10.f : 0.f, i);
             outputs[PATTERN_E_OUTPUT].setChannels(16);
         } else {
-            for (int i = 0; i < 16; i++) outputs[PATTERN_E_OUTPUT + i].setVoltage(patternE[i] ? 10.f : 0.f);
+            for (size_t i = 0; i < 16; i++) outputs[PATTERN_E_OUTPUT + i].setVoltage(patternE[i] ? 10.f : 0.f);
             outputs[PATTERN_E_OUTPUT].setChannels(0);
         }
     }
 
-    void processLights(const ProcessArgs& args) {
-        for (int i = 0; i < 16; i++) {
+    void processLights() {
+        for (size_t i = 0; i < 16; i++) {
             lights[PATTERN_B_LIGHT + i].setBrightness(patternB[i] ? 1.f : 0.f);
             lights[PATTERN_C_LIGHT + i].setBrightness(patternC[i] ? 1.f : 0.f);
             lights[PATTERN_D_LIGHT + i].setBrightness(patternD[i] ? 1.f : 0.f);
@@ -676,19 +676,19 @@ struct Aleister : ArcaneBase {
     }
     
     // Turn on a step and turn off the others
-    void turnOnPatternLight(int light, int step, const ProcessArgs& args) {
-        for (int i = 0; i < 16; i++) {
+    void turnOnPatternLight(size_t light, size_t step) {
+        for (size_t i = 0; i < 16; i++) {
             lights[light + i ].setBrightness( (i == step) ? 1.f : 0.f);
         }
     }
     
-    void turnOffPatternLight(int light, const ProcessArgs& args) {
-        for (int i = 0; i < 16; i++) {
+    void turnOffPatternLight(int light) {
+        for (size_t i = 0; i < 16; i++) {
             lights[light + i].setBrightness(0.f);
         }
     }
     
-    void processExpander(const ProcessArgs& args) {
+    void processExpander() {
         if (leftExpander.module and ( leftExpander.module->model == modelArcane or leftExpander.module->model == modelAtout ) ) {
             lights[EXPANDER_LIGHT].setBrightness(1.f);
             int *message = (int*) leftExpander.consumerMessage;
@@ -697,31 +697,31 @@ struct Aleister : ArcaneBase {
                 4..8: Bar, 1/4, 1/8, 1/16, 1/32 step
             */
             if (message[0]) {
-                turnOnPatternLight(PATTERN_B_STEP_LIGHT, message[ message[0] + 3 ], args );
+                turnOnPatternLight(PATTERN_B_STEP_LIGHT, message[ message[0] + 3 ]);
             } else {
-                turnOffPatternLight(PATTERN_B_STEP_LIGHT, args );
+                turnOffPatternLight(PATTERN_B_STEP_LIGHT);
             }
             if (message[1]) {
-                turnOnPatternLight(PATTERN_C_STEP_LIGHT, message[ message[1] + 3 ], args );
+                turnOnPatternLight(PATTERN_C_STEP_LIGHT, message[ message[1] + 3 ]);
             } else {
-                turnOffPatternLight(PATTERN_C_STEP_LIGHT, args );
+                turnOffPatternLight(PATTERN_C_STEP_LIGHT);
             }
             if (message[2]) {
-                turnOnPatternLight(PATTERN_D_STEP_LIGHT, message[ message[2] + 3 ], args );
+                turnOnPatternLight(PATTERN_D_STEP_LIGHT, message[ message[2] + 3 ]);
             } else {
-                turnOffPatternLight(PATTERN_D_STEP_LIGHT, args );
+                turnOffPatternLight(PATTERN_D_STEP_LIGHT);
             }
             if (message[3]) {
-                turnOnPatternLight(PATTERN_E_STEP_LIGHT, message[ message[3] + 3 ], args );
+                turnOnPatternLight(PATTERN_E_STEP_LIGHT, message[ message[3] + 3 ]);
             } else {
-                turnOffPatternLight(PATTERN_E_STEP_LIGHT, args );
+                turnOffPatternLight(PATTERN_E_STEP_LIGHT);
             }
         } else {
             lights[EXPANDER_LIGHT].setBrightness(0.f);
-            turnOffPatternLight(PATTERN_B_STEP_LIGHT, args );
-            turnOffPatternLight(PATTERN_C_STEP_LIGHT, args );
-            turnOffPatternLight(PATTERN_D_STEP_LIGHT, args );
-            turnOffPatternLight(PATTERN_E_STEP_LIGHT, args );
+            turnOffPatternLight(PATTERN_B_STEP_LIGHT);
+            turnOffPatternLight(PATTERN_C_STEP_LIGHT);
+            turnOffPatternLight(PATTERN_D_STEP_LIGHT);
+            turnOffPatternLight(PATTERN_E_STEP_LIGHT);
         }
     }
     
@@ -731,13 +731,13 @@ struct Aleister : ArcaneBase {
         }
         if (jsonParsed) {
             if (refreshDivider.process()){
-                sendVoltage(args);
-                processLights(args);
+                sendVoltage();
+                processLights();
             }
         }
         
         if (expanderDivider.process()) {
-            processExpander(args);
+            processExpander();
         }
     }
 }; // Aleister
@@ -779,30 +779,30 @@ struct CardDrawWidget : TransparentWidget {
 };
 
 
-struct ArcaneWidget : ModuleWidget {
+struct ArcaneWidget : W::ModuleWidget {
     // Offset
-    float x = 80.32;
-    float y = 18.0;
+    float x = 80.32f;
+    float y = 18.f;
         
     ArcaneWidget(Arcane* module) {
         setModule(module);
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Arcane/Arcane.svg")));
         
         // Signature
-        addChild(createWidget<AriaSignature>(mm2px(Vec(101.0, 114.5))));
+        addChild(createWidget<W::Signature>(mm2px(Vec(101.f, 114.5f))));
 
         // Screws. First two, the leftmost ones, are hidden after the card loads.
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));	
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 10 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 10 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));	
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 10 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 10 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         
         // The card
         CardFramebufferWidget *cfb = new CardFramebufferWidget(module);
         CardDrawWidget *cdw = new CardDrawWidget(module);
-        cfb->box.pos = mm2px(Vec(0.0, 0.0));
+        cfb->box.pos = mm2px(Vec(0.f, 0.f));
         cfb->addChild(cdw);
         addChild(cfb);
         
@@ -813,81 +813,81 @@ struct ArcaneWidget : ModuleWidget {
         addChild(lcd);
 
         // Quantizer
-        addInput(createInput<AriaJackIn>(   mm2px(Vec(x + 00.0, y + 00.0)), module, Arcane::QNT_INPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 32.0, y + 00.0)), module, Arcane::QNT_OUTPUT));
+        addStaticInput(   mm2px(Vec(x + 00.f, y + 00.f)), module, Arcane::QNT_INPUT);
+        addStaticOutput(mm2px(Vec(x + 32.f, y + 00.f)), module, Arcane::QNT_OUTPUT);
         
         // Scale
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 00.0, y + 08.0)), module, Arcane::SCALE_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 16.0, y + 08.0)), module, Arcane::SCALE_PADDED_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 32.0, y + 08.0)), module, Arcane::EXTERNAL_SCALE_OUTPUT));
+        addStaticOutput(mm2px(Vec(x + 00.f, y + 08.f)), module, Arcane::SCALE_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 16.f, y + 08.f)), module, Arcane::SCALE_PADDED_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 32.f, y + 08.f)), module, Arcane::EXTERNAL_SCALE_OUTPUT);
 
         // Arcane
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 00.0, y + 36.0)), module, Arcane::ARCANA_OUTPUT));
+        addStaticOutput(mm2px(Vec(x + 00.f, y + 36.f)), module, Arcane::ARCANA_OUTPUT);
         
         // Reset/Run inputs and jacks
-        addParam(createParam<AriaPushButton500Momentary>(mm2px(Vec(x + 16.0, y + 36.0)), module, Arcane::RESET_PARAM));
-        addParam(createParam<AriaPushButton500>(mm2px(Vec(x + 19.4, y + 39.4)), module, Arcane::RUN_PARAM));
-        addInput(createInput<AriaJackIn>(   mm2px(Vec(x + 08.0, y + 36.0)), module, Arcane::RESET_INPUT));
-        addInput(createInput<AriaJackIn>(   mm2px(Vec(x + 24.0, y + 36.0)), module, Arcane::RUN_INPUT));
+        addParam(createParam<W::SmallButtonMomentary>(mm2px(Vec(x + 16.f, y + 36.f)), module, Arcane::RESET_PARAM));
+        addParam(createParam<W::SmallButton>(mm2px(Vec(x + 19.4f, y + 39.4f)), module, Arcane::RUN_PARAM));
+        addStaticInput(   mm2px(Vec(x + 08.f, y + 36.f)), module, Arcane::RESET_INPUT);
+        addStaticInput(   mm2px(Vec(x + 24.f, y + 36.f)), module, Arcane::RUN_INPUT);
         
         // BPM
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 32.0, y + 36.0)), module, Arcane::BPM_NUM_OUTPUT));
+        addStaticOutput(mm2px(Vec(x + 32.f, y + 36.f)), module, Arcane::BPM_NUM_OUTPUT);
         
         // Pulse/Ramp
-        addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(x - 6.0, y + 54.0)), module, Arcane::PULSE_RAMP_PARAM));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 00.0, y + 54.0)), module, Arcane::BPM_1_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 08.0, y + 54.0)), module, Arcane::BPM_4_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 16.0, y + 54.0)), module, Arcane::BPM_8_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 24.0, y + 54.0)), module, Arcane::BPM_16_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 32.0, y + 54.0)), module, Arcane::BPM_32_OUTPUT));
+        addParam(createParam<W::RockerSwitchVertical>(mm2px(Vec(x - 6.f, y + 54.f)), module, Arcane::PULSE_RAMP_PARAM));
+        addStaticOutput(mm2px(Vec(x + 00.f, y + 54.f)), module, Arcane::BPM_1_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 08.f, y + 54.f)), module, Arcane::BPM_4_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 16.f, y + 54.f)), module, Arcane::BPM_8_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 24.f, y + 54.f)), module, Arcane::BPM_16_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 32.f, y + 54.f)), module, Arcane::BPM_32_OUTPUT);
                 
         // B C D E
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 00.0, y + 64.0)), module, Arcane::PATTERN_B_1_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 08.0, y + 64.0)), module, Arcane::PATTERN_B_4_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 16.0, y + 64.0)), module, Arcane::PATTERN_B_8_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 24.0, y + 64.0)), module, Arcane::PATTERN_B_16_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 32.0, y + 64.0)), module, Arcane::PATTERN_B_32_OUTPUT));
+        addStaticOutput(mm2px(Vec(x + 00.f, y + 64.f)), module, Arcane::PATTERN_B_1_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 08.f, y + 64.f)), module, Arcane::PATTERN_B_4_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 16.f, y + 64.f)), module, Arcane::PATTERN_B_8_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 24.f, y + 64.f)), module, Arcane::PATTERN_B_16_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 32.f, y + 64.f)), module, Arcane::PATTERN_B_32_OUTPUT);
         
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 00.0, y + 72.0)), module, Arcane::PATTERN_C_1_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 08.0, y + 72.0)), module, Arcane::PATTERN_C_4_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 16.0, y + 72.0)), module, Arcane::PATTERN_C_8_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 24.0, y + 72.0)), module, Arcane::PATTERN_C_16_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 32.0, y + 72.0)), module, Arcane::PATTERN_C_32_OUTPUT));
+        addStaticOutput(mm2px(Vec(x + 00.f, y + 72.f)), module, Arcane::PATTERN_C_1_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 08.f, y + 72.f)), module, Arcane::PATTERN_C_4_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 16.f, y + 72.f)), module, Arcane::PATTERN_C_8_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 24.f, y + 72.f)), module, Arcane::PATTERN_C_16_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 32.f, y + 72.f)), module, Arcane::PATTERN_C_32_OUTPUT);
         
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 00.0, y + 80.0)), module, Arcane::PATTERN_D_1_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 08.0, y + 80.0)), module, Arcane::PATTERN_D_4_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 16.0, y + 80.0)), module, Arcane::PATTERN_D_8_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 24.0, y + 80.0)), module, Arcane::PATTERN_D_16_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 32.0, y + 80.0)), module, Arcane::PATTERN_D_32_OUTPUT));
+        addStaticOutput(mm2px(Vec(x + 00.f, y + 80.f)), module, Arcane::PATTERN_D_1_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 08.f, y + 80.f)), module, Arcane::PATTERN_D_4_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 16.f, y + 80.f)), module, Arcane::PATTERN_D_8_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 24.f, y + 80.f)), module, Arcane::PATTERN_D_16_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 32.f, y + 80.f)), module, Arcane::PATTERN_D_32_OUTPUT);
         
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 00.0, y + 88.0)), module, Arcane::PATTERN_E_1_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 08.0, y + 88.0)), module, Arcane::PATTERN_E_4_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 16.0, y + 88.0)), module, Arcane::PATTERN_E_8_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 24.0, y + 88.0)), module, Arcane::PATTERN_E_16_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 32.0, y + 88.0)), module, Arcane::PATTERN_E_32_OUTPUT));
+        addStaticOutput(mm2px(Vec(x + 00.f, y + 88.f)), module, Arcane::PATTERN_E_1_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 08.f, y + 88.f)), module, Arcane::PATTERN_E_4_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 16.f, y + 88.f)), module, Arcane::PATTERN_E_8_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 24.f, y + 88.f)), module, Arcane::PATTERN_E_16_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 32.f, y + 88.f)), module, Arcane::PATTERN_E_32_OUTPUT);
         
         // Pulse width
-        addParam(createParam<AriaKnob820>(mm2px(Vec(x + 3.8, y + 98.0)), module, Arcane::PULSE_WIDTH_PARAM));	
+        addParam(createParam<W::Knob>(mm2px(Vec(x + 3.8f, y + 98.f)), module, Arcane::PULSE_WIDTH_PARAM));	
         
         // Expander light (3.5mm from edge)
-        addChild(createLight<SmallLight<OutputLight>>(mm2px(Vec(x + 38.1, 125.2)), module, Arcane::EXPANDER_LIGHT));
+        addChild(createLight<W::StatusLightOutput>(mm2px(Vec(x + 38.1f, 125.2f)), module, Arcane::EXPANDER_LIGHT));
     }
 }; // ArcaneWidget
 
 
 
 // Atout is a smaller version of Arcane, otherwise identical.
-struct AtoutWidget : ModuleWidget {
+struct AtoutWidget : W::ModuleWidget {
     // Offset
-    float x = 3.2;
-    float y = 18.0;
+    float x = 3.2f;
+    float y = 18.f;
     
     AtoutWidget(Arcane* module) {
         setModule(module);
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Arcane/Atout.svg")));
         
         // Signature
-        addChild(createWidget<AriaSignature>(mm2px(Vec(31.06, 114.5))));
+        addChild(createWidget<W::Signature>(mm2px(Vec(31.06f, 114.5f))));
         
         // LCD	
         Lcd::LcdWidget<Arcane> *lcd = new Lcd::LcdWidget<Arcane>(module);
@@ -896,71 +896,71 @@ struct AtoutWidget : ModuleWidget {
 
         
         // Screws
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 5 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 5 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
     
         // Quantizer
-        addInput(createInput<AriaJackIn>(   mm2px(Vec(x + 00.0, y + 00.0)), module, Arcane::QNT_INPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 32.0, y + 00.0)), module, Arcane::QNT_OUTPUT));
+        addStaticInput(   mm2px(Vec(x + 00.f, y + 00.f)), module, Arcane::QNT_INPUT);
+        addStaticOutput(mm2px(Vec(x + 32.f, y + 00.f)), module, Arcane::QNT_OUTPUT);
         
         // Scale
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 00.0, y + 08.0)), module, Arcane::SCALE_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 16.0, y + 08.0)), module, Arcane::SCALE_PADDED_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 32.0, y + 08.0)), module, Arcane::EXTERNAL_SCALE_OUTPUT));
+        addStaticOutput(mm2px(Vec(x + 00.f, y + 08.f)), module, Arcane::SCALE_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 16.f, y + 08.f)), module, Arcane::SCALE_PADDED_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 32.f, y + 08.f)), module, Arcane::EXTERNAL_SCALE_OUTPUT);
 
         // Arcane
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 00.0, y + 36.0)), module, Arcane::ARCANA_OUTPUT));
+        addStaticOutput(mm2px(Vec(x + 00.f, y + 36.f)), module, Arcane::ARCANA_OUTPUT);
 
         // Reset/Run inputs and jacks
-        addParam(createParam<AriaPushButton500Momentary>(mm2px(Vec(x + 16.0, y + 36.0)), module, Arcane::RESET_PARAM));
-        addParam(createParam<AriaPushButton500>(mm2px(Vec(x + 19.4, y + 39.4)), module, Arcane::RUN_PARAM));
-        addInput(createInput<AriaJackIn>(   mm2px(Vec(x + 08.0, y + 36.0)), module, Arcane::RESET_INPUT));
-        addInput(createInput<AriaJackIn>(   mm2px(Vec(x + 24.0, y + 36.0)), module, Arcane::RUN_INPUT));
+        addParam(createParam<W::SmallButtonMomentary>(mm2px(Vec(x + 16.f, y + 36.f)), module, Arcane::RESET_PARAM));
+        addParam(createParam<W::SmallButton>(mm2px(Vec(x + 19.4f, y + 39.4f)), module, Arcane::RUN_PARAM));
+        addStaticInput(   mm2px(Vec(x + 08.f, y + 36.f)), module, Arcane::RESET_INPUT);
+        addStaticInput(   mm2px(Vec(x + 24.f, y + 36.f)), module, Arcane::RUN_INPUT);
 
         // BPM
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 32.0, y + 36.0)), module, Arcane::BPM_NUM_OUTPUT));
+        addStaticOutput(mm2px(Vec(x + 32.f, y + 36.f)), module, Arcane::BPM_NUM_OUTPUT);
         
         // Pulse/Ramp
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 00.0, y + 54.0)), module, Arcane::BPM_1_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 08.0, y + 54.0)), module, Arcane::BPM_4_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 16.0, y + 54.0)), module, Arcane::BPM_8_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 24.0, y + 54.0)), module, Arcane::BPM_16_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 32.0, y + 54.0)), module, Arcane::BPM_32_OUTPUT));
+        addStaticOutput(mm2px(Vec(x + 00.f, y + 54.f)), module, Arcane::BPM_1_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 08.f, y + 54.f)), module, Arcane::BPM_4_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 16.f, y + 54.f)), module, Arcane::BPM_8_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 24.f, y + 54.f)), module, Arcane::BPM_16_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 32.f, y + 54.f)), module, Arcane::BPM_32_OUTPUT);
                 
         // B C D E
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 00.0, y + 64.0)), module, Arcane::PATTERN_B_1_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 08.0, y + 64.0)), module, Arcane::PATTERN_B_4_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 16.0, y + 64.0)), module, Arcane::PATTERN_B_8_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 24.0, y + 64.0)), module, Arcane::PATTERN_B_16_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 32.0, y + 64.0)), module, Arcane::PATTERN_B_32_OUTPUT));
+        addStaticOutput(mm2px(Vec(x + 00.f, y + 64.f)), module, Arcane::PATTERN_B_1_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 08.f, y + 64.f)), module, Arcane::PATTERN_B_4_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 16.f, y + 64.f)), module, Arcane::PATTERN_B_8_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 24.f, y + 64.f)), module, Arcane::PATTERN_B_16_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 32.f, y + 64.f)), module, Arcane::PATTERN_B_32_OUTPUT);
         
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 00.0, y + 72.0)), module, Arcane::PATTERN_C_1_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 08.0, y + 72.0)), module, Arcane::PATTERN_C_4_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 16.0, y + 72.0)), module, Arcane::PATTERN_C_8_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 24.0, y + 72.0)), module, Arcane::PATTERN_C_16_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 32.0, y + 72.0)), module, Arcane::PATTERN_C_32_OUTPUT));
+        addStaticOutput(mm2px(Vec(x + 00.f, y + 72.f)), module, Arcane::PATTERN_C_1_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 08.f, y + 72.f)), module, Arcane::PATTERN_C_4_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 16.f, y + 72.f)), module, Arcane::PATTERN_C_8_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 24.f, y + 72.f)), module, Arcane::PATTERN_C_16_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 32.f, y + 72.f)), module, Arcane::PATTERN_C_32_OUTPUT);
         
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 00.0, y + 80.0)), module, Arcane::PATTERN_D_1_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 08.0, y + 80.0)), module, Arcane::PATTERN_D_4_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 16.0, y + 80.0)), module, Arcane::PATTERN_D_8_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 24.0, y + 80.0)), module, Arcane::PATTERN_D_16_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 32.0, y + 80.0)), module, Arcane::PATTERN_D_32_OUTPUT));
+        addStaticOutput(mm2px(Vec(x + 00.f, y + 80.f)), module, Arcane::PATTERN_D_1_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 08.f, y + 80.f)), module, Arcane::PATTERN_D_4_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 16.f, y + 80.f)), module, Arcane::PATTERN_D_8_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 24.f, y + 80.f)), module, Arcane::PATTERN_D_16_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 32.f, y + 80.f)), module, Arcane::PATTERN_D_32_OUTPUT);
         
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 00.0, y + 88.0)), module, Arcane::PATTERN_E_1_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 08.0, y + 88.0)), module, Arcane::PATTERN_E_4_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 16.0, y + 88.0)), module, Arcane::PATTERN_E_8_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 24.0, y + 88.0)), module, Arcane::PATTERN_E_16_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(x + 32.0, y + 88.0)), module, Arcane::PATTERN_E_32_OUTPUT));
+        addStaticOutput(mm2px(Vec(x + 00.f, y + 88.f)), module, Arcane::PATTERN_E_1_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 08.f, y + 88.f)), module, Arcane::PATTERN_E_4_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 16.f, y + 88.f)), module, Arcane::PATTERN_E_8_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 24.f, y + 88.f)), module, Arcane::PATTERN_E_16_OUTPUT);
+        addStaticOutput(mm2px(Vec(x + 32.f, y + 88.f)), module, Arcane::PATTERN_E_32_OUTPUT);
         
         // Pulse width
-        addParam(createParam<AriaKnob820>(mm2px(Vec(x + 3.8, y + 96.0)), module, Arcane::PULSE_WIDTH_PARAM));	
+        addParam(createParam<W::Knob>(mm2px(Vec(x + 3.8f, y + 96.f)), module, Arcane::PULSE_WIDTH_PARAM));	
         
         // On Atout, the Pulse/Ramp rocker is at the bottom
-        addParam(createParam<AriaRockerSwitchHorizontal800>(mm2px(Vec(x + 3.8, y + 105.5)), module, Arcane::PULSE_RAMP_PARAM));
+        addParam(createParam<W::RockerSwitchHorizontal>(mm2px(Vec(x + 3.8f, y + 105.5f)), module, Arcane::PULSE_RAMP_PARAM));
         
         // Expander light
-        addChild(createLight<SmallLight<OutputLight>>(mm2px(Vec(x + 39.0, 125.2)), module, Arcane::EXPANDER_LIGHT));
+        addChild(createLight<W::StatusLightOutput>(mm2px(Vec(x + 39.f, 125.2f)), module, Arcane::EXPANDER_LIGHT));
     }
 }; // AtoutWidget
 
@@ -968,11 +968,11 @@ struct AtoutWidget : ModuleWidget {
 
 
 // Aleister expresses the four binary patterns as gates instead of rhythms.
-struct AleisterWidget : ModuleWidget {
+struct AleisterWidget : W::ModuleWidget {
     
     // No BG, so I can overlay it on top of the normal light.
     // Would have preferred to go light blue, but yellow is the only color that feels readable but not jarring.
-    struct AriaStepLight : AriaJackLight {
+    struct AriaStepLight : W::JackLight {
         AriaStepLight() {
             this->addBaseColor(nvgRGB(0xff, 0xcc, 0x03));
             this->bgColor = nvgRGBA(0xff, 0xff, 0xff, 0x00);
@@ -984,49 +984,49 @@ struct AleisterWidget : ModuleWidget {
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Arcane/Aleister.svg")));
         
         // Signature
-        addChild(createWidget<AriaSignature>(mm2px(Vec(28.76, 114.5))));
+        addChild(createWidget<W::Signature>(mm2px(Vec(28.76f, 114.5f))));
         
         // Screws
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         
         // Patterns
         float startX = 3.2;
         float startY = 18.0;
         
-        for (int i = 0; i < 8; i++) {
-            addChild(createLight<AriaOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 00.f)), module, Aleister::PATTERN_B_LIGHT + i + 0));
-            addChild(createLight<AriaOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 08.f)), module, Aleister::PATTERN_B_LIGHT + i + 8));
-            addChild(createLight<AriaOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 24.f)), module, Aleister::PATTERN_C_LIGHT + i + 0));
-            addChild(createLight<AriaOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 32.f)), module, Aleister::PATTERN_C_LIGHT + i + 8));
-            addChild(createLight<AriaOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 48.f)), module, Aleister::PATTERN_D_LIGHT + i + 0));
-            addChild(createLight<AriaOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 56.f)), module, Aleister::PATTERN_D_LIGHT + i + 8));
-            addChild(createLight<AriaOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 72.f)), module, Aleister::PATTERN_E_LIGHT + i + 0));
-            addChild(createLight<AriaOutputLight>(mm2px(Vec(startX + (i * 8.0), startY + 80.f)), module, Aleister::PATTERN_E_LIGHT + i + 8));
+        for (size_t i = 0; i < 8; i++) {
+            addChild(createLight<W::JackDynamicLightOutput>(mm2px(Vec(startX + (i * 8.f), startY + 00.f)), module, Aleister::PATTERN_B_LIGHT + i + 0));
+            addChild(createLight<W::JackDynamicLightOutput>(mm2px(Vec(startX + (i * 8.f), startY + 08.f)), module, Aleister::PATTERN_B_LIGHT + i + 8));
+            addChild(createLight<W::JackDynamicLightOutput>(mm2px(Vec(startX + (i * 8.f), startY + 24.f)), module, Aleister::PATTERN_C_LIGHT + i + 0));
+            addChild(createLight<W::JackDynamicLightOutput>(mm2px(Vec(startX + (i * 8.f), startY + 32.f)), module, Aleister::PATTERN_C_LIGHT + i + 8));
+            addChild(createLight<W::JackDynamicLightOutput>(mm2px(Vec(startX + (i * 8.f), startY + 48.f)), module, Aleister::PATTERN_D_LIGHT + i + 0));
+            addChild(createLight<W::JackDynamicLightOutput>(mm2px(Vec(startX + (i * 8.f), startY + 56.f)), module, Aleister::PATTERN_D_LIGHT + i + 8));
+            addChild(createLight<W::JackDynamicLightOutput>(mm2px(Vec(startX + (i * 8.f), startY + 72.f)), module, Aleister::PATTERN_E_LIGHT + i + 0));
+            addChild(createLight<W::JackDynamicLightOutput>(mm2px(Vec(startX + (i * 8.f), startY + 80.f)), module, Aleister::PATTERN_E_LIGHT + i + 8));
             
-            addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.0), startY + 00.f)), module, Aleister::PATTERN_B_STEP_LIGHT + i + 0));
-            addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.0), startY + 08.f)), module, Aleister::PATTERN_B_STEP_LIGHT + i + 8));
-            addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.0), startY + 24.f)), module, Aleister::PATTERN_C_STEP_LIGHT + i + 0));
-            addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.0), startY + 32.f)), module, Aleister::PATTERN_C_STEP_LIGHT + i + 8));
-            addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.0), startY + 48.f)), module, Aleister::PATTERN_D_STEP_LIGHT + i + 0));
-            addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.0), startY + 56.f)), module, Aleister::PATTERN_D_STEP_LIGHT + i + 8));
-            addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.0), startY + 72.f)), module, Aleister::PATTERN_E_STEP_LIGHT + i + 0));
-            addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.0), startY + 80.f)), module, Aleister::PATTERN_E_STEP_LIGHT + i + 8));
+            addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.f), startY + 00.f)), module, Aleister::PATTERN_B_STEP_LIGHT + i + 0));
+            addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.f), startY + 08.f)), module, Aleister::PATTERN_B_STEP_LIGHT + i + 8));
+            addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.f), startY + 24.f)), module, Aleister::PATTERN_C_STEP_LIGHT + i + 0));
+            addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.f), startY + 32.f)), module, Aleister::PATTERN_C_STEP_LIGHT + i + 8));
+            addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.f), startY + 48.f)), module, Aleister::PATTERN_D_STEP_LIGHT + i + 0));
+            addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.f), startY + 56.f)), module, Aleister::PATTERN_D_STEP_LIGHT + i + 8));
+            addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.f), startY + 72.f)), module, Aleister::PATTERN_E_STEP_LIGHT + i + 0));
+            addChild(createLight<AriaStepLight>(mm2px(Vec(startX + (i * 8.f), startY + 80.f)), module, Aleister::PATTERN_E_STEP_LIGHT + i + 8));
                         
-            addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(startX + (i * 8.0), startY + 00.0)), module, Aleister::PATTERN_B_OUTPUT + i + 0));
-            addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(startX + (i * 8.0), startY + 08.0)), module, Aleister::PATTERN_B_OUTPUT + i + 8));
-            addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(startX + (i * 8.0), startY + 24.0)), module, Aleister::PATTERN_C_OUTPUT + i + 0));
-            addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(startX + (i * 8.0), startY + 32.0)), module, Aleister::PATTERN_C_OUTPUT + i + 8));
-            addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(startX + (i * 8.0), startY + 48.0)), module, Aleister::PATTERN_D_OUTPUT + i + 0));
-            addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(startX + (i * 8.0), startY + 56.0)), module, Aleister::PATTERN_D_OUTPUT + i + 8));
-            addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(startX + (i * 8.0), startY + 72.0)), module, Aleister::PATTERN_E_OUTPUT + i + 0));
-            addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(startX + (i * 8.0), startY + 80.0)), module, Aleister::PATTERN_E_OUTPUT + i + 8));
+            addOutput(createOutput<W::JackTransparent>(mm2px(Vec(startX + (i * 8.f), startY + 00.f)), module, Aleister::PATTERN_B_OUTPUT + i + 0));
+            addOutput(createOutput<W::JackTransparent>(mm2px(Vec(startX + (i * 8.f), startY + 08.f)), module, Aleister::PATTERN_B_OUTPUT + i + 8));
+            addOutput(createOutput<W::JackTransparent>(mm2px(Vec(startX + (i * 8.f), startY + 24.f)), module, Aleister::PATTERN_C_OUTPUT + i + 0));
+            addOutput(createOutput<W::JackTransparent>(mm2px(Vec(startX + (i * 8.f), startY + 32.f)), module, Aleister::PATTERN_C_OUTPUT + i + 8));
+            addOutput(createOutput<W::JackTransparent>(mm2px(Vec(startX + (i * 8.f), startY + 48.f)), module, Aleister::PATTERN_D_OUTPUT + i + 0));
+            addOutput(createOutput<W::JackTransparent>(mm2px(Vec(startX + (i * 8.f), startY + 56.f)), module, Aleister::PATTERN_D_OUTPUT + i + 8));
+            addOutput(createOutput<W::JackTransparent>(mm2px(Vec(startX + (i * 8.f), startY + 72.f)), module, Aleister::PATTERN_E_OUTPUT + i + 0));
+            addOutput(createOutput<W::JackTransparent>(mm2px(Vec(startX + (i * 8.f), startY + 80.f)), module, Aleister::PATTERN_E_OUTPUT + i + 8));
         }
         
         // Expander light
-        addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(1.4, 125.2)), module, Aleister::EXPANDER_LIGHT));
+        addChild(createLight<W::StatusLightInput>(mm2px(Vec(1.4, 125.2)), module, Aleister::EXPANDER_LIGHT));
     }
 }; // AleisterWidget
 

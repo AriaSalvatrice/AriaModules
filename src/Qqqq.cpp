@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include "javascript.hpp"
 #include "javascript-libraries.hpp"
 #include "portablesequence.hpp"
+#include "polyexternalscale.hpp"
 
 namespace Qqqq {
 
@@ -72,12 +73,10 @@ struct Qqqq : Module {
 
     bool lastExtInConnected = false;
     bool sceneChanged = false;
-    // FIXME: I am supposed to free it manually but didn't figure out how.
-    // FIXME: IDK how to use a std::array for this - assuming I even can
-    bool leftMessages[2][12];
     bool isExpander = false;
     bool lastIsExpander = false;
     bool sceneTrigSelection = false;
+    bool initialized = false;
     int lcdMode = INIT_MODE;
     int scene = 0;
     int lastScene = 0;
@@ -86,6 +85,7 @@ struct Qqqq : Module {
     int lastTransposeKnobTouchedId = 0;
     int lastTransposeModeTouchedId = 0;
     int lastShTouchedId = 0;
+    size_t initCounter = 0;
     float lcdLastInteraction = 0.f;
     float lastKeyKnob = 0.f;
     float lastScaleKnob = 2.f;
@@ -103,6 +103,8 @@ struct Qqqq : Module {
     dsp::ClockDivider lcdDivider;
     dsp::SchmittTrigger shTrigger[4];
     dsp::SchmittTrigger sceneSelectionTrigger;
+    PolyExternalScale::PESExpanderMessage pesExpanderProducerMessage;
+    PolyExternalScale::PESExpanderMessage pesExpanderConsumerMessage;
     
     Qqqq() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -121,7 +123,7 @@ struct Qqqq : Module {
         configParam(NOTE_PARAM + 11, 0.f, 1.f, 0.f, "B");
         configParam(KEY_PARAM, 0.f, 11.f, 0.f, "Key");
         configParam(SCALE_PARAM, 0.f, (float) Quantizer::NUM_SCALES - 1, 2.f, "Scale");
-        for (int i = 0; i < 4; i++){
+        for (size_t i = 0; i < 4; i++){
             configParam(SCALING_PARAM + i, -100.f, 300.f, 100.f, "Scaling", "%");
             configParam(OFFSET_PARAM + i, -10.f, 10.f, 0.f, "Offset", "V");
             configParam(TRANSPOSE_PARAM + i, -12.f, 12.f, 0.f, "Transpose");
@@ -134,7 +136,7 @@ struct Qqqq : Module {
         configParam(VISUALIZE_PARAM + 2, 0.f, 1.f, 0.f, "Visualize on Piano");
         configParam(VISUALIZE_PARAM + 3, 0.f, 1.f, 0.f, "Visualize on Piano");
         configParam(SCENE_BUTTON_PARAM, 0.f, 1.f, 0.f, "Scene #1");
-        for (int i = 1; i < 16; i++) configParam(SCENE_BUTTON_PARAM + i, 0.f, 1.f, 0.f, "Scene #" + std::to_string(i + 1));
+        for (size_t i = 1; i < 16; i++) configParam(SCENE_BUTTON_PARAM + i, 0.f, 1.f, 0.f, "Scene #" + std::to_string(i + 1));
         processDivider.setDivision(PROCESSDIVIDER);
         lcdDivider.setDivision(LCDDIVIDER);
         lcdMode = INIT_MODE;
@@ -142,12 +144,12 @@ struct Qqqq : Module {
         lcdStatus.lcdText1 = " Q- ...";
         lcdStatus.lcdLayout = Lcd::TEXT1_LAYOUT;
         // Initialize
-        for (int i = 0; i < 16; i++) { for (int j = 0; j < 12; j++) { scale[i][j] = false; }}
+        for (size_t i = 0; i < 16; i++) { for (int j = 0; j < 12; j++) { scale[i][j] = false; }}
         // C Minor in first scene
         scale[0][0] = true; scale[0][2] = true; scale[0][3] = true; scale[0][5] = true; scale[0][7] = true; scale[0][8] = true; scale[0][10] = true;
         // Expander
-        leftExpander.producerMessage = leftMessages[0];
-        leftExpander.consumerMessage = leftMessages[1];
+        leftExpander.producerMessage = &pesExpanderProducerMessage;
+        leftExpander.consumerMessage = &pesExpanderConsumerMessage;
     }
 
 
@@ -158,7 +160,7 @@ struct Qqqq : Module {
         json_object_set_new(rootJ, "scene", json_integer(scene));
 
         json_t* scenesJ = json_array();
-        for (int i = 0; i < 16; i++) {
+        for (size_t i = 0; i < 16; i++) {
             json_t* sceneJ = json_array();
             for (int j = 0; j < 12; j++) {
                 json_array_append_new(sceneJ, json_boolean(scale[i][j]));
@@ -179,7 +181,7 @@ struct Qqqq : Module {
 
         json_t* scenesJ = json_object_get(rootJ, "scenes");
         if (scenesJ){
-            for (int i = 0; i < 16; i++) {
+            for (size_t i = 0; i < 16; i++) {
                 json_t* sceneJ = json_array_get(scenesJ, i);
                 if (sceneJ) {
                     for (int j = 0; j < 12; j++) {
@@ -194,7 +196,7 @@ struct Qqqq : Module {
     }
 
     void onReset() override {
-        for (int i = 1; i < 16; i++) {
+        for (size_t i = 1; i < 16; i++) {
             for (int j = 0; j < 12; j++) {
                 scale[i][j] = false;
             }
@@ -209,10 +211,12 @@ struct Qqqq : Module {
         lcdLastInteraction = 0.f;
         lcdMode = INIT_MODE;
         lcdStatus.lcdDirty = true;
+        initialized = false;
+        initCounter = 0;
     }
 
     void onRandomize() override {
-        for (int i = 0; i < 16; i++) {
+        for (size_t i = 0; i < 16; i++) {
             for (int j = 0; j < 12; j++) {
                 // Should produce about 7 notes per scale
                 scale[i][j] = (random::uniform() > 0.42f) ? true : false;
@@ -238,7 +242,7 @@ struct Qqqq : Module {
             lcdMode = INIT_MODE;
             lcdStatus.lcdDirty = true;
         } else {
-            for (int i = 0; i < 16; i++) {
+            for (size_t i = 0; i < 16; i++) {
                 for (int j = 0; j < 12; j++) {
                     scale[i][j] = false;
                 }
@@ -259,7 +263,7 @@ struct Qqqq : Module {
             lcdLastInteraction = 0.f;
             lcdMode = INIT_MODE;
             lcdStatus.lcdDirty = true;
-            for (int i = 1; i < 16; i++) {
+            for (size_t i = 1; i < 16; i++) {
                 params[SCENE_BUTTON_PARAM + i].setValue(0.f);
             }
             scene = 0;
@@ -270,7 +274,7 @@ struct Qqqq : Module {
 
     // Returns the last non-empty scene
     int getLastScene() {
-        for (int i = 15; i >=0; i--) {
+       for (int i = 15; i >=0; i--) {
             for (int j = 0; j < 12; j++) {
                 if (scale[i][j] == true) return i;
             }
@@ -309,7 +313,7 @@ struct Qqqq : Module {
     void copyPortableSequence(){
         PortableSequence::Sequence sequence;
         sequence.length = (float) getLastScene() + 1;
-        for (int i = 0; i <= getLastScene(); i++) {
+       for (int i = 0; i <= getLastScene(); i++) {
             for (int j = 0; j < 12; j++) {
                 if (scale[i][j] == true) {
                     PortableSequence::Note note;
@@ -336,14 +340,14 @@ struct Qqqq : Module {
         if (sequence.notes.size() < 1) return;
 
         // Reset scales
-        for (int i = 0; i < 16; i++) {
+        for (size_t i = 0; i < 16; i++) {
             for (int j = 0; j < 12; j++) {
                 scale[i][j] = false;
             }
         }
 
         int position = 0;
-        for (int i = 0; i < 16; i++) {
+        for (size_t i = 0; i < 16; i++) {
             float start = sequence.notes[position].start;
             int remaining = sequence.notes.size() - position;
             if (remaining > 0) {
@@ -409,8 +413,8 @@ struct Qqqq : Module {
         ||  (leftExpander.module and leftExpander.module->model == modelQuale)) {
             // We are an expander
             lights[EXPANDER_IN_LIGHT].setBrightness(1.f);
-            bool *message = (bool*) leftExpander.consumerMessage;
-            for (int i = 0; i < 12; i++) receivedExpanderScale[i] = message[i];
+            PolyExternalScale::PESExpanderMessage *message = (PolyExternalScale::PESExpanderMessage*) leftExpander.consumerMessage;
+            for (size_t i = 0; i < 12; i++) receivedExpanderScale[i] = message->scale[i];
             isExpander = true;
         } else {
             // We are not an expander
@@ -424,8 +428,8 @@ struct Qqqq : Module {
         ||  (rightExpander.module and rightExpander.module->model == modelQuale)) {
             // We have an expander
             lights[EXPANDER_OUT_LIGHT].setBrightness(1.f);
-            bool *message = (bool*) rightExpander.module->leftExpander.producerMessage;			
-            for (int i = 0; i < 12; i++) message[i] = scale[scene][i];
+            PolyExternalScale::PESExpanderMessage *message = (PolyExternalScale::PESExpanderMessage*) rightExpander.module->leftExpander.producerMessage;			
+            for (size_t i = 0; i < 12; i++) message->scale[i] = scale[scene][i];
             rightExpander.module->leftExpander.messageFlipRequested = true;
         } else {
             // We have no expander
@@ -453,7 +457,7 @@ struct Qqqq : Module {
 
         // Button selection
         if (! inputs[SCENE_INPUT].isConnected()) {
-            for (int i = 0; i < 16; i++) {
+           for (int i = 0; i < 16; i++) {
                 if ( params[SCENE_BUTTON_PARAM + i].getValue() == 1.f && i != lastScene ) {
                     scene = i;
                     sceneChanged = true;
@@ -466,7 +470,7 @@ struct Qqqq : Module {
         }
 
         // You shouldn't be able to turn on multiple scenes at once, or turn off the current one
-        for (int i = 0; i < 16; i++) params[SCENE_BUTTON_PARAM + i].setValue( (i == scene) ? 1.f : 0.f );
+       for (int i = 0; i < 16; i++) params[SCENE_BUTTON_PARAM + i].setValue( (i == scene) ? 1.f : 0.f );
 
         lastScene = scene;
     }
@@ -474,7 +478,7 @@ struct Qqqq : Module {
 
     // Update the piano display to match the state of the internal scale if necessary
     void scaleToPiano() {
-        for (int i = 0; i < 12; i++) {
+        for (size_t i = 0; i < 12; i++) {
             params[NOTE_PARAM + i].setValue((scale[scene][i]) ? 1.f : 0.f);
         }
     }
@@ -482,12 +486,24 @@ struct Qqqq : Module {
 
     // Update the internal scale to match the state of the piano display
     void pianoToScale() {
-        for (int i = 0; i < 12; i++) scale[scene][i] = (params[NOTE_PARAM + i].getValue() == 1.f)  ? true : false;
+        for (size_t i = 0; i < 12; i++) scale[scene][i] = (params[NOTE_PARAM + i].getValue() == 1.f)  ? true : false;
     }
 
 
     // The last control touched always has the last word.
     void updateScale() {
+
+        // Initialize
+        if (!initialized) {
+            lastKeyKnob = params[KEY_PARAM].getValue();
+            lastScaleKnob = params[SCALE_PARAM].getValue();
+            for (size_t i = 0; i < 12; i++) lastExternalScale[i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.1f) ? true : false;
+
+            initCounter++;
+            // We need a few iterations or else other modules might not be initialized
+            if (initCounter > 32) initialized = true;
+        }
+
         // Scene: has it changed?
         if (sceneChanged) {
             scaleToPiano();
@@ -495,7 +511,7 @@ struct Qqqq : Module {
         }
 
         // Expander: has it just been connected, or sent something new?
-        if (isExpander) {
+        if (isExpander && initialized) {
             if ((receivedExpanderScale != lastReceivedExpanderScale) || !lastIsExpander) {
                 scale[scene] = receivedExpanderScale;
                 scaleToPiano();
@@ -505,8 +521,8 @@ struct Qqqq : Module {
         lastReceivedExpanderScale = receivedExpanderScale;
 
         // External scale: was it just connected?
-        if (!lastExtInConnected && inputs[EXT_SCALE_INPUT].isConnected()) {
-            for (int i = 0; i < 12; i++){
+        if (!lastExtInConnected && inputs[EXT_SCALE_INPUT].isConnected() && initialized) {
+            for (size_t i = 0; i < 12; i++){
                 scale[scene][i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.1f) ? true : false;
             }
             scaleToPiano();
@@ -514,8 +530,8 @@ struct Qqqq : Module {
 
         // External scale: has it changed?
         std::array<bool, 12> currentExternalScale;
-        if (inputs[EXT_SCALE_INPUT].isConnected()) {
-            for (int i = 0; i < 12; i++) currentExternalScale[i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.1f) ? true : false;
+        if (inputs[EXT_SCALE_INPUT].isConnected() && initialized) {
+            for (size_t i = 0; i < 12; i++) currentExternalScale[i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.1f) ? true : false;
             if (currentExternalScale != lastExternalScale) {
                 lastExternalScale = currentExternalScale;
                 scale[scene] = currentExternalScale;
@@ -539,34 +555,23 @@ struct Qqqq : Module {
 
     void updateExternalOutput() {
         if (outputs[EXT_SCALE_OUTPUT].isConnected()){
-            for (int i = 0; i < 12; i++) {
-                if (scale[scene][i]) {
-                    if ((int) params[KEY_PARAM].getValue() == i) {
-                        outputs[EXT_SCALE_OUTPUT].setVoltage(10.f, i);
-                    } else {
-                        outputs[EXT_SCALE_OUTPUT].setVoltage(8.f, i);
-                    }
-                } else {
-                    outputs[EXT_SCALE_OUTPUT].setVoltage(0.f, i);
-                }
-            } 
-            // outputs[EXT_SCALE_OUTPUT].setVoltage( (scale[scene][i]) ? 8.f : 0.f, i);
+            for (int i = 0; i < 12; i++) outputs[EXT_SCALE_OUTPUT].setVoltage( (scale[scene][i]) ? 8.f : 0.f, i);
             outputs[EXT_SCALE_OUTPUT].setChannels(12);
         }
     }
 
 
     void cleanLitKeys() {
-        for (int i =  0; i < 12; i++) litKeys[i] = false; 
+        for (size_t i =  0; i < 12; i++) litKeys[i] = false; 
     }
 
 
     // When there is no CV input, use the column to the left instead.
     void processInputs() {
         inputChannels[0] = inputs[CV_INPUT + 0].getChannels();
-        for (int i = 0; i < inputChannels[0]; i++) inputVoltage[0][i] = inputs[CV_INPUT + 0].getVoltage(i);
+       for (int i = 0; i < inputChannels[0]; i++) inputVoltage[0][i] = inputs[CV_INPUT + 0].getVoltage(i);
 
-        for (int i = 1; i < 4; i++) {
+        for (size_t i = 1; i < 4; i++) {
             inputChannels[i] = inputs[CV_INPUT + i].getChannels();
             if (inputChannels[i] > 0) {
                 for (int j = 0; j < inputChannels[i]; j++) inputVoltage[i][j] = inputs[CV_INPUT + i].getVoltage(j);
@@ -603,7 +608,7 @@ struct Qqqq : Module {
         if (sh) shChannels[col] = channels;
 
         // Iterate channels
-        for (int i = 0; i < channels; i++) {
+       for (int i = 0; i < channels; i++) {
 
             // Only process if S&H this sample
             if (sh) {
@@ -765,11 +770,11 @@ struct Qqqq : Module {
 namespace QqqqWidgets {
 
 // The LCD knobs
-struct LcdKnob : AriaKnob820 {
+struct LcdKnob : W::Knob {
     void onDragMove(const event::DragMove& e) override {
          dynamic_cast<Qqqq*>(paramQuantity->module)->lcdLastInteraction = 0.f;
          dynamic_cast<Qqqq*>(paramQuantity->module)->lcdStatus.lcdDirty = true;
-        AriaKnob820::onDragMove(e);
+        W::Knob::onDragMove(e);
     }
 };
 struct ScaleKnob : LcdKnob {
@@ -808,34 +813,33 @@ struct TransposeKnob : LcdKnob {
     }
 };
 // The LCD buttons. They're not sending ongoing events so no point setting Lcd dirty from here.
-struct TransposeButton : AriaPushButton500 {
+struct TransposeButton : W::SmallButton {
     void onDragStart(const event::DragStart& e) override {
         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdLastInteraction = 0.f;
         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdMode = TRANSPOSE_TYPE_MODE;
         dynamic_cast<Qqqq*>(paramQuantity->module)->lastTransposeModeTouchedId = paramQuantity->paramId;
-        AriaPushButton500::onDragStart(e);
+        W::SmallButton::onDragStart(e);
     }
 };
-struct ShButton : AriaPushButton500 {
+struct ShButton : W::SmallButton {
     void onDragStart(const event::DragStart& e) override {
         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdLastInteraction = 0.f;
         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdMode = SH_MODE;
         dynamic_cast<Qqqq*>(paramQuantity->module)->lastShTouchedId = paramQuantity->paramId;
-        AriaPushButton500::onDragStart(e);
+        W::SmallButton::onDragStart(e);
     }
 };
-struct VisualizeButton : AriaPushButton820Pink {
+struct VisualizeButton : W::ButtonPink {
     void onDragStart(const event::DragStart& e) override {
         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdLastInteraction = 0.f;
         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdMode = VISUALIZE_MODE;
-        AriaPushButton820Pink::onDragStart(e);
+        W::ButtonPink::onDragStart(e);
     }
 };
 
-
 // The piano display
 // https://community.vcvrack.com/t/whats-the-best-way-to-implement-a-pushbutton-with-three-visual-states-but-only-two-user-controllable-states/10351/8?u=aria_salvatrice
-struct PianoKey : SvgSwitchUnshadowed {
+struct PianoKey : W::LitSvgSwitchUnshadowed {
     bool lastPianoDisplay = false;
     bool currentPianoDisplay = false;
     int note = 0;
@@ -844,18 +848,22 @@ struct PianoKey : SvgSwitchUnshadowed {
         if (paramQuantity){
             currentPianoDisplay = dynamic_cast<Qqqq*>(paramQuantity->module)->litKeys[note];
             if (currentPianoDisplay == true && currentPianoDisplay != lastPianoDisplay) {
-                sw->setSvg(frames[2]);
+                lsw->setSvg(frames[2]);
                 fb->dirty = true;
             }
             if (currentPianoDisplay == false && currentPianoDisplay != lastPianoDisplay) {
                 int index = (int) std::round(paramQuantity->getValue() - paramQuantity->getMinValue());
                 index = math::clamp(index, 0, (int) frames.size() - 1);
-                sw->setSvg(frames[index]);
+                if (index > 0) {
+                    lsw->setSvg(frames[index]);
+                } else {
+                    lsw->hide();
+                }
                 fb->dirty = true; 
             }
             lastPianoDisplay = currentPianoDisplay;
         }
-        SvgSwitchUnshadowed::step();
+        W::LitSvgSwitchUnshadowed::step();
     }
 };
 
@@ -961,12 +969,12 @@ struct PastePortableSequenceItem : MenuItem {
     }
 };
 
-struct PushButtonKeyboard : SvgSwitchUnshadowed {
+struct PushButtonKeyboard : W::SvgSwitchUnshadowed {
     PushButtonKeyboard() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/button-keyboard.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/button-keyboard-pressed.svg")));
         momentary = true;
-        SvgSwitchUnshadowed();
+        W::SvgSwitchUnshadowed();
     }
 
     void onButton(const event::Button& e) override {
@@ -1015,7 +1023,7 @@ struct PasteScenePortableSequenceItem : MenuItem {
     }
 };
 
-struct SceneButton : SvgSwitchUnshadowed {
+struct SceneButton : W::LitSvgSwitchUnshadowed {
     void onButton(const event::Button& e) override {
         if (e.button == GLFW_MOUSE_BUTTON_RIGHT) {
             ui::Menu* menu = createMenu();
@@ -1034,7 +1042,7 @@ struct SceneButton : SvgSwitchUnshadowed {
 
             e.consume(this);
         } else {
-            SvgSwitchUnshadowed::onButton(e);
+            W::LitSvgSwitchUnshadowed::onButton(e);
         }
     }
 };
@@ -1147,13 +1155,13 @@ struct SceneButton16 : SceneButton {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-struct QqqqWidget : ModuleWidget {
+struct QqqqWidget : W::ModuleWidget {
 
     void drawScrews() {
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
     }
 
     void drawPianoKeys(float xOffset, float yOffset, Qqqq* module) {
@@ -1174,7 +1182,7 @@ struct QqqqWidget : ModuleWidget {
     }
 
     void drawQuantizerColumn(float xOffset, float yOffset, Qqqq* module, int col) {
-        addInput(createInput<AriaJackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 0.f)), module, Qqqq::CV_INPUT + col));
+        addStaticInput(mm2px(Vec(xOffset + 0.f, yOffset + 0.f)), module, Qqqq::CV_INPUT + col);
         addParam(createParam<QqqqWidgets::ScalingKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 10.f)), module, Qqqq::SCALING_PARAM + col));
         addParam(createParam<QqqqWidgets::OffsetKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 20.f)), module, Qqqq::OFFSET_PARAM + col));
         addParam(createParam<QqqqWidgets::TransposeKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 30.f)), module, Qqqq::TRANSPOSE_PARAM + col));
@@ -1182,9 +1190,9 @@ struct QqqqWidget : ModuleWidget {
         addParam(createParam<QqqqWidgets::TransposeButton>(mm2px(Vec(xOffset + 3.5f, yOffset + 40.f)), module, Qqqq::TRANSPOSE_MODE_PARAM + col));
         addParam(createParam<QqqqWidgets::ShButton>(mm2px(Vec(xOffset + -0.5f, yOffset + 42.5f)), module, Qqqq::SH_MODE_PARAM + col));
 
-        addInput(createInput<AriaJackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 50.f)), module, Qqqq::SH_INPUT + col));
+        addStaticInput(mm2px(Vec(xOffset + 0.f, yOffset + 50.f)), module, Qqqq::SH_INPUT + col);
         addParam(createParam<QqqqWidgets::VisualizeButton>(mm2px(Vec(xOffset + 0.f, yOffset + 60.f)), module, Qqqq::VISUALIZE_PARAM + col));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 0.f, yOffset + 70.f)), module, Qqqq::CV_OUTPUT + col));
+        addStaticOutput(mm2px(Vec(xOffset + 0.f, yOffset + 70.f)), module, Qqqq::CV_OUTPUT + col);
     }
 
     void drawSceneSlots(float xOffset, float yOffset, Qqqq* module) {
@@ -1211,7 +1219,7 @@ struct QqqqWidget : ModuleWidget {
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Qqqq.svg")));
         
         // Signature
-        addChild(createWidget<AriaSignature>(mm2px(Vec(65.f, 114.5f))));
+        addChild(createWidget<W::Signature>(mm2px(Vec(65.f, 114.5f))));
 
         drawScrews();
         drawPianoKeys(4.7f, 102.8f, module);
@@ -1225,12 +1233,12 @@ struct QqqqWidget : ModuleWidget {
         // Scale, Key, External
         addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(25.f, 29.f)), module, Qqqq::KEY_PARAM));
         addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(35.f, 29.f)), module, Qqqq::SCALE_PARAM));
-        addInput(createInput<AriaJackIn>(mm2px(Vec(45.f, 29.f)), module, Qqqq::EXT_SCALE_INPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(55.f, 29.f)), module, Qqqq::EXT_SCALE_OUTPUT));
+        addStaticInput(mm2px(Vec(45.f, 29.f)), module, Qqqq::EXT_SCALE_INPUT);
+        addStaticOutput(mm2px(Vec(55.f, 29.f)), module, Qqqq::EXT_SCALE_OUTPUT);
 
         // Scene programmer. Offset by 0.1mm because it looks better that way
         drawSceneSlots(67.6f, 42.5f, module);
-        addInput(createInput<AriaJackIn>(mm2px(Vec(84.f, 53.f)), module, Qqqq::SCENE_INPUT));
+        addStaticInput(mm2px(Vec(84.f, 53.f)), module, Qqqq::SCENE_INPUT);
 
         // Keyboard inputs
         addParam(createParam<QqqqWidgets::PushButtonKeyboard>(mm2px(Vec(83.f, 66.5f)), module, Qqqq::KEYBOARD_INPUT_PARAM));
@@ -1242,8 +1250,8 @@ struct QqqqWidget : ModuleWidget {
         drawQuantizerColumn(55.f, 43.f, module, 3);
 
         // Expander lights (right is 3.5mm from edge)
-        addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(1.4, 125.2)), module, Qqqq::EXPANDER_IN_LIGHT));
-        addChild(createLight<SmallLight<OutputLight>>(mm2px(Vec(98.1, 125.2)), module, Qqqq::EXPANDER_OUT_LIGHT));
+        addChild(createLight<W::StatusLightInput>(mm2px(Vec(1.4, 125.2)), module, Qqqq::EXPANDER_IN_LIGHT));
+        addChild(createLight<W::StatusLightOutput>(mm2px(Vec(98.1, 125.2)), module, Qqqq::EXPANDER_OUT_LIGHT));
     }
 
 
@@ -1292,13 +1300,13 @@ struct QqqqWidget : ModuleWidget {
 
 
 
-struct QuackWidget : ModuleWidget {
+struct QuackWidget : W::ModuleWidget {
 
     void drawScrews() {
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
     }
 
     void drawPianoKeys(float xOffset, float yOffset, Qqqq* module) {
@@ -1319,7 +1327,7 @@ struct QuackWidget : ModuleWidget {
     }
 
     void drawQuantizerColumn(float xOffset, float yOffset, Qqqq* module, int col) {
-        addInput(createInput<AriaJackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 0.f)), module, Qqqq::CV_INPUT + col));
+        addStaticInput(mm2px(Vec(xOffset + 0.f, yOffset + 0.f)), module, Qqqq::CV_INPUT + col);
         addParam(createParam<QqqqWidgets::ScalingKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 10.f)), module, Qqqq::SCALING_PARAM + col));
         addParam(createParam<QqqqWidgets::OffsetKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 20.f)), module, Qqqq::OFFSET_PARAM + col));
         addParam(createParam<QqqqWidgets::TransposeKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 30.f)), module, Qqqq::TRANSPOSE_PARAM + col));
@@ -1327,8 +1335,8 @@ struct QuackWidget : ModuleWidget {
         addParam(createParam<QqqqWidgets::TransposeButton>(mm2px(Vec(xOffset + 3.5f, yOffset + 40.f)), module, Qqqq::TRANSPOSE_MODE_PARAM + col));
         addParam(createParam<QqqqWidgets::ShButton>(mm2px(Vec(xOffset + -0.5f, yOffset + 42.5f)), module, Qqqq::SH_MODE_PARAM + col));
 
-        addInput(createInput<AriaJackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 50.f)), module, Qqqq::SH_INPUT + col));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 0.f, yOffset + 60.f)), module, Qqqq::CV_OUTPUT + col));
+        addStaticInput(mm2px(Vec(xOffset + 0.f, yOffset + 50.f)), module, Qqqq::SH_INPUT + col);
+        addStaticOutput(mm2px(Vec(xOffset + 0.f, yOffset + 60.f)), module, Qqqq::CV_OUTPUT + col);
     }
 
     QuackWidget(Qqqq* module) {
@@ -1336,7 +1344,7 @@ struct QuackWidget : ModuleWidget {
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Quack.svg")));
         
         // Signature
-        addChild(createWidget<AriaSignature>(mm2px(Vec(20.0f, 114.5f))));
+        addChild(createWidget<W::Signature>(mm2px(Vec(20.0f, 114.5f))));
 
         drawScrews();
         drawPianoKeys(1.7f, 102.8f, module);
@@ -1344,15 +1352,15 @@ struct QuackWidget : ModuleWidget {
         // Scale, Key, External
         addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(18.1f, 18.f)), module, Qqqq::KEY_PARAM));
         addParam(createParam<QqqqWidgets::ScaleKnob>(mm2px(Vec(26.4f, 18.f)), module, Qqqq::SCALE_PARAM));
-        addInput(createInput<AriaJackIn>(mm2px(Vec(18.1f, 31.f)), module, Qqqq::EXT_SCALE_INPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(26.4f, 31.f)), module, Qqqq::EXT_SCALE_OUTPUT));
+        addStaticInput(mm2px(Vec(18.1f, 31.f)), module, Qqqq::EXT_SCALE_INPUT);
+        addStaticOutput(mm2px(Vec(26.4f, 31.f)), module, Qqqq::EXT_SCALE_OUTPUT);
 
         // The quantizer column
         drawQuantizerColumn(22.f, 43.f, module, 0);
 
         // Expander lights (right is 3.5mm from edge)
-        addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(1.4, 125.2)), module, Qqqq::EXPANDER_IN_LIGHT));
-        addChild(createLight<SmallLight<OutputLight>>(mm2px(Vec(32.06, 125.2)), module, Qqqq::EXPANDER_OUT_LIGHT));
+        addChild(createLight<W::StatusLightInput>(mm2px(Vec(1.4, 125.2)), module, Qqqq::EXPANDER_IN_LIGHT));
+        addChild(createLight<W::StatusLightOutput>(mm2px(Vec(32.06, 125.2)), module, Qqqq::EXPANDER_OUT_LIGHT));
     }
 };
 
@@ -1366,18 +1374,18 @@ struct QuackWidget : ModuleWidget {
 
 
 
-struct QWidget : ModuleWidget {
+struct QWidget : W::ModuleWidget {
 
     void drawScrews() {
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
     }
 
     // No visualize button in this version
     void drawQuantizerColumn(float xOffset, float yOffset, Qqqq* module, int col) {
-        addInput(createInput<AriaJackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 0.f)), module, Qqqq::CV_INPUT + col));
+        addStaticInput(mm2px(Vec(xOffset + 0.f, yOffset + 0.f)), module, Qqqq::CV_INPUT + col);
         addParam(createParam<QqqqWidgets::ScalingKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 10.f)), module, Qqqq::SCALING_PARAM + col));
         addParam(createParam<QqqqWidgets::OffsetKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 20.f)), module, Qqqq::OFFSET_PARAM + col));
         addParam(createParam<QqqqWidgets::TransposeKnob>(mm2px(Vec(xOffset + 0.f, yOffset + 30.f)), module, Qqqq::TRANSPOSE_PARAM + col));
@@ -1385,8 +1393,8 @@ struct QWidget : ModuleWidget {
         addParam(createParam<QqqqWidgets::TransposeButton>(mm2px(Vec(xOffset + 3.5f, yOffset + 40.f)), module, Qqqq::TRANSPOSE_MODE_PARAM + col));
         addParam(createParam<QqqqWidgets::ShButton>(mm2px(Vec(xOffset + -0.5f, yOffset + 42.5f)), module, Qqqq::SH_MODE_PARAM + col));
 
-        addInput(createInput<AriaJackIn>(mm2px(Vec(xOffset + 0.f, yOffset + 50.f)), module, Qqqq::SH_INPUT + col));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(xOffset + 0.f, yOffset + 60.f)), module, Qqqq::CV_OUTPUT + col));
+        addStaticInput(mm2px(Vec(xOffset + 0.f, yOffset + 50.f)), module, Qqqq::SH_INPUT + col);
+        addStaticOutput(mm2px(Vec(xOffset + 0.f, yOffset + 60.f)), module, Qqqq::CV_OUTPUT + col);
     }
 
     QWidget(Qqqq* module) {
@@ -1394,19 +1402,19 @@ struct QWidget : ModuleWidget {
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Q.svg")));
         
         // Signature
-        addChild(createWidget<AriaSignature>(mm2px(Vec(1.0f, 114.5f))));
+        addChild(createWidget<W::Signature>(mm2px(Vec(1.0f, 114.5f))));
 
         drawScrews();
 
         // External
-        addInput(createInput<AriaJackIn>(mm2px(Vec(3.52f, 29.f)), module, Qqqq::EXT_SCALE_INPUT));
+        addStaticInput(mm2px(Vec(3.52f, 29.f)), module, Qqqq::EXT_SCALE_INPUT);
 
         // Quantizer column
         drawQuantizerColumn(3.52f, 43.f, module, 0);
 
         // Expander lights (right is 3.5mm from edge)
-        addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(1.4, 125.2)), module, Qqqq::EXPANDER_IN_LIGHT));
-        addChild(createLight<SmallLight<OutputLight>>(mm2px(Vec(11.74, 125.2)), module, Qqqq::EXPANDER_OUT_LIGHT));
+        addChild(createLight<W::StatusLightInput>(mm2px(Vec(1.4, 125.2)), module, Qqqq::EXPANDER_IN_LIGHT));
+        addChild(createLight<W::StatusLightOutput>(mm2px(Vec(11.74, 125.2)), module, Qqqq::EXPANDER_OUT_LIGHT));
     }
 };
 

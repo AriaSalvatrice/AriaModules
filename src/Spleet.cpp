@@ -3,6 +3,12 @@ This program is free software: you can redistribute it and/or modify it under th
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
+
+
+// Warning - this module was created with very little C++ experience, and features were 
+// added to it later without regard for code quality. This is maintained exploratory code, not good design.
+
+
 #include "plugin.hpp"
 
 namespace Spleet {
@@ -37,22 +43,23 @@ struct Spleet : Module {
     }
 
     // Split without sorting, faster
-    void split(const ProcessArgs& args) {
-        for (int i = 0; i < 4; i++) // First bank
+    void split() {
+        for (size_t i = 0; i < 4; i++) // First bank
             outputs[SPLIT_OUTPUT + i].setVoltage(inputs[POLY_INPUT + 0].getVoltage(i));
         if (chainMode) { // Second bank depends on chain mode
-            for (int i = 4; i < 8; i++) 
+            for (size_t i = 4; i < 8; i++) 
                 outputs[SPLIT_OUTPUT + i].setVoltage(inputs[POLY_INPUT + 0].getVoltage(i));
         } else {
-            for (int i = 4; i < 8; i++)
+            for (size_t i = 4; i < 8; i++)
                 outputs[SPLIT_OUTPUT + i].setVoltage(inputs[POLY_INPUT + 1].getVoltage(i - 4));
         }
     }
     
+
     // Split with sorting
-    void splitSort(const ProcessArgs& args) {
+    void splitSort() {
         std::array<float, 8> splitVoltages;	// First bank, or both if chained
-        int connected = 0; // First bank, or both if chained
+        size_t connected = 0; // First bank, or both if chained
         std::array<float, 4> splitVoltagesSecond;	
         int connectedSecond = 0;
         
@@ -62,7 +69,7 @@ struct Spleet : Module {
         connectedSecond = inputs[POLY_INPUT + 1].getChannels();
                 
         // Fill arrays
-        for (int i = 0; i < 8; i++)
+        for (size_t i = 0; i < 8; i++)
             splitVoltages[i] = (i < connected) ? (inputs[POLY_INPUT + 0].getVoltage(i)) : 0.f;
         for (int i = 0; i < 4; i++)
             splitVoltagesSecond[i] = (i < connectedSecond) ? (inputs[POLY_INPUT + 1].getVoltage(i)) : 0.f;
@@ -70,13 +77,13 @@ struct Spleet : Module {
         // Sort and output
         std::sort(splitVoltages.begin(), splitVoltages.begin() + connected);
         std::sort(splitVoltagesSecond.begin(), splitVoltagesSecond.begin() + connectedSecond);
-        for (int i = 0; i < 4; i++)
+        for (size_t i = 0; i < 4; i++)
             outputs[SPLIT_OUTPUT + i].setVoltage(splitVoltages[i]);	
-        for (int i = 0; i < 4; i++)
+        for (size_t i = 0; i < 4; i++)
             outputs[SPLIT_OUTPUT + i + 4].setVoltage( (chainMode) ? (splitVoltages[i + 4]) : (splitVoltagesSecond[i]) );
     }
     
-    void updateLeds(const ProcessArgs& args) {
+    void updateLeds() {
         lights[CHAIN_LIGHT].setBrightness( (chainMode) ? 1.f : 0.f);
         
         // Split outputs
@@ -93,57 +100,45 @@ struct Spleet : Module {
     
     void process(const ProcessArgs& args) override {
         chainMode = (inputs[POLY_INPUT + 1].isConnected()) ? false : true;
-        (params[SORT_PARAM].getValue()) ? splitSort(args) : split(args);
+        (params[SORT_PARAM].getValue()) ? splitSort() : split();
         if (ledDivider.process())
-            updateLeds(args);
+            updateLeds();
     }	
 };
 
 
-struct SpleetWidget : ModuleWidget {
+struct SpleetWidget : W::ModuleWidget {
     SpleetWidget(Spleet* module) {
         setModule(module);
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Spleet.svg")));
         
         // Signature 
-        addChild(createWidget<AriaSignature>(mm2px(Vec(1.0, 114.538))));
+        addChild(createWidget<W::Signature>(mm2px(Vec(1.f, 114.5f))));
 
         // Screws
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         
         // Jacks, top to bottom.
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 20.0)), module, Spleet::POLY_INPUT + 0));
-        
-        addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 30.0)), module, Spleet::SPLIT_LIGHT + 0));
-        addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 38.0)), module, Spleet::SPLIT_LIGHT + 1));
-        addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 46.0)), module, Spleet::SPLIT_LIGHT + 2));
-        addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 54.0)), module, Spleet::SPLIT_LIGHT + 3));
-        
-        addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 30.0)), module, Spleet::SPLIT_OUTPUT + 0));
-        addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 38.0)), module, Spleet::SPLIT_OUTPUT + 1));
-        addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 46.0)), module, Spleet::SPLIT_OUTPUT + 2));
-        addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 54.0)), module, Spleet::SPLIT_OUTPUT + 3));
-        
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 67.0)), module, Spleet::POLY_INPUT + 1));
-        
-        addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 77.0)), module, Spleet::SPLIT_LIGHT + 4));
-        addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 85.0)), module, Spleet::SPLIT_LIGHT + 5));
-        addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 93.0)), module, Spleet::SPLIT_LIGHT + 6));
-        addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(7.62, 101.0)), module, Spleet::SPLIT_LIGHT + 7));
-        
-        addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 77.0)), module, Spleet::SPLIT_OUTPUT + 4));
-        addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 85.0)), module, Spleet::SPLIT_OUTPUT + 5));
-        addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 93.0)), module, Spleet::SPLIT_OUTPUT + 6));
-        addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(7.62, 101.0)), module, Spleet::SPLIT_OUTPUT + 7));
-        
+        addStaticInput(mm2px(Vec(3.52f, 15.9f)), module, Spleet::POLY_INPUT + 0);       
+        addDynamicOutput(mm2px(Vec(3.52f, 25.9f)), module, Spleet::SPLIT_OUTPUT + 0, Spleet::SPLIT_LIGHT + 0);
+        addDynamicOutput(mm2px(Vec(3.52f, 33.9f)), module, Spleet::SPLIT_OUTPUT + 1, Spleet::SPLIT_LIGHT + 1);
+        addDynamicOutput(mm2px(Vec(3.52f, 41.9f)), module, Spleet::SPLIT_OUTPUT + 2, Spleet::SPLIT_LIGHT + 2);
+        addDynamicOutput(mm2px(Vec(3.52f, 49.9f)), module, Spleet::SPLIT_OUTPUT + 3, Spleet::SPLIT_LIGHT + 3);
+
+        addStaticInput(mm2px(Vec(3.52f, 62.9f)), module, Spleet::POLY_INPUT + 1);
+        addDynamicOutput(mm2px(Vec(3.52f, 72.9f)), module, Spleet::SPLIT_OUTPUT + 4, Spleet::SPLIT_LIGHT + 4);
+        addDynamicOutput(mm2px(Vec(3.52f, 80.9f)), module, Spleet::SPLIT_OUTPUT + 5, Spleet::SPLIT_LIGHT + 5);
+        addDynamicOutput(mm2px(Vec(3.52f, 88.9f)), module, Spleet::SPLIT_OUTPUT + 6, Spleet::SPLIT_LIGHT + 6);
+        addDynamicOutput(mm2px(Vec(3.52f, 96.9f)), module, Spleet::SPLIT_OUTPUT + 7, Spleet::SPLIT_LIGHT + 7);
+                
         // Pushbutton
-        addParam(createParam<AriaPushButton500>(mm2px(Vec(1.0, 107)), module, Spleet::SORT_PARAM));
+        addParam(createParam<W::SmallButton>(mm2px(Vec(1.f, 107.f)), module, Spleet::SORT_PARAM));
         
         // Chain light
-        addChild(createLightCentered<SmallLight<InputLight>>(mm2px(Vec(13.6, 63.6)), module, Spleet::CHAIN_LIGHT));
+        addChild(createLight<W::StatusLightInput>(mm2px(Vec(12.6f, 62.6f)), module, Spleet::CHAIN_LIGHT));
 
     }
 };

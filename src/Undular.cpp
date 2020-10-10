@@ -111,7 +111,7 @@ struct Undular : Module {
     }
     
     // Selects the most useful min & max positions to scroll to. Why do these values work? I DUNNO.
-    void updateScrollOffsets(const ProcessArgs& args) {	
+    void updateScrollOffsets() {	
         math::Rect rackScrollBox = APP->scene->rackScroll->box;	
         math::Rect boundingBox = APP->scene->rackScroll->container->getChildrenBoundingBox();
         boundingBox = boundingBox.grow(rackScrollBox.size.mult( - 0.6666)); // This sets left and top offset correctly
@@ -123,7 +123,7 @@ struct Undular : Module {
         scrollMaxY = boundingBox.pos.y + boundingBox.size.y - rackScrollBox.size.y + BND_SCROLLBAR_HEIGHT + padding;
     }
     
-    void processJumpInputs(const ProcessArgs& args) {
+    void processJumpInputs() {
         position = APP->scene->rackScroll->offset;
 
         jumpUp    = (uTrigger.process(inputs[U_INPUT].getVoltageSum())) ? true : false; 
@@ -168,7 +168,7 @@ struct Undular : Module {
     }
     
     // X, Y, Zoom
-    void processXYZInputs(const ProcessArgs& args) {
+    void processXYZInputs() {
         position = APP->scene->rackScroll->offset;
         bool positionChanged = false;
         bool zoomChanged = false;
@@ -210,7 +210,7 @@ struct Undular : Module {
         if (zoomChanged and initialized) settings::zoom = newZoom;
     }
 
-    void processCableInputs(const ProcessArgs& args) {		
+    void processCableInputs() {		
         if (inputs[OPACITY_INPUT].isConnected() and inputs[OPACITY_INPUT].getVoltage() >= 0.f and opacityActivated) {
             if (inputs[OPACITY_INPUT].getVoltage() != lastOpacityInput) {
                 settings::cableOpacity = math::clamp(inputs[OPACITY_INPUT].getVoltage() / 10.0f, 0.0f, 1.0f);
@@ -227,7 +227,7 @@ struct Undular : Module {
         tensionActivated = (inputs[TENSION_INPUT].isConnected()) ? true : false;
     }
     
-    void processLocks(const ProcessArgs& args) {
+    void processLocks() {
         // Store values first loop when enabled
         if ( !previousLockX and params[X_LOCK_PARAM].getValue() == 1.f ) lockX = position.x;
         if ( !previousLockY and params[Y_LOCK_PARAM].getValue() == 1.f ) lockY = position.y;
@@ -264,11 +264,11 @@ struct Undular : Module {
                     startupTimer += args.sampleTime;
                 } else {
                     position = APP->scene->rackScroll->offset;
-                    updateScrollOffsets(args);
-                    processJumpInputs(args);
-                    processXYZInputs(args);
-                    processCableInputs(args);
-                    processLocks(args);
+                    updateScrollOffsets();
+                    processJumpInputs();
+                    processXYZInputs();
+                    processCableInputs();
+                    processLocks();
                     initialized = true; // On load, memorize last input but do not act upon it
                 }
             }
@@ -277,7 +277,7 @@ struct Undular : Module {
 };
 
 
-struct AriaPushButtonPadlock820 : SvgSwitch {
+struct AriaPushButtonPadlock820 : W::LitSvgSwitch {
     AriaPushButtonPadlock820() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-820-padlock-off.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pushbutton-820-padlock-on.svg")));
@@ -285,50 +285,48 @@ struct AriaPushButtonPadlock820 : SvgSwitch {
 };
 
 
-struct UndularWidget : ModuleWidget {
+struct UndularWidget : W::ModuleWidget {
     UndularWidget(Undular* module) {
         setModule(module);
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Undular.svg")));
         
         // Signature 
-        addChild(createWidget<AriaSignature>(mm2px(Vec(5.9, 114.538))));
+        addChild(createWidget<W::Signature>(mm2px(Vec(5.9f, 114.5f))));
 
         // Screws
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         
         // UDLR
-        addInput(createInput<AriaJackIn>(mm2px(Vec(8.5, 18.0)), module, Undular::U_INPUT));
-        addInput(createInput<AriaJackIn>(mm2px(Vec(8.5, 30.0)), module, Undular::D_INPUT));
-        addInput(createInput<AriaJackIn>(mm2px(Vec(2.5, 24.0)), module, Undular::L_INPUT));
-        addInput(createInput<AriaJackIn>(mm2px(Vec(14.5, 24.0)), module, Undular::R_INPUT));
+        addStaticInput(mm2px(Vec(8.5, 18.0)), module, Undular::U_INPUT);
+        addStaticInput(mm2px(Vec(8.5, 30.0)), module, Undular::D_INPUT);
+        addStaticInput(mm2px(Vec(2.5, 24.0)), module, Undular::L_INPUT);
+        addStaticInput(mm2px(Vec(14.5, 24.0)), module, Undular::R_INPUT);
         
         // Step
-        addParam(createParam<AriaKnob820>(mm2px(Vec(2.6, 36.0)), module, Undular::X_STEP_PARAM));
-        addParam(createParam<AriaKnob820>(mm2px(Vec(14.6, 36.0)), module, Undular::Y_STEP_PARAM));
+        addParam(createParam<W::Knob>(mm2px(Vec(2.6, 36.0)), module, Undular::X_STEP_PARAM));
+        addParam(createParam<W::Knob>(mm2px(Vec(14.6, 36.0)), module, Undular::Y_STEP_PARAM));
         
         // Padding
-        addParam(createParam<AriaKnob820>(mm2px(Vec(2.6, 50.2)), module, Undular::PADDING_PARAM));
+        addParam(createParam<W::Knob>(mm2px(Vec(2.6, 50.2)), module, Undular::PADDING_PARAM));
 
         // Y & Lock
-        addInput(createInput<AriaJackIn>(mm2px(Vec(14.5, 50.0)), module, Undular::Y_INPUT));
+        addStaticInput(mm2px(Vec(14.5, 50.0)), module, Undular::Y_INPUT);
         addParam(createParam<AriaPushButtonPadlock820>(mm2px(Vec(14.5, 58.5)), module, Undular::Y_LOCK_PARAM));
 
         // X & Lock
-        addInput(createInput<AriaJackIn>(mm2px(Vec(2.5, 66.0)), module, Undular::X_INPUT));	
+        addStaticInput(mm2px(Vec(2.5, 66.0)), module, Undular::X_INPUT);	
         addParam(createParam<AriaPushButtonPadlock820>(mm2px(Vec(11.0, 66.0)), module, Undular::X_LOCK_PARAM));
         
         // Zoom
-        addInput(createInput<AriaJackIn>(mm2px(Vec(8.5, 82.0)), module, Undular::Z_INPUT));
+        addStaticInput(mm2px(Vec(8.5, 82.0)), module, Undular::Z_INPUT);
         
         // Cables
-        addInput(createInput<AriaJackIn>(mm2px(Vec(8.5, 95.0)), module, Undular::OPACITY_INPUT));
-        addInput(createInput<AriaJackIn>(mm2px(Vec(8.5, 103.0)), module, Undular::TENSION_INPUT));
+        addStaticInput(mm2px(Vec(8.5, 95.0)), module, Undular::OPACITY_INPUT);
+        addStaticInput(mm2px(Vec(8.5, 103.0)), module, Undular::TENSION_INPUT);
 
-        // Debug
-        // addOutput(createOutput<AriaJackOut>(mm2px(Vec(8.5, 120.0)), module, Undular::DEBUG_OUTPUT));
     }
 };
 

@@ -48,11 +48,11 @@ struct prng {
     void init(float seed1, float seed2){
         s[0] = seed1 * 572376460694501; // Keyboard smash - salting seems to improve results
         s[1] = seed2 * 645624357248923;
-        for (int i = 0; i < 50; i++) next(); // Warm up for better results
+        for (size_t i = 0; i < 50; i++) next(); // Warm up for better results
     }
 
     float uniform() {
-        for (int i = 0; i < 50; i++) next(); // More dry runs.
+        for (size_t i = 0; i < 50; i++) next(); // More dry runs.
         return (next() >> (64 - 24)) / std::pow(2.f, 24);
     }
 

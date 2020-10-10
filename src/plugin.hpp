@@ -5,7 +5,7 @@ You should have received a copy of the GNU General Public License along with thi
 */
 #pragma once
 #include <rack.hpp>
-#include "components.hpp"
+#include "widgets.hpp"
 // Explicit <array> include required on OS X
 #include <array> 
 
@@ -14,7 +14,7 @@ using namespace rack;
 // Declare the Plugin, defined in plugin.cpp
 extern Plugin* pluginInstance;
 
-// Split and Merge series
+// Split & Merge series
 extern Model *modelSplort;
 extern Model *modelSmerge;
 extern Model *modelSpleet;

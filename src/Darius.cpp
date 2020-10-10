@@ -4,10 +4,15 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
+
 // Warning - this module was created with very little C++ experience, and features were 
 // added to it later without regard for code quality. This is maintained exploratory code, not good design.
-//
+// I do not know why it works.
+// In fact it doesn't really work, if you process data at audio rates everything breaks.
+
+
 // Note: the module calls it a "path" internally, but they are called "routes" for the user.
+
 
 #include "plugin.hpp"
 #include "prng.hpp"
@@ -27,8 +32,11 @@ const int STEP7START = 21; //   27  26  25  24  23  22  21
 const int STEP8START = 28; // 35  34  33  32  31  30  29  28
 const int STEP9START = 36; // (Panel is rotated 90 degrees counter-clockwise compared to this diagram)
 
+const int STEP_STARTS[9] = {STEP1START, STEP2START, STEP3START, STEP4START, STEP5START, STEP6START, STEP7START, STEP8START, STEP9START};
+
 const int DISPLAYDIVIDER = 512;
 const int KNOBDIVIDER = 512;
+const int PROCESSDIVIDER = 32;
 
 enum LcdModes {
     INIT_MODE,
@@ -132,6 +140,7 @@ struct Darius : Module {
     dsp::PulseGenerator manualStepTrigger;
     dsp::ClockDivider knobDivider;
     dsp::ClockDivider displayDivider;
+    dsp::ClockDivider processDivider;
     prng::prng prng;
     Lcd::LcdStatus lcdStatus;
 
@@ -152,16 +161,17 @@ struct Darius : Module {
         configParam(KEY_PARAM, 0.f, 11.f, 0.f, "Key");
         configParam(SCALE_PARAM, 0.f, (float) Quantizer::NUM_SCALES - 1, 2.f, "Scale");
         configParam(SLIDE_PARAM, 0.f, 10.f, 0.f, "Slide");
-        for (int i = 0; i < STEP9START; i++)
+        for (size_t i = 0; i < STEP9START; i++)
             configParam(CV_PARAM + i, 0.f, 10.f, 5.f, "CV");
-        for (int i = 0; i < STEP8START; i++)
+        for (size_t i = 0; i < STEP8START; i++)
             configParam(ROUTE_PARAM + i, 0.f, 1.f, 0.5f, "Random route");
         knobDivider.setDivision(KNOBDIVIDER);
         displayDivider.setDivision(DISPLAYDIVIDER);
+        processDivider.setDivision(PROCESSDIVIDER);
         lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
         lcdStatus.lcdText1 = "MEDITATE..."; // Loading message
         lcdStatus.lcdText2 = "MEDITATION."; // https://www.youtube.com/watch?v=JqLNY1zyQ6o
-        for (int i = 0; i < 100; i++) random::uniform(); // The first few seeds we get seem bad, need more warming up. Might just be superstition.
+        for (size_t i = 0; i < 100; i++) random::uniform(); // The first few seeds we get seem bad, need more warming up. Might just be superstition.
     }
     
     json_t* dataToJson() override {
@@ -171,7 +181,7 @@ struct Darius : Module {
         json_object_set_new(rootJ, "lastNode", json_integer(lastNode));
         json_object_set_new(rootJ, "lastGate", json_integer(lastGate));
         json_t *pathTraveledJ = json_array();
-        for (int i = 0; i < 8; i++) {
+        for (size_t i = 0; i < 8; i++) {
             json_array_insert_new(pathTraveledJ, i, json_integer(pathTraveled[i]));
         } 
         json_object_set_new(rootJ, "pathTraveled", pathTraveledJ);
@@ -197,7 +207,7 @@ struct Darius : Module {
         }
         json_t *pathTraveledJ = json_object_get(rootJ, "pathTraveled");
         if (pathTraveledJ) {
-            for (int i = 0; i < 8; i++) {
+            for (size_t i = 0; i < 8; i++) {
                 json_t *pathTraveledNodeJ = json_array_get(pathTraveledJ, i);
                 if (pathTraveledNodeJ) {
                     pathTraveled[i] = json_integer_value(pathTraveledNodeJ);
@@ -227,100 +237,100 @@ struct Darius : Module {
         void undo() override {
             Darius *module = dynamic_cast<Darius*>(APP->engine->getModule(this->moduleId));
             if (module) {
-                for (int i = 0; i < 36; i++) module->params[param + i].setValue(this->oldValues[i]);
+                for (size_t i = 0; i < 36; i++) module->params[param + i].setValue(this->oldValues[i]);
             }
         }
 
         void redo() override {
             Darius *module = dynamic_cast<Darius*>(APP->engine->getModule(this->moduleId));
             if (module) {
-                for (int i = 0; i < 36; i++) module->params[param + i].setValue(this->newValues[i]);
+                for (size_t i = 0; i < 36; i++) module->params[param + i].setValue(this->newValues[i]);
             }
         }
     };
 
-    void randomizeCv(const ProcessArgs& args){
+    void randomizeCv(){
         std::array<float, 36> oldValues;
         std::array<float, 36> newValues;
-        for (int i = 0; i < 36; i++) oldValues[i] = params[CV_PARAM + i].getValue();
-        for (int i = 0; i < 36; i++) params[CV_PARAM + i].setValue(random::uniform() * 10.f);
-        for (int i = 0; i < 36; i++) newValues[i] = params[CV_PARAM + i].getValue();
+        for (size_t i = 0; i < 36; i++) oldValues[i] = params[CV_PARAM + i].getValue();
+        for (size_t i = 0; i < 36; i++) params[CV_PARAM + i].setValue(random::uniform() * 10.f);
+        for (size_t i = 0; i < 36; i++) newValues[i] = params[CV_PARAM + i].getValue();
         APP->history->push(new BulkCvAction(this->id, "randomize Darius CV", CV_PARAM, oldValues, newValues));
     }
     
-    void randomizeRoute(const ProcessArgs& args){
+    void randomizeRoute(){
         std::array<float, 36> oldValues;
         std::array<float, 36> newValues;
-        for (int i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
-        for (int i = 0; i < 36; i++) params[ROUTE_PARAM + i].setValue(random::uniform());	
-        for (int i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
+        for (size_t i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
+        for (size_t i = 0; i < 36; i++) params[ROUTE_PARAM + i].setValue(random::uniform());	
+        for (size_t i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
         APP->history->push(new BulkCvAction(this->id, "randomize Darius Routes", ROUTE_PARAM, oldValues, newValues));
     }
     
-    void processResetCV(const ProcessArgs& args){
+    void processResetCV(){
         resetCV = false;
         std::array<float, 36> oldValues;
         std::array<float, 36> newValues;
-        for (int i = 0; i < 36; i++) oldValues[i] = params[CV_PARAM + i].getValue();
-        for (int i = 0; i < 36; i++) params[CV_PARAM + i].setValue(5.f);	
-        for (int i = 0; i < 36; i++) newValues[i] = params[CV_PARAM + i].getValue();
+        for (size_t i = 0; i < 36; i++) oldValues[i] = params[CV_PARAM + i].getValue();
+        for (size_t i = 0; i < 36; i++) params[CV_PARAM + i].setValue(5.f);	
+        for (size_t i = 0; i < 36; i++) newValues[i] = params[CV_PARAM + i].getValue();
         APP->history->push(new BulkCvAction(this->id, "reset Darius CV", CV_PARAM, oldValues, newValues));
     }
 
-    void processResetRoutes(const ProcessArgs& args){
+    void processResetRoutes(){
         resetRoutes = false;
         std::array<float, 36> oldValues;
         std::array<float, 36> newValues;
-        for (int i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
-        for (int i = 0; i < 36; i++) params[ROUTE_PARAM + i].setValue(0.5f);	
-        for (int i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
+        for (size_t i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
+        for (size_t i = 0; i < 36; i++) params[ROUTE_PARAM + i].setValue(0.5f);	
+        for (size_t i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
         APP->history->push(new BulkCvAction(this->id, "reset Darius Routes", ROUTE_PARAM, oldValues, newValues));
     }
 
-    void processRoutesToTop(const ProcessArgs& args){
+    void processRoutesToTop(){
         routesToTop = false;
         std::array<float, 36> oldValues;
         std::array<float, 36> newValues;
-        for (int i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
-        for (int i = 0; i < 36; i++) params[ROUTE_PARAM + i].setValue(0.f);	
-        for (int i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
+        for (size_t i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
+        for (size_t i = 0; i < 36; i++) params[ROUTE_PARAM + i].setValue(0.f);	
+        for (size_t i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
         APP->history->push(new BulkCvAction(this->id, "set Darius Routes to Top", ROUTE_PARAM, oldValues, newValues));
     }
 
-    void processRoutesToBottom(const ProcessArgs& args){
+    void processRoutesToBottom(){
         routesToBottom = false;
         std::array<float, 36> oldValues;
         std::array<float, 36> newValues;
-        for (int i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
-        for (int i = 0; i < 36; i++) params[ROUTE_PARAM + i].setValue(1.f);	
-        for (int i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
+        for (size_t i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
+        for (size_t i = 0; i < 36; i++) params[ROUTE_PARAM + i].setValue(1.f);	
+        for (size_t i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
         APP->history->push(new BulkCvAction(this->id, "set Darius Routes to Bottom", ROUTE_PARAM, oldValues, newValues));
     }
 
-    void processRoutesToEqualProbability(const ProcessArgs& args){
+    void processRoutesToEqualProbability(){
         routesToEqualProbability = false;
         std::array<float, 36> oldValues;
         std::array<float, 36> newValues;
-        for (int i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
+        for (size_t i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
         params[ROUTE_PARAM].setValue(0.5f);
-        for (int i = 0; i < 2; i++) params[ROUTE_PARAM + i + STEP2START].setValue( (i + 1) / 3.f );
-        for (int i = 0; i < 3; i++) params[ROUTE_PARAM + i + STEP3START].setValue( (i + 1) / 4.f );
-        for (int i = 0; i < 4; i++) params[ROUTE_PARAM + i + STEP4START].setValue( (i + 1) / 5.f );
-        for (int i = 0; i < 5; i++) params[ROUTE_PARAM + i + STEP5START].setValue( (i + 1) / 6.f );
-        for (int i = 0; i < 6; i++) params[ROUTE_PARAM + i + STEP6START].setValue( (i + 1) / 7.f );
-        for (int i = 0; i < 7; i++) params[ROUTE_PARAM + i + STEP7START].setValue( (i + 1) / 8.f );
-        for (int i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
+        for (size_t i = 0; i < 2; i++) params[ROUTE_PARAM + i + STEP2START].setValue( (i + 1) / 3.f );
+        for (size_t i = 0; i < 3; i++) params[ROUTE_PARAM + i + STEP3START].setValue( (i + 1) / 4.f );
+        for (size_t i = 0; i < 4; i++) params[ROUTE_PARAM + i + STEP4START].setValue( (i + 1) / 5.f );
+        for (size_t i = 0; i < 5; i++) params[ROUTE_PARAM + i + STEP5START].setValue( (i + 1) / 6.f );
+        for (size_t i = 0; i < 6; i++) params[ROUTE_PARAM + i + STEP6START].setValue( (i + 1) / 7.f );
+        for (size_t i = 0; i < 7; i++) params[ROUTE_PARAM + i + STEP7START].setValue( (i + 1) / 8.f );
+        for (size_t i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
         APP->history->push(new BulkCvAction(this->id, "set Darius Routes to Spread out", ROUTE_PARAM, oldValues, newValues));
     }
 
     // Thanks to stoermelder for the idea!
     // https://community.vcvrack.com/t/arias-cool-and-nice-thread-of-barely-working-betas-and-bug-squashing-darius-update/8208/13?u=aria_salvatrice
-    void processRoutesToBinaryTree(const ProcessArgs& args){
+    void processRoutesToBinaryTree(){
         routesToBinaryTree = false;
         std::array<float, 36> oldValues;
         std::array<float, 36> newValues;
-        for (int i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
-        for (int i = 0; i < 36; i++) params[ROUTE_PARAM + i].setValue(0.5f);
+        for (size_t i = 0; i < 36; i++) oldValues[i] = params[ROUTE_PARAM + i].getValue();
+        for (size_t i = 0; i < 36; i++) params[ROUTE_PARAM + i].setValue(0.5f);
         params[ROUTE_PARAM +  1].setValue(0.f);
         params[ROUTE_PARAM +  2].setValue(1.f);
         params[ROUTE_PARAM +  6].setValue(0.f);
@@ -335,11 +345,11 @@ struct Darius : Module {
         params[ROUTE_PARAM + 17].setValue(0.f);
         params[ROUTE_PARAM + 18].setValue(1.f);
         params[ROUTE_PARAM + 20].setValue(1.f);
-        for (int i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
+        for (size_t i = 0; i < 36; i++) newValues[i] = params[ROUTE_PARAM + i].getValue();
         APP->history->push(new BulkCvAction(this->id, "set Darius Routes to Binary tree", ROUTE_PARAM, oldValues, newValues));
     }
 
-    void importPortableSequence(const ProcessArgs& args){
+    void importPortableSequence(){
         pastePortableSequence = false;
         std::array<float, 36> oldValues;
         std::array<float, 36> newValues;
@@ -347,7 +357,7 @@ struct Darius : Module {
         sequence.fromClipboard();
         sequence.sort();
         sequence.clampValues();
-        for (int i = 0; i < 36; i++) oldValues[i] = params[CV_PARAM + i].getValue(); 
+        for (size_t i = 0; i < 36; i++) oldValues[i] = params[CV_PARAM + i].getValue(); 
         for(int i = 0; i < 1; i++) params[CV_PARAM + i + STEP1START].setValue( (sequence.notes.size() > 0) ? clamp(sequence.notes[0].pitch + 4.f, 0.f, 10.f) : 5.f);
         for(int i = 0; i < 2; i++) params[CV_PARAM + i + STEP2START].setValue( (sequence.notes.size() > 1) ? clamp(sequence.notes[1].pitch + 4.f, 0.f, 10.f) : 5.f);
         for(int i = 0; i < 3; i++) params[CV_PARAM + i + STEP3START].setValue( (sequence.notes.size() > 2) ? clamp(sequence.notes[2].pitch + 4.f, 0.f, 10.f) : 5.f);
@@ -356,12 +366,12 @@ struct Darius : Module {
         for(int i = 0; i < 6; i++) params[CV_PARAM + i + STEP6START].setValue( (sequence.notes.size() > 5) ? clamp(sequence.notes[5].pitch + 4.f, 0.f, 10.f) : 5.f);
         for(int i = 0; i < 7; i++) params[CV_PARAM + i + STEP7START].setValue( (sequence.notes.size() > 6) ? clamp(sequence.notes[6].pitch + 4.f, 0.f, 10.f) : 5.f);
         for(int i = 0; i < 8; i++) params[CV_PARAM + i + STEP8START].setValue( (sequence.notes.size() > 7) ? clamp(sequence.notes[7].pitch + 4.f, 0.f, 10.f) : 5.f);
-        for (int i = 0; i < 36; i++) newValues[i] = params[CV_PARAM + i].getValue();
+        for (size_t i = 0; i < 36; i++) newValues[i] = params[CV_PARAM + i].getValue();
         APP->history->push(new BulkCvAction(this->id, "import Portable Sequence", CV_PARAM, oldValues, newValues));
     }
 
     // OK, this one is gonna be messy lol
-    void exportPortableSequence(const ProcessArgs& args){
+    void exportPortableSequence(){
         copyPortableSequence = false;
         PortableSequence::Sequence sequence;
         PortableSequence::Note note;
@@ -398,12 +408,12 @@ struct Darius : Module {
         sequence.toClipboard();
     }
 
-    void resetPathTraveled(const ProcessArgs& args){
+    void resetPathTraveled(){
         pathTraveled[0] = 0;
-        for (int i = 1; i < 8; i++) pathTraveled[i] = -1;
+        for (size_t i = 1; i < 8; i++) pathTraveled[i] = -1;
     }
     
-    void refreshSeed(const ProcessArgs& args){
+    void refreshSeed(){
         if (inputs[SEED_INPUT].isConnected() and (inputs[SEED_INPUT].getVoltage() != 0.f) ) {
             randomSeed = inputs[SEED_INPUT].getVoltage();
         } else {
@@ -412,14 +422,13 @@ struct Darius : Module {
     }
 
     // Reset to the first step
-    // FIXME: 1 ms wait #36
-    void reset(const ProcessArgs& args){
+    void reset(){
         step = 0;
         node = 0;
         lastNode = 0;
         lightsReset = true;
-        resetPathTraveled(args);
-        for (int i = 0; i < 36; i++)
+        resetPathTraveled();
+        for (size_t i = 0; i < 36; i++)
             outputs[GATE_OUTPUT + i].setVoltage(0.f);
         lcdStatus.lcdDirty = true;
         resetDelay = 0.f; // This starts the delay
@@ -431,7 +440,7 @@ struct Darius : Module {
     }
     
     // Sets running to the current run status
-    void setRunStatus(const ProcessArgs& args){
+    void setRunStatus(){
         if (runCvTrigger.process(inputs[RUN_INPUT].getVoltageSum())){
             running = !running;
             params[RUN_PARAM].setValue(running);
@@ -439,7 +448,7 @@ struct Darius : Module {
         running = params[RUN_PARAM].getValue();
     }
         
-    void setStepStatus(const ProcessArgs& args){
+    void setStepStatus(){
         stepFirst = std::round(params[STEPFIRST_PARAM].getValue());
         stepLast  = std::round(params[STEPCOUNT_PARAM].getValue());
         if (stepFirst > stepLast) stepFirst = stepLast;
@@ -487,13 +496,13 @@ struct Darius : Module {
             step = 0;
             node = 0;
             lastNode = 0;
-            resetPathTraveled(args);
+            resetPathTraveled();
             lightsReset = true;
             slideCounter = 0.f;
             lastOutput = outputs[CV_OUTPUT].getVoltage();
             for(int i = 0; i < stepFirst - 1; i++) {
                 step++;
-                nodeForward(args);
+                nodeForward();
             }
         }
     }
@@ -514,7 +523,7 @@ struct Darius : Module {
         return getUpChild(parent) + 1;
     }
 
-    void updateRoutes(const ProcessArgs& args){
+    void updateRoutes(){
         // This is hard to think about, so I did it by hand, lol
         probabilities[0]  = 1.f;
 
@@ -565,7 +574,7 @@ struct Darius : Module {
     // Using this code as reference:
     // https://github.com/mgunyho/Little-Utils/blob/master/src/PulseGenerator.cpp
     // This has a bit of a performance impact so it's not called every sample.
-    void setSlide(const ProcessArgs& args){
+    void setSlide(){
         slideDuration = params[SLIDE_PARAM].getValue();
         if (slideDuration > 0.00001f ) {
             slideDuration = rescale(slideDuration, 0.f, 10.f, -3.0f, 1.0f);
@@ -575,17 +584,17 @@ struct Darius : Module {
         }
     }
     
-    void nodeForward(const ProcessArgs& args){
+    void nodeForward(){
         steppedForward = false;
         
         // Refresh seed at start of sequences, and on external seeds
         // Refresh at the last minute: when about to move the second step (step == 1), not when entering the first (step == 0).
         if (step == 1){
-            refreshSeed(args);
+            refreshSeed();
             prng.init(randomSeed, randomSeed);
         } else {
             if (params[SEED_MODE_PARAM].getValue() == 1.0f && inputs[SEED_INPUT].isConnected()){
-                refreshSeed(args);
+                refreshSeed();
                 prng.init(randomSeed, randomSeed);
             }
         }
@@ -597,7 +606,9 @@ struct Darius : Module {
             if (forceUp or forceDown) {
                 if (forceUp) {
                     if (step == 1) {
-                        node = 1; // FIXME: This check prevents issue #21 but I don't understand why
+                        /* NOTE: This check prevents issue #21 but I don't understand why.
+                           Not gonna bother to figure out this old bad code. */
+                        node = 1; 
                     } else {
                         node = node + step;
                     }
@@ -625,16 +636,17 @@ struct Darius : Module {
         lcdStatus.lcdDirty = true;
     }
     
-    void nodeBack(const ProcessArgs& args){
+    void nodeBack(){
         lightsReset = true;
         node = pathTraveled[step];
-        // FIXME: This conditional avoids a bizarre problem where randomSeed goes NaN. Not sure what's exactly going on!!
+        // NOTE: This conditional avoids a bizarre problem where randomSeed goes NaN.
+        // Not sure what's exactly going on, not very eager to figure out this old code.
         if (step < 7) pathTraveled[step + 1] = -1; 
         lastNode = node;
         lcdStatus.lcdDirty = true;
     }
 
-    void updateScale(const ProcessArgs& args){
+    void updateScale(){
         if (inputs[EXT_SCALE_INPUT].isConnected()) {
             for(int i = 0; i < 12; i++) {
                 scale [i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.1f) ? true : false;
@@ -696,16 +708,22 @@ struct Darius : Module {
         outputs[CV_OUTPUT].setVoltage(output);
     }
     
-    void updateLights(const ProcessArgs& args){
+    void updateLights(){
         // The Seed input light
         lights[SEED_LIGHT].setBrightness( ( inputs[SEED_INPUT].getVoltage() == 0.f ) ? 0.f : 1.f );
 
 
         // Clean up by request only
         if (lightsReset) {
-            for (int i = 0; i < 36; i++) lights[CV_LIGHT + i].setBrightness( 0.f );
-            for (int i = 0; i < 8; i++) {
-                if (pathTraveled[i] >= 0) lights[CV_LIGHT + pathTraveled[i]].setBrightness( 1.f );
+            for (size_t i = 0; i < 36; i++) lights[CV_LIGHT + i].setBrightness( 0.f );
+            for (size_t i = 0; i < 8; i++) {
+                if (pathTraveled[i] >= 0) {
+                    if (pathTraveled[i] < STEP_STARTS[(int) params[STEPFIRST_PARAM].getValue()]) {
+                        lights[CV_LIGHT + pathTraveled[i]].setBrightness( 0.3f );
+                    } else {
+                        lights[CV_LIGHT + pathTraveled[i]].setBrightness( 1.f );
+                    }
+                }
             }
             lightsReset = false;
         }		
@@ -716,25 +734,25 @@ struct Darius : Module {
         float brightness[36];
         // Light the outputs depending on amount of steps enabled
         brightness[0] = (stepFirst <= 1 && stepLast >= 1 ) ? 1.f : 0.f ;
-        for (int i = STEP2START; i < STEP3START; i++)
+        for (size_t i = STEP2START; i < STEP3START; i++)
             brightness[i] = (stepFirst <= 2 && stepLast >= 2 ) ? 1.f : 0.f;
-        for (int i = STEP3START; i < STEP4START; i++)
+        for (size_t i = STEP3START; i < STEP4START; i++)
             brightness[i] = (stepFirst <= 3 && stepLast >= 3 ) ? 1.f : 0.f;
-        for (int i = STEP4START; i < STEP5START; i++)
+        for (size_t i = STEP4START; i < STEP5START; i++)
             brightness[i] = (stepFirst <= 4 && stepLast >= 4 ) ? 1.f : 0.f;
-        for (int i = STEP5START; i < STEP6START; i++)
+        for (size_t i = STEP5START; i < STEP6START; i++)
             brightness[i] = (stepFirst <= 5 && stepLast >= 5 ) ? 1.f : 0.f;
-        for (int i = STEP6START; i < STEP7START; i++)
+        for (size_t i = STEP6START; i < STEP7START; i++)
             brightness[i] = (stepFirst <= 6 && stepLast >= 6 ) ? 1.f : 0.f;
-        for (int i = STEP7START; i < STEP8START; i++)
+        for (size_t i = STEP7START; i < STEP8START; i++)
             brightness[i] = (stepFirst <= 7 && stepLast >= 7 ) ? 1.f : 0.f;
-        for (int i = STEP8START; i < STEP9START; i++)
+        for (size_t i = STEP8START; i < STEP9START; i++)
             brightness[i] = (stepFirst <= 8 && stepLast >= 8 ) ? 1.f : 0.f;
         // And turn off nodes that are impossible to reach
-        for (int i = 0; i < 36; i++)
+        for (size_t i = 0; i < 36; i++)
             if (probabilities[i] == 0.f) brightness[i] = 0.f;
 
-        for (int i = 0; i < 36; i++)
+        for (size_t i = 0; i < 36; i++)
             lights[GATE_LIGHT + i].setBrightness(brightness[i]);
         
     }
@@ -916,7 +934,7 @@ struct Darius : Module {
         node = 0;
         lastNode = 0;
         pathTraveled[0] = 0;
-        for (int i = 1; i < 8; i++) pathTraveled[i] = -1;
+        for (size_t i = 1; i < 8; i++) pathTraveled[i] = -1;
         lightsReset = true;
         lcdMode = INIT_MODE;
         lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
@@ -928,66 +946,69 @@ struct Darius : Module {
     }
 
     void process(const ProcessArgs& args) override {
-        if (copyPortableSequence)
-            exportPortableSequence(args);
+        if (processDivider.process()) {
 
-        if (pastePortableSequence)
-            importPortableSequence(args);
+            if (copyPortableSequence)
+                exportPortableSequence();
+
+            if (pastePortableSequence)
+                importPortableSequence();
 
 
-        if (randomizeCvTrigger.process(params[RANDCV_PARAM].getValue()))
-            randomizeCv(args);
-        if (randomizeRouteTrigger.process(params[RANDROUTE_PARAM].getValue()))
-            randomizeRoute(args);
-        if (resetCvTrigger.process(inputs[RESET_INPUT].getVoltageSum()) or resetButtonTrigger.process(params[RESET_PARAM].getValue()))
-            reset(args);
-        if (resetDelay >= 0.f) {
-            if (wait1msOnReset(args.sampleTime)) {
-                // Done with reset
-                resetDelay = -1.f;
-            } else {
-                return;
+            if (randomizeCvTrigger.process(params[RANDCV_PARAM].getValue()))
+                randomizeCv();
+            if (randomizeRouteTrigger.process(params[RANDROUTE_PARAM].getValue()))
+                randomizeRoute();
+            if (resetCvTrigger.process(inputs[RESET_INPUT].getVoltageSum()) or resetButtonTrigger.process(params[RESET_PARAM].getValue()))
+                reset();
+            if (resetDelay >= 0.f) {
+                if (wait1msOnReset(args.sampleTime)) {
+                    // Done with reset
+                    resetDelay = -1.f;
+                } else {
+                    return;
+                }
             }
+
+
+            if (resetCV)
+                processResetCV();
+            if (resetRoutes)
+                processResetRoutes();
+            if (routesToTop)
+                processRoutesToTop();
+            if (routesToBottom)
+                processRoutesToBottom();
+            if (routesToEqualProbability)
+                processRoutesToEqualProbability();
+            if (routesToBinaryTree)
+                processRoutesToBinaryTree();
+
+            setRunStatus();
+            setStepStatus();
+
+            updateRoutes();
+
+            // Refreshing slide knobs often has a performance impact
+            // so the divider will remain quite high unless someone complains
+            // it breaks their art. 
+            if (knobDivider.process()) {
+                setSlide();
+            }
+
+            if (steppedForward)
+                nodeForward();
+            if (steppedBack)
+                nodeBack();
+
+            updateScale();
+
+            sendGateOutput(args);
+            setVoltageOutput(args);
         }
-
-
-        if (resetCV)
-            processResetCV(args);
-        if (resetRoutes)
-            processResetRoutes(args);
-        if (routesToTop)
-            processRoutesToTop(args);
-        if (routesToBottom)
-            processRoutesToBottom(args);
-        if (routesToEqualProbability)
-            processRoutesToEqualProbability(args);
-        if (routesToBinaryTree)
-            processRoutesToBinaryTree(args);
-
-        setRunStatus(args);
-        setStepStatus(args);
-
-        updateRoutes(args);
-
-        // Refreshing slide knobs often has a performance impact
-        // so the divider will remain quite high unless someone complains
-        // it breaks their art. 
-        if (knobDivider.process()) {
-            setSlide(args);
-        }
-
-        if (steppedForward)
-            nodeForward(args);
-        if (steppedBack)
-            nodeBack(args);
-
-        updateScale(args);
-
-        sendGateOutput(args);
-        setVoltageOutput(args);
         
         if (displayDivider.process()) {
-            updateLights(args);
+            updateLights();
             updateLcd(args);
         }
     }
@@ -1005,55 +1026,54 @@ struct Darius : Module {
 
 
 
-namespace DariusWidgets {
-
-struct AriaKnob820Snap : AriaKnob820 {
-    AriaKnob820Snap() {
-        snap = true;
-        AriaKnob820();
-    }
-};
-
-struct AriaKnob820Lcd : AriaKnob820 {
+struct KnobLcd : W::Knob {
     void onDragMove(const event::DragMove& e) override {
          dynamic_cast<Darius*>(paramQuantity->module)->lcdLastInteraction = 0.f;
          dynamic_cast<Darius*>(paramQuantity->module)->lcdStatus.lcdDirty = true;
-        AriaKnob820::onDragMove(e);
+        W::Knob::onDragMove(e);
     }
 };
 
 
-struct AriaKnob820MinMax : AriaKnob820Lcd {
+struct KnobMinMax : KnobLcd {
     void onDragMove(const event::DragMove& e) override {
          dynamic_cast<Darius*>(paramQuantity->module)->lcdMode = MINMAX_MODE;
-        AriaKnob820Lcd::onDragMove(e);
+        KnobLcd::onDragMove(e);
     }
 };
 
-struct AriaKnob820Scale : AriaKnob820Lcd {
-    AriaKnob820Scale() {
+struct KnobScale : KnobLcd {
+    KnobScale() {
         snap = true;
-        AriaKnob820();
+        KnobLcd();
     }
     void onDragMove(const event::DragMove& e) override {
        dynamic_cast<Darius*>(paramQuantity->module)->lcdMode = SCALE_MODE;
-        AriaKnob820Lcd::onDragMove(e);
+        KnobLcd::onDragMove(e);
     }
 };
 
-struct AriaKnob820Slide : AriaKnob820Lcd {
+struct KnobSlide : KnobLcd {
     void onDragMove(const event::DragMove& e) override {
         dynamic_cast<Darius*>(paramQuantity->module)->lcdMode = SLIDE_MODE;
-        AriaKnob820Lcd::onDragMove(e);
+        KnobLcd::onDragMove(e);
     }
 };
 
-struct AriaRockerSwitchHorizontal800ModeReset : AriaRockerSwitchHorizontal800 {
+struct RockerSwitchHorizontalModeReset : W::RockerSwitchHorizontal {
     void onDragStart(const event::DragStart& e) override {
         dynamic_cast<Darius*>(paramQuantity->module)->lcdMode = DEFAULT_MODE;
         dynamic_cast<Darius*>(paramQuantity->module)->lcdLastInteraction = 0.f;
         dynamic_cast<Darius*>(paramQuantity->module)->lcdStatus.lcdDirty = true;
-        AriaRockerSwitchHorizontal800::onDragStart(e);
+        W::RockerSwitchHorizontal::onDragStart(e);
+    }
+};
+
+// Rocker siwtch, horizontal, flipped for backwards compatibility.
+struct RockerSwitchHorizontalFlipped : W::SvgSwitchUnshadowed {
+    RockerSwitchHorizontalFlipped() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-r.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-800-l.svg")));
     }
 };
 
@@ -1068,17 +1088,17 @@ TParamWidget* createMainParam(math::Vec pos, Darius* module, int paramId, int la
     return o;
 }
 
-struct AriaKnob820Route : AriaKnob820 {
+struct KnobRoute : W::Knob {
     Darius *module;
     int lastChanged;
 
-    AriaKnob820Route(Darius* module, int lastChanged) {
+    KnobRoute(Darius* module, int lastChanged) {
         this->module = module;
         this->lastChanged = lastChanged;
         setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/knob-820-arrow.svg")));
         minAngle = 0.25 * M_PI;
         maxAngle = 0.75 * M_PI;
-        AriaKnob820();
+        W::Knob();
     }
 
     void onDragMove(const event::DragMove& e) override {
@@ -1086,18 +1106,18 @@ struct AriaKnob820Route : AriaKnob820 {
         module->lcdLastInteraction = 0.f;
         module->lcdStatus.lcdDirty = true;
         module->lastRouteChanged = lastChanged;
-        AriaKnob820::onDragMove(e);
+        W::Knob::onDragMove(e);
     }
 };
 
-struct AriaKnob820TransparentCV : AriaKnob820Transparent {
+struct KnobTransparentCV : W::KnobTransparent {
     Darius *module;
     int lastChanged;
 
-    AriaKnob820TransparentCV(Darius* module, int lastChanged) {
+    KnobTransparentCV(Darius* module, int lastChanged) {
         this->module = module;
         this->lastChanged = lastChanged;
-        AriaKnob820Transparent();
+        W::KnobTransparent();
     }
 
     void onDragMove(const event::DragMove& e) override {
@@ -1105,110 +1125,115 @@ struct AriaKnob820TransparentCV : AriaKnob820Transparent {
         module->lcdLastInteraction = 0.f;
         module->lcdStatus.lcdDirty = true;
         module->lastCvChanged = lastChanged;
-        AriaKnob820Transparent::onDragMove(e);
+        W::KnobTransparent::onDragMove(e);
     }
 };
 
-} // Namespace DariusWidgets
 
-struct DariusWidget : ModuleWidget {
+
+struct KnobLightYellowTest : W::KnobLightYellow {
+
+};
+
+
+struct DariusWidget : W::ModuleWidget {
     DariusWidget(Darius* module) {
         setModule(module);
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Darius.svg")));
         
         // Signature
-        addChild(createWidget<AriaSignature>(mm2px(Vec(120.0, 114.538))));
+        addChild(createWidget<W::Signature>(mm2px(Vec(120.0, 114.5f))));
         
         // Screws
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
         // The main area - lights, knobs and trigger outputs.
-        for (int i = 0; i < 1; i++) {
-            addChild(createLight<AriaInputLight>(mm2px(Vec( 4.5, (16.0 + (6.5 * 7) + i * 13.0))), module, Darius::CV_LIGHT +    i));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820TransparentCV>(mm2px(Vec( 4.5, (16.0 + (6.5 * 7) + i * 13.0))), module, Darius::CV_PARAM +    i, i));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820Route>(mm2px(Vec(14.5, (16.0 + (6.5 * 7) + i * 13.0))), module, Darius::ROUTE_PARAM + i, i));
-            addChild(createLight<AriaOutputLight>(mm2px(Vec( 9.5, (22.5 + (6.5 * 7) + i * 13.0))), module, Darius::GATE_LIGHT +  i));
-            addOutput(createOutput<AriaJackTransparent>(mm2px(Vec( 9.5, (22.5 + (6.5 * 7) + i * 13.0))), module, Darius::GATE_OUTPUT + i));
+        for (size_t i = 0; i < 1; i++) {
+            addChild(W::createKnobLight<W::KnobLightYellow>(mm2px(Vec( 4.5, (16.0 + (6.5 * 7) + i * 13.0))), module,
+                                                         Darius::CV_LIGHT + i, Darius::CV_PARAM + i, 0.f, 10.f));
+            addParam(createMainParam<KnobTransparentCV>(mm2px(Vec( 4.5, (16.0 + (6.5 * 7) + i * 13.0))), module, Darius::CV_PARAM + i, i));
+            addParam(createMainParam<KnobRoute>(mm2px(Vec(14.5, (16.0 + (6.5 * 7) + i * 13.0))), module, Darius::ROUTE_PARAM + i, i));
+            addDynamicOutput(mm2px(Vec( 9.5, (22.5 + (6.5 * 7) + i * 13.0))), module, Darius::GATE_OUTPUT + i, Darius::GATE_LIGHT +  i);
         }
-        for (int i = 0; i < 2; i++) {
-            addChild(createLight<AriaInputLight>(mm2px(Vec(24.5, (16.0 + (6.5 * 6) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP2START));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820TransparentCV>(mm2px(Vec(24.5, (16.0 + (6.5 * 6) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP2START, i + STEP2START));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820Route>(mm2px(Vec(34.5, (16.0 + (6.5 * 6) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP2START, i + STEP2START));
-            addChild(createLight<AriaOutputLight>(mm2px(Vec(29.5, (22.5 + (6.5 * 6) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP2START));
-            addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(29.5, (22.5 + (6.5 * 6) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP2START));
+        for (size_t i = 0; i < 2; i++) {
+            addChild(W::createKnobLight<W::KnobLightYellow>(mm2px(Vec(24.5, (16.0 + (6.5 * 6) + i * 13.0))), module,
+                                                         Darius::CV_LIGHT + i + STEP2START, Darius::CV_PARAM + i + STEP2START, 0.f, 10.f));
+            addParam(createMainParam<KnobTransparentCV>(mm2px(Vec(24.5, (16.0 + (6.5 * 6) + i * 13.0))), module, Darius::CV_PARAM + i + STEP2START, i + STEP2START));
+            addParam(createMainParam<KnobRoute>(mm2px(Vec(34.5, (16.0 + (6.5 * 6) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP2START, i + STEP2START));
+            addDynamicOutput(mm2px(Vec(29.5, (22.5 + (6.5 * 6) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP2START, Darius::GATE_LIGHT +  i + STEP2START);
         }
-        for (int i = 0; i < 3; i++) {
-            addChild(createLight<AriaInputLight>(mm2px(Vec(44.5, (16.0 + (6.5 * 5) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP3START));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820TransparentCV>(mm2px(Vec(44.5, (16.0 + (6.5 * 5) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP3START, i + STEP3START));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820Route>(mm2px(Vec(54.5, (16.0 + (6.5 * 5) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP3START, i + STEP3START));
-            addChild(createLight<AriaOutputLight>(mm2px(Vec(49.5, (22.5 + (6.5 * 5) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP3START));
-            addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(49.5, (22.5 + (6.5 * 5) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP3START));
+        for (size_t i = 0; i < 3; i++) {
+            addChild(W::createKnobLight<W::KnobLightYellow>(mm2px(Vec(44.5, (16.0 + (6.5 * 5) + i * 13.0))), module,
+                                                         Darius::CV_LIGHT + i + STEP3START, Darius::CV_PARAM + i + STEP3START, 0.f, 10.f));
+            addParam(createMainParam<KnobTransparentCV>(mm2px(Vec(44.5, (16.0 + (6.5 * 5) + i * 13.0))), module, Darius::CV_PARAM + i + STEP3START, i + STEP3START));
+            addParam(createMainParam<KnobRoute>(mm2px(Vec(54.5, (16.0 + (6.5 * 5) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP3START, i + STEP3START));
+            addDynamicOutput(mm2px(Vec(49.5, (22.5 + (6.5 * 5) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP3START, Darius::GATE_LIGHT +  i + STEP3START);
         }
-        for (int i = 0; i < 4; i++) {
-            addChild(createLight<AriaInputLight>(mm2px(Vec(64.5, (16.0 + (6.5 * 4) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP4START));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820TransparentCV>(mm2px(Vec(64.5, (16.0 + (6.5 * 4) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP4START, i + STEP4START));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820Route>(mm2px(Vec(74.5, (16.0 + (6.5 * 4) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP4START, i + STEP4START));
-            addChild(createLight<AriaOutputLight>(mm2px(Vec(69.5, (22.5 + (6.5 * 4) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP4START));
-            addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(69.5, (22.5 + (6.5 * 4) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP4START));
+        for (size_t i = 0; i < 4; i++) {
+            addChild(W::createKnobLight<W::KnobLightYellow>(mm2px(Vec(64.5, (16.0 + (6.5 * 4) + i * 13.0))), module,
+                                                         Darius::CV_LIGHT + i + STEP4START, Darius::CV_PARAM + i + STEP4START, 0.f, 10.f));
+            addParam(createMainParam<KnobTransparentCV>(mm2px(Vec(64.5, (16.0 + (6.5 * 4) + i * 13.0))), module, Darius::CV_PARAM + i + STEP4START, i + STEP4START));
+            addParam(createMainParam<KnobRoute>(mm2px(Vec(74.5, (16.0 + (6.5 * 4) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP4START, i + STEP4START));
+            addDynamicOutput(mm2px(Vec(69.5, (22.5 + (6.5 * 4) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP4START, Darius::GATE_LIGHT +  i + STEP4START);
         }
-        for (int i = 0; i < 5; i++) {
-            addChild(createLight<AriaInputLight>(mm2px(Vec(84.5, (16.0 + (6.5 * 3) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP5START));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820TransparentCV>(mm2px(Vec(84.5, (16.0 + (6.5 * 3) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP5START, i + STEP5START));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820Route>(mm2px(Vec(94.5, (16.0 + (6.5 * 3) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP5START, i + STEP5START));
-            addChild(createLight<AriaOutputLight>(mm2px(Vec(89.5, (22.5 + (6.5 * 3) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP5START));
-            addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(89.5, (22.5 + (6.5 * 3) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP5START));
+        for (size_t i = 0; i < 5; i++) {
+            addChild(W::createKnobLight<W::KnobLightYellow>(mm2px(Vec(84.5, (16.0 + (6.5 * 3) + i * 13.0))), module,
+                                                         Darius::CV_LIGHT + i + STEP5START, Darius::CV_PARAM + i + STEP5START, 0.f, 10.f));
+            addParam(createMainParam<KnobTransparentCV>(mm2px(Vec(84.5, (16.0 + (6.5 * 3) + i * 13.0))), module, Darius::CV_PARAM + i + STEP5START, i + STEP5START));
+            addParam(createMainParam<KnobRoute>(mm2px(Vec(94.5, (16.0 + (6.5 * 3) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP5START, i + STEP5START));
+            addDynamicOutput(mm2px(Vec(89.5, (22.5 + (6.5 * 3) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP5START, Darius::GATE_LIGHT +  i + STEP5START);
         }
-        for (int i = 0; i < 6; i++) {
-            addChild(createLight<AriaInputLight>(mm2px(Vec(104.5, (16.0 + (6.5 * 2) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP6START));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820TransparentCV>(mm2px(Vec(104.5, (16.0 + (6.5 * 2) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP6START, i + STEP6START));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820Route>(mm2px(Vec(114.5, (16.0 + (6.5 * 2) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP6START, i + STEP6START));
-            addChild(createLight<AriaOutputLight>(mm2px(Vec(109.5, (22.5 + (6.5 * 2) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP6START));
-            addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(109.5, (22.5 + (6.5 * 2) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP6START));
+        for (size_t i = 0; i < 6; i++) {
+            addChild(W::createKnobLight<W::KnobLightYellow>(mm2px(Vec(104.5, (16.0 + (6.5 * 2) + i * 13.0))), module,
+                                                         Darius::CV_LIGHT + i + STEP6START, Darius::CV_PARAM + i + STEP6START, 0.f, 10.f));
+            addParam(createMainParam<KnobTransparentCV>(mm2px(Vec(104.5, (16.0 + (6.5 * 2) + i * 13.0))), module, Darius::CV_PARAM + i + STEP6START, i + STEP6START));
+            addParam(createMainParam<KnobRoute>(mm2px(Vec(114.5, (16.0 + (6.5 * 2) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP6START, i + STEP6START));
+            addDynamicOutput(mm2px(Vec(109.5, (22.5 + (6.5 * 2) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP6START, Darius::GATE_LIGHT +  i + STEP6START);
         }
-        for (int i = 0; i < 7; i++) {
-            addChild(createLight<AriaInputLight>(mm2px(Vec(124.5, (16.0 + (6.5 * 1) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP7START));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820TransparentCV>(mm2px(Vec(124.5, (16.0 + (6.5 * 1) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP7START, i + STEP7START));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820Route>(mm2px(Vec(134.5, (16.0 + (6.5 * 1) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP7START, i + STEP7START));
-            addChild(createLight<AriaOutputLight>(mm2px(Vec(129.5, (22.5 + (6.5 * 1) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP7START));
-            addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(129.5, (22.5 + (6.5 * 1) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP7START));
+        for (size_t i = 0; i < 7; i++) {
+            addChild(W::createKnobLight<W::KnobLightYellow>(mm2px(Vec(124.5, (16.0 + (6.5 * 1) + i * 13.0))), module,
+                                                         Darius::CV_LIGHT + i + STEP7START, Darius::CV_PARAM + i + STEP7START, 0.f, 10.f));
+            addParam(createMainParam<KnobTransparentCV>(mm2px(Vec(124.5, (16.0 + (6.5 * 1) + i * 13.0))), module, Darius::CV_PARAM + i + STEP7START, i + STEP7START));
+            addParam(createMainParam<KnobRoute>(mm2px(Vec(134.5, (16.0 + (6.5 * 1) + i * 13.0))), module, Darius::ROUTE_PARAM + i + STEP7START, i + STEP7START));
+            addDynamicOutput(mm2px(Vec(129.5, (22.5 + (6.5 * 1) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP7START, Darius::GATE_LIGHT +  i + STEP7START);
         }
-        for (int i = 0; i < 8; i++) {
-            addChild(createLight<AriaInputLight>(mm2px(Vec(144.5, (16.0 + (6.5 * 0) + i * 13.0))), module, Darius::CV_LIGHT +    i + STEP8START));
-            addParam(DariusWidgets::createMainParam<DariusWidgets::AriaKnob820TransparentCV>(mm2px(Vec(144.5, (16.0 + (6.5 * 0) + i * 13.0))), module, Darius::CV_PARAM +    i + STEP8START, i + STEP8START));
-            addChild(createLight<AriaOutputLight>(mm2px(Vec(149.5, (22.5 + (6.5 * 0) + i * 13.0))), module, Darius::GATE_LIGHT +  i + STEP8START));
-            addOutput(createOutput<AriaJackTransparent>(mm2px(Vec(149.5, (22.5 + (6.5 * 0) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP8START));
+        for (size_t i = 0; i < 8; i++) {
+            addChild(W::createKnobLight<W::KnobLightYellow>(mm2px(Vec(144.5, (16.0 + (6.5 * 0) + i * 13.0))), module,
+                                                         Darius::CV_LIGHT + i + STEP8START, Darius::CV_PARAM + i + STEP8START, 0.f, 10.f));
+            addParam(createMainParam<KnobTransparentCV>(mm2px(Vec(144.5, (16.0 + (6.5 * 0) + i * 13.0))), module, Darius::CV_PARAM + i + STEP8START, i + STEP8START));
+            addDynamicOutput(mm2px(Vec(149.5, (22.5 + (6.5 * 0) + i * 13.0))), module, Darius::GATE_OUTPUT + i + STEP8START, Darius::GATE_LIGHT +  i + STEP8START);
         }
         
         // Step < ^ v >
-        addInput(createInput<AriaJackIn>(mm2px(Vec(4.5, 22.5)), module, Darius::STEP_BACK_INPUT));
-        addInput(createInput<AriaJackIn>(mm2px(Vec(14.5, 18.0)), module, Darius::STEP_UP_INPUT));
-        addInput(createInput<AriaJackIn>(mm2px(Vec(14.5, 27.0)), module, Darius::STEP_DOWN_INPUT));
-        addInput(createInput<AriaJackIn>(mm2px(Vec(24.5, 22.5)), module, Darius::STEP_INPUT));
-        addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(24.5, 32.5)), module, Darius::STEP_PARAM));
+        addStaticInput(mm2px(Vec(4.5, 22.5)), module, Darius::STEP_BACK_INPUT);
+        addStaticInput(mm2px(Vec(14.5, 18.0)), module, Darius::STEP_UP_INPUT);
+        addStaticInput(mm2px(Vec(14.5, 27.0)), module, Darius::STEP_DOWN_INPUT);
+        addStaticInput(mm2px(Vec(24.5, 22.5)), module, Darius::STEP_INPUT);
+        addParam(createParam<W::ButtonMomentary>(mm2px(Vec(24.5, 32.5)), module, Darius::STEP_PARAM));
         
         // Run
-        addInput(createInput<AriaJackIn>(mm2px(Vec(4.5, 42.5)), module, Darius::RUN_INPUT));
-        addParam(createParam<AriaPushButton820>(mm2px(Vec(14.5, 42.5)), module, Darius::RUN_PARAM));
+        addStaticInput(mm2px(Vec(4.5, 42.5)), module, Darius::RUN_INPUT);
+        addParam(createParam<W::Button>(mm2px(Vec(14.5, 42.5)), module, Darius::RUN_PARAM));
         
         // Reset
-        addInput(createInput<AriaJackIn>(mm2px(Vec(24.5, 42.5)), module, Darius::RESET_INPUT));
-        addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(34.5, 42.5)), module, Darius::RESET_PARAM));
+        addStaticInput(mm2px(Vec(24.5, 42.5)), module, Darius::RESET_INPUT);
+        addParam(createParam<W::ButtonMomentary>(mm2px(Vec(34.5, 42.5)), module, Darius::RESET_PARAM));
         
         // Step count & First step
-        addParam(createParam<DariusWidgets::AriaKnob820Snap>(mm2px(Vec(44.5, 22.5)), module, Darius::STEPFIRST_PARAM));
-        addParam(createParam<DariusWidgets::AriaKnob820Snap>(mm2px(Vec(54.5, 22.5)), module, Darius::STEPCOUNT_PARAM));
+        addParam(createParam<W::KnobSnap>(mm2px(Vec(44.5, 22.5)), module, Darius::STEPFIRST_PARAM));
+        addParam(createParam<W::KnobSnap>(mm2px(Vec(54.5, 22.5)), module, Darius::STEPCOUNT_PARAM));
         
         // Randomize
-        addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(64.5, 22.5)), module, Darius::RANDCV_PARAM));
-        addParam(createParam<AriaPushButton820Momentary>(mm2px(Vec(74.5, 22.5)), module, Darius::RANDROUTE_PARAM));
+        addParam(createParam<W::ButtonMomentary>(mm2px(Vec(64.5, 22.5)), module, Darius::RANDCV_PARAM));
+        addParam(createParam<W::ButtonMomentary>(mm2px(Vec(74.5, 22.5)), module, Darius::RANDROUTE_PARAM));
         
         // Seed
-        addParam(createParam<AriaRockerSwitchVertical800>(mm2px(Vec(103.0, 112.0)), module, Darius::SEED_MODE_PARAM));
-        addInput(createInput<AriaJackIn>(mm2px(Vec(109.5, 112.0)), module, Darius::SEED_INPUT));
-        addChild(createLightCentered<SmallLight<InputLight>>(mm2px(Vec(108.7, 121.4)), module, Darius::SEED_LIGHT));
+        addParam(createParam<W::RockerSwitchVertical>(mm2px(Vec(103.0, 112.0)), module, Darius::SEED_MODE_PARAM));
+        addStaticInput(mm2px(Vec(109.5, 112.0)), module, Darius::SEED_INPUT);
+        addChild(createLight<W::StatusLightInput>(mm2px(Vec(107.7, 120.4)), module, Darius::SEED_LIGHT));
 
         // Output area //////////////////
 
@@ -1218,28 +1243,28 @@ struct DariusWidget : ModuleWidget {
         addChild(lcd);
 
         // Quantizer toggle
-        addParam(createParam<DariusWidgets::AriaRockerSwitchHorizontal800ModeReset>(mm2px(Vec(11.1, 99.7)), module, Darius::QUANTIZE_TOGGLE_PARAM));
+        addParam(createParam<RockerSwitchHorizontalModeReset>(mm2px(Vec(11.1, 99.7)), module, Darius::QUANTIZE_TOGGLE_PARAM));
 
         // Voltage Range
-        addParam(createParam<AriaRockerSwitchHorizontal800Flipped>(mm2px(Vec(28.0, 118.8)), module, Darius::RANGE_PARAM));
+        addParam(createParam<RockerSwitchHorizontalFlipped>(mm2px(Vec(28.0, 118.8)), module, Darius::RANGE_PARAM));
 
         // Min & Max
-        addParam(createParam<DariusWidgets::AriaKnob820MinMax>(mm2px(Vec(49.5f, 112.f)), module, Darius::MIN_PARAM)); 
-        addParam(createParam<DariusWidgets::AriaKnob820MinMax>(mm2px(Vec(59.5f, 112.f)), module, Darius::MAX_PARAM)); 
+        addParam(createParam<KnobMinMax>(mm2px(Vec(49.5f, 112.f)), module, Darius::MIN_PARAM)); 
+        addParam(createParam<KnobMinMax>(mm2px(Vec(59.5f, 112.f)), module, Darius::MAX_PARAM)); 
 
         // Quantizer Key & Scale
-        addParam(createParam<DariusWidgets::AriaKnob820Scale>(mm2px(Vec(49.5f, 99.f)), module, Darius::KEY_PARAM));
-        addParam(createParam<DariusWidgets::AriaKnob820Scale>(mm2px(Vec(59.5f, 99.f)), module, Darius::SCALE_PARAM));
+        addParam(createParam<KnobScale>(mm2px(Vec(49.5f, 99.f)), module, Darius::KEY_PARAM));
+        addParam(createParam<KnobScale>(mm2px(Vec(59.5f, 99.f)), module, Darius::SCALE_PARAM));
 
         // External Scale
-        addInput(createInput<AriaJackIn>(mm2px(Vec(69.5, 99.0)), module, Darius::EXT_SCALE_INPUT));
+        addStaticInput(mm2px(Vec(69.5, 99.0)), module, Darius::EXT_SCALE_INPUT);
 
         // Slide
-        addParam(createParam<DariusWidgets::AriaKnob820Slide>(mm2px(Vec(69.5, 112.0)), module, Darius::SLIDE_PARAM));
+        addParam(createParam<KnobSlide>(mm2px(Vec(69.5, 112.0)), module, Darius::SLIDE_PARAM));
 
         // Output!
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(79.5, 112.0)), module, Darius::GLOBAL_GATE_OUTPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(89.5, 112.0)), module, Darius::CV_OUTPUT));
+        addStaticOutput(mm2px(Vec(79.5, 112.0)), module, Darius::GLOBAL_GATE_OUTPUT);
+        addStaticOutput(mm2px(Vec(89.5, 112.0)), module, Darius::CV_OUTPUT);
     }
 
 

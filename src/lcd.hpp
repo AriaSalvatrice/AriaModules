@@ -17,14 +17,14 @@
 using namespace rack;
 extern Plugin* pluginInstance;
 
-// This LCD widget  displays data, provided by the module or by widgets.
+// This LCD widget displays data, provided by the module or by widgets.
 // Its size is currently fixed to 36*10mm - 2 lines of 11 characters.
 //
 // The LCD LAYOUT is the layout, e.g., two lines of text, or a piano and a line of text.
 // The LCD MODE is deprecated.
 //
 // Modulus Salomonis Regis is the only module to implement the LCD somewhat as intended.
-// Arcane, Darius and QQQQ do things in deprecated ways.
+// Arcane, Darius and QQQQ do things in deprecated (and downright stupid) ways.
 // 
 // On Arcane and Darius, the SVG of the LCD is a little bit too small to display
 // descenders on the second line of text, so uppercase is mostly used.
@@ -34,6 +34,8 @@ extern Plugin* pluginInstance;
 // 
 // If you're gonna reuse this code despite the warnings, please consider changing my signature
 // color scheme to your own. You can recolor the SVG letters in batch with a text editor.
+
+// TODO: Handle the page timer entirely within the widget
 
 namespace Lcd {
 
@@ -82,7 +84,7 @@ struct LcdStatus {
     float notificationTimeout = 3.f;
 
     LcdStatus() {
-        for (int i = 0; i < 12; i++) pianoDisplay[i] = false;
+       for (size_t i = 0; i < 12; i++) pianoDisplay[i] = false;
     }
 
     // Call this from the module.
@@ -111,12 +113,12 @@ struct LcdDrawWidget : LightWidget {
         module = _module;
         if (module) {
             box.size = mm2px(Vec(36.0, 10.0));
-            for (int i = 0; i < 12; i++) // Unlit
-                pianoSvg[i] = APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/lcd/piano/u" + std::to_string(i) + ".svg"));
-            for (int i = 0; i < 12; i++) // Lit
-                pianoSvg[i + 12] = APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/lcd/piano/l" + std::to_string(i) + ".svg"));
-            for (int i = 0; i < 95; i++)
-                asciiSvg[i] = APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/lcd/Fixed_v01/" + std::to_string(i + 32) + ".svg"));
+           for (size_t i = 0; i < 12; i++) // Unlit
+                pianoSvg[i] = APP->window->loadSvg(asset::plugin(pluginInstance, "res/lcd/piano/u" + std::to_string(i) + ".svg"));
+           for (size_t i = 0; i < 12; i++) // Lit
+                pianoSvg[i + 12] = APP->window->loadSvg(asset::plugin(pluginInstance, "res/lcd/piano/l" + std::to_string(i) + ".svg"));
+           for (size_t i = 0; i < 95; i++)
+                asciiSvg[i] = APP->window->loadSvg(asset::plugin(pluginInstance, "res/lcd/Fixed_v01/" + std::to_string(i + 32) + ".svg"));
         }
     }
 
@@ -162,7 +164,7 @@ struct LcdDrawWidget : LightWidget {
             nvgSave(args.vg);
             lcdText1 = module->lcdStatus.lcdText1;
             lcdText1.append(11, ' '); // Ensure the string is long enough
-            for (int i = 0; i < 11; i++) {
+           for (size_t i = 0; i < 11; i++) {
                 char c = lcdText1.at(i);
                 svgDraw(args.vg, asciiSvg[ c - 32 ]->handle);
                 nvgTranslate(args.vg, 6, 0);
@@ -178,7 +180,7 @@ struct LcdDrawWidget : LightWidget {
             nvgTranslate(args.vg, 0, 11);
             lcdText2 = module->lcdStatus.lcdText2;
             lcdText2.append(11, ' '); // Ensure the string is long enough
-            for (int i = 0; i < 11; i++) {
+           for (size_t i = 0; i < 11; i++) {
                 char c = lcdText2.at(i);
                 svgDraw(args.vg, asciiSvg[ c - 32 ]->handle);
                 nvgTranslate(args.vg, 6, 0);

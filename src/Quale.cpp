@@ -8,6 +8,7 @@ You should have received a copy of the GNU General Public License along with thi
 
 #include "plugin.hpp"
 #include "quantizer.hpp"
+#include "polyexternalscale.hpp"
 
 namespace Quale {
 
@@ -34,15 +35,32 @@ struct Quale : Module {
         NUM_LIGHTS
     };
 
-    bool leftMessages[2][12];
+    bool channel1root = true;
+    size_t rootNote = 0;
     std::array<bool, 12> scale;
     dsp::ClockDivider processDivider;
+    PolyExternalScale::PESExpanderMessage pesExpanderProducerMessage;
+    PolyExternalScale::PESExpanderMessage pesExpanderConsumerMessage;
     
     Quale() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         processDivider.setDivision(PROCESSDIVIDER);
-        leftExpander.producerMessage = leftMessages[0];
-        leftExpander.consumerMessage = leftMessages[1];
+        leftExpander.producerMessage = &pesExpanderProducerMessage;
+        leftExpander.consumerMessage = &pesExpanderConsumerMessage;
+    }
+
+    json_t* dataToJson() override {
+        json_t* rootJ = json_object();
+        json_t *channel1rootJ = json_boolean(channel1root);
+        json_object_set_new(rootJ, "channel1root", channel1rootJ);
+        return rootJ;
+    }
+
+    void dataFromJson(json_t* rootJ) override {
+        json_t *channel1rootJ = json_object_get(rootJ, "channel1root");
+        if (channel1rootJ) {
+            channel1root = json_boolean_value(channel1rootJ);
+        }
     }
 
     void processScaleToChord() {
@@ -55,10 +73,10 @@ struct Quale : Module {
             // We are an expander
             lights[EXPANDER_IN_LIGHT].setBrightness(1.f);
             lights[SCALE_TO_CHORD_LIGHT].setBrightness(0.f);
-            bool *message = (bool*) leftExpander.consumerMessage;
+            PolyExternalScale::PESExpanderMessage *message = (PolyExternalScale::PESExpanderMessage*) leftExpander.consumerMessage;
             if (outputs[CHORD_OUTPUT].isConnected()) {
                 for (size_t i = 0; i < 12; i++) {
-                    if (message[i]) outputs[CHORD_OUTPUT].setVoltage((i * 1.f/12.f) , j++);
+                    if (message->scale[i]) outputs[CHORD_OUTPUT].setVoltage((i * 1.f/12.f) , j++);
                 }
                 outputs[CHORD_OUTPUT].setChannels(j);
             }
@@ -82,6 +100,9 @@ struct Quale : Module {
             for (int i = 0; i < inputs[CHORD_INPUT].getChannels(); i++) {
                 scale[Quantizer::quantizeToPositionInOctave(inputs[CHORD_INPUT].getVoltage(i), Quantizer::validNotesInScale(Quantizer::CHROMATIC))] = true;
             }
+            if (channel1root) {
+                rootNote = Quantizer::quantizeToPositionInOctave(inputs[CHORD_INPUT].getVoltage(0), Quantizer::validNotesInScale(Quantizer::CHROMATIC));
+            }
         }
 
         if ((rightExpander.module and rightExpander.module->model == modelQqqq)
@@ -89,8 +110,14 @@ struct Quale : Module {
         ||  (rightExpander.module and rightExpander.module->model == modelQ)) {
             // We have an expander
             lights[EXPANDER_OUT_LIGHT].setBrightness(1.f);
-            bool *message = (bool*) rightExpander.module->leftExpander.producerMessage;			
-            for (size_t i = 0; i < 12; i++) message[i] = scale[i];
+            PolyExternalScale::PESExpanderMessage *message = (PolyExternalScale::PESExpanderMessage*) rightExpander.module->leftExpander.producerMessage;			
+            for (size_t i = 0; i < 12; i++) message->scale[i] = scale[i];
+            if (channel1root) {
+                message->hasRootNote = true;
+                message->rootNote = Quantizer::quantizeToPositionInOctave(inputs[CHORD_INPUT].getVoltage(0), Quantizer::validNotesInScale(Quantizer::CHROMATIC));
+            } else {
+                message->hasRootNote = false;
+            }
             rightExpander.module->leftExpander.messageFlipRequested = true;
         } else {
             // We have no expander
@@ -98,7 +125,13 @@ struct Quale : Module {
         }
 
         if (outputs[SCALE_OUTPUT].isConnected()){
-            for (size_t i = 0; i < 12; i++) outputs[SCALE_OUTPUT].setVoltage( (scale[i]) ? 10.f : 0.f, i);
+            for (size_t i = 0; i < 12; i++) {
+                if (channel1root && rootNote == i) {
+                    outputs[SCALE_OUTPUT].setVoltage(10.f, i);    
+                } else {
+                    outputs[SCALE_OUTPUT].setVoltage( (scale[i]) ? 8.f : 0.f, i);
+                }
+            }
             outputs[SCALE_OUTPUT].setChannels(12);
         }
     }
@@ -112,34 +145,57 @@ struct Quale : Module {
 };
 
 
-struct QualeWidget : ModuleWidget {
+struct QualeSettingChannel1Root : MenuItem {
+    Quale* module;
+    size_t num;
+    void onAction(const event::Action &e) override {
+        module->channel1root = ! module->channel1root;
+    }
+};
+
+
+struct QualeWidget : W::ModuleWidget {
     QualeWidget(Quale* module) {
         setModule(module);
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Quale.svg")));
 
         // Signature
-        addChild(createWidget<AriaSignature>(mm2px(Vec(1.0f, 114.5f))));
+        addChild(createWidget<W::Signature>(mm2px(Vec(1.0f, 114.5f))));
         
         // Screws
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
         // Jacks
-        addInput(createInput<AriaJackIn>(mm2px(Vec(3.52f, 39.f)), module, Quale::CHORD_INPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(3.52f, 59.f)), module, Quale::SCALE_OUTPUT));
+        addStaticInput(mm2px(Vec(3.52f, 39.f)), module, Quale::CHORD_INPUT);
+        addStaticOutput(mm2px(Vec(3.52f, 59.f)), module, Quale::SCALE_OUTPUT);
 
-        addInput(createInput<AriaJackIn>(mm2px(Vec(3.52f, 83.f)), module, Quale::SCALE_INPUT));
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(3.52f, 103.f)), module, Quale::CHORD_OUTPUT));
+        addStaticInput(mm2px(Vec(3.52f, 83.f)), module, Quale::SCALE_INPUT);
+        addStaticOutput(mm2px(Vec(3.52f, 103.f)), module, Quale::CHORD_OUTPUT);
 
         // Operation lights
-        addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(3.5f, 96.f)), module, Quale::SCALE_TO_CHORD_LIGHT));
+        addChild(createLight<W::StatusLightInput>(mm2px(Vec(3.5f, 96.f)), module, Quale::SCALE_TO_CHORD_LIGHT));
 
         // Expander lights (right is 3.5mm from edge)
-        addChild(createLight<SmallLight<InputLight>>(mm2px(Vec(1.4f, 125.2f)), module, Quale::EXPANDER_IN_LIGHT));
-        addChild(createLight<SmallLight<OutputLight>>(mm2px(Vec(11.74f, 125.2f)), module, Quale::EXPANDER_OUT_LIGHT));
+        addChild(createLight<W::StatusLightInput>(mm2px(Vec(1.4f, 125.2f)), module, Quale::EXPANDER_IN_LIGHT));
+        addChild(createLight<W::StatusLightOutput>(mm2px(Vec(11.74f, 125.2f)), module, Quale::EXPANDER_OUT_LIGHT));
     }
+
+    void appendContextMenu(ui::Menu *menu) override {	
+        Quale *module = dynamic_cast<Quale*>(this->module);
+        assert(module);
+
+        menu->addChild(new MenuSeparator());
+        menu->addChild(createMenuLabel("Poly External Scales"));
+
+        QualeSettingChannel1Root *qualeSettingChannel1Root = createMenuItem<QualeSettingChannel1Root>("Channel 1 of chord is P.E.S. root note", "");
+        qualeSettingChannel1Root->module = module;
+        qualeSettingChannel1Root->rightText += (module->channel1root) ? "✔" : "";
+        menu->addChild(qualeSettingChannel1Root);
+    }
+
 };
 
 } // namespace Quale

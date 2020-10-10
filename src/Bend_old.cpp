@@ -78,33 +78,33 @@ struct AriaPbSlider : SvgSlider {
 };
 
 
-struct BendletWidget : ModuleWidget {
+struct BendletWidget : W::ModuleWidget {
     BendletWidget(Bendlet* module) {
         setModule(module);
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Bendlet.svg")));
 
         // Signature
-        addChild(createWidget<AriaSignature>(mm2px(Vec(1.0, 114.538))));
+        addChild(createWidget<W::Signature>(mm2px(Vec(1.f, 114.5f))));
 
         // Screws
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
         // Input
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 79.0)), module, Bendlet::PITCH_INPUT));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 92.0)), module, Bendlet::PB_INPUT));
+        // addInput(createInputCentered<W::JackInput>(mm2px(Vec(7.62, 79.0)), module, Bendlet::PITCH_INPUT));
+        // addInput(createInputCentered<W::JackInput>(mm2px(Vec(7.62, 92.0)), module, Bendlet::PB_INPUT));
 
-        // Output
-        addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 105.0)), module, Bendlet::BENT_OUTPUT));
+        // // Output
+        // addOutput(createOutputCentered<W::JackOutput>(mm2px(Vec(7.62, 105.0)), module, Bendlet::BENT_OUTPUT));
 
         // PB Wheel
         addParam(createParam<AriaPbSlider>(mm2px(Vec(2.12, 18.0)), module, Bendlet::PB_PARAM));
         
         // Debug Output
         #ifdef ARIA_DEBUG
-        // addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(7.62, 119.0)), module, Bendlet::DEBUG_OUTPUT));
+        // addOutput(createOutputCentered<W::JackOutput>(mm2px(Vec(7.62, 119.0)), module, Bendlet::DEBUG_OUTPUT));
         #endif
     }
 };

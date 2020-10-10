@@ -154,9 +154,9 @@ struct Pokies : Module {
 // Add a margin to my normal button, so the square that shows it's bound to MIDI is offset a bit.
 // A black placeholder square is added to the faceplate. Positioning of the rectangle is yolo'd.
 // The button is always momentary: we display an overlay when it's in toggle mode.
-struct Pokie : AriaPushButton820Momentary {
+struct Pokie : W::ButtonMomentary {
     Pokie() {
-        AriaPushButton820Momentary();
+        W::ButtonMomentary();
         box.size.x += mm2px(1.35f);
         box.size.y += mm2px(0.71f);
     }
@@ -379,7 +379,7 @@ struct PokieSettingsItem : MenuItem {
 
 
 
-struct PokiesWidget : ModuleWidget {
+struct PokiesWidget : W::ModuleWidget {
 
     void drawPokie(Pokies<4>* module, float y, int num) {
         addParam(createParam<Pokie>(mm2px(Vec(3.52f, y)), module, Pokies<4>::POKIE_PARAM + num));
@@ -390,7 +390,7 @@ struct PokiesWidget : ModuleWidget {
         pokieLight->num = num;
         addChild(pokieLight);
 
-        addOutput(createOutput<AriaJackOut>(mm2px(Vec(3.52f, y + 10.f)), module, Pokies<4>::CV_OUTPUT + num));
+        addStaticOutput(mm2px(Vec(3.52f, y + 10.f)), module, Pokies<4>::CV_OUTPUT + num);
     }
 
     PokiesWidget(Pokies<4>* module) {
@@ -398,10 +398,10 @@ struct PokiesWidget : ModuleWidget {
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Pokies.svg")));
         
         // Signature
-        addChild(createWidget<AriaSignature>(mm2px(Vec(1.0f, 114.5f))));
+        addChild(createWidget<W::Signature>(mm2px(Vec(1.0f, 114.5f))));
 
         // Global Input
-        addInput(createInput<AriaJackIn>(mm2px(Vec(3.52f, 15.9f)), module, Pokies<4>::GLOBAL_INPUT));
+        addStaticInput(mm2px(Vec(3.52f, 15.9f)), module, Pokies<4>::GLOBAL_INPUT);
 
         // Pokies
         drawPokie(module, 31.f, 0);
@@ -410,10 +410,10 @@ struct PokiesWidget : ModuleWidget {
         drawPokie(module, 94.f, 3);
 
         // Screws
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
     }
 
     void appendContextMenu(ui::Menu *menu) override {	

@@ -10,7 +10,7 @@ Plugin* pluginInstance;
 void init(Plugin* p) {
     pluginInstance = p;
 
-    // Split series
+    // Split & Merge series
     p->addModel(modelSplort);
     p->addModel(modelSmerge);
     p->addModel(modelSpleet);

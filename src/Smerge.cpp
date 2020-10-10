@@ -3,6 +3,12 @@ This program is free software: you can redistribute it and/or modify it under th
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
+
+
+// Warning - this module was created with very little C++ experience, and features were 
+// added to it later without regard for code quality. This is maintained exploratory code, not good design.
+
+
 #include "plugin.hpp"
 
 namespace Smerge{
@@ -37,9 +43,13 @@ struct Smerge : Module {
     }
     
     // Merge without sorting, faster
-    void merge(const ProcessArgs& args) {
+    void merge() {
+
+        // Don't waste time if there's no output connected
+        if (!outputs[POLY_OUTPUT].isConnected()) return;
+
         int lastMergeChannel = 0;
-        for (int i = 0; i < 16; i++) {
+        for (size_t i = 0; i < 16; i++) {
             if (inputs[MERGE_INPUT + i].isConnected()) {
                 outputs[POLY_OUTPUT].setVoltage(inputs[MERGE_INPUT + i].getVoltage(), i);
                 lastMergeChannel = i+1;
@@ -51,9 +61,9 @@ struct Smerge : Module {
     }
     
     // Merge with sorting, and send Link output
-    void mergeSortLink(const ProcessArgs& args) {
+    void mergeSortLink() {
         std::array<std::array<float, 2>, 16> mergedVoltages;	
-        int connected = 0;
+        size_t connected = 0;
         
         if (inputs[LINK_INPUT].isConnected()) {
             // Link input
@@ -73,7 +83,7 @@ struct Smerge : Module {
             });	
         } else {
             // No link input
-            for (int i = 0; i < 16; i++) {
+            for (size_t i = 0; i < 16; i++) {
                 if (inputs[MERGE_INPUT + i].isConnected()) {
                     mergedVoltages[i][0] = inputs[MERGE_INPUT + i].getVoltage();
                     mergedVoltages[i][1] = (i + 1.f) * 0.1f;
@@ -87,7 +97,7 @@ struct Smerge : Module {
         }
         
         // Send to poly output
-        for (int i = 0; i < connected; i++) {
+        for (size_t i = 0; i < connected; i++) {
             outputs[POLY_OUTPUT].setVoltage(mergedVoltages[i][0], i);
         }
         outputs[POLY_OUTPUT].setChannels(connected);
@@ -95,16 +105,16 @@ struct Smerge : Module {
         // Send to link output
         if (! inputs[LINK_INPUT].isConnected()) {
             outputs[LINK_OUTPUT].setChannels(connected);
-            for (int i = 0; i < 16; i++) {
+            for (size_t i = 0; i < 16; i++) {
                 outputs[LINK_OUTPUT].setVoltage(mergedVoltages[i][1], i);
             }
         }
     }
     
-    void chainLink(const ProcessArgs& args) {
+    void chainLink() {
         if (inputs[LINK_INPUT].isConnected()) {
             outputs[LINK_OUTPUT].setChannels(inputs[LINK_INPUT].getChannels());
-            for (int i = 0; i < 16; i++) {
+            for (size_t i = 0; i < 16; i++) {
                 outputs[LINK_OUTPUT].setVoltage(inputs[LINK_INPUT].getVoltage(i), i);
             }
         } else {
@@ -115,7 +125,7 @@ struct Smerge : Module {
     }
     
     
-    void updateLeds(const ProcessArgs& args) {
+    void updateLeds() {
         if ( (params[SORT_PARAM].getValue()) or (inputs[LINK_INPUT].isConnected()) ) {
             lights[LINK_IN_LIGHT].setBrightness(1.f);
             lights[LINK_OUT_LIGHT].setBrightness(1.f);
@@ -127,59 +137,55 @@ struct Smerge : Module {
 
 
     void process(const ProcessArgs& args) override {
-        (params[SORT_PARAM].getValue()) ? mergeSortLink(args) : merge(args);
-        chainLink(args); // Chain link inputs, whether sorting or not
+        (params[SORT_PARAM].getValue()) ? mergeSortLink() : merge();
+        chainLink(); // Chain link inputs, whether sorting or not
         if (ledDivider.process())
-            updateLeds(args);
+            updateLeds();
     }	
 };
 
 
-struct SmergeWidget : ModuleWidget {
+struct SmergeWidget : W::ModuleWidget {
     SmergeWidget(Smerge* module) {
         setModule(module);
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Smerge.svg")));
         
         // Signature 
-        addChild(createWidget<AriaSignature>(mm2px(Vec(5.899, 114.538))));
+        addChild(createWidget<W::Signature>(mm2px(Vec(5.9f, 114.5f))));
 
         // Screws
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<AriaScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<AriaScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
         // Merge Output
-        addOutput(createOutputCentered<AriaJackOut>(mm2px(Vec(12.7, 20.0)),  module, Smerge::POLY_OUTPUT));
+        addStaticOutput(mm2px(Vec(8.6f, 15.9f)),  module, Smerge::POLY_OUTPUT);
         
         // Merge Inputs
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 29.5)),  module, Smerge::MERGE_INPUT + 0));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 37.5)),  module, Smerge::MERGE_INPUT + 1));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 45.5)),  module, Smerge::MERGE_INPUT + 2));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 53.5)),  module, Smerge::MERGE_INPUT + 3));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 61.5)),  module, Smerge::MERGE_INPUT + 4));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 69.5)),  module, Smerge::MERGE_INPUT + 5));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 77.5)),  module, Smerge::MERGE_INPUT + 6));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(7.62, 85.5)),  module, Smerge::MERGE_INPUT + 7));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(17.78, 29.5)), module, Smerge::MERGE_INPUT + 8));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(17.78, 37.5)), module, Smerge::MERGE_INPUT + 9));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(17.78, 45.5)), module, Smerge::MERGE_INPUT + 10));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(17.78, 53.5)), module, Smerge::MERGE_INPUT + 11));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(17.78, 61.5)), module, Smerge::MERGE_INPUT + 12));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(17.78, 69.5)), module, Smerge::MERGE_INPUT + 13));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(17.78, 77.5)), module, Smerge::MERGE_INPUT + 14));
-        addInput(createInputCentered<AriaJackIn>(mm2px(Vec(17.78, 85.5)), module, Smerge::MERGE_INPUT + 15));
+        addStaticInput(mm2px(Vec( 3.52f, 25.4f)), module, Smerge::MERGE_INPUT + 0);
+        addStaticInput(mm2px(Vec( 3.52f, 33.4f)), module, Smerge::MERGE_INPUT + 1);
+        addStaticInput(mm2px(Vec( 3.52f, 41.4f)), module, Smerge::MERGE_INPUT + 2);
+        addStaticInput(mm2px(Vec( 3.52f, 49.4f)), module, Smerge::MERGE_INPUT + 3);
+        addStaticInput(mm2px(Vec( 3.52f, 57.4f)), module, Smerge::MERGE_INPUT + 4);
+        addStaticInput(mm2px(Vec( 3.52f, 65.4f)), module, Smerge::MERGE_INPUT + 5);
+        addStaticInput(mm2px(Vec( 3.52f, 73.4f)), module, Smerge::MERGE_INPUT + 6);
+        addStaticInput(mm2px(Vec( 3.52f, 81.4f)), module, Smerge::MERGE_INPUT + 7);
+        addStaticInput(mm2px(Vec(13.68f, 25.4f)), module, Smerge::MERGE_INPUT + 8);
+        addStaticInput(mm2px(Vec(13.68f, 33.4f)), module, Smerge::MERGE_INPUT + 9);
+        addStaticInput(mm2px(Vec(13.68f, 41.4f)), module, Smerge::MERGE_INPUT + 10);
+        addStaticInput(mm2px(Vec(13.68f, 49.4f)), module, Smerge::MERGE_INPUT + 11);
+        addStaticInput(mm2px(Vec(13.68f, 57.4f)), module, Smerge::MERGE_INPUT + 12);
+        addStaticInput(mm2px(Vec(13.68f, 65.4f)), module, Smerge::MERGE_INPUT + 13);
+        addStaticInput(mm2px(Vec(13.68f, 73.4f)), module, Smerge::MERGE_INPUT + 14);
+        addStaticInput(mm2px(Vec(13.68f, 81.4f)), module, Smerge::MERGE_INPUT + 15);
 
         // Sort button
-        addParam(createParamCentered<AriaPushButton700>(mm2px(Vec(12.7, 95.0)), module, Smerge::SORT_PARAM));
+        addParam(createParam<W::ReducedButton>(mm2px(Vec(8.6f, 90.9f)), module, Smerge::SORT_PARAM));
 
         // Link jacks with lights
-        addChild(createLightCentered<AriaInputLight>(mm2px(Vec(5.62, 109.0)), module, Smerge::LINK_IN_LIGHT));
-        addChild(createLightCentered<AriaOutputLight>(mm2px(Vec(19.78, 109.0)), module, Smerge::LINK_OUT_LIGHT));
-        
-        addInput(createInputCentered<AriaJackTransparent>(mm2px(Vec(5.62, 109.0)), module, Smerge::LINK_INPUT));
-        addOutput(createOutputCentered<AriaJackTransparent>(mm2px(Vec(19.78, 109.0)), module, Smerge::LINK_OUTPUT));
-        
+        addDynamicInput(mm2px(Vec(1.52f, 104.9f)), module, Smerge::LINK_INPUT, Smerge::LINK_IN_LIGHT);
+        addDynamicOutput(mm2px(Vec(15.68f, 104.9f)), module, Smerge::LINK_OUTPUT, Smerge::LINK_OUT_LIGHT);
     }
 };
 
