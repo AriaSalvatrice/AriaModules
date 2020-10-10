@@ -36,6 +36,7 @@ struct Quale : Module {
     };
 
     bool channel1root = true;
+    size_t rootNote = 0;
     std::array<bool, 12> scale;
     dsp::ClockDivider processDivider;
     PolyExternalScale::PESExpanderMessage pesExpanderProducerMessage;
@@ -99,6 +100,9 @@ struct Quale : Module {
             for (int i = 0; i < inputs[CHORD_INPUT].getChannels(); i++) {
                 scale[Quantizer::quantizeToPositionInOctave(inputs[CHORD_INPUT].getVoltage(i), Quantizer::validNotesInScale(Quantizer::CHROMATIC))] = true;
             }
+            if (channel1root) {
+                rootNote = Quantizer::quantizeToPositionInOctave(inputs[CHORD_INPUT].getVoltage(0), Quantizer::validNotesInScale(Quantizer::CHROMATIC));
+            }
         }
 
         if ((rightExpander.module and rightExpander.module->model == modelQqqq)
@@ -108,6 +112,12 @@ struct Quale : Module {
             lights[EXPANDER_OUT_LIGHT].setBrightness(1.f);
             PolyExternalScale::PESExpanderMessage *message = (PolyExternalScale::PESExpanderMessage*) rightExpander.module->leftExpander.producerMessage;			
             for (size_t i = 0; i < 12; i++) message->scale[i] = scale[i];
+            if (channel1root) {
+                message->hasRootNote = true;
+                message->rootNote = Quantizer::quantizeToPositionInOctave(inputs[CHORD_INPUT].getVoltage(0), Quantizer::validNotesInScale(Quantizer::CHROMATIC));
+            } else {
+                message->hasRootNote = false;
+            }
             rightExpander.module->leftExpander.messageFlipRequested = true;
         } else {
             // We have no expander
@@ -115,7 +125,13 @@ struct Quale : Module {
         }
 
         if (outputs[SCALE_OUTPUT].isConnected()){
-            for (size_t i = 0; i < 12; i++) outputs[SCALE_OUTPUT].setVoltage( (scale[i]) ? 10.f : 0.f, i);
+            for (size_t i = 0; i < 12; i++) {
+                if (channel1root && rootNote == i) {
+                    outputs[SCALE_OUTPUT].setVoltage(10.f, i);    
+                } else {
+                    outputs[SCALE_OUTPUT].setVoltage( (scale[i]) ? 8.f : 0.f, i);
+                }
+            }
             outputs[SCALE_OUTPUT].setChannels(12);
         }
     }
@@ -174,7 +190,7 @@ struct QualeWidget : W::ModuleWidget {
         menu->addChild(new MenuSeparator());
         menu->addChild(createMenuLabel("Poly External Scales"));
 
-        QualeSettingChannel1Root *qualeSettingChannel1Root = createMenuItem<QualeSettingChannel1Root>("Channel 1 is root note", "");
+        QualeSettingChannel1Root *qualeSettingChannel1Root = createMenuItem<QualeSettingChannel1Root>("Channel 1 of chord is P.E.S. root note", "");
         qualeSettingChannel1Root->module = module;
         qualeSettingChannel1Root->rightText += (module->channel1root) ? "✔" : "";
         menu->addChild(qualeSettingChannel1Root);

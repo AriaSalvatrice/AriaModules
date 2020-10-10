@@ -21,7 +21,7 @@ struct PESExpanderMessage {
     std::array<bool, 12> scale;
     bool hasRootNote = false;
     // Only if hasRootNote
-    size_t rootNote;
+    size_t rootNote = 0;
 };
 
 } // namespace PolyExternalScale

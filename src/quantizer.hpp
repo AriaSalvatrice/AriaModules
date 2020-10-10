@@ -299,7 +299,7 @@ inline float quantize(float voltage, const std::array<bool, 12>& validNotes, int
 }
 
 // C3 = 0, C#5 = 1, D8 = 2, etc.
-inline int quantizeToPositionInOctave(float voltage, const std::array<bool, 12>& validNotes) {
+inline size_t quantizeToPositionInOctave(float voltage, const std::array<bool, 12>& validNotes) {
     voltage = quantize(voltage, validNotes);
     voltage = voltage * 12.f + 60.f;
     return (int) voltage % 12;
