@@ -13,6 +13,7 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 ### Changed
 
 - [CHANGE] Darius: When the first step is greater than 1, the path leading up to the first node is now dimmer, to make it easier to see which step is the first.
+- [NEW FEATURE] Quale: The 1st channel of the chord received is now considered the tonic in Poly External Scales. This can be disasbled via right-click menu.
 - [CHANGE] Many small improvements to widgets, most of them not user-visible. The most noticeable is the removal of halos from LEDs, as they are slated for removal in VCV 2.0 anyway. The least noticeable is that I moved the pipe character on the LCD by 1 pixel to the right to make it align to the piano on Modulus Salomonis Regis.
 - [CHANGE] Many small code improvements to most modules, most of them not user-visible, to keep the collection more maintainable in the future. 
 

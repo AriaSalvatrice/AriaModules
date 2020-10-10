@@ -8,6 +8,7 @@ You should have received a copy of the GNU General Public License along with thi
 
 #include "plugin.hpp"
 #include "quantizer.hpp"
+#include "polyexternalscale.hpp"
 
 namespace Quale {
 
@@ -35,15 +36,16 @@ struct Quale : Module {
     };
 
     bool channel1root = true;
-    std::array<std::array<bool, 12>, 2> leftMessages;
     std::array<bool, 12> scale;
     dsp::ClockDivider processDivider;
+    PolyExternalScale::PESExpanderMessage pesExpanderProducerMessage;
+    PolyExternalScale::PESExpanderMessage pesExpanderConsumerMessage;
     
     Quale() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         processDivider.setDivision(PROCESSDIVIDER);
-        leftExpander.producerMessage = &leftMessages[0];
-        leftExpander.consumerMessage = &leftMessages[1];
+        leftExpander.producerMessage = &pesExpanderProducerMessage;
+        leftExpander.consumerMessage = &pesExpanderConsumerMessage;
     }
 
     json_t* dataToJson() override {
@@ -70,10 +72,10 @@ struct Quale : Module {
             // We are an expander
             lights[EXPANDER_IN_LIGHT].setBrightness(1.f);
             lights[SCALE_TO_CHORD_LIGHT].setBrightness(0.f);
-            bool *message = (bool*) leftExpander.consumerMessage;
+            PolyExternalScale::PESExpanderMessage *message = (PolyExternalScale::PESExpanderMessage*) leftExpander.consumerMessage;
             if (outputs[CHORD_OUTPUT].isConnected()) {
                 for (size_t i = 0; i < 12; i++) {
-                    if (message[i]) outputs[CHORD_OUTPUT].setVoltage((i * 1.f/12.f) , j++);
+                    if (message->scale[i]) outputs[CHORD_OUTPUT].setVoltage((i * 1.f/12.f) , j++);
                 }
                 outputs[CHORD_OUTPUT].setChannels(j);
             }
@@ -104,8 +106,8 @@ struct Quale : Module {
         ||  (rightExpander.module and rightExpander.module->model == modelQ)) {
             // We have an expander
             lights[EXPANDER_OUT_LIGHT].setBrightness(1.f);
-            bool *message = (bool*) rightExpander.module->leftExpander.producerMessage;			
-            for (size_t i = 0; i < 12; i++) message[i] = scale[i];
+            PolyExternalScale::PESExpanderMessage *message = (PolyExternalScale::PESExpanderMessage*) rightExpander.module->leftExpander.producerMessage;			
+            for (size_t i = 0; i < 12; i++) message->scale[i] = scale[i];
             rightExpander.module->leftExpander.messageFlipRequested = true;
         } else {
             // We have no expander
