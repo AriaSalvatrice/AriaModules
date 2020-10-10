@@ -76,6 +76,7 @@ struct Qqqq : Module {
     bool isExpander = false;
     bool lastIsExpander = false;
     bool sceneTrigSelection = false;
+    bool initialized = false;
     int lcdMode = INIT_MODE;
     int scene = 0;
     int lastScene = 0;
@@ -84,6 +85,7 @@ struct Qqqq : Module {
     int lastTransposeKnobTouchedId = 0;
     int lastTransposeModeTouchedId = 0;
     int lastShTouchedId = 0;
+    size_t initCounter = 0;
     float lcdLastInteraction = 0.f;
     float lastKeyKnob = 0.f;
     float lastScaleKnob = 2.f;
@@ -188,6 +190,10 @@ struct Qqqq : Module {
                     }
                 }
             }
+            // // If we have loaded data, we want to prevent it from being overwritten on the first sample.
+            // lastKeyKnob = params[KEY_PARAM].getValue();
+            // lastScaleKnob = params[SCALE_PARAM].getValue();
+            // for (size_t i = 0; i < 12; i++) lastExternalScale[i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.1f) ? true : false;
         }
         updateScene();
         scaleToPiano();
@@ -488,6 +494,18 @@ struct Qqqq : Module {
 
     // The last control touched always has the last word.
     void updateScale() {
+
+        // Initialize
+        if (!initialized) {
+            lastKeyKnob = params[KEY_PARAM].getValue();
+            lastScaleKnob = params[SCALE_PARAM].getValue();
+            for (size_t i = 0; i < 12; i++) lastExternalScale[i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.1f) ? true : false;
+
+            initCounter++;
+            // We need a few iterations or else other modules might not be initialized
+            if (initCounter > 32) initialized = true;
+        }
+
         // Scene: has it changed?
         if (sceneChanged) {
             scaleToPiano();
@@ -495,7 +513,7 @@ struct Qqqq : Module {
         }
 
         // Expander: has it just been connected, or sent something new?
-        if (isExpander) {
+        if (isExpander && initialized) {
             if ((receivedExpanderScale != lastReceivedExpanderScale) || !lastIsExpander) {
                 scale[scene] = receivedExpanderScale;
                 scaleToPiano();
@@ -505,7 +523,7 @@ struct Qqqq : Module {
         lastReceivedExpanderScale = receivedExpanderScale;
 
         // External scale: was it just connected?
-        if (!lastExtInConnected && inputs[EXT_SCALE_INPUT].isConnected()) {
+        if (!lastExtInConnected && inputs[EXT_SCALE_INPUT].isConnected() && initialized) {
             for (size_t i = 0; i < 12; i++){
                 scale[scene][i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.1f) ? true : false;
             }
@@ -514,7 +532,7 @@ struct Qqqq : Module {
 
         // External scale: has it changed?
         std::array<bool, 12> currentExternalScale;
-        if (inputs[EXT_SCALE_INPUT].isConnected()) {
+        if (inputs[EXT_SCALE_INPUT].isConnected() && initialized) {
             for (size_t i = 0; i < 12; i++) currentExternalScale[i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.1f) ? true : false;
             if (currentExternalScale != lastExternalScale) {
                 lastExternalScale = currentExternalScale;
