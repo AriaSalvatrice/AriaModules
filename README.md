@@ -97,7 +97,9 @@ Thanks to my music-making LGBBQT internet shitposting gang for introducing me to
 Lawyer's corner
 ---------------
 
-Yeah, the licensing rules are a bit complicated. If they cause licensing incompatibilities (besides the intended virality of the GPL) lemme know and we'll figure out something. Here goes the breakdown:
+Yeah, the licensing rules are a bit complicated. But the big idea is pretty simple: my modules are GPL3, my logo is copyrighted, the rest is less restrictive. If there's licensing incompatibilities (besides the intended virality of the GPL) lemme know and we'll figure out something.
+
+Here goes the detailed breakdown:
 
 ### The output of my modules belongs to you
 
@@ -113,7 +115,7 @@ The code of the Aria Salvatrice Signature Series Synthesizer Modules is distribu
 
 ### Re-usable libraries
 
-Not that the code is very good, but some libraries I created for my own use are available under the less restrictive terms of the [Do What The Fuck You Want To Public License](https://spdx.org/licenses/WTFPL.html), to allow every VCV creator to do what the fuck they want. The files in question are [`src/javascript.hpp`](src/javascript.hpp), [`src/lcd.hpp`](src/lcd.hpp), [`src/portablesequence.hpp`](src/portablesequence.hpp), [`src/prng.hpp`](src/prng.hpp), [`src/quantizer.hpp`](src/quantizer.hpp), and [`src/widgets.hpp`](src/widgets.hpp).
+Not that the code is very good, but some libraries I created for my own use are available under the less restrictive terms of the [Do What The Fuck You Want To Public License](https://spdx.org/licenses/WTFPL.html), to allow every VCV creator to do what the fuck they want. The files in question are [`src/javascript.hpp`](src/javascript.hpp), [`src/lcd.hpp`](src/lcd.hpp), [`src/polyexternalscale.hpp`](src/polyexternalscale.hpp), [`src/portablesequence.hpp`](src/portablesequence.hpp), [`src/prng.hpp`](src/prng.hpp), [`src/quantizer.hpp`](src/quantizer.hpp), and [`src/widgets.hpp`](src/widgets.hpp).
 
 
 ### Faceplates 
@@ -123,9 +125,9 @@ Not that the code is very good, but some libraries I created for my own use are 
 
 ### Components (knobs, jacks, etc)
 
-WTFPL graphics and code (in [`src/widgets.hpp`](src/widgets.hpp)). But if you re-use them, I request you do not entirely re-use my signature color scheme in your own modules. Because I use a limited palette, it's easy to replace most colors in my SVG files using search and replace in a text editor. This request is not legally binding. 
+WTFPL graphics and code (in [`src/widgets.hpp`](src/widgets.hpp)). But if you re-use them, I request you do not entirely re-use my signature color scheme in your own modules. This request is not legally binding, as it'd make licensing complicated. Because I use a limited palette, it's easy to replace most colors in my SVG files using search and replace in a text editor.
 
-My collection of modules does not use VCV's component library at all, and is thus unencumbered by its licensing restrictions.
+My collection of modules and widgets does not use VCV's component library at all, and is thus unencumbered by its licensing restrictions.
 
 
 ### Signature / Logo
@@ -163,7 +165,7 @@ The **Arcane** module uses Tarot cards altered from [Yoav Ben-Dov's CBD Tarot](h
 
 **By sending me pull requests, you assign their copyright to me, allowing me, in perpetuity, to license your contributions however I see fit**.    
 Right now, that means a mix of GPL-3.0-only and WTFPL, but I reserve the right to relicense it or re-use code in proprietary projects in the future.     
-This is a personal project where I don't expect external contributions to be any more complex than small-scale bugfixes and feature additions, so I think that's reasonable. If you think that's unreasonable, don't contribute. You will be asked to acknowledge this policy the first time you send me a pull request. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for more information.
+This is a personal project where I don't expect external contributions to be any more complex than small-scale bugfixes and feature additions, so I think that's reasonable. If you think that's unreasonable, don't contribute. You will be asked to acknowledge this policy the first time you send me a non-trivial pull request. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for more information.
 
 
 

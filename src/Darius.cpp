@@ -8,6 +8,7 @@ You should have received a copy of the GNU General Public License along with thi
 // Warning - this module was created with very little C++ experience, and features were 
 // added to it later without regard for code quality. This is maintained exploratory code, not good design.
 // I do not know why it works.
+// In fact it doesn't really work, if you process data at audio rates everything breaks.
 
 
 // Note: the module calls it a "path" internally, but they are called "routes" for the user.
@@ -35,6 +36,7 @@ const int STEP_STARTS[9] = {STEP1START, STEP2START, STEP3START, STEP4START, STEP
 
 const int DISPLAYDIVIDER = 512;
 const int KNOBDIVIDER = 512;
+const int PROCESSDIVIDER = 32;
 
 enum LcdModes {
     INIT_MODE,
@@ -138,6 +140,7 @@ struct Darius : Module {
     dsp::PulseGenerator manualStepTrigger;
     dsp::ClockDivider knobDivider;
     dsp::ClockDivider displayDivider;
+    dsp::ClockDivider processDivider;
     prng::prng prng;
     Lcd::LcdStatus lcdStatus;
 
@@ -164,6 +167,7 @@ struct Darius : Module {
             configParam(ROUTE_PARAM + i, 0.f, 1.f, 0.5f, "Random route");
         knobDivider.setDivision(KNOBDIVIDER);
         displayDivider.setDivision(DISPLAYDIVIDER);
+        processDivider.setDivision(PROCESSDIVIDER);
         lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
         lcdStatus.lcdText1 = "MEDITATE..."; // Loading message
         lcdStatus.lcdText2 = "MEDITATION."; // https://www.youtube.com/watch?v=JqLNY1zyQ6o
@@ -942,63 +946,66 @@ struct Darius : Module {
     }
 
     void process(const ProcessArgs& args) override {
-        if (copyPortableSequence)
-            exportPortableSequence();
+        if (processDivider.process()) {
 
-        if (pastePortableSequence)
-            importPortableSequence();
+            if (copyPortableSequence)
+                exportPortableSequence();
+
+            if (pastePortableSequence)
+                importPortableSequence();
 
 
-        if (randomizeCvTrigger.process(params[RANDCV_PARAM].getValue()))
-            randomizeCv();
-        if (randomizeRouteTrigger.process(params[RANDROUTE_PARAM].getValue()))
-            randomizeRoute();
-        if (resetCvTrigger.process(inputs[RESET_INPUT].getVoltageSum()) or resetButtonTrigger.process(params[RESET_PARAM].getValue()))
-            reset();
-        if (resetDelay >= 0.f) {
-            if (wait1msOnReset(args.sampleTime)) {
-                // Done with reset
-                resetDelay = -1.f;
-            } else {
-                return;
+            if (randomizeCvTrigger.process(params[RANDCV_PARAM].getValue()))
+                randomizeCv();
+            if (randomizeRouteTrigger.process(params[RANDROUTE_PARAM].getValue()))
+                randomizeRoute();
+            if (resetCvTrigger.process(inputs[RESET_INPUT].getVoltageSum()) or resetButtonTrigger.process(params[RESET_PARAM].getValue()))
+                reset();
+            if (resetDelay >= 0.f) {
+                if (wait1msOnReset(args.sampleTime)) {
+                    // Done with reset
+                    resetDelay = -1.f;
+                } else {
+                    return;
+                }
             }
+
+
+            if (resetCV)
+                processResetCV();
+            if (resetRoutes)
+                processResetRoutes();
+            if (routesToTop)
+                processRoutesToTop();
+            if (routesToBottom)
+                processRoutesToBottom();
+            if (routesToEqualProbability)
+                processRoutesToEqualProbability();
+            if (routesToBinaryTree)
+                processRoutesToBinaryTree();
+
+            setRunStatus();
+            setStepStatus();
+
+            updateRoutes();
+
+            // Refreshing slide knobs often has a performance impact
+            // so the divider will remain quite high unless someone complains
+            // it breaks their art. 
+            if (knobDivider.process()) {
+                setSlide();
+            }
+
+            if (steppedForward)
+                nodeForward();
+            if (steppedBack)
+                nodeBack();
+
+            updateScale();
+
+            sendGateOutput(args);
+            setVoltageOutput(args);
         }
-
-
-        if (resetCV)
-            processResetCV();
-        if (resetRoutes)
-            processResetRoutes();
-        if (routesToTop)
-            processRoutesToTop();
-        if (routesToBottom)
-            processRoutesToBottom();
-        if (routesToEqualProbability)
-            processRoutesToEqualProbability();
-        if (routesToBinaryTree)
-            processRoutesToBinaryTree();
-
-        setRunStatus();
-        setStepStatus();
-
-        updateRoutes();
-
-        // Refreshing slide knobs often has a performance impact
-        // so the divider will remain quite high unless someone complains
-        // it breaks their art. 
-        if (knobDivider.process()) {
-            setSlide();
-        }
-
-        if (steppedForward)
-            nodeForward();
-        if (steppedBack)
-            nodeBack();
-
-        updateScale();
-
-        sendGateOutput(args);
-        setVoltageOutput(args);
         
         if (displayDivider.process()) {
             updateLights();
