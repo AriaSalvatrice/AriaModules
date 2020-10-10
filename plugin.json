@@ -1,7 +1,7 @@
 {
   "slug": "AriaSalvatrice",
   "name": "Aria Salvatrice",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "license": "GPL-3.0-only",
   "brand": "Aria Salvatrice",
   "author": "Aria Salvatrice",
@@ -63,17 +63,6 @@
       "slug": "Splirge",
       "name": "Signature Series Splirge",
       "description": "4 channels polyphonic split and merge with optional sort mode",
-      "manualUrl": "https://aria.dog/modules/splitmerge",
-      "tags": [
-        "Polyphonic",
-        "Utility",
-        "Logic"
-      ]
-    },
-    {
-      "slug": "Srot",
-      "name": "Signature Series Srot",
-      "description": "Sort, rotate, and randomize the channels of polyphonic cables.",
       "manualUrl": "https://aria.dog/modules/splitmerge",
       "tags": [
         "Polyphonic",
@@ -210,6 +199,7 @@
       "slug": "Pokies4",
       "name": "Signature Series Pokies",
       "description": "4 tiny buttons for automation or manual performance of CV parameters. Right-click options to change output values, and use in latch mode.",
+      "manualUrl": "https://aria.dog/modules/remote-controllers",
       "tags": [
         "Controller",
         "Utility",
@@ -220,6 +210,7 @@
       "slug": "Grabby",
       "name": "Signature Series Grabby",
       "description": "A lil fader for automation or manual performance of CV parameters. Right-click options to offset and invert output.\n Support for Poly External Scales from Quatherina's Quantizer.",
+      "manualUrl": "https://aria.dog/modules/remote-controllers",
       "tags": [
         "Controller",
         "Utility"
@@ -229,6 +220,7 @@
       "slug": "Rotatoes4",
       "name": "Signature Series Rotatoes",
       "description": "4 tiny knobs for automation or manual performance of CV parameters. Right-click options to offset and invert output.\n Support for Poly External Scales from Quatherina's Quantizer.",
+      "manualUrl": "https://aria.dog/modules/remote-controllers",
       "tags": [
         "Controller",
         "Utility",
@@ -243,15 +235,6 @@
       "tags": [
         "Controller",
     		"Visual"
-      ]
-    },
-    {
-      "slug": "Test",
-      "name": "Signature Series Test",
-      "description": "Yay",
-      "manualUrl": "https://aria.dog/modules/blank",
-      "tags": [
-        "Blank"
       ]
     },
     {

@@ -20,7 +20,7 @@ extern Model *modelSmerge;
 extern Model *modelSpleet;
 extern Model *modelSwerge;
 extern Model *modelSplirge;
-extern Model *modelSrot;
+// extern Model *modelSrot;
 
 // Quantizers
 extern Model *modelQqqq;
@@ -51,4 +51,4 @@ extern Model *modelUndular;
 extern Model *modelBlank;
 
 // extern Model *modelBendlet;
-extern Model *modelTest;
+// extern Model *modelTest;

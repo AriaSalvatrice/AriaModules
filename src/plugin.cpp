@@ -16,7 +16,7 @@ void init(Plugin* p) {
     p->addModel(modelSpleet);
     p->addModel(modelSwerge);
     p->addModel(modelSplirge);
-    p->addModel(modelSrot);
+    // p->addModel(modelSrot);
 
     // Quantizers
     p->addModel(modelQqqq);
@@ -47,6 +47,6 @@ void init(Plugin* p) {
     p->addModel(modelBlank);
 
     // p->addModel(modelBendlet);
-    p->addModel(modelTest);
+    // p->addModel(modelTest);
 
 }

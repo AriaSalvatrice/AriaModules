@@ -190,10 +190,6 @@ struct Qqqq : Module {
                     }
                 }
             }
-            // // If we have loaded data, we want to prevent it from being overwritten on the first sample.
-            // lastKeyKnob = params[KEY_PARAM].getValue();
-            // lastScaleKnob = params[SCALE_PARAM].getValue();
-            // for (size_t i = 0; i < 12; i++) lastExternalScale[i] = (inputs[EXT_SCALE_INPUT].getVoltage(i) > 0.1f) ? true : false;
         }
         updateScene();
         scaleToPiano();
@@ -215,6 +211,8 @@ struct Qqqq : Module {
         lcdLastInteraction = 0.f;
         lcdMode = INIT_MODE;
         lcdStatus.lcdDirty = true;
+        initialized = false;
+        initCounter = 0;
     }
 
     void onRandomize() override {

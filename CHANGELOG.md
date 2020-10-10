@@ -4,7 +4,7 @@ Changelog
 The versioning follows this standard: the first number corresponds to the VCV rack version used. The second number is increased any time a new module family is added. The third number is increased when something is added or fixed without adding a new module family.
 
 
-## Unreleased
+## [1.7.1] - 2020-10-11
 
 ### Added
 
@@ -12,15 +12,16 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 
 ### Changed
 
-- [CHANGE] Darius: When the first step is greater than 1, the path leading up to the first node is now dimmer, to make it easier to see which step is the first.
 - [OPTIMIZATION] Darius: No longer processes at audio rates. This greatly improves its performance. Audio rate processing had no practical uses and caused bugs. Find a better waveshaper! Or open a feature request if you really want that option restored.
+- [CHANGE] Darius: When the first step is greater than 1, the path leading up to the first node is now dimmer, to make it easier to see which step is the first.
 - [CHANGE] QQQQ, Quack, Q<: Poly External Scale output no longer forwards information about the tonic for now, as there are too many ambiguous cases, UI-wise. Better modules to program scales and chords, or possibly a revised QQQQ UI, will be added in the future. Because there are no modules consuming Poly External Scale data with a defined tonic yet, this is all very hypothetical anyway.
-- [NEW FEATURE] Quale: The 1st channel of the chord received is now considered the tonic in Poly External Scales. This can be disasbled via right-click menu.
+- [NEW FEATURE] Quale: The 1st channel of the chord received is now considered the tonic in Poly External Scales. This can be disasbled via right-click menu. No module makes use of this information yet.
 - [CHANGE] Many small improvements to widgets, most of them not user-visible. The most noticeable is the removal of halos from LEDs, as they are slated for removal in VCV 2.0 anyway. The least noticeable is that I moved the pipe character on the LCD by 1 pixel to the right to make it align to the piano on Modulus Salomonis Regis.
 - [CHANGE] Many small code improvements to most modules, most of them not user-visible, to keep the collection more maintainable in the future. 
 
 ### Fixed
 
+- [FIX] QQQQ: Fix various scenarios where scenes are recalled incorrectly on init.
 - [FIX] Grabby: The Grabby is no longer incorrectly labeled a Rotato.
 
 
