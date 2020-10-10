@@ -34,6 +34,7 @@ struct Quale : Module {
         NUM_LIGHTS
     };
 
+    bool channel1root = true;
     std::array<std::array<bool, 12>, 2> leftMessages;
     std::array<bool, 12> scale;
     dsp::ClockDivider processDivider;
@@ -43,6 +44,20 @@ struct Quale : Module {
         processDivider.setDivision(PROCESSDIVIDER);
         leftExpander.producerMessage = &leftMessages[0];
         leftExpander.consumerMessage = &leftMessages[1];
+    }
+
+    json_t* dataToJson() override {
+        json_t* rootJ = json_object();
+        json_t *channel1rootJ = json_boolean(channel1root);
+        json_object_set_new(rootJ, "channel1root", channel1rootJ);
+        return rootJ;
+    }
+
+    void dataFromJson(json_t* rootJ) override {
+        json_t *channel1rootJ = json_object_get(rootJ, "channel1root");
+        if (channel1rootJ) {
+            channel1root = json_boolean_value(channel1rootJ);
+        }
     }
 
     void processScaleToChord() {
@@ -112,6 +127,15 @@ struct Quale : Module {
 };
 
 
+struct QualeSettingChannel1Root : MenuItem {
+    Quale* module;
+    size_t num;
+    void onAction(const event::Action &e) override {
+        module->channel1root = ! module->channel1root;
+    }
+};
+
+
 struct QualeWidget : W::ModuleWidget {
     QualeWidget(Quale* module) {
         setModule(module);
@@ -140,6 +164,20 @@ struct QualeWidget : W::ModuleWidget {
         addChild(createLight<W::StatusLightInput>(mm2px(Vec(1.4f, 125.2f)), module, Quale::EXPANDER_IN_LIGHT));
         addChild(createLight<W::StatusLightOutput>(mm2px(Vec(11.74f, 125.2f)), module, Quale::EXPANDER_OUT_LIGHT));
     }
+
+    void appendContextMenu(ui::Menu *menu) override {	
+        Quale *module = dynamic_cast<Quale*>(this->module);
+        assert(module);
+
+        menu->addChild(new MenuSeparator());
+        menu->addChild(createMenuLabel("Poly External Scales"));
+
+        QualeSettingChannel1Root *qualeSettingChannel1Root = createMenuItem<QualeSettingChannel1Root>("Channel 1 is root note", "");
+        qualeSettingChannel1Root->module = module;
+        qualeSettingChannel1Root->rightText += (module->channel1root) ? "✔" : "";
+        menu->addChild(qualeSettingChannel1Root);
+    }
+
 };
 
 } // namespace Quale

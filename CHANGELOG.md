@@ -18,7 +18,9 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 
 ### Fixed
 
-- [FIX] Grabby: The Grabby is no longer incorrectly labeled as a Rotato.
+- [FIX] Grabby: The Grabby is no longer incorrectly labeled a Rotato.
+
+
 
 
 ## [1.7.0] - 2020-08-17
