@@ -75,7 +75,7 @@ stages:
       displayName: Build Plugin
     - task: PublishPipelineArtifact@1
       inputs:
-        path: $(System.DefaultWorkingDirectory)/artifact
+        path: $(System.DefaultWorkingDirectory)/dist
         artifact: $(artifact)
 
 - stage: publish
