@@ -35,17 +35,17 @@ stages:
   - job: BuildPlugin
     strategy:
       matrix:
-        mac:
+        Mac:
           imageName: macos-10.14
           prepare-env: ""
           artifact: Plugin-MacOS
-        windows:
+        Windows:
           imageName: vs2017-win2016
           prepare-env: export CC=gcc
           artifact: Plugin-Windows
-        linux:
+        Linux:
           imageName: ubuntu-16.04
-          prepare-env: ""
+          prepare-env: sudo apt install -y libglu-dev
           artifact: Plugin-Linux
 
     pool:
@@ -65,8 +65,8 @@ stages:
         $(add-gitrev-to-plugin-version)
       displayName: Update Version in plugins.json
     - bash: |
-        export RACK_DIR=$AGENT_TEMPDIRECTORY/Rack-SDK
         $(prepare-env)
+        export RACK_DIR=$AGENT_TEMPDIRECTORY/Rack-SDK
         make dep
         make dist
       displayName: Build  Plugin
