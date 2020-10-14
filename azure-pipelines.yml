@@ -84,19 +84,10 @@ stages:
   jobs:
     - job: PublishArtifacts
       steps:
+        - checkout: none
         - task: DownloadPipelineArtifact@2
           inputs:
-            artifact: Plugin-Linux
-            patterns: "**/*.zip"
-            targetPath: $(Build.ArtifactStagingDirectory)
-        - task: DownloadPipelineArtifact@2
-          inputs:
-            artifact: Plugin-MacOS
-            patterns: "**/*.zip"
-            targetPath: $(Build.ArtifactStagingDirectory)
-        - task: DownloadPipelineArtifact@2
-          inputs:
-            artifact: Plugin-Windows
+            source: current
             patterns: "**/*.zip"
             targetPath: $(Build.ArtifactStagingDirectory)
         - bash: |
