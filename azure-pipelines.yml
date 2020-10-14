@@ -41,7 +41,7 @@ stages:
           artifact: Plugin-MacOS
         Windows:
           imageName: vs2017-win2016
-          prepare-env: C:/msys64/usr/bin/pacman -S --noconfirm zip unzip && export CC=gcc
+          prepare-env: C:/msys64/usr/bin/pacman -Sy zip unzip --noconfirm && export CC=gcc
           artifact: Plugin-Windows
         Linux:
           imageName: ubuntu-16.04
