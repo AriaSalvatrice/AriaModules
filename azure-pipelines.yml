@@ -72,8 +72,6 @@ stages:
         export RACK_DIR=$AGENT_TEMPDIRECTORY/Rack-SDK
         make dep
         make $(dist-target)
-        mkdir artifact
-        cp dist/*.zip artifact/
       displayName: Build Plugin
     - task: PublishPipelineArtifact@1
       inputs:
