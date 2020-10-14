@@ -38,14 +38,17 @@ stages:
         Mac:
           imageName: macos-10.14
           prepare-env: ""
+          dist-target: dist
           artifact: Plugin-MacOS
         Windows:
           imageName: vs2017-win2016
-          prepare-env: C:/msys64/usr/bin/pacman -Sy zip unzip --noconfirm && export CC=gcc
+          prepare-env: export CC=gcc
+          dist-target: azure-win-dist
           artifact: Plugin-Windows
         Linux:
           imageName: ubuntu-16.04
           prepare-env: sudo apt install -y libglu-dev
+          dist-target: dist
           artifact: Plugin-Linux
 
     pool:
@@ -68,7 +71,7 @@ stages:
         $(prepare-env)
         export RACK_DIR=$AGENT_TEMPDIRECTORY/Rack-SDK
         make dep
-        make dist
+        make $(dist-target)
         mkdir artifact
         cp dist/*.zip artifact/
       displayName: Build Plugin
