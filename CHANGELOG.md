@@ -4,6 +4,18 @@ Changelog
 The versioning follows this standard: the first number corresponds to the VCV rack version used. The second number is increased any time a new module family is added. The third number is increased when something is added or fixed without adding a new module family.
 
 
+## [1.8.0] - UNRELEASED
+
+### New Modules
+
+- [NEW] Psychopump: Matches 8 channels of incoming triggers to CV presets. Perfect to get more percussive voices out of a single module. 
+
+### Changed
+
+- [CHANGE] Modulus Salomonis Regis, Modulellus Salomonis Regis, Modulissimus Salomonis Regis: Removed the visual link between Load and Reset on the faceplate, as this default behavior can be disabled by the user.
+
+
+
 ## [1.7.1] - 2020-10-11
 
 ### Added

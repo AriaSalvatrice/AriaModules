@@ -25,6 +25,7 @@ When labels call for a stroke to make them easier to distinguish from the backgr
 
 - Yellow: 					    #ffcc03ff
 - Pink: 					    #fcaebbff
+- Orange (use very sparingly):  #f28a40ff
 - Blues, from light to dark:
   - Lightest (Highlight, LCD):  #c1f0f2ff
   - Light (backgrounds):        #76bfbeff
@@ -39,8 +40,6 @@ These shades of yellow and pink are almost indistinguishable to people with trit
 ## Alignment
 
 Things are aligned to a 0.5mm grid when possible. Don't sweat precision too much. Go for something that looks good rather than mathematical accuracy.
-
-My signature SVG is 13.60mm wide.
 
 
 ## Jacks
@@ -64,18 +63,3 @@ For the tarot cards, I set the settings as follows, and barely edited them at al
 
 Optimize paths to a low settings is the important one here. It's what tends to break things once imported in VCV.
 
-
-## Design process in 12 easy steps
-
-1. Rough design and component placement on paper. 
-2. Just do the background and title in Inkscape.
-3. Do all the widget placement in code. Frankly, having to write in values by hand and recompile things is much less of a pain than having to deal with Inkscape more than necessary.
-4. Inkscape will crash because stop complaining and being entitled it's open-source.
-5. Once the widget placement is finalized, take a screencap and overlay it in Inkscape as a guide.
-6. Place the labels and roundrects in Inkscape.
-7. Inkscape will crash (this is normal).
-8. Hand paint the background and arrows in Krita. Place a cropping mark in the top-left and bottom-right to simplify placement in Inkscape. Export layers separately as PNG.
-9. Import the layers in Inkscape and trace them at default settings. Remove the cropping marks.
-10. Don't forget to remove the bitmap layers to avoid bloating the file size.
-11. Inkscape will crash (this is normal).
-12. Try <https://jakearchibald.github.io/svgomg/> if things break for no apparent reason. Sometimes it fixes them. Sometimes it makes them worse. 

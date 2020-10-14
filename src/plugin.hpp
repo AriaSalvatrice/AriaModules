@@ -39,6 +39,9 @@ extern Model *modelArcane;
 extern Model *modelAtout;
 extern Model *modelAleister;
 
+// Psychopump
+extern Model *modelPsychopump;
+
 // Remote controllers
 extern Model *modelPokies4;
 extern Model *modelGrabby;

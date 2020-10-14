@@ -35,6 +35,9 @@ void init(Plugin* p) {
     p->addModel(modelAtout);
     p->addModel(modelAleister);
 
+    // Psychopump
+    p->addModel(modelPsychopump);
+
     // Remote Controllers
     p->addModel(modelPokies4);
     p->addModel(modelGrabby);

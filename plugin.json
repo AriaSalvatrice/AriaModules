@@ -196,6 +196,15 @@
       ]
     },
     {
+      "slug": "Psychopump",
+      "name": "Signature Series Psychopump",
+      "description": "Matches 8 channels of incoming triggers to CV presets. Perfect to get more percussive voices out of a single module.",
+      "manualUrl": "https://aria.dog/modules/psychopump",
+      "tags": [
+        "Utility"
+      ]
+    },
+    {
       "slug": "Pokies4",
       "name": "Signature Series Pokies",
       "description": "4 tiny buttons for automation or manual performance of CV parameters. Right-click options to change output values, and use in latch mode.",
