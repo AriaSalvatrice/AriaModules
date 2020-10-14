@@ -41,7 +41,7 @@ stages:
           artifact: Plugin-MacOS
         Windows:
           imageName: vs2017-win2016
-          prepare-env:  pacman -S --noconfirm zip unzip && export CC=gcc
+          prepare-env: C:/msys64/usr/bin/pacman -S --noconfirm zip unzip && export CC=gcc
           artifact: Plugin-Windows
         Linux:
           imageName: ubuntu-16.04
@@ -69,10 +69,12 @@ stages:
         export RACK_DIR=$AGENT_TEMPDIRECTORY/Rack-SDK
         make dep
         make dist
-      displayName: Build  Plugin
+        mkdir artifact
+        cp dist/*.zip artifact/
+      displayName: Build Plugin
     - task: PublishPipelineArtifact@1
       inputs:
-        path: $(System.DefaultWorkingDirectory)/dist
+        path: $(System.DefaultWorkingDirectory)/artifact
         artifact: $(artifact)
 
 - stage: publish
