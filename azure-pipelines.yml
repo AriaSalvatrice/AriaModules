@@ -84,7 +84,6 @@ stages:
   jobs:
     - job: PublishArtifacts
       steps:
-        - checkout: none
         - task: DownloadPipelineArtifact@2
           inputs:
             source: current
@@ -93,7 +92,7 @@ stages:
         - bash: |
             ls -l $(Build.ArtifactStagingDirectory)
             export EXTEND_TAG=`date "+%Y%m%d"`
-            for file in $(Build.ArtifactStagingDirectory)/*.zip; do mv "$file" "${file/.zip/-${EXTEND_TAG}.zip}"; done
+            for file in $(Build.ArtifactStagingDirectory)/**/*.zip; do mv "$file" "${file/.zip/-${EXTEND_TAG}.zip}"; done
             ls -l $(Build.ArtifactStagingDirectory)
           displayName: Tag asset names with Date
         - bash: |
