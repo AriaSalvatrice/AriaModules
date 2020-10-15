@@ -61,6 +61,7 @@ struct Psychopump : Module {
         ENUMS(OUT2_PARAM, 8),
         ENUMS(RANDOMIZE_PARAM, 8),
         ENUMS(QUANTIZE_PARAM, 8),
+        POLY_MODE_PARAM,
         NUM_PARAMS
     };
     enum InputIds {
@@ -68,6 +69,7 @@ struct Psychopump : Module {
         ENUMS(PT1_INPUT, 8),
         ENUMS(PT2_INPUT, 8),
         ENUMS(PITCH_INPUT, 8),
+        POLY_EXTERNAL_SCALE_INPUT,
         NUM_INPUTS
     };
     enum OutputIds {
@@ -88,6 +90,11 @@ struct Psychopump : Module {
     };
     enum LightIds {
         ENUMS(ROW_LIGHT, 8),
+        POLY_MODE_MONO_LIGHT,
+        POLY_MODE_ECO_LIGHT,
+        POLY_MODE_ALL_LIGHT,
+        GATE1_LIGHT,
+        GATE2_LIGHT,
         NUM_LIGHTS
     };
 
@@ -100,28 +107,28 @@ struct Psychopump : Module {
         for(size_t i = 0; i < 8; i++) {
             label = "Knob 1 - Channel ";
             label.append(std::to_string(i + 1));
-            configParam(CV1_PARAM + i, -10.f, 10.f, 0.f, label, "V");
+            configParam(CV1_PARAM + i, 0.f, 10.f, 5.f, label, "V");
             label = "Knob 2 - Channel ";
             label.append(std::to_string(i + 1));
-            configParam(CV2_PARAM + i, -10.f, 10.f, 0.f, label, "V");
+            configParam(CV2_PARAM + i, 0.f, 10.f, 5.f, label, "V");
             label = "Knob 3 - Channel ";
             label.append(std::to_string(i + 1));
-            configParam(CV3_PARAM + i, -10.f, 10.f, 0.f, label, "V");
+            configParam(CV3_PARAM + i, 0.f, 10.f, 5.f, label, "V");
             label = "Knob 4 - Channel ";
             label.append(std::to_string(i + 1));
-            configParam(CV4_PARAM + i, -10.f, 10.f, 0.f, label, "V");
+            configParam(CV4_PARAM + i, 0.f, 10.f, 5.f, label, "V");
             label = "Knob 5 - Channel ";
             label.append(std::to_string(i + 1));
-            configParam(CV5_PARAM + i, -10.f, 10.f, 0.f, label, "V");
+            configParam(CV5_PARAM + i, 0.f, 10.f, 5.f, label, "V");
             label = "Knob 6 - Channel ";
             label.append(std::to_string(i + 1));
-            configParam(CV6_PARAM + i, -10.f, 10.f, 0.f, label, "V");
+            configParam(CV6_PARAM + i, 0.f, 10.f, 5.f, label, "V");
             label = "Knob 7 - Channel ";
             label.append(std::to_string(i + 1));
-            configParam(CV7_PARAM + i, -10.f, 10.f, 0.f, label, "V");
+            configParam(CV7_PARAM + i, 0.f, 10.f, 5.f, label, "V");
             label = "Knob 8 - Channel ";
             label.append(std::to_string(i + 1));
-            configParam(CV8_PARAM + i, -10.f, 10.f, 0.f, label, "V");
+            configParam(CV8_PARAM + i, 0.f, 10.f, 5.f, label, "V");
 
             configParam(CV1_PLUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Add random offset");
             configParam(CV2_PLUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Add random offset");
@@ -171,6 +178,7 @@ struct Psychopump : Module {
         configParam(PT1_RANDOM_OFFSET_PARAM, 0.f, 5.f, 0.f, "Random offset for Pass-through 1");
         configParam(PT2_RANDOM_OFFSET_PARAM, 0.f, 5.f, 0.f, "Random offset for Pass-through 2");
         configParam(PITCH_RANDOM_OFFSET_PARAM, 0.f, 5.f, 0.f, "Random offset for Pitch");
+        configParam(POLY_MODE_PARAM, 0.f, 1.f, 0.f, "Polyphony Mode");
 
         processDivider.setDivision(PROCESSDIVIDER);
 
@@ -184,6 +192,8 @@ struct Psychopump : Module {
         if (processDivider.process()) {
             // test
             lights[ROW_LIGHT + 2].setBrightness(1.f);
+            lights[POLY_MODE_MONO_LIGHT].setBrightness(1.f);
+            lights[GATE1_LIGHT].setBrightness(1.f);
         }
     }
 };
@@ -273,6 +283,13 @@ struct Out2Button : W::LitSvgSwitchUnshadowed {
     }
 };
 
+struct RockerSwitchUB : W::SvgSwitchUnshadowed {
+    RockerSwitchUB() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-ub-u.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/rocker-switch-ub-b.svg")));
+    }
+};
+
 struct PsychopumpWidget : W::ModuleWidget {
 
     void addGateInputs(float xOffset, float yOffset, Psychopump* module) {
@@ -327,7 +344,7 @@ struct PsychopumpWidget : W::ModuleWidget {
     void addCVParamElement(float xOffset, float yOffset, Psychopump* module, int light, int cvParam, int plusRandomParam, int minusRandomParam) {
         addParam(createParam<PlusButton>(mm2px(Vec(xOffset + 4.1f, yOffset)), module, plusRandomParam));
         addParam(createParam<MinusButton>(mm2px(Vec(xOffset + 4.1f, yOffset + 3.95f)), module, minusRandomParam));
-        addChild(W::createKnobLight<W::KnobLightYellow>(mm2px(Vec(xOffset, yOffset)), module, light, cvParam, -10.f, 10.f));
+        addChild(W::createKnobLight<W::KnobLightYellow>(mm2px(Vec(xOffset, yOffset)), module, light, cvParam, 0.f, 10.f));
         addParam(createParam<W::KnobTransparent>(mm2px(Vec(xOffset, yOffset)), module, cvParam));
     }
 
@@ -346,7 +363,7 @@ struct PsychopumpWidget : W::ModuleWidget {
 
     void addCVPolaritySwitches(float xOffset, float yOffset, Psychopump* module) {
         for(size_t i = 0; i < 8; i++) {
-            addParam(createParam<W::RockerSwitchHorizontal>(mm2px(Vec(xOffset + i * 14.f, yOffset)), module, Psychopump::CV_POLARITY_PARAM + i));
+            addParam(createParam<RockerSwitchUB>(mm2px(Vec(xOffset + i * 14.f, yOffset)), module, Psychopump::CV_POLARITY_PARAM + i));
         }
     }
 
@@ -416,7 +433,7 @@ struct PsychopumpWidget : W::ModuleWidget {
         addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
         // Signature
-        addChild(createWidget<W::Signature>(mm2px(Vec(230.0f, 114.5f))));
+        addChild(createWidget<W::Signature>(mm2px(Vec(224.0f, 114.5f))));
 
         // Main Area
         addGateInputs(5.f, 24.f, module); // ~14mm
@@ -433,7 +450,18 @@ struct PsychopumpWidget : W::ModuleWidget {
         lcd->box.pos = mm2px(Vec(213.6f, 27.1f));
         addChild(lcd);
 
+        // PES
+        addStaticInput(mm2px(Vec(225.9f, 54.f)), module, Psychopump::POLY_EXTERNAL_SCALE_INPUT);
+
+        // Polyphony
+        addParam(createParam<W::ButtonMomentary>(mm2px(Vec(212.f, 74.f)), module, Psychopump::POLY_MODE_PARAM));
+        addChild(createLight<W::StatusLightInput>(mm2px(Vec(222.f, 74.f)), module, Psychopump::POLY_MODE_MONO_LIGHT));
+        addChild(createLight<W::StatusLightInput>(mm2px(Vec(222.f, 77.5f)), module, Psychopump::POLY_MODE_ECO_LIGHT));
+        addChild(createLight<W::StatusLightInput>(mm2px(Vec(222.f, 81.f)), module, Psychopump::POLY_MODE_ALL_LIGHT));
+
         // Other I/O
+        addDynamicOutput(mm2px(Vec(217.f, 95.f)), module, Psychopump::GATE1_OUTPUT, Psychopump::GATE1_LIGHT);
+        addDynamicOutput(mm2px(Vec(237.f, 95.f)), module, Psychopump::GATE2_OUTPUT, Psychopump::GATE2_LIGHT);
     }
 };
 
