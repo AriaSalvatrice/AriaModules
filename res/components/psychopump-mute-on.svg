@@ -54,9 +54,9 @@
      inkscape:document-rotation="0"
      inkscape:current-layer="layer1"
      inkscape:document-units="mm"
-     inkscape:cy="8.9579914"
-     inkscape:cx="17.352819"
-     inkscape:zoom="22.4"
+     inkscape:cy="-14.98234"
+     inkscape:cx="-23.985557"
+     inkscape:zoom="2.8"
      inkscape:pageshadow="2"
      inkscape:pageopacity="0.0"
      borderopacity="1.0"
@@ -71,7 +71,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -96,12 +96,12 @@
        id="rect1683" />
     <g
        transform="translate(-145.1,-49.999998)"
-       style="font-size:3.175px;line-height:1.25;font-family:sans-serif;text-align:center;text-anchor:middle;display:inline;fill:#083d45;fill-opacity:1;stroke-width:0.264583"
+       style="font-size:3.175px;line-height:1.25;font-family:sans-serif;text-align:center;text-anchor:middle;display:inline;fill:#c1f0f2;fill-opacity:1;stroke-width:0.264583"
        id="text1704"
        aria-label="M">
       <path
          id="path1723"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Nova Flat';-inkscape-font-specification:'Nova Flat';fill:#083d45;fill-opacity:1;stroke-width:0.264583"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Nova Flat';-inkscape-font-specification:'Nova Flat';fill:#c1f0f2;fill-opacity:1;stroke-width:0.264583"
          d="m 146.289,53.322254 v -1.922363 q 0,-0.283704 0.35192,-0.429431 0.19689,-0.08217 0.43098,-0.08217 0.23564,0 0.43098,0.08217 0.11782,0.04961 0.19689,0.113171 0.0791,-0.06356 0.19689,-0.113171 0.19533,-0.08217 0.43098,-0.08217 0.23409,0 0.43098,0.08217 0.35191,0.145727 0.35191,0.429431 v 1.782837 l -0.29455,0.139526 h -0.0155 v -1.922363 q 0,-0.10697 -0.18759,-0.181384 -0.13022,-0.05116 -0.28525,-0.05116 -0.15503,0 -0.28526,0.05116 -0.18758,0.07441 -0.18758,0.181384 v 1.782837 l -0.29456,0.139526 h -0.0155 v -1.922363 q 0,-0.10697 -0.18759,-0.181384 -0.13022,-0.05116 -0.28525,-0.05116 -0.15503,0 -0.28525,0.05116 -0.18759,0.07441 -0.18759,0.181384 v 1.782837 l -0.29456,0.139526 z" />
     </g>
     <rect

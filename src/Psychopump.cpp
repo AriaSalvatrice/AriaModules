@@ -165,7 +165,7 @@ struct Psychopump : Module {
             label.append(std::to_string(i + 1));
             configParam(RANDOMIZE_PARAM + i, 0.f, 1.f, 0.f, label);
 
-            configParam(QUANTIZE_PARAM + i, 0.f, 1.f, 0.f, "Quantize");
+            configParam(QUANTIZE_PARAM + i, 0.f, 2.f, 0.f, "Quantize");
 
             configParam(GATE_LABEL_PARAM + i, 0.f, 1.f, 0.f, "Add Gate label on LCD");
             configParam(OUTPUT_LABEL_PARAM + i, 0.f, 1.f, 0.f, "Add Output label on LCD");
@@ -224,6 +224,7 @@ struct QuantizeButton : W::LitSvgSwitchUnshadowed {
     QuantizeButton() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/quantize-off.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/quantize-on.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/quantize-pink.svg")));
     }
 };
 
@@ -460,8 +461,8 @@ struct PsychopumpWidget : W::ModuleWidget {
         addChild(createLight<W::StatusLightInput>(mm2px(Vec(222.f, 81.f)), module, Psychopump::POLY_MODE_ALL_LIGHT));
 
         // Other I/O
-        addDynamicOutput(mm2px(Vec(217.f, 95.f)), module, Psychopump::GATE1_OUTPUT, Psychopump::GATE1_LIGHT);
-        addDynamicOutput(mm2px(Vec(237.f, 95.f)), module, Psychopump::GATE2_OUTPUT, Psychopump::GATE2_LIGHT);
+        addDynamicOutput(mm2px(Vec(217.f, 94.f)), module, Psychopump::GATE1_OUTPUT, Psychopump::GATE1_LIGHT);
+        addDynamicOutput(mm2px(Vec(237.f, 94.f)), module, Psychopump::GATE2_OUTPUT, Psychopump::GATE2_LIGHT);
     }
 };
 
