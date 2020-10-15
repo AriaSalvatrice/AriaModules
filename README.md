@@ -20,7 +20,6 @@ The documentation of the modules is only available [from my website](https://ari
 
 
 
-
 Compatibility, Download & Installation
 --------------------------------------
 
@@ -103,7 +102,6 @@ Yeah, the licensing rules are a bit complicated. But the big idea is pretty simp
 
 Here goes the detailed breakdown:
 
-
 ### The output of my modules belongs to you
 
 It should go without saying that no sane courtroom would ever humor the idea the output of my modules is original enough to be my copyright, even that of Arcane, which directly outputs random data obtained from a server under my control.
@@ -147,7 +145,6 @@ The easiest way to remove my signature from every module is by blanking or repla
 ### Graphics for the **Arcane** module 
 
 The **Arcane** module uses Tarot cards altered from [Yoav Ben-Dov's CBD Tarot](https://www.cbdtarot.com/). Its graphics are distributed under the [CC-BY-NC-SA](https://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_US), to comply with the license of the graphics used. That includes the faceplate, as it uses a pattern taken from that tarot deck.
-
 
 ### Fonts used
 

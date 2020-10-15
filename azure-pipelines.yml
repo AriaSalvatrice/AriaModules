@@ -21,7 +21,7 @@ variables:
   add-release-notes: |
     cat <<- EOH
     # Aria Salvatrice Signature Series development builds
-    These test builds are produced on every commit. Expect crashes and half-finished modules! If you just want to install my modules, install them from the official VCV Library instead. 
+    These test builds are produced on every commit. Expect crashes and half-finished modules! If you just want to install my modules, install them from the official VCV Library instead.
     EOH
     date
     echo ""
@@ -35,15 +35,21 @@ stages:
   - job: BuildPlugin
     strategy:
       matrix:
-        mac:
-          imageName: 'macos-10.14'
-          isMac: true
-        windows:
-          imageName: 'vs2017-win2016'
-          isWindows: true
-        linux:
-          imageName: 'ubuntu-16.04'
-          isLinux: true
+        Mac:
+          imageName: macos-10.14
+          prepare-env: ""
+          dist-target: dist
+          artifact: Plugin-MacOS
+        Windows:
+          imageName: vs2017-win2016
+          prepare-env: export CC=gcc
+          dist-target: azure-win-dist
+          artifact: Plugin-Windows
+        Linux:
+          imageName: ubuntu-16.04
+          prepare-env: sudo apt install -y libglu-dev
+          dist-target: dist
+          artifact: Plugin-Linux
 
     pool:
       vmImage: $(imageName)
@@ -51,7 +57,6 @@ stages:
     steps:
     - checkout: self
       fetchDepth: 1
-
     - bash: |
         uname -a
         git submodule update --init --recursive
@@ -63,51 +68,16 @@ stages:
         $(add-gitrev-to-plugin-version)
       displayName: Update Version in plugins.json
     - bash: |
-        export RACK_DIR=$AGENT_TEMPDIRECTORY/Rack-SDK
-        export CC=gcc
-        make dep
-        make azure-win-dist
-        mkdir artifacts_win/
-        cp dist/*zip artifacts_win/
-      displayName: Build Windows Plugin
-      condition: variables.isWindows
-    - bash: |
+        $(prepare-env)
         export RACK_DIR=$AGENT_TEMPDIRECTORY/Rack-SDK
         make dep
-        make dist
-        mkdir artifacts_mac/
-        cp dist/*zip artifacts_mac/
-      displayName: Build MacOS Plugin
-      condition: variables.isMac
-    - bash: |
-        sudo apt install -y libglu-dev
-        export RACK_DIR=$AGENT_TEMPDIRECTORY/Rack-SDK
-        make dep
-        make dist
-        mkdir artifacts_lin/
-        cp dist/*zip artifacts_lin/
-      displayName: Build Linux Plugins
-      condition: variables.isLinux
-    - task: PublishPipelineArtifact@0
+        make $(dist-target)
+      displayName: Build Plugin
+    - task: PublishPipelineArtifact@1
       inputs:
-        artifactName: Plugin-Linux
-        targetPath: artifacts_lin/
-      displayName: Publish Linux Zip
-      condition: variables.isLinux
+        path: $(System.DefaultWorkingDirectory)/dist
+        artifact: $(artifact)
 
-    - task: PublishPipelineArtifact@0
-      inputs:
-        artifactName: Plugin-MacOS
-        targetPath: artifacts_mac/
-      displayName: Publish MacOS Zip
-      condition: variables.isMac
-
-    - task: PublishPipelineArtifact@0
-      inputs:
-        artifactName: Plugin-Windows
-        targetPath: artifacts_win/
-      displayName: Publish Windows Zip
-      condition: variables.isWindows
 - stage: publish
   displayName: Publish Plugin
   dependsOn: build
@@ -116,20 +86,11 @@ stages:
       steps:
         - task: DownloadPipelineArtifact@2
           inputs:
-            artifact: Plugin-Linux
-            patterns: "**/*.zip"
-            targetPath: $(Build.ArtifactStagingDirectory)
-        - task: DownloadPipelineArtifact@2
-          inputs:
-            artifact: Plugin-MacOS
-            patterns: "**/*.zip"
-            targetPath: $(Build.ArtifactStagingDirectory)
-        - task: DownloadPipelineArtifact@2
-          inputs:
-            artifact: Plugin-Windows
+            source: current
             patterns: "**/*.zip"
             targetPath: $(Build.ArtifactStagingDirectory)
         - bash: |
+            cp $(Build.ArtifactStagingDirectory)/**/*.zip $(Build.ArtifactStagingDirectory)/
             ls -l $(Build.ArtifactStagingDirectory)
             export EXTEND_TAG=`date "+%Y%m%d"`
             for file in $(Build.ArtifactStagingDirectory)/*.zip; do mv "$file" "${file/.zip/-${EXTEND_TAG}.zip}"; done
