@@ -54,7 +54,7 @@ struct Psychopump : Module {
         ENUMS(PITCH_MINUS_RANDOM_PARAM, 8),
         PITCH_RANDOM_OFFSET_PARAM,
         ENUMS(GATE_LABEL_PARAM, 8),
-        ENUMS(KNOB_LABEL_PARAM, 8),
+        ENUMS(OUTPUT_LABEL_PARAM, 8),
         ENUMS(MUTE_PARAM, 8),
         ENUMS(SOLO_PARAM, 8),
         ENUMS(OUT1_PARAM, 8),
@@ -98,28 +98,28 @@ struct Psychopump : Module {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         std::string label;
         for(size_t i = 0; i < 8; i++) {
-            label = "Param 1 - Channel ";
+            label = "Knob 1 - Channel ";
             label.append(std::to_string(i + 1));
             configParam(CV1_PARAM + i, -10.f, 10.f, 0.f, label, "V");
-            label = "Param 2 - Channel ";
+            label = "Knob 2 - Channel ";
             label.append(std::to_string(i + 1));
             configParam(CV2_PARAM + i, -10.f, 10.f, 0.f, label, "V");
-            label = "Param 3 - Channel ";
+            label = "Knob 3 - Channel ";
             label.append(std::to_string(i + 1));
             configParam(CV3_PARAM + i, -10.f, 10.f, 0.f, label, "V");
-            label = "Param 4 - Channel ";
+            label = "Knob 4 - Channel ";
             label.append(std::to_string(i + 1));
             configParam(CV4_PARAM + i, -10.f, 10.f, 0.f, label, "V");
-            label = "Param 5 - Channel ";
+            label = "Knob 5 - Channel ";
             label.append(std::to_string(i + 1));
             configParam(CV5_PARAM + i, -10.f, 10.f, 0.f, label, "V");
-            label = "Param 6 - Channel ";
+            label = "Knob 6 - Channel ";
             label.append(std::to_string(i + 1));
             configParam(CV6_PARAM + i, -10.f, 10.f, 0.f, label, "V");
-            label = "Param 7 - Channel ";
+            label = "Knob 7 - Channel ";
             label.append(std::to_string(i + 1));
             configParam(CV7_PARAM + i, -10.f, 10.f, 0.f, label, "V");
-            label = "Param 8 - Channel ";
+            label = "Knob 8 - Channel ";
             label.append(std::to_string(i + 1));
             configParam(CV8_PARAM + i, -10.f, 10.f, 0.f, label, "V");
 
@@ -146,11 +146,32 @@ struct Psychopump : Module {
             configParam(PT1_MINUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Subtract random offset");
             configParam(PT2_MINUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Subtract random offset");
             configParam(PITCH_MINUS_RANDOM_PARAM + i, 0.f, 1.f, 0.f, "Subtract random offset");
+            
+            configParam(GATE_LENGTH_PARAM + i, 0.f, 1.f, 0.f, "Change Gate length");
+
+            configParam(MUTE_PARAM + i, 0.f, 1.f, 0.f, "Mute");
+            configParam(SOLO_PARAM + i, 0.f, 1.f, 0.f, "Solo");
+            configParam(OUT1_PARAM + i, 0.f, 1.f, 1.f, "Gate to Output 1");
+            configParam(OUT2_PARAM + i, 0.f, 1.f, 0.f, "Gate to Output 2");
+
+            label = "Randomize knobs on Channel ";
+            label.append(std::to_string(i + 1));
+            configParam(RANDOMIZE_PARAM + i, 0.f, 1.f, 0.f, label);
+
+            configParam(QUANTIZE_PARAM + i, 0.f, 1.f, 0.f, "Quantize");
+
+            configParam(GATE_LABEL_PARAM + i, 0.f, 1.f, 0.f, "Add Gate label on LCD");
+            configParam(OUTPUT_LABEL_PARAM + i, 0.f, 1.f, 0.f, "Add Output label on LCD");
 
             label = "Random offset for param ";
             label.append(std::to_string(i + 1));
             configParam(CV_RANDOM_OFFSET_PARAM + i, 0.f, 5.f, 0.f, label, "V");
+            configParam(CV_POLARITY_PARAM + i, 0.f, 1.f, 0.f, "Unipolar / Bipolar");
         }
+        configParam(PT1_RANDOM_OFFSET_PARAM, 0.f, 5.f, 0.f, "Random offset for Pass-through 1");
+        configParam(PT2_RANDOM_OFFSET_PARAM, 0.f, 5.f, 0.f, "Random offset for Pass-through 2");
+        configParam(PITCH_RANDOM_OFFSET_PARAM, 0.f, 5.f, 0.f, "Random offset for Pitch");
+
         processDivider.setDivision(PROCESSDIVIDER);
 
         processDivider.setDivision(PROCESSDIVIDER);
@@ -171,6 +192,13 @@ struct GateLabelButton : W::LitSvgSwitchUnshadowed {
     GateLabelButton() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/label-button-right-off.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/label-button-right-on.svg")));
+        momentary = true;
+    }
+    void onButton(const event::Button& e) override {
+    	if (e.button != GLFW_MOUSE_BUTTON_LEFT) return; // Skip context menu
+        ui::Menu* menu = createMenu();
+        menu->addChild(createMenuLabel("Gate label on LCD:"));
+        e.consume(this);
     }
 };
 
@@ -178,6 +206,7 @@ struct FortuneButton : W::LitSvgSwitchUnshadowed {
     FortuneButton() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/fortune-off.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/fortune-on.svg")));
+        momentary = true;
     }
 };
 
@@ -188,10 +217,17 @@ struct QuantizeButton : W::LitSvgSwitchUnshadowed {
     }
 };
 
-struct KnobLabelButton : W::LitSvgSwitchUnshadowed {
-    KnobLabelButton() {
+struct OutputLabelButton : W::LitSvgSwitchUnshadowed {
+    OutputLabelButton() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/label-button-bottom-off.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/label-button-bottom-on.svg")));
+        momentary = true;
+    }
+    void onButton(const event::Button& e) override {
+    	if (e.button != GLFW_MOUSE_BUTTON_LEFT) return; // Skip context menu
+        ui::Menu* menu = createMenu();
+        menu->addChild(createMenuLabel("Output label on LCD:"));
+        e.consume(this);
     }
 };
 
@@ -249,9 +285,9 @@ struct PsychopumpWidget : W::ModuleWidget {
     void addChannelControls(float xOffset, float yOffset, Psychopump* module) {
         for(size_t i = 0; i < 8; i++) {
             addParam(createParam<MuteButton>(mm2px(Vec(xOffset +  0.f, yOffset +  0.f + i * 10.f)), module, Psychopump::MUTE_PARAM + i));
-            addParam(createParam<SoloButton>(mm2px(Vec(xOffset +  0.f, yOffset + 4.2f + i * 10.f)), module, Psychopump::SOLO_PARAM + i));
+            addParam(createParam<SoloButton>(mm2px(Vec(xOffset +  0.f, yOffset + 4.1f + i * 10.f)), module, Psychopump::SOLO_PARAM + i));
             addParam(createParam<Out1Button>(mm2px(Vec(xOffset + 5.2f, yOffset +  0.f + i * 10.f)), module, Psychopump::OUT1_PARAM + i));
-            addParam(createParam<Out2Button>(mm2px(Vec(xOffset + 5.2f, yOffset + 4.2f + i * 10.f)), module, Psychopump::OUT2_PARAM + i));
+            addParam(createParam<Out2Button>(mm2px(Vec(xOffset + 5.2f, yOffset + 4.1f + i * 10.f)), module, Psychopump::OUT2_PARAM + i));
         }
     }
 
@@ -310,7 +346,7 @@ struct PsychopumpWidget : W::ModuleWidget {
 
     void addCVPolaritySwitches(float xOffset, float yOffset, Psychopump* module) {
         for(size_t i = 0; i < 8; i++) {
-            addParam(createParam<W::RockerSwitchVertical>(mm2px(Vec(xOffset + i * 14.f, yOffset)), module, Psychopump::CV_POLARITY_PARAM + i));
+            addParam(createParam<W::RockerSwitchHorizontal>(mm2px(Vec(xOffset + i * 14.f, yOffset)), module, Psychopump::CV_POLARITY_PARAM + i));
         }
     }
 
@@ -322,7 +358,7 @@ struct PsychopumpWidget : W::ModuleWidget {
 
     void addCVOutputs(float xOffset, float yOffset, Psychopump* module) {
         for(size_t i = 0; i < 8; i++) {
-            addParam(createParam<KnobLabelButton>(mm2px(Vec(xOffset + i * 14.f, yOffset + 4.1f)), module, Psychopump::KNOB_LABEL_PARAM + i));
+            addParam(createParam<OutputLabelButton>(mm2px(Vec(xOffset + i * 14.f, yOffset + 4.1f)), module, Psychopump::OUTPUT_LABEL_PARAM + i));
         }
 
         addStaticOutput(mm2px(Vec(xOffset + 0 * 14.f, yOffset)), module, Psychopump::CV1_OUTPUT);
@@ -337,8 +373,8 @@ struct PsychopumpWidget : W::ModuleWidget {
 
     void addCVParamsSection(float xOffset, float yOffset, Psychopump* module) {
         addCVParams(xOffset, yOffset, module); // 112mm
-        addCVPolaritySwitches(xOffset, yOffset + 80.f, module);
-        addCVRandomOffsetKnobs(xOffset + 4.5f, yOffset + 80.f, module);
+        addCVPolaritySwitches(xOffset + 3.f, yOffset - 4.8f, module);
+        addCVRandomOffsetKnobs(xOffset + 2.9f, yOffset + 80.f, module);
         addCVOutputs(xOffset + 2.9f, yOffset + 90.f, module); // + 2.9mm
     }
 
@@ -393,7 +429,7 @@ struct PsychopumpWidget : W::ModuleWidget {
         addPitchSection(194.f, 24.f, module); // 14mm
 
         // LCD
-        Lcd::LcdWidget<Psychopump> *lcd = new Lcd::LcdWidget<Psychopump>(module);
+        Lcd::LcdWidget<Psychopump> *lcd = new Lcd::LcdWidget<Psychopump>(module, "Insert Obol", " To Depart");
         lcd->box.pos = mm2px(Vec(213.6f, 27.1f));
         addChild(lcd);
 

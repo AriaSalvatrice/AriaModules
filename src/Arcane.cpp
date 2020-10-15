@@ -807,8 +807,7 @@ struct ArcaneWidget : W::ModuleWidget {
         addChild(cfb);
         
         // LCD
-        // addChild(Lcd::createLcd<Arcane>(mm2px(Vec(83.6, 41.4)), module));
-        Lcd::LcdWidget<Arcane> *lcd = new Lcd::LcdWidget<Arcane>(module);
+        Lcd::LcdWidget<Arcane> *lcd = new Lcd::LcdWidget<Arcane>(module, "Today's", "Fortune *");
         lcd->box.pos = mm2px(Vec(83.6f, 41.4f));
         addChild(lcd);
 
@@ -890,7 +889,7 @@ struct AtoutWidget : W::ModuleWidget {
         addChild(createWidget<W::Signature>(mm2px(Vec(31.06f, 114.5f))));
         
         // LCD	
-        Lcd::LcdWidget<Arcane> *lcd = new Lcd::LcdWidget<Arcane>(module);
+        Lcd::LcdWidget<Arcane> *lcd = new Lcd::LcdWidget<Arcane>(module, "Today's", "Fortune *");
         lcd->box.pos = mm2px(Vec(6.44f, 41.4f));
         addChild(lcd);
 

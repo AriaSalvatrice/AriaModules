@@ -928,7 +928,7 @@ struct SolomonLcdWidget : TransparentWidget {
     SolomonLcdWidget(TModule *_module){
         module = _module;
         lfb = new Lcd::LcdFramebufferWidget<TModule>(module);
-        ldw = new Lcd::LcdDrawWidget<TModule>(module);
+        ldw = new Lcd::LcdDrawWidget<TModule>(module, "LEARNING...", "SUMMONING..");
         addChild(lfb);
         lfb->addChild(ldw);
     }

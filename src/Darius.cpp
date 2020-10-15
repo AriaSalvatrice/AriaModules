@@ -1238,7 +1238,7 @@ struct DariusWidget : W::ModuleWidget {
         // Output area //////////////////
 
         // LCD
-        Lcd::LcdWidget<Darius> *lcd = new Lcd::LcdWidget<Darius>(module);
+        Lcd::LcdWidget<Darius> *lcd = new Lcd::LcdWidget<Darius>(module, "MEDITATE...", "MEDITATION.");
         lcd->box.pos = mm2px(Vec(10.3f, 106.7f));
         addChild(lcd);
 

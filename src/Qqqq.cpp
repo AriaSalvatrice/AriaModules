@@ -1225,7 +1225,7 @@ struct QqqqWidget : W::ModuleWidget {
         drawPianoKeys(4.7f, 102.8f, module);
 
         // LCD
-        Lcd::LcdWidget<Qqqq> *lcd = new Lcd::LcdWidget<Qqqq>(module);
+        Lcd::LcdWidget<Qqqq> *lcd = new Lcd::LcdWidget<Qqqq>(module, " Q< Quack!");
         lcd->box.pos = mm2px(Vec(27.6f, 21.2f));
         addChild(lcd);
 

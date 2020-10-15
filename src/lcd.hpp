@@ -24,7 +24,8 @@ extern Plugin* pluginInstance;
 // The LCD MODE is deprecated.
 //
 // Modulus Salomonis Regis is the only module to implement the LCD somewhat as intended.
-// Arcane, Darius and QQQQ do things in deprecated (and downright stupid) ways.
+// Arcane, Darius and QQQQ do things in deprecated (and downright stupid) ways:
+// too much logic lives within the module, rather than the widget.
 // 
 // On Arcane and Darius, the SVG of the LCD is a little bit too small to display
 // descenders on the second line of text, so uppercase is mostly used.
@@ -84,7 +85,7 @@ struct LcdStatus {
     float notificationTimeout = 3.f;
 
     LcdStatus() {
-       for (size_t i = 0; i < 12; i++) pianoDisplay[i] = false;
+        for (size_t i = 0; i < 12; i++) pianoDisplay[i] = false;
     }
 
     // Call this from the module.
@@ -108,27 +109,51 @@ struct LcdDrawWidget : LightWidget {
     std::array<std::shared_ptr<Svg>, 24> pianoSvg; // 0..11: Unlit, 12..23 = Lit
     std::string lcdText1;
     std::string lcdText2;
+    std::string placeholderText1;
+    std::string placeholderText2;
 
-    LcdDrawWidget(TModule *_module) {
+    LcdDrawWidget(TModule *_module, std::string _placeholderText1, std::string _placeholderText2) {
         module = _module;
-        if (module) {
-            box.size = mm2px(Vec(36.0, 10.0));
-           for (size_t i = 0; i < 12; i++) // Unlit
-                pianoSvg[i] = APP->window->loadSvg(asset::plugin(pluginInstance, "res/lcd/piano/u" + std::to_string(i) + ".svg"));
-           for (size_t i = 0; i < 12; i++) // Lit
-                pianoSvg[i + 12] = APP->window->loadSvg(asset::plugin(pluginInstance, "res/lcd/piano/l" + std::to_string(i) + ".svg"));
-           for (size_t i = 0; i < 95; i++)
-                asciiSvg[i] = APP->window->loadSvg(asset::plugin(pluginInstance, "res/lcd/Fixed_v01/" + std::to_string(i + 32) + ".svg"));
-        }
+        placeholderText1 = _placeholderText1;
+        placeholderText2 = _placeholderText2;
+        box.size = mm2px(Vec(36.0, 10.0));
+        for (size_t i = 0; i < 12; i++) // Unlit
+            pianoSvg[i] = APP->window->loadSvg(asset::plugin(pluginInstance, "res/lcd/piano/u" + std::to_string(i) + ".svg"));
+        for (size_t i = 0; i < 12; i++) // Lit
+            pianoSvg[i + 12] = APP->window->loadSvg(asset::plugin(pluginInstance, "res/lcd/piano/l" + std::to_string(i) + ".svg"));
+        for (size_t i = 0; i < 95; i++)
+            asciiSvg[i] = APP->window->loadSvg(asset::plugin(pluginInstance, "res/lcd/Fixed_v01/" + std::to_string(i + 32) + ".svg"));
     }
 
     // Decides what to draw depending on the layout.
     void draw(const DrawArgs &args) override {
-        // Avoids crashing the browser
-        if (!module) return;
 
         nvgScale(args.vg, 1.5, 1.5);
-    
+
+        // If there's no module, display instead the placeholder text so it shows up the module browser & online library
+        if (!module) { 
+            nvgSave(args.vg);
+            lcdText1 = placeholderText1;
+            lcdText1.append(11, ' '); // Ensure the string is long enough
+            for (size_t i = 0; i < 11; i++) {
+                char c = lcdText1.at(i);
+                svgDraw(args.vg, asciiSvg[ c - 32 ]->handle);
+                nvgTranslate(args.vg, 6, 0);
+            }
+            nvgRestore(args.vg);
+            nvgSave(args.vg);
+            nvgTranslate(args.vg, 0, 11);
+            lcdText2 = placeholderText2;
+            lcdText2.append(11, ' '); // Ensure the string is long enough
+            for (size_t i = 0; i < 11; i++) {
+                char c = lcdText2.at(i);
+                svgDraw(args.vg, asciiSvg[ c - 32 ]->handle);
+                nvgTranslate(args.vg, 6, 0);
+            }
+            nvgRestore(args.vg);
+            return;
+        }
+
         // Piano display at the top.
         if ( module->lcdStatus.lcdLayout == PIANO_AND_TEXT2_LAYOUT ) {
             nvgSave(args.vg);
@@ -164,7 +189,7 @@ struct LcdDrawWidget : LightWidget {
             nvgSave(args.vg);
             lcdText1 = module->lcdStatus.lcdText1;
             lcdText1.append(11, ' '); // Ensure the string is long enough
-           for (size_t i = 0; i < 11; i++) {
+            for (size_t i = 0; i < 11; i++) {
                 char c = lcdText1.at(i);
                 svgDraw(args.vg, asciiSvg[ c - 32 ]->handle);
                 nvgTranslate(args.vg, 6, 0);
@@ -180,7 +205,7 @@ struct LcdDrawWidget : LightWidget {
             nvgTranslate(args.vg, 0, 11);
             lcdText2 = module->lcdStatus.lcdText2;
             lcdText2.append(11, ' '); // Ensure the string is long enough
-           for (size_t i = 0; i < 11; i++) {
+            for (size_t i = 0; i < 11; i++) {
                 char c = lcdText2.at(i);
                 svgDraw(args.vg, asciiSvg[ c - 32 ]->handle);
                 nvgTranslate(args.vg, 6, 0);
@@ -218,10 +243,10 @@ struct LcdWidget : TransparentWidget {
     Lcd::LcdFramebufferWidget<TModule> *lfb;
     Lcd::LcdDrawWidget<TModule> *ldw;
 
-    LcdWidget(TModule *_module){
+    LcdWidget(TModule *_module, std::string placeholderText1 = "", std::string placeholderText2 = ""){
         module = _module;
         lfb = new Lcd::LcdFramebufferWidget<TModule>(module);
-        ldw = new Lcd::LcdDrawWidget<TModule>(module);
+        ldw = new Lcd::LcdDrawWidget<TModule>(module, placeholderText1, placeholderText2);
         addChild(lfb);
         lfb->addChild(ldw);
     }
