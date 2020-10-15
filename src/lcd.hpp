@@ -239,4 +239,4 @@ struct LcdWidget : TransparentWidget {
 
 
 
-} // Lcd
+} // Namespace Lcd

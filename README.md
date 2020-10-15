@@ -73,6 +73,8 @@ Thanks to [Andrew Belt](https://vcvrack.com/) for creating VCV Rack and providin
 
 Thanks to [Jerry Sievert](https://legitimatesounding.com/) and [cschol](https://github.com/cschol) for their help with [QuickJS](https://bellard.org/quickjs/) integration.
 
+Thanks to [Silvio Kunaschk](https://github.com/qno/) for their help with [Azure Pipelines](https://azure.microsoft.com/en-us/services/devops/pipelines/) continuous integration.
+
 Thanks to [Squinky Labs](https://github.com/squinkylabs/SquinkyVCV), [Stoermelder](https://github.com/stoermelder/vcvrack-packone), [David O'Rourke](https://github.com/david-c14/SubmarineFree), and [Anthony Lexander Matos](https://github.com/anlexmatos) for technical advice.
 
 Thanks to [Omri Cohen](https://www.youtube.com/channel/UCuWKHSHTHMV_nVSeNH4gYAg) for featuring my modules in livestreams.

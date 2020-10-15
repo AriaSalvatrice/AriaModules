@@ -4,6 +4,8 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 #include "plugin.hpp"
+#include "quantizer.hpp"
+#include "lcd.hpp"
 
 namespace Psychopump {
 
@@ -58,6 +60,7 @@ struct Psychopump : Module {
         ENUMS(OUT1_PARAM, 8),
         ENUMS(OUT2_PARAM, 8),
         ENUMS(RANDOMIZE_PARAM, 8),
+        ENUMS(QUANTIZE_PARAM, 8),
         NUM_PARAMS
     };
     enum InputIds {
@@ -88,6 +91,7 @@ struct Psychopump : Module {
         NUM_LIGHTS
     };
 
+    Lcd::LcdStatus lcdStatus;
     dsp::ClockDivider processDivider;
     
     Psychopump() {
@@ -148,6 +152,11 @@ struct Psychopump : Module {
             configParam(CV_RANDOM_OFFSET_PARAM + i, 0.f, 5.f, 0.f, label, "V");
         }
         processDivider.setDivision(PROCESSDIVIDER);
+
+        processDivider.setDivision(PROCESSDIVIDER);
+        lcdStatus.lcdText1 = "Insert Obol";
+        lcdStatus.lcdText2 = " To Depart";
+        lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
     }
     
     void process(const ProcessArgs& args) override {
@@ -162,6 +171,20 @@ struct GateLabelButton : W::LitSvgSwitchUnshadowed {
     GateLabelButton() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/label-button-right-off.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/label-button-right-on.svg")));
+    }
+};
+
+struct FortuneButton : W::LitSvgSwitchUnshadowed {
+    FortuneButton() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/fortune-off.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/fortune-on.svg")));
+    }
+};
+
+struct QuantizeButton : W::LitSvgSwitchUnshadowed {
+    QuantizeButton() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/quantize-off.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/quantize-on.svg")));
     }
 };
 
@@ -259,6 +282,12 @@ struct PsychopumpWidget : W::ModuleWidget {
         addPassThroughOutputs(xOffset + 2.9f, yOffset + 90.f, module);
     }
 
+    void addRandomizeButtons(float xOffset, float yOffset, Psychopump* module) {
+        for(size_t i = 0; i < 8; i++) {
+            addParam(createParam<FortuneButton>(mm2px(Vec(xOffset, yOffset + 1.5f + i * 10.f)), module, Psychopump::RANDOMIZE_PARAM + i));
+        }
+    }
+
     void addCVParamElement(float xOffset, float yOffset, Psychopump* module, int light, int cvParam, int plusRandomParam, int minusRandomParam) {
         addParam(createParam<PlusButton>(mm2px(Vec(xOffset + 4.1f, yOffset)), module, plusRandomParam));
         addParam(createParam<MinusButton>(mm2px(Vec(xOffset + 4.1f, yOffset + 3.95f)), module, minusRandomParam));
@@ -313,6 +342,12 @@ struct PsychopumpWidget : W::ModuleWidget {
         addCVOutputs(xOffset + 2.9f, yOffset + 90.f, module); // + 2.9mm
     }
 
+    void addQuantizeButtons(float xOffset, float yOffset, Psychopump* module) {
+        for(size_t i = 0; i < 8; i++) {
+            addParam(createParam<QuantizeButton>(mm2px(Vec(xOffset, yOffset + 1.5f + i * 10.f)), module, Psychopump::QUANTIZE_PARAM + i));
+        }
+    }
+
     void addPitchInputs(float xOffset, float yOffset, Psychopump* module) {
         for(size_t i = 0; i < 8; i++) {
             addParam(createParam<PlusButton>(mm2px(Vec(xOffset + 4.1f, i * 10.f + yOffset)), module, Psychopump::PITCH_PLUS_RANDOM_PARAM + i));
@@ -344,15 +379,23 @@ struct PsychopumpWidget : W::ModuleWidget {
         addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-        // TODO: Signature
+        // Signature
+        addChild(createWidget<W::Signature>(mm2px(Vec(230.0f, 114.5f))));
 
         // Main Area
-        addGateInputs(4.f, 24.f, module); // ~14mm
-        addChannelControls(18.f, 24.f, module);  // ~10mm
+        addGateInputs(5.f, 24.f, module); // ~14mm
+        addChannelControls(19.f, 24.f, module);  // ~10mm
         addGateLengthControls(31.f, 24.f, module); // 10mm
-        addPassThroughSection(41.f, 24.f, module); // 28mm
-        addCVParamsSection(69.f, 24.f, module); // 112mm
-        addPitchSection(181.f, 24.f, module); // 14mm
+        addPassThroughSection(40.f, 24.f, module); // 28mm
+        addRandomizeButtons(68.f, 24.f, module); // ~7mm
+        addCVParamsSection(75.f, 24.f, module); // 112mm
+        addQuantizeButtons(187.f, 24.f, module); // ~7mm
+        addPitchSection(194.f, 24.f, module); // 14mm
+
+        // LCD
+        Lcd::LcdWidget<Psychopump> *lcd = new Lcd::LcdWidget<Psychopump>(module);
+        lcd->box.pos = mm2px(Vec(213.6f, 27.1f));
+        addChild(lcd);
 
         // Other I/O
     }

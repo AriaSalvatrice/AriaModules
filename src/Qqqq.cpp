@@ -971,8 +971,8 @@ struct PastePortableSequenceItem : MenuItem {
 
 struct PushButtonKeyboard : W::SvgSwitchUnshadowed {
     PushButtonKeyboard() {
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/button-keyboard.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/button-keyboard-pressed.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/keyboard-off.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/keyboard-on.svg")));
         momentary = true;
         W::SvgSwitchUnshadowed();
     }
@@ -1224,8 +1224,7 @@ struct QqqqWidget : W::ModuleWidget {
         drawScrews();
         drawPianoKeys(4.7f, 102.8f, module);
 
-        // The LCD
-        // addChild(Lcd::createLcd<Qqqq>(mm2px(Vec(27.6f, 21.2f)), module));
+        // LCD
         Lcd::LcdWidget<Qqqq> *lcd = new Lcd::LcdWidget<Qqqq>(module);
         lcd->box.pos = mm2px(Vec(27.6f, 21.2f));
         addChild(lcd);

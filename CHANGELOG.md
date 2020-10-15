@@ -13,6 +13,7 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 ### Changed
 
 - [CHANGE] Modulus Salomonis Regis, Modulellus Salomonis Regis, Modulissimus Salomonis Regis: Removed the visual link between Load and Reset on the faceplate, as this default behavior can be disabled by the user.
+- [CHANGE] QQQQ: Altered the design of the keyboard button for consistency.
 
 
 
