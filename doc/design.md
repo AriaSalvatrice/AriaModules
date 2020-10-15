@@ -25,7 +25,6 @@ When labels call for a stroke to make them easier to distinguish from the backgr
 
 - Yellow: 					    #ffcc03ff
 - Pink: 					    #fcaebbff
-- Orange (use very sparingly):  #f28a40ff
 - Blues, from light to dark:
   - Lightest (Highlight, LCD):  #c1f0f2ff
   - Light (backgrounds):        #76bfbeff
@@ -33,6 +32,12 @@ When labels call for a stroke to make them easier to distinguish from the backgr
   - Shade (bg gradient):        #469ca9ff
   - Dark (text and arrows):     #0e6977ff
   - Darkest (jacks):            #083d45ff
+
+Additional gradients, from light to dark (the second color being the main). Use sparingly.
+
+- Orange (Psychopump +/- buttons):  #ffcc03ff ~ #f28a40ff
+- Red (Mute button):                #ff1c6eff ~ #974151ff
+- Green (Solo button):              #a0ff2dff ~ #269d2cff
 
 These shades of yellow and pink are almost indistinguishable to people with tritanopia (about 1% of the population), so they should never be the only design cue provided to convey information. When a widget can be lit both pink and yellow, the pink version should have a Dark notch in the center. 
 

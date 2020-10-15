@@ -198,7 +198,7 @@
     {
       "slug": "Psychopump",
       "name": "Signature Series Psychopump",
-      "description": "Matches 8 channels of incoming triggers to CV presets. Perfect to get more percussive voices out of a single module.",
+      "description": "Matches 8 rows of incoming triggers to CV presets. Perfect to get more percussive voices out of a single module.",
       "manualUrl": "https://aria.dog/modules/psychopump",
       "tags": [
         "Utility"
