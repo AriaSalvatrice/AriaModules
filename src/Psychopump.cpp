@@ -100,6 +100,8 @@ struct Psychopump : Module {
 
     Lcd::LcdStatus lcdStatus;
     dsp::ClockDivider processDivider;
+    std::array<std::string, 8> rowLabels;
+    std::array<std::string, 8> columnLabels;
     
     Psychopump() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -129,6 +131,14 @@ struct Psychopump : Module {
             label = "Knob 8 - Channel ";
             label.append(std::to_string(i + 1));
             configParam(CV8_PARAM + i, 0.f, 10.f, 5.f, label, "V");
+
+            label = "Gate ";
+            label.append(std::to_string(i + 1));
+            rowLabels[i] = label;
+
+            label = "Knob ";
+            label.append(std::to_string(i + 1));
+            columnLabels[i] = label;
 
             configParam(CV1_PLUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Add random offset");
             configParam(CV2_PLUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Add random offset");
@@ -170,7 +180,7 @@ struct Psychopump : Module {
             configParam(GATE_LABEL_PARAM + i, 0.f, 1.f, 0.f, "Add Gate label on LCD");
             configParam(OUTPUT_LABEL_PARAM + i, 0.f, 1.f, 0.f, "Add Output label on LCD");
 
-            label = "Random offset for param ";
+            label = "Random offset for Knob ";
             label.append(std::to_string(i + 1));
             configParam(CV_RANDOM_OFFSET_PARAM + i, 0.f, 5.f, 0.f, label, "V");
             configParam(CV_POLARITY_PARAM + i, 0.f, 1.f, 0.f, "Unipolar / Bipolar");
@@ -198,7 +208,31 @@ struct Psychopump : Module {
     }
 };
 
+struct GateLabelField : TextField {
+    Psychopump* module;
+    size_t row = 0;
+
+    void onSelectKey(const event::SelectKey& e) override {
+        if (e.action == GLFW_PRESS && e.key == GLFW_KEY_ENTER) {
+            module->rowLabels[row] = text;
+            getAncestorOfType<ui::MenuOverlay>()->requestDelete();
+            e.consume(this);
+        }
+        if (!e.getTarget()) {
+            TextField::onSelectKey(e);
+        }
+    }
+
+    void step() override {
+        APP->event->setSelected(this);
+        module->rowLabels[row] = text;
+        TextField::step();
+    }
+};
+
 struct GateLabelButton : W::LitSvgSwitchUnshadowed {
+    Psychopump* module;
+    size_t row = 0;
     GateLabelButton() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/label-button-right-off.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/label-button-right-on.svg")));
@@ -208,6 +242,14 @@ struct GateLabelButton : W::LitSvgSwitchUnshadowed {
     	if (e.button != GLFW_MOUSE_BUTTON_LEFT) return; // Skip context menu
         ui::Menu* menu = createMenu();
         menu->addChild(createMenuLabel("Gate label on LCD:"));
+        GateLabelField* gateLabelField = new GateLabelField;
+        gateLabelField->module = module;
+        gateLabelField->row = row;
+        gateLabelField->box.size.x = 80.f;
+        gateLabelField->placeholder = "Label";
+        gateLabelField->setText(module->rowLabels[row]);
+        gateLabelField->selectAll();
+        menu->addChild(gateLabelField);
         e.consume(this);
     }
 };
@@ -295,7 +337,14 @@ struct PsychopumpWidget : W::ModuleWidget {
 
     void addGateInputs(float xOffset, float yOffset, Psychopump* module) {
         for(size_t i = 0; i < 8; i++) {
-            addParam(createParam<GateLabelButton>(mm2px(Vec(xOffset + 4.1f, yOffset + i * 10.f)), module, Psychopump::GATE_LABEL_PARAM + i));
+            GateLabelButton* gateLabelButton = new GateLabelButton;
+            gateLabelButton->box.pos = mm2px(Vec(xOffset + 4.1f, yOffset + i * 10.f));
+            gateLabelButton->row = i;
+            if (module) {
+                gateLabelButton->module = module;
+                gateLabelButton->paramQuantity = module->paramQuantities[Psychopump::GATE_LABEL_PARAM + i];
+            }
+            addParam(gateLabelButton);
             addStaticInput(mm2px(Vec(xOffset, yOffset + i * 10.f)), module, Psychopump::GATE_INPUT + i);
         }
     }
