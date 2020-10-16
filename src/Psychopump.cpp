@@ -195,9 +195,9 @@ struct Psychopump : Module {
         processDivider.setDivision(PROCESSDIVIDER);
 
         processDivider.setDivision(PROCESSDIVIDER);
-        lcdStatus.lcdText1 = "Insert Obol";
-        lcdStatus.lcdText2 = " To Depart";
-        lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
+        lcdStatus.text1 = "Insert Obol";
+        lcdStatus.text2 = " To Depart";
+        lcdStatus.layout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
     }
     
     void process(const ProcessArgs& args) override {

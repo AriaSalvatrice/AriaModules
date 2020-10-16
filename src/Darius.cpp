@@ -169,9 +169,9 @@ struct Darius : Module {
         knobDivider.setDivision(KNOBDIVIDER);
         displayDivider.setDivision(DISPLAYDIVIDER);
         processDivider.setDivision(PROCESSDIVIDER);
-        lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
-        lcdStatus.lcdText1 = "MEDITATE..."; // Loading message
-        lcdStatus.lcdText2 = "MEDITATION."; // https://www.youtube.com/watch?v=JqLNY1zyQ6o
+        lcdStatus.layout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
+        lcdStatus.text1 = "MEDITATE..."; // Loading message
+        lcdStatus.text2 = "MEDITATION."; // https://www.youtube.com/watch?v=JqLNY1zyQ6o
         for (size_t i = 0; i < 100; i++) random::uniform(); // The first few seeds we get seem bad, need more warming up. Might just be superstition.
     }
     
@@ -431,7 +431,7 @@ struct Darius : Module {
         resetPathTraveled();
         for (size_t i = 0; i < 36; i++)
             outputs[GATE_OUTPUT + i].setVoltage(0.f);
-        lcdStatus.lcdDirty = true;
+        lcdStatus.dirty = true;
         resetDelay = 0.f; // This starts the delay
     }
 
@@ -634,7 +634,7 @@ struct Darius : Module {
         }
         pathTraveled[step] = node;
         lastNode = node;
-        lcdStatus.lcdDirty = true;
+        lcdStatus.dirty = true;
     }
     
     void nodeBack(){
@@ -644,7 +644,7 @@ struct Darius : Module {
         // Not sure what's exactly going on, not very eager to figure out this old code.
         if (step < 7) pathTraveled[step + 1] = -1; 
         lastNode = node;
-        lcdStatus.lcdDirty = true;
+        lcdStatus.dirty = true;
     }
 
     void updateScale(){
@@ -768,7 +768,7 @@ struct Darius : Module {
         std::array<bool, 12> validNotes;
 
         // Since we might be sliding, refresh at least this often
-        lcdStatus.lcdDirty = true;
+        lcdStatus.dirty = true;
 
         // Reset after 3 seconds since the last interactive input was touched
         if (lcdLastInteraction < (3.f / DISPLAYDIVIDER) ) {
@@ -776,7 +776,7 @@ struct Darius : Module {
             // Updating only once after reset
             if(lcdLastInteraction >= (3.f / DISPLAYDIVIDER) ) {
                 lcdMode = DEFAULT_MODE;
-                lcdStatus.lcdDirty = true;
+                lcdStatus.dirty = true;
             }
         }
 
@@ -786,26 +786,26 @@ struct Darius : Module {
         }
 
         if (lcdMode == SLIDE_MODE) {
-            lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
-            lcdStatus.lcdText1 = "Slide:";
+            lcdStatus.layout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
+            lcdStatus.text1 = "Slide:";
             float displayDuration = slideDuration;
             if (displayDuration == 0.f)
-                lcdStatus.lcdText2 = "DISABLED";
+                lcdStatus.text2 = "DISABLED";
             if (displayDuration > 0.f && displayDuration < 1.f) {
                 int displayDurationMs = displayDuration * 1000;
                 displayDurationMs = truncf(displayDurationMs);
-                lcdStatus.lcdText2 = std::to_string(displayDurationMs);
-                lcdStatus.lcdText2.append("ms");
+                lcdStatus.text2 = std::to_string(displayDurationMs);
+                lcdStatus.text2.append("ms");
             } 
             if (displayDuration >= 1.f) {
-                lcdStatus.lcdText2 = std::to_string(displayDuration);
-                lcdStatus.lcdText2.resize(4);
-                lcdStatus.lcdText2.append("s");
+                lcdStatus.text2 = std::to_string(displayDuration);
+                lcdStatus.text2.resize(4);
+                lcdStatus.text2.append("s");
             }
         }
 
         if (lcdMode == SCALE_MODE) {
-            lcdStatus.lcdLayout = Lcd::PIANO_AND_TEXT2_LAYOUT;
+            lcdStatus.layout = Lcd::PIANO_AND_TEXT2_LAYOUT;
             if(params[SCALE_PARAM].getValue() == 0.f) {
                 text = "CHROMATIC";
             } else {
@@ -816,25 +816,26 @@ struct Darius : Module {
             if(inputs[EXT_SCALE_INPUT].isConnected()){
                 text = "EXTERNAL";
             }
-            lcdStatus.lcdText2 = text;
+            lcdStatus.text2 = text;
             lcdStatus.pianoDisplay = scale;
         }
 
         if (lcdMode == QUANTIZED_MODE){
-            lcdStatus.lcdLayout = Lcd::PIANO_AND_TEXT2_LAYOUT;
-            lcdStatus.lcdText2 = Quantizer::noteOctaveLcdName(outputs[CV_OUTPUT].getVoltage());
+            lcdStatus.layout = Lcd::PIANO_AND_TEXT2_LAYOUT;
+            lcdStatus.text2 = Quantizer::noteOctaveLcdName(outputs[CV_OUTPUT].getVoltage());
             lcdStatus.pianoDisplay = Quantizer::pianoDisplay(outputs[CV_OUTPUT].getVoltage());
         }
 
         if (lcdMode == CV_MODE){
-            lcdStatus.lcdLayout = Lcd::TEXT2_LAYOUT;
+            lcdStatus.layout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
             text = std::to_string( outputs[CV_OUTPUT].getVoltage() );
             text.resize(5);
-            lcdStatus.lcdText2 = text + "V";
+            lcdStatus.text1 = "";
+            lcdStatus.text2 = text + "V";
         }
 
         if (lcdMode == MINMAX_MODE) {
-            lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
+            lcdStatus.layout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
             if (params[QUANTIZE_TOGGLE_PARAM].getValue() == 0.f) {
                 text = (params[RANGE_PARAM].getValue() == 0.f) ? std::to_string(params[MIN_PARAM].getValue()) : std::to_string(params[MIN_PARAM].getValue() - 5.f);
                 text.resize(5);
@@ -842,7 +843,7 @@ struct Darius : Module {
             } else {
                 text = (params[RANGE_PARAM].getValue() == 0.f) ? Quantizer::noteOctaveLcdName(params[MIN_PARAM].getValue() - 4.f) : Quantizer::noteOctaveLcdName(params[MIN_PARAM].getValue() - 5.f);
             }
-            lcdStatus.lcdText1 = "Min: " + text;
+            lcdStatus.text1 = "Min: " + text;
 
             if (params[QUANTIZE_TOGGLE_PARAM].getValue() == 0.f) {
                 text = (params[RANGE_PARAM].getValue() == 0.f) ? std::to_string(params[MAX_PARAM].getValue()) : std::to_string(params[MAX_PARAM].getValue() - 5.f);
@@ -851,13 +852,13 @@ struct Darius : Module {
             } else {
                 text = (params[RANGE_PARAM].getValue() == 0.f) ? Quantizer::noteOctaveLcdName(params[MAX_PARAM].getValue() - 4.f) : Quantizer::noteOctaveLcdName(params[MAX_PARAM].getValue() - 5.f);
             }
-            lcdStatus.lcdText2 = "Max: " + text;
+            lcdStatus.text2 = "Max: " + text;
         }
 
 
         if (lcdMode == KNOB_MODE) {
             if (params[QUANTIZE_TOGGLE_PARAM].getValue() == 0.f) {
-                lcdStatus.lcdLayout = Lcd::TEXT2_LAYOUT;
+                lcdStatus.layout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
                 if (params[RANGE_PARAM].getValue() == 0.f) {
                     f = rescale( params[CV_PARAM + lastCvChanged].getValue(), 0.f, 10.f, params[MIN_PARAM].getValue(), params[MAX_PARAM].getValue());
                 } else {
@@ -865,9 +866,10 @@ struct Darius : Module {
                 }
                 text = std::to_string(f);
                 text.resize(5);
-                lcdStatus.lcdText2 = ">" + text + "V";
+                lcdStatus.text1 = "";
+                lcdStatus.text2 = ">" + text + "V";
             } else {
-                lcdStatus.lcdLayout = Lcd::PIANO_AND_TEXT2_LAYOUT;
+                lcdStatus.layout = Lcd::PIANO_AND_TEXT2_LAYOUT;
                 validNotes = Quantizer::validNotesInScaleKey( (int)params[SCALE_PARAM].getValue() , (int)params[KEY_PARAM].getValue() );
                  if (params[RANGE_PARAM].getValue() == 0.f) {
                      f = rescale(params[CV_PARAM + lastCvChanged].getValue(), 0.f, 10.f, params[MIN_PARAM].getValue() - 4.f, params[MAX_PARAM].getValue() - 4.f);
@@ -876,12 +878,12 @@ struct Darius : Module {
                  }
                  f = Quantizer::quantize( f, validNotes);
                  lcdStatus.pianoDisplay = Quantizer::pianoDisplay(f);
-                 lcdStatus.lcdText2 = ">" + Quantizer::noteOctaveLcdName(f);
+                 lcdStatus.text2 = ">" + Quantizer::noteOctaveLcdName(f);
             }
         }
 
         if (lcdMode == ROUTE_MODE) {
-            lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
+            lcdStatus.layout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
             relative = std::to_string( (1.f - params[ROUTE_PARAM + lastRouteChanged].getValue()) * 100.f);
             relative.resize(4);
             if (1.f - params[ROUTE_PARAM + lastRouteChanged].getValue() >= 0.9999f){
@@ -903,7 +905,7 @@ struct Darius : Module {
                 absolute.resize(4);
                 absolute.append("%");
             }
-            lcdStatus.lcdText1 = relative + "/" + absolute;
+            lcdStatus.text1 = relative + "/" + absolute;
 
             relative = std::to_string(params[ROUTE_PARAM + lastRouteChanged].getValue() * 100.f);
             relative.resize(4);
@@ -926,7 +928,7 @@ struct Darius : Module {
                 absolute.resize(4);
                 absolute.append("%");
             }
-            lcdStatus.lcdText2 = relative + "/" + absolute;
+            lcdStatus.text2 = relative + "/" + absolute;
         }
     }
 
@@ -938,11 +940,11 @@ struct Darius : Module {
         for (size_t i = 1; i < 8; i++) pathTraveled[i] = -1;
         lightsReset = true;
         lcdMode = INIT_MODE;
-        lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
-        lcdStatus.lcdText1 = "MEDITATE...";
-        lcdStatus.lcdText2 = "MEDITATION.";
+        lcdStatus.layout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
+        lcdStatus.text1 = "MEDITATE...";
+        lcdStatus.text2 = "MEDITATION.";
         lcdLastInteraction = 0.f;
-        lcdStatus.lcdDirty = true;
+        lcdStatus.dirty = true;
         resetDelay = 0.f;
     }
 
@@ -1030,7 +1032,7 @@ struct Darius : Module {
 struct KnobLcd : W::Knob {
     void onDragMove(const event::DragMove& e) override {
          dynamic_cast<Darius*>(paramQuantity->module)->lcdLastInteraction = 0.f;
-         dynamic_cast<Darius*>(paramQuantity->module)->lcdStatus.lcdDirty = true;
+         dynamic_cast<Darius*>(paramQuantity->module)->lcdStatus.dirty = true;
         W::Knob::onDragMove(e);
     }
 };
@@ -1065,7 +1067,7 @@ struct RockerSwitchHorizontalModeReset : W::RockerSwitchHorizontal {
     void onDragStart(const event::DragStart& e) override {
         dynamic_cast<Darius*>(paramQuantity->module)->lcdMode = DEFAULT_MODE;
         dynamic_cast<Darius*>(paramQuantity->module)->lcdLastInteraction = 0.f;
-        dynamic_cast<Darius*>(paramQuantity->module)->lcdStatus.lcdDirty = true;
+        dynamic_cast<Darius*>(paramQuantity->module)->lcdStatus.dirty = true;
         W::RockerSwitchHorizontal::onDragStart(e);
     }
 };
@@ -1105,7 +1107,7 @@ struct KnobRoute : W::Knob {
     void onDragMove(const event::DragMove& e) override {
         module->lcdMode = ROUTE_MODE;
         module->lcdLastInteraction = 0.f;
-        module->lcdStatus.lcdDirty = true;
+        module->lcdStatus.dirty = true;
         module->lastRouteChanged = lastChanged;
         W::Knob::onDragMove(e);
     }
@@ -1124,7 +1126,7 @@ struct KnobTransparentCV : W::KnobTransparent {
     void onDragMove(const event::DragMove& e) override {
         module->lcdMode = KNOB_MODE;
         module->lcdLastInteraction = 0.f;
-        module->lcdStatus.lcdDirty = true;
+        module->lcdStatus.dirty = true;
         module->lastCvChanged = lastChanged;
         W::KnobTransparent::onDragMove(e);
     }

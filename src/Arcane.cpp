@@ -446,43 +446,43 @@ struct Arcane : ArcaneBase {
         if (jsonParsed) {
             switch (lcdMode) {
                 case 0:
-                    lcdStatus.lcdText2 = todaysFortuneDate;
+                    lcdStatus.text2 = todaysFortuneDate;
                     lcdMode++;
                     break;
                 case 1:
-                    if (arcana == 0 ) lcdStatus.lcdText2 = "   FOOL    ";
-                    if (arcana == 1 ) lcdStatus.lcdText2 = " MAGICIAN  ";
-                    if (arcana == 2 ) lcdStatus.lcdText2 = "H.PRIESTESS";
-                    if (arcana == 3 ) lcdStatus.lcdText2 = "  EMPRESS  ";
-                    if (arcana == 4 ) lcdStatus.lcdText2 = "  EMPEROR  ";
-                    if (arcana == 5 ) lcdStatus.lcdText2 = "HIEROPHANT ";
-                    if (arcana == 6 ) lcdStatus.lcdText2 = "  LOVERS   ";
-                    if (arcana == 7 ) lcdStatus.lcdText2 = "  CHARIOT  ";
-                    if (arcana == 8 ) lcdStatus.lcdText2 = "  JUSTICE  ";
-                    if (arcana == 9 ) lcdStatus.lcdText2 = "  HERMIT   ";
-                    if (arcana == 10) lcdStatus.lcdText2 = "W. FORTUNE ";
-                    if (arcana == 11) lcdStatus.lcdText2 = "  STRENGTH ";
-                    if (arcana == 12) lcdStatus.lcdText2 = "HANGED MAN ";
-                    if (arcana == 13) lcdStatus.lcdText2 = "           "; // Intentional
-                    if (arcana == 14) lcdStatus.lcdText2 = "TEMPERANCE ";
-                    if (arcana == 15) lcdStatus.lcdText2 = "   DEVIL   ";
-                    if (arcana == 16) lcdStatus.lcdText2 = "   TOWER   ";
-                    if (arcana == 17) lcdStatus.lcdText2 = "   STAR    ";
-                    if (arcana == 18) lcdStatus.lcdText2 = "   MOON    ";
-                    if (arcana == 19) lcdStatus.lcdText2 = "    SUN    ";
-                    if (arcana == 20) lcdStatus.lcdText2 = " JUDGEMENT ";
-                    if (arcana == 21) lcdStatus.lcdText2 = "   WORLD   ";
+                    if (arcana == 0 ) lcdStatus.text2 = "   FOOL    ";
+                    if (arcana == 1 ) lcdStatus.text2 = " MAGICIAN  ";
+                    if (arcana == 2 ) lcdStatus.text2 = "H.PRIESTESS";
+                    if (arcana == 3 ) lcdStatus.text2 = "  EMPRESS  ";
+                    if (arcana == 4 ) lcdStatus.text2 = "  EMPEROR  ";
+                    if (arcana == 5 ) lcdStatus.text2 = "HIEROPHANT ";
+                    if (arcana == 6 ) lcdStatus.text2 = "  LOVERS   ";
+                    if (arcana == 7 ) lcdStatus.text2 = "  CHARIOT  ";
+                    if (arcana == 8 ) lcdStatus.text2 = "  JUSTICE  ";
+                    if (arcana == 9 ) lcdStatus.text2 = "  HERMIT   ";
+                    if (arcana == 10) lcdStatus.text2 = "W. FORTUNE ";
+                    if (arcana == 11) lcdStatus.text2 = "  STRENGTH ";
+                    if (arcana == 12) lcdStatus.text2 = "HANGED MAN ";
+                    if (arcana == 13) lcdStatus.text2 = "           "; // Intentional
+                    if (arcana == 14) lcdStatus.text2 = "TEMPERANCE ";
+                    if (arcana == 15) lcdStatus.text2 = "   DEVIL   ";
+                    if (arcana == 16) lcdStatus.text2 = "   TOWER   ";
+                    if (arcana == 17) lcdStatus.text2 = "   STAR    ";
+                    if (arcana == 18) lcdStatus.text2 = "   MOON    ";
+                    if (arcana == 19) lcdStatus.text2 = "    SUN    ";
+                    if (arcana == 20) lcdStatus.text2 = " JUDGEMENT ";
+                    if (arcana == 21) lcdStatus.text2 = "   WORLD   ";
                     lcdMode++;
                     break;
                 case 2:
-                    lcdStatus.lcdText2 = "  " + std::to_string(bpm) + " BPM";
+                    lcdStatus.text2 = "  " + std::to_string(bpm) + " BPM";
                     lcdMode++;
                     break;
                 case 3:
-                    if (wish == 0) lcdStatus.lcdText2 = "WISH:LUCK";
-                    if (wish == 1) lcdStatus.lcdText2 = "WISH:LOVE";
-                    if (wish == 2) lcdStatus.lcdText2 = "WISH:HEALTH";
-                    if (wish == 3) lcdStatus.lcdText2 = "WISH:MONEY";
+                    if (wish == 0) lcdStatus.text2 = "WISH:LUCK";
+                    if (wish == 1) lcdStatus.text2 = "WISH:LOVE";
+                    if (wish == 2) lcdStatus.text2 = "WISH:HEALTH";
+                    if (wish == 3) lcdStatus.text2 = "WISH:MONEY";
                     if (todaysFortuneDate != getCurrentFortuneDate()) {
                         lcdMode = 4;
                     } else {
@@ -490,12 +490,12 @@ struct Arcane : ArcaneBase {
                     }
                     break;
                 case 4: 
-                    lcdStatus.lcdText2 = "NEW ORACLE!";
+                    lcdStatus.text2 = "NEW ORACLE!";
                     lcdMode = 0;
                     break;
             }
         } else { // JSON not parsed
-            lcdStatus.lcdText2 = (owningSingleton) ? "DOWNLOADING" : "WAIT ON D/L"; 
+            lcdStatus.text2 = (owningSingleton) ? "DOWNLOADING" : "WAIT ON D/L"; 
         }
     }
     
@@ -516,7 +516,7 @@ struct Arcane : ArcaneBase {
         running = true;
         lcdMode = 0;
         cardDelayCounter = 0;
-        lcdStatus.lcdDirty = true;
+        lcdStatus.dirty = true;
         cardDirty = true;
         ArcaneBase::onReset();
     }
@@ -542,7 +542,7 @@ struct Arcane : ArcaneBase {
         configParam(PULSE_WIDTH_PARAM, 1.f, 99.f, 1.f, "Pulse width for all outputs", "%");
         configParam(PULSE_RAMP_PARAM, 0.f, 1.f, 0.f, "Clock Pulse/Ramp output");
         lcdDivider.setDivision(1000); // Gets changed on first tick
-        lcdStatus.lcdLayout = Lcd::PIANO_AND_TEXT2_LAYOUT;
+        lcdStatus.layout = Lcd::PIANO_AND_TEXT2_LAYOUT;
     }
     
     void process(const ProcessArgs& args) override {
@@ -572,7 +572,7 @@ struct Arcane : ArcaneBase {
         
         if (lcdDivider.process()) {
             processLcdText(args);
-            lcdStatus.lcdDirty = true;
+            lcdStatus.dirty = true;
             if (jsonParsed) {
                 // Slow down loading the card by 8 secs, to simulate the user placing it manually themself
                 // and give them time to read the message on the faceplate, conveying better the theme

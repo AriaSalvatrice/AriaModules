@@ -173,11 +173,11 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1"
-     inkscape:cx="760.29138"
-     inkscape:cy="247.53051"
+     inkscape:zoom="1.4142136"
+     inkscape:cx="416.72076"
+     inkscape:cy="449.69331"
      inkscape:document-units="mm"
-     inkscape:current-layer="layer4"
+     inkscape:current-layer="layer10"
      showgrid="false"
      inkscape:window-width="1920"
      inkscape:window-height="1019"
@@ -1519,6 +1519,70 @@
        width="0.5"
        id="rect8048"
        style="display:inline;opacity:1;fill:#0e6977;fill-opacity:1;stroke-width:0.154919;stroke-linecap:square;paint-order:markers stroke fill" />
+    <rect
+       transform="rotate(90)"
+       y="-180.14999"
+       x="27.799999"
+       height="109.7"
+       width="0.5"
+       id="rect8052"
+       style="display:inline;opacity:1;fill:#0e6977;fill-opacity:1;stroke-width:0.573671;stroke-linecap:square;paint-order:markers stroke fill" />
+    <rect
+       style="display:inline;opacity:1;fill:#0e6977;fill-opacity:1;stroke-width:0.573671;stroke-linecap:square;paint-order:markers stroke fill"
+       id="rect8054"
+       width="0.5"
+       height="109.7"
+       x="37.799999"
+       y="-180.14999"
+       transform="rotate(90)" />
+    <rect
+       style="display:inline;opacity:1;fill:#0e6977;fill-opacity:1;stroke-width:0.573671;stroke-linecap:square;paint-order:markers stroke fill"
+       id="rect8056"
+       width="0.5"
+       height="109.7"
+       x="47.799999"
+       y="-180.14999"
+       transform="rotate(90)" />
+    <rect
+       transform="rotate(90)"
+       y="-180.14999"
+       x="57.799999"
+       height="109.7"
+       width="0.5"
+       id="rect8058"
+       style="display:inline;opacity:1;fill:#0e6977;fill-opacity:1;stroke-width:0.573671;stroke-linecap:square;paint-order:markers stroke fill" />
+    <rect
+       style="display:inline;opacity:1;fill:#0e6977;fill-opacity:1;stroke-width:0.573671;stroke-linecap:square;paint-order:markers stroke fill"
+       id="rect8060"
+       width="0.5"
+       height="109.7"
+       x="67.800003"
+       y="-180.14999"
+       transform="rotate(90)" />
+    <rect
+       transform="rotate(90)"
+       y="-180.14999"
+       x="77.800003"
+       height="109.7"
+       width="0.5"
+       id="rect8062"
+       style="display:inline;opacity:1;fill:#0e6977;fill-opacity:1;stroke-width:0.573671;stroke-linecap:square;paint-order:markers stroke fill" />
+    <rect
+       transform="rotate(90)"
+       y="-180.14999"
+       x="87.800003"
+       height="109.7"
+       width="0.5"
+       id="rect8064"
+       style="display:inline;opacity:1;fill:#0e6977;fill-opacity:1;stroke-width:0.573671;stroke-linecap:square;paint-order:markers stroke fill" />
+    <rect
+       style="display:inline;opacity:1;fill:#0e6977;fill-opacity:1;stroke-width:0.573671;stroke-linecap:square;paint-order:markers stroke fill"
+       id="rect8066"
+       width="0.5"
+       height="109.7"
+       x="97.800003"
+       y="-180.14999"
+       transform="rotate(90)" />
   </g>
   <g
      style="display:inline"
