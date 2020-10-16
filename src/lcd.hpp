@@ -21,7 +21,6 @@ extern Plugin* pluginInstance;
 // Its size is currently fixed to 36*10mm - 2 lines of 11 characters.
 //
 // The LCD LAYOUT is the layout, e.g., two lines of text, or a piano and a line of text.
-// The LCD MODE is deprecated.
 //
 // Modulus Salomonis Regis is the only module to implement the LCD somewhat as intended.
 // Arcane, Darius and QQQQ do things in deprecated (and downright stupid) ways:
@@ -41,15 +40,10 @@ extern Plugin* pluginInstance;
 namespace Lcd {
 
 
-// Which elements to show and hide
-// FIXME: Migrate terminology entirely to mode.
+// Which elements to show or hide
 enum LcdLayouts {
-    // Displays nothing
-    OFF_LAYOUT,
-    // Displays text on the first line and empties the second
+    // Displays text on the first line. Guaranteed a 2nd line will not be used.
     TEXT1_LAYOUT,
-    // Displays text on the second line and empties the first
-    TEXT2_LAYOUT,
     // Displays text on two lines
     TEXT1_AND_TEXT2_LAYOUT,
     // Piano on the first line and text on the second
@@ -57,7 +51,9 @@ enum LcdLayouts {
 };
 
 
-// Interface between the module & widgets with the LCD
+// Interface between the module & widgets with the LCD. The module must have one, named lcdStatus.
+// It's currently not possible to have more than one LCD as it looks for that name explicitly.
+// TODO: Support a decadent amount of LCDs
 struct LcdStatus {
     // The first line, not displayed on every layout. 
     std::string lcdText1 = "";
@@ -71,12 +67,8 @@ struct LcdStatus {
     // Whether to redraw the widget.
     bool lcdDirty = false;
 
-    // Which mode we're in. Use this to implement custom module logic - the LCD has no clue what this means.
-    // FIXME: Deprected, move away from using this.
-    int lcdMode = 0;
-
     // Whether to draw two lines of text, a piano, etc.
-    int lcdLayout = OFF_LAYOUT;
+    int lcdLayout = TEXT1_AND_TEXT2_LAYOUT;
 
     // For any info on a timer in the module. This widget has no knowledge what it means.
     float lcdLastInteraction = 0.f;
@@ -88,9 +80,25 @@ struct LcdStatus {
         for (size_t i = 0; i < 12; i++) pianoDisplay[i] = false;
     }
 
+    // Resets the timeout and dirties the framebuffer. Changes layout to TEXT1_LAYOUT upon request.
+    void notifyText1(std::string text, bool changeLayout = false) {
+        if (changeLayout) lcdLayout = TEXT1_LAYOUT;
+        lcdText1 = text;
+        lcdDirty = true;
+        lcdLastInteraction = 0.f;
+    }
+
+    // Resets the timeout and dirties the framebuffer. Changes layout to TEXT1_AND_TEXT2_LAYOUT upon request.
+    void notifyText2(std::string text, bool changeLayout = false) {
+        if (changeLayout) lcdLayout = TEXT1_AND_TEXT2_LAYOUT;
+        lcdText2 = text;
+        lcdDirty = true;
+        lcdLastInteraction = 0.f;
+    }
+
     // Call this from the module.
     // Use this to go back to the main page.
-    void notificationStep(float deltaTime) {
+    void processLcd(float deltaTime) {
         if (lcdLastInteraction >= 0.f) {
             lcdLastInteraction += deltaTime;
         }
@@ -184,8 +192,7 @@ struct LcdDrawWidget : LightWidget {
         }
 
         // 11 character display at the top.
-        if ( module->lcdStatus.lcdLayout == TEXT1_LAYOUT
-            || module->lcdStatus.lcdLayout == TEXT1_AND_TEXT2_LAYOUT ) {
+        if ( module->lcdStatus.lcdLayout == TEXT1_LAYOUT || module->lcdStatus.lcdLayout == TEXT1_AND_TEXT2_LAYOUT ) {
             nvgSave(args.vg);
             lcdText1 = module->lcdStatus.lcdText1;
             lcdText1.append(11, ' '); // Ensure the string is long enough
@@ -198,9 +205,7 @@ struct LcdDrawWidget : LightWidget {
         }
     
         // 11 character display at the bottom.
-        if ( module->lcdStatus.lcdLayout == TEXT2_LAYOUT
-            || module->lcdStatus.lcdLayout == TEXT1_AND_TEXT2_LAYOUT
-            || module->lcdStatus.lcdLayout == PIANO_AND_TEXT2_LAYOUT ) {
+        if ( module->lcdStatus.lcdLayout == TEXT1_AND_TEXT2_LAYOUT || module->lcdStatus.lcdLayout == PIANO_AND_TEXT2_LAYOUT ) {
             nvgSave(args.vg);
             nvgTranslate(args.vg, 0, 11);
             lcdText2 = module->lcdStatus.lcdText2;

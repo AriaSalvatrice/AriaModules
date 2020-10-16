@@ -27,14 +27,6 @@ enum StepTypes {
     STEP_FORWARD
 };
 
-enum LcdModes {
-    INIT_MODE,
-    SCALE_MODE,
-    MINMAX_MODE,
-    TOTAL_NODES_MODE,
-    SLIDE_MODE
-};
-
 template <size_t NODES>
 struct Solomon : Module {
     enum ParamIds {
@@ -168,7 +160,6 @@ struct Solomon : Module {
         outputDivider.setDivision(OUTPUTDIVIDER);
 
         lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
-        lcdStatus.lcdMode = INIT_MODE;
         lcdStatus.lcdText1 = "LEARNING...";
         lcdStatus.lcdText2 = "SUMMONING..";
         lcdStatus.lcdLastInteraction = 0.f;
@@ -735,7 +726,7 @@ struct Solomon : Module {
 
     void process(const ProcessArgs& args) override {
 
-        lcdStatus.notificationStep(args.sampleTime);
+        lcdStatus.processLcd(args.sampleTime);
 
         if (copyPortableSequence)      exportPortableSequence();
         if (pastePortableSequence)     importPortableSequence();
@@ -800,7 +791,8 @@ struct TotalNodesKnob : W::KnobSnap {
 
         module->lcdStatus.lcdLastInteraction = 0.f;
         module->lcdStatus.lcdDirty = true;
-        module->lcdStatus.lcdLayout = Lcd::TEXT2_LAYOUT;
+        module->lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
+        module->lcdStatus.lcdText1 = "";
         module->lcdStatus.lcdText2 = "Nodes: " + std::to_string( (int) module->params[module->TOTAL_NODES_PARAM].getValue());
 
         W::Knob::onDragMove(e);
@@ -809,12 +801,7 @@ struct TotalNodesKnob : W::KnobSnap {
 
 // Scale/key knobs
 template <typename TModule>
-struct ScaleKnob : W::Knob {
-    ScaleKnob() {
-        snap = true;
-        W::Knob();
-    }
-
+struct ScaleKnob : W::KnobSnap {
     void onDragMove(const event::DragMove& e) override {
         TModule* module = dynamic_cast<TModule*>(paramQuantity->module);
 

@@ -53,7 +53,7 @@ struct Psychopump : Module {
         ENUMS(PITCH_PLUS_RANDOM_PARAM, 8),
         ENUMS(PITCH_MINUS_RANDOM_PARAM, 8),
         PITCH_RANDOM_OFFSET_PARAM,
-        ENUMS(GATE_LABEL_PARAM, 8),
+        ENUMS(CHANNEL_LABEL_PARAM, 8),
         ENUMS(OUTPUT_LABEL_PARAM, 8),
         ENUMS(MUTE_PARAM, 8),
         ENUMS(SOLO_PARAM, 8),
@@ -62,6 +62,7 @@ struct Psychopump : Module {
         ENUMS(RANDOMIZE_PARAM, 8),
         ENUMS(QUANTIZE_PARAM, 8),
         POLY_MODE_PARAM,
+        GATE_DELAY_PARAM,
         NUM_PARAMS
     };
     enum InputIds {
@@ -177,7 +178,7 @@ struct Psychopump : Module {
 
             configParam(QUANTIZE_PARAM + i, 0.f, 2.f, 0.f, "Quantize");
 
-            configParam(GATE_LABEL_PARAM + i, 0.f, 1.f, 0.f, "Add Gate label on LCD");
+            configParam(CHANNEL_LABEL_PARAM + i, 0.f, 1.f, 0.f, "Add Channel label on LCD");
             configParam(OUTPUT_LABEL_PARAM + i, 0.f, 1.f, 0.f, "Add Output label on LCD");
 
             label = "Random offset for Knob ";
@@ -187,8 +188,9 @@ struct Psychopump : Module {
         }
         configParam(PT1_RANDOM_OFFSET_PARAM, 0.f, 5.f, 0.f, "Random offset for Pass-through 1");
         configParam(PT2_RANDOM_OFFSET_PARAM, 0.f, 5.f, 0.f, "Random offset for Pass-through 2");
-        configParam(PITCH_RANDOM_OFFSET_PARAM, 0.f, 5.f, 0.f, "Random offset for Pitch");
+        configParam(PITCH_RANDOM_OFFSET_PARAM, 0.f, 12.f, 0.f, "Random offset for Pitch", " semitones");
         configParam(POLY_MODE_PARAM, 0.f, 1.f, 0.f, "Polyphony Mode");
+        configParam(GATE_DELAY_PARAM, 0.f, 32.f, 0.f, "Delay", " samples");
 
         processDivider.setDivision(PROCESSDIVIDER);
 
@@ -208,10 +210,22 @@ struct Psychopump : Module {
     }
 };
 
-struct GateLabelField : TextField {
+
+
+
+// --------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------
+
+
+
+// Thank you https://github.com/stoermelder/vcvrack-packone/blob/v1/src/Glue.cpp 
+// for figuring this one out lol
+struct ChannelLabelField : TextField {
     Psychopump* module;
     size_t row = 0;
 
+    // Force close on Enter
     void onSelectKey(const event::SelectKey& e) override {
         if (e.action == GLFW_PRESS && e.key == GLFW_KEY_ENTER) {
             module->rowLabels[row] = text;
@@ -223,9 +237,32 @@ struct GateLabelField : TextField {
         }
     }
 
+    // Auto-focus and auto-save
     void step() override {
         APP->event->setSelected(this);
         module->rowLabels[row] = text;
+        TextField::step();
+    }
+};
+
+struct OutputLabelField : TextField {
+    Psychopump* module;
+    size_t column = 0;
+
+    void onSelectKey(const event::SelectKey& e) override {
+        if (e.action == GLFW_PRESS && e.key == GLFW_KEY_ENTER) {
+            module->columnLabels[column] = text;
+            getAncestorOfType<ui::MenuOverlay>()->requestDelete();
+            e.consume(this);
+        }
+        if (!e.getTarget()) {
+            TextField::onSelectKey(e);
+        }
+    }
+
+    void step() override {
+        APP->event->setSelected(this);
+        module->columnLabels[column] = text;
         TextField::step();
     }
 };
@@ -242,17 +279,42 @@ struct GateLabelButton : W::LitSvgSwitchUnshadowed {
     	if (e.button != GLFW_MOUSE_BUTTON_LEFT) return; // Skip context menu
         ui::Menu* menu = createMenu();
         menu->addChild(createMenuLabel("Gate label on LCD:"));
-        GateLabelField* gateLabelField = new GateLabelField;
-        gateLabelField->module = module;
-        gateLabelField->row = row;
-        gateLabelField->box.size.x = 80.f;
-        gateLabelField->placeholder = "Label";
-        gateLabelField->setText(module->rowLabels[row]);
-        gateLabelField->selectAll();
-        menu->addChild(gateLabelField);
+        ChannelLabelField* channelLabelField = new ChannelLabelField;
+        channelLabelField->module = module;
+        channelLabelField->row = row;
+        channelLabelField->box.size.x = 80.f;
+        channelLabelField->placeholder = "Label";
+        channelLabelField->setText(module->rowLabels[row]);
+        channelLabelField->selectAll();
+        menu->addChild(channelLabelField);
         e.consume(this);
     }
 };
+
+struct OutputLabelButton : W::LitSvgSwitchUnshadowed {
+    Psychopump* module;
+    size_t column = 0;
+    OutputLabelButton() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/label-button-bottom-off.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/label-button-bottom-on.svg")));
+        momentary = true;
+    }
+    void onButton(const event::Button& e) override {
+    	if (e.button != GLFW_MOUSE_BUTTON_LEFT) return; // Skip context menu
+        ui::Menu* menu = createMenu();
+        menu->addChild(createMenuLabel("Output label on LCD:"));
+        OutputLabelField* outputLabelField = new OutputLabelField;
+        outputLabelField->module = module;
+        outputLabelField->column = column;
+        outputLabelField->box.size.x = 80.f;
+        outputLabelField->placeholder = "Label";
+        outputLabelField->setText(module->columnLabels[column]);
+        outputLabelField->selectAll();
+        menu->addChild(outputLabelField);
+        e.consume(this);
+    }
+};
+
 
 struct FortuneButton : W::LitSvgSwitchUnshadowed {
     FortuneButton() {
@@ -267,20 +329,6 @@ struct QuantizeButton : W::LitSvgSwitchUnshadowed {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/quantize-off.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/quantize-on.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/quantize-pink.svg")));
-    }
-};
-
-struct OutputLabelButton : W::LitSvgSwitchUnshadowed {
-    OutputLabelButton() {
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/label-button-bottom-off.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/label-button-bottom-on.svg")));
-        momentary = true;
-    }
-    void onButton(const event::Button& e) override {
-    	if (e.button != GLFW_MOUSE_BUTTON_LEFT) return; // Skip context menu
-        ui::Menu* menu = createMenu();
-        menu->addChild(createMenuLabel("Output label on LCD:"));
-        e.consume(this);
     }
 };
 
@@ -333,6 +381,14 @@ struct RockerSwitchUB : W::SvgSwitchUnshadowed {
     }
 };
 
+
+
+// --------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------
+
+
+
 struct PsychopumpWidget : W::ModuleWidget {
 
     void addGateInputs(float xOffset, float yOffset, Psychopump* module) {
@@ -342,7 +398,7 @@ struct PsychopumpWidget : W::ModuleWidget {
             gateLabelButton->row = i;
             if (module) {
                 gateLabelButton->module = module;
-                gateLabelButton->paramQuantity = module->paramQuantities[Psychopump::GATE_LABEL_PARAM + i];
+                gateLabelButton->paramQuantity = module->paramQuantities[Psychopump::CHANNEL_LABEL_PARAM + i];
             }
             addParam(gateLabelButton);
             addStaticInput(mm2px(Vec(xOffset, yOffset + i * 10.f)), module, Psychopump::GATE_INPUT + i);
@@ -425,7 +481,14 @@ struct PsychopumpWidget : W::ModuleWidget {
 
     void addCVOutputs(float xOffset, float yOffset, Psychopump* module) {
         for(size_t i = 0; i < 8; i++) {
-            addParam(createParam<OutputLabelButton>(mm2px(Vec(xOffset + i * 14.f, yOffset + 4.1f)), module, Psychopump::OUTPUT_LABEL_PARAM + i));
+            OutputLabelButton* outputLabelButton = new OutputLabelButton;
+            outputLabelButton->box.pos = mm2px(Vec(xOffset + i * 14.f, yOffset + 4.1f));
+            outputLabelButton->column = i;
+            if (module) {
+                outputLabelButton->module = module;
+                outputLabelButton->paramQuantity = module->paramQuantities[Psychopump::OUTPUT_LABEL_PARAM + i];
+            }
+            addParam(outputLabelButton);
         }
 
         addStaticOutput(mm2px(Vec(xOffset + 0 * 14.f, yOffset)), module, Psychopump::CV1_OUTPUT);
@@ -461,7 +524,7 @@ struct PsychopumpWidget : W::ModuleWidget {
 
     void addPitchSection(float xOffset, float yOffset, Psychopump* module) {
         addPitchInputs(xOffset, yOffset, module);
-        addParam(createParam<W::Knob>(mm2px(Vec(xOffset + 2.9f, yOffset + 80.f)), module, Psychopump::PITCH_RANDOM_OFFSET_PARAM));
+        addParam(createParam<W::KnobSnap>(mm2px(Vec(xOffset + 2.9f, yOffset + 80.f)), module, Psychopump::PITCH_RANDOM_OFFSET_PARAM));
         addStaticOutput(mm2px(Vec(xOffset + 2.9f, yOffset + 90.f)), module, Psychopump::PITCH_OUTPUT);
     }
 
@@ -483,16 +546,16 @@ struct PsychopumpWidget : W::ModuleWidget {
         addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
         // Signature
-        addChild(createWidget<W::Signature>(mm2px(Vec(224.0f, 114.5f))));
+        addChild(createWidget<W::Signature>(mm2px(Vec(223.0f, 94.f))));
 
         // Main Area
         addGateInputs(5.f, 24.f, module); // ~14mm
         addChannelControls(19.f, 24.f, module);  // ~10mm
         addGateLengthControls(31.f, 24.f, module); // 10mm
         addPassThroughSection(40.f, 24.f, module); // 28mm
-        addRandomizeButtons(68.f, 24.f, module); // ~7mm
+        addRandomizeButtons(68.1f, 24.f, module); // ~7mm
         addCVParamsSection(75.f, 24.f, module); // 112mm
-        addQuantizeButtons(187.f, 24.f, module); // ~7mm
+        addQuantizeButtons(187.1f, 24.f, module); // ~7mm
         addPitchSection(194.f, 24.f, module); // 14mm
 
         // LCD
@@ -509,9 +572,10 @@ struct PsychopumpWidget : W::ModuleWidget {
         addChild(createLight<W::StatusLightInput>(mm2px(Vec(222.f, 77.5f)), module, Psychopump::POLY_MODE_ECO_LIGHT));
         addChild(createLight<W::StatusLightInput>(mm2px(Vec(222.f, 81.f)), module, Psychopump::POLY_MODE_ALL_LIGHT));
 
-        // Other I/O
-        addDynamicOutput(mm2px(Vec(217.f, 94.f)), module, Psychopump::GATE1_OUTPUT, Psychopump::GATE1_LIGHT);
-        addDynamicOutput(mm2px(Vec(237.f, 94.f)), module, Psychopump::GATE2_OUTPUT, Psychopump::GATE2_LIGHT);
+        // Gate outputs
+        addDynamicOutput(mm2px(Vec(214.f, 114.f)), module, Psychopump::GATE1_OUTPUT, Psychopump::GATE1_LIGHT);
+        addDynamicOutput(mm2px(Vec(240.f, 114.f)), module, Psychopump::GATE2_OUTPUT, Psychopump::GATE2_LIGHT);
+        addParam(createParam<W::KnobSnap>(mm2px(Vec(227.f, 114.f)), module, Psychopump::GATE_DELAY_PARAM));
     }
 };
 

@@ -9,6 +9,7 @@ You should have received a copy of the GNU General Public License along with thi
 // added to it later without regard for code quality. This is maintained exploratory code, not good design.
 // I do not know why it works.
 // In fact it doesn't really work, if you process data at audio rates everything breaks.
+// Every time I have to look at this code again, I add another comment here to discourage you from working on this code.
 
 
 // Note: the module calls it a "path" internally, but they are called "routes" for the user.
