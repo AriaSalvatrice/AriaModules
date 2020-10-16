@@ -175,7 +175,7 @@
      inkscape:pageshadow="2"
      inkscape:zoom="1.4142136"
      inkscape:cx="416.72076"
-     inkscape:cy="449.69331"
+     inkscape:cy="223.41914"
      inkscape:document-units="mm"
      inkscape:current-layer="layer10"
      showgrid="false"
@@ -1382,7 +1382,7 @@
        y="20.5" />
     <rect
        y="20.5"
-       x="23.799999"
+       x="23.9"
        height="76.578949"
        width="0.5"
        id="rect1760"
@@ -1426,19 +1426,12 @@
        transform="rotate(90)" />
     <rect
        transform="rotate(90)"
-       y="-229.95"
+       y="-230.10001"
        x="57.799999"
        height="28.799999"
        width="0.5"
        id="rect2029"
        style="display:inline;opacity:1;fill:#0e6977;fill-opacity:1;stroke-width:0.293939;stroke-linecap:square;paint-order:markers stroke fill" />
-    <rect
-       y="40.400002"
-       x="229.95001"
-       height="1.6"
-       width="0.5"
-       id="rect5336"
-       style="display:inline;opacity:1;fill:#0e6977;fill-opacity:1;stroke-width:0.0692816;stroke-linecap:square;paint-order:markers stroke fill" />
     <rect
        transform="rotate(90)"
        y="-180.39999"
@@ -1461,11 +1454,11 @@
        width="0.5"
        height="8"
        x="57.799999"
-       y="-197.5"
+       y="-197.65001"
        transform="rotate(90)" />
     <rect
        transform="rotate(90)"
-       y="-197.5"
+       y="-197.65001"
        x="47.799999"
        height="8"
        width="0.5"
@@ -1473,7 +1466,7 @@
        style="display:inline;opacity:1;fill:#0e6977;fill-opacity:1;stroke-width:0.154919;stroke-linecap:square;paint-order:markers stroke fill" />
     <rect
        transform="rotate(90)"
-       y="-197.5"
+       y="-197.65001"
        x="37.799999"
        height="8"
        width="0.5"
@@ -1485,11 +1478,11 @@
        width="0.5"
        height="8"
        x="27.799999"
-       y="-197.5"
+       y="-197.65001"
        transform="rotate(90)" />
     <rect
        transform="rotate(90)"
-       y="-197.5"
+       y="-197.65001"
        x="97.800003"
        height="8"
        width="0.5"
@@ -1501,7 +1494,7 @@
        width="0.5"
        height="8"
        x="87.800003"
-       y="-197.5"
+       y="-197.65001"
        transform="rotate(90)" />
     <rect
        style="display:inline;opacity:1;fill:#0e6977;fill-opacity:1;stroke-width:0.154919;stroke-linecap:square;paint-order:markers stroke fill"
@@ -1509,11 +1502,11 @@
        width="0.5"
        height="8"
        x="77.800003"
-       y="-197.5"
+       y="-197.65001"
        transform="rotate(90)" />
     <rect
        transform="rotate(90)"
-       y="-197.5"
+       y="-197.65001"
        x="67.800003"
        height="8"
        width="0.5"
@@ -1521,7 +1514,7 @@
        style="display:inline;opacity:1;fill:#0e6977;fill-opacity:1;stroke-width:0.154919;stroke-linecap:square;paint-order:markers stroke fill" />
     <rect
        transform="rotate(90)"
-       y="-180.14999"
+       y="-180.3"
        x="27.799999"
        height="109.7"
        width="0.5"
@@ -1533,7 +1526,7 @@
        width="0.5"
        height="109.7"
        x="37.799999"
-       y="-180.14999"
+       y="-180.3"
        transform="rotate(90)" />
     <rect
        style="display:inline;opacity:1;fill:#0e6977;fill-opacity:1;stroke-width:0.573671;stroke-linecap:square;paint-order:markers stroke fill"
@@ -1541,11 +1534,11 @@
        width="0.5"
        height="109.7"
        x="47.799999"
-       y="-180.14999"
+       y="-180.3"
        transform="rotate(90)" />
     <rect
        transform="rotate(90)"
-       y="-180.14999"
+       y="-180.3"
        x="57.799999"
        height="109.7"
        width="0.5"
@@ -1557,11 +1550,11 @@
        width="0.5"
        height="109.7"
        x="67.800003"
-       y="-180.14999"
+       y="-180.3"
        transform="rotate(90)" />
     <rect
        transform="rotate(90)"
-       y="-180.14999"
+       y="-180.3"
        x="77.800003"
        height="109.7"
        width="0.5"
@@ -1569,7 +1562,7 @@
        style="display:inline;opacity:1;fill:#0e6977;fill-opacity:1;stroke-width:0.573671;stroke-linecap:square;paint-order:markers stroke fill" />
     <rect
        transform="rotate(90)"
-       y="-180.14999"
+       y="-180.3"
        x="87.800003"
        height="109.7"
        width="0.5"
@@ -1581,7 +1574,7 @@
        width="0.5"
        height="109.7"
        x="97.800003"
-       y="-180.14999"
+       y="-180.3"
        transform="rotate(90)" />
   </g>
   <g

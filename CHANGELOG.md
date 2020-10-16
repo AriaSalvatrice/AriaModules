@@ -14,6 +14,7 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 
 - [CHANGE] Modulus Salomonis Regis, Modulellus Salomonis Regis, Modulissimus Salomonis Regis: Removed the visual link between Load and Reset on the faceplate, as this default behavior can be disabled by the user.
 - [CHANGE] QQQQ: Altered the design of the keyboard button for consistency.
+- [CHANGE] All modules with a LCD: Altered the SVG font to hint at the pixel grid better on HDPI displays. It _is_ supposed to look low-tech and pixelated.
 
 
 
