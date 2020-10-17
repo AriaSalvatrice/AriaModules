@@ -622,7 +622,7 @@ struct Screw : SvgScrew {
 };
 
 
-// My personal brand, featuring the Cool S. Standard vertical position is 114.5mm.
+// My personal brand, featuring the Cool S. Standard vertical position is 114.5mm. It's 13.6mm wide.
 // Using a SvgScrew for the handy built-in framebuffer.
 // If you reuse these components, change the corresponding SVG file. Do not reuse my signature in your own works.
 // See the README for full legal details. 
