@@ -14,6 +14,11 @@ namespace Psychopump {
 // I might make a smaller version of this module if it's popular, but for now only one version.
 const size_t CHANNELS = 8;
 
+// TODO: Make gates longer
+// TODO: Retrigger
+// TODO: CV
+// TODO: Pitch
+
 // Contains one of everything I want to handle polyphonically.
 struct OutputChannel {
     std::array<float, 8> cv;
@@ -33,7 +38,7 @@ struct OutputChannel {
     }
 
     // This must be called exactly once per getGateVoltage()
-    void processGate(bool status, size_t outputNumber) {
+    void setGate(bool status, size_t outputNumber) {
         if (status) {
             gateQueue[outputNumber].push(true);
         } else {
@@ -41,29 +46,14 @@ struct OutputChannel {
         }
     }
 
-    // This must be called exactly once per processGate()
+    // This must be called exactly once per setGate(), even if the value is not necessary.
     float getGateVoltage(bool delayEnabled, size_t outputNumber) {
-        // FIXME: Remove those checks before distribution
-        if (gateQueue[outputNumber].size() > 5) {
-            DEBUG("QUEUE TOO BIG! This should never happen.");
-        }
-        if (gateQueue[outputNumber].empty()) {
-            DEBUG("QUEUE EMPTY! This should never happen.");
-            return 0.f;
-        }
         float r;
-        // FIXME: simplify
-        if (delayEnabled) {
-            if (gateQueue[outputNumber].size() < 5) {
-                DEBUG("Queue low");
-                r = 0.f;
-            } else {
-                DEBUG("Queue full");
-                r = (gateQueue[outputNumber].front()) ? 10.f : 0.f;
-                gateQueue[outputNumber].pop();
-            }
+        if (delayEnabled && gateQueue[outputNumber].size() < 5) {
+            // Delay enabled recently - wait for it to fill
+            r = 0.f;
         } else {
-            DEBUG("Not using the queue");
+            // Queue full or delay disabled (queue was cleared)
             r = (gateQueue[outputNumber].front()) ? 10.f : 0.f;
             gateQueue[outputNumber].pop();
         }
@@ -155,19 +145,28 @@ struct Psychopump : Module {
     enum LightIds {
         ENUMS(ROW_LIGHT, CHANNELS),
         POLY_MODE_MONO_LIGHT,
-        POLY_MODE_ECO_LIGHT,
+        POLY_MODE_ROTATE_LIGHT,
         POLY_MODE_ALL_LIGHT,
         GATE1_LIGHT,
         GATE2_LIGHT,
         NUM_LIGHTS
     };
+    enum PolyModes {
+        MONO_MODE,
+        ROTATE_MODE,
+        ALL_MODE,
+        NUM_POLYPHONY_MODES
+    };
 
     Lcd::LcdStatus lcdStatus;
     dsp::Timer processTimer;
+    dsp::SchmittTrigger polyButtonTrigger;
     std::array<std::string, CHANNELS> rowLabels;
     std::array<std::string, CHANNELS> columnLabels;
     std::array<OutputChannel, CHANNELS> outputChannels;
     std::array<size_t, CHANNELS> channelOrder;
+    std::array<std::array<bool, CHANNELS>, 2> gates;
+    size_t polyMode = MONO_MODE;
     bool delayEnabled = false;
     bool lastDelayStatus = false;
     
@@ -176,6 +175,8 @@ struct Psychopump : Module {
         std::string label;
         for(size_t i = 0; i < CHANNELS; i++) {
             channelOrder[i] = i;
+            gates[0][i] = false;
+            gates[1][i] = false;
 
             label = "Knob 1 - Channel ";
             label.append(std::to_string(i + 1));
@@ -266,65 +267,105 @@ struct Psychopump : Module {
         lcdStatus.layout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
     }
 
+    // TODO: More logic on mode change here.
+    void updatePolyphonyMode() {
+        if (polyButtonTrigger.process(params[POLY_MODE_PARAM].getValue())) {
+            polyMode++;
+            if (polyMode == NUM_POLYPHONY_MODES) polyMode = MONO_MODE;
+        }
+    }
+
     size_t getMaxPolyphonyChannels() {
-        // FIXME: Do it
+        if (polyMode == ROTATE_MODE) {
+            return 3;
+        }
+        if (polyMode == ALL_MODE) {
+            for (size_t i = CHANNELS; i > 0; i--) {
+                if (inputs[GATE_INPUT + i - 1].isConnected()) return i;
+            }
+        }
+        // If monophonic, or polyphonic but nothing plugged in
         return 1;
     }
 
-    size_t getMaxInputChannels() {
-        // FIXME: Do it
-        return 8;
-    }  
-
-    // Empties every channel's queue if the delay was just disabled
-    void processDelayStatus() {
+    // Empties every channel's delay queue if the delay was just disabled
+    void updateDelayStatus() {
         delayEnabled = (params[GATE_DELAY_PARAM].getValue() == 1.f) ? true : false;
         if (!delayEnabled && delayEnabled != lastDelayStatus) {
             for(size_t i = 0; i < CHANNELS; i++) outputChannels[i].emptyQueue();
-            DEBUG("Emptying the queues!");
         }
-        lastDelayStatus = (params[GATE_DELAY_PARAM].getValue() == 1.f) ? true : false;
+        lastDelayStatus = delayEnabled;
     }
 
-    void processTriggers() {
-        for (size_t i = 0; i < getMaxInputChannels(); i++) {
-            outputChannels[i].processGate((inputs[GATE_INPUT + i].getVoltageSum() > 0.1f), 0);
+    // Pushes a gate to the delay queue, popped by updateGates()
+    void updateTriggers() {
+        for (size_t i = 0; i < CHANNELS; i++) {
+            outputChannels[i].setGate((inputs[GATE_INPUT + i].getVoltageSum() > 0.1f), 0);
+            outputChannels[i].setGate((inputs[GATE_INPUT + i].getVoltageSum() > 0.1f), 1);
+        }
+    }
+    
+    // This also pops the delay queue.
+    void updateGates() {
+        for (size_t i = 0; i < CHANNELS; i++) {
+            gates[0][i] = outputChannels[i].getGateVoltage(delayEnabled, 0);
+            gates[1][i] = outputChannels[i].getGateVoltage(delayEnabled, 1);
         }
     }
 
     void sendOutput() {
         // TODO: Handle polyphony.
-        
-        for (size_t i = 0; i < getMaxPolyphonyChannels(); i++) {
-            outputs[CV0_OUTPUT].setVoltage(  outputChannels[i].cv[0]);
-            outputs[CV1_OUTPUT].setVoltage(  outputChannels[i].cv[1]);
-            outputs[CV2_OUTPUT].setVoltage(  outputChannels[i].cv[2]);
-            outputs[CV3_OUTPUT].setVoltage(  outputChannels[i].cv[3]);
-            outputs[CV4_OUTPUT].setVoltage(  outputChannels[i].cv[4]);
-            outputs[CV5_OUTPUT].setVoltage(  outputChannels[i].cv[5]);
-            outputs[CV6_OUTPUT].setVoltage(  outputChannels[i].cv[6]);
-            outputs[CV7_OUTPUT].setVoltage(  outputChannels[i].cv[7]);
-            outputs[PT1_OUTPUT].setVoltage(  outputChannels[i].pt[0]);
-            outputs[PT2_OUTPUT].setVoltage(  outputChannels[i].pt[1]);
-            outputs[GATE1_OUTPUT].setVoltage(outputChannels[i].getGateVoltage(delayEnabled, 0));
-            // outputs[GATE2_OUTPUT].setVoltage(outputChannels[i].getGateVoltage(delayEnabled, 1));
-            outputs[PITCH_OUTPUT].setVoltage(outputChannels[i].pitch);
+        size_t max = getMaxPolyphonyChannels();
+
+        for (size_t i = 0; i < max; i++) {
+            outputs[CV0_OUTPUT].setVoltage(outputChannels[ channelOrder[i] ].cv[0], i);
+            outputs[CV1_OUTPUT].setVoltage(outputChannels[ channelOrder[i] ].cv[1], i);
+            outputs[CV2_OUTPUT].setVoltage(outputChannels[ channelOrder[i] ].cv[2], i);
+            outputs[CV3_OUTPUT].setVoltage(outputChannels[ channelOrder[i] ].cv[3], i);
+            outputs[CV4_OUTPUT].setVoltage(outputChannels[ channelOrder[i] ].cv[4], i);
+            outputs[CV5_OUTPUT].setVoltage(outputChannels[ channelOrder[i] ].cv[5], i);
+            outputs[CV6_OUTPUT].setVoltage(outputChannels[ channelOrder[i] ].cv[6], i);
+            outputs[CV7_OUTPUT].setVoltage(outputChannels[ channelOrder[i] ].cv[7], i);
+            outputs[PT1_OUTPUT].setVoltage(outputChannels[ channelOrder[i] ].pt[0], i);
+            outputs[PT2_OUTPUT].setVoltage(outputChannels[ channelOrder[i] ].pt[1], i);
+            outputs[PITCH_OUTPUT].setVoltage(outputChannels[ channelOrder[i] ].pitch, i);
+            outputs[GATE1_OUTPUT].setVoltage((gates[0][ channelOrder[i] ] ? 10.f : 0.f), i);
+            outputs[GATE2_OUTPUT].setVoltage((gates[1][ channelOrder[i] ] ? 10.f : 0.f), i);
         }
+        outputs[CV0_OUTPUT].setChannels(max);
+        outputs[CV1_OUTPUT].setChannels(max);
+        outputs[CV2_OUTPUT].setChannels(max);
+        outputs[CV3_OUTPUT].setChannels(max);
+        outputs[CV4_OUTPUT].setChannels(max);
+        outputs[CV5_OUTPUT].setChannels(max);
+        outputs[CV6_OUTPUT].setChannels(max);
+        outputs[CV7_OUTPUT].setChannels(max);
+        outputs[PT1_OUTPUT].setChannels(max);
+        outputs[PT2_OUTPUT].setChannels(max);
+        outputs[PITCH_OUTPUT].setChannels(max);
+        outputs[GATE1_OUTPUT].setChannels(max);
+        outputs[GATE2_OUTPUT].setChannels(max);
+    }
+
+    void updateLights() {
+        lights[POLY_MODE_MONO_LIGHT].setBrightness((polyMode == MONO_MODE) ? 1.f : 0.f);
+        lights[POLY_MODE_ROTATE_LIGHT].setBrightness((polyMode == ROTATE_MODE) ? 1.f : 0.f);
+        lights[POLY_MODE_ALL_LIGHT].setBrightness((polyMode == ALL_MODE) ? 1.f : 0.f);
     }
     
     void process(const ProcessArgs& args) override {
         // We want the module to run at 1hz or below, regardless of sample rate, so that gates and
         // silences are always at least 1ms.
         // https://community.vcvrack.com/t/what-is-the-shortest-safe-gap-in-between-gates-to-retrigger/11303
-        if (processTimer.process(args.sampleTime) > 1.001f) {
+        if (processTimer.process(args.sampleTime) > 0.001f) {
             processTimer.reset();
-            // // test
-            // lights[ROW_LIGHT + 2].setBrightness(1.f);
-            // lights[POLY_MODE_MONO_LIGHT].setBrightness(1.f);
-            // lights[GATE1_LIGHT].setBrightness(1.f);
-            processDelayStatus();
-            processTriggers();
+            updatePolyphonyMode();
+            updateDelayStatus();
+            updateTriggers();
+            updateGates();
             sendOutput();
+            updateLights();
+            // TODO: Channel order
         }
     }
 };
@@ -692,7 +733,7 @@ struct PsychopumpWidget : W::ModuleWidget {
         // Polyphony
         addParam(createParam<W::ButtonMomentary>(mm2px(Vec(213.f, 54.f)), module, Psychopump::POLY_MODE_PARAM));
         addChild(createLight<W::StatusLightInput>(mm2px(Vec(223.f, 54.f)), module, Psychopump::POLY_MODE_MONO_LIGHT));
-        addChild(createLight<W::StatusLightInput>(mm2px(Vec(223.f, 57.5f)), module, Psychopump::POLY_MODE_ECO_LIGHT));
+        addChild(createLight<W::StatusLightInput>(mm2px(Vec(223.f, 57.5f)), module, Psychopump::POLY_MODE_ROTATE_LIGHT));
         addChild(createLight<W::StatusLightInput>(mm2px(Vec(223.f, 61.f)), module, Psychopump::POLY_MODE_ALL_LIGHT));
 
         // Delay
