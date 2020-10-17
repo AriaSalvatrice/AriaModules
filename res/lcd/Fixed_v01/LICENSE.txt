@@ -1,10 +1,14 @@
 These SVG files were exported from the Fixed_v01 font by Orgdot,
 available from http://www.orgdot.com/aliasfonts/index.htm 
 
+The exporter used was Pixels to Svg https://codepen.io/shshaw/pen/XbxvNj
+
+The line-height was lowered to cause a scanline effect.
+
 The | (pipe) character was moved 1 pixel to the right, to align better
 with the piano on the Modulus Salomonis Regis module.
 
-The font is distributed under a custom license, reproduced below.
+The font is distributed under a custom license, reproduced verbatim below.
 
 =====================================================================
 

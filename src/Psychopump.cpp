@@ -5,75 +5,110 @@ You should have received a copy of the GNU General Public License along with thi
 */
 #include "plugin.hpp"
 #include "quantizer.hpp"
+#include "polyexternalscale.hpp"
 #include "lcd.hpp"
 
 namespace Psychopump {
 
-const int PROCESSDIVIDER = 32;
+// Lots of values are hardcoded in this module, but amount of channels is the most common magic number.
+// I might make a smaller version of this module if it's popular, but for now only one version.
+const int CHANNELS = 8;
+
+// Contains one of everything I want to handle polyphonically
+struct OutputChannel {
+    std::array<float, 8> cv;
+    std::array<float, 2> pt;
+    float pitch = 0.f;
+    PolyExternalScale::PES pes; // FIXME: Do I neeed it?
+    std::array<bool, 2> gate;
+
+    OutputChannel() {
+        for (size_t i = 0; i < 8; i++) cv[i] = 0.f;
+        for (size_t i = 0; i < 2; i++) pt[i] = 0.f;
+        for (size_t i = 0; i < 2; i++) gate[i] = false;
+    }
+
+    // TODO: Delay!
+    void setGate(bool status, size_t outputNumber) {
+        gate[outputNumber] = status;
+    }
+
+    void retrigger(size_t outputNumber) {
+        // FIXME: do it
+    }
+
+    float gateVoltage(size_t outputNumber) {
+        return (gate[outputNumber]) ? 10.f : 0.f;
+    }
+
+};
+
+
 
 // Keeping track of enums across two dimensions would be a huge pain, so instead I'm going
-// with a lot of duplication. The rule: if it's vertical on the module, it's enumerated.
-// If it's horizontal it's named. 
+// with a lot of duplication. The rule: if it's vertical (a channel) on the module, it's enumerated.
+// If it's horizontal (a parm or input), it's named. 
 
 struct Psychopump : Module {
     enum ParamIds {
-        ENUMS(CV1_PARAM, 8),
-        ENUMS(CV2_PARAM, 8),
-        ENUMS(CV3_PARAM, 8),
-        ENUMS(CV4_PARAM, 8),
-        ENUMS(CV5_PARAM, 8),
-        ENUMS(CV6_PARAM, 8),
-        ENUMS(CV7_PARAM, 8),
-        ENUMS(CV8_PARAM, 8),
-        ENUMS(GATE_LENGTH_PARAM, 8),
-        ENUMS(CV1_PLUS_RANDOM_PARAM, 8),
-        ENUMS(CV2_PLUS_RANDOM_PARAM, 8),
-        ENUMS(CV3_PLUS_RANDOM_PARAM, 8),
-        ENUMS(CV4_PLUS_RANDOM_PARAM, 8),
-        ENUMS(CV5_PLUS_RANDOM_PARAM, 8),
-        ENUMS(CV6_PLUS_RANDOM_PARAM, 8),
-        ENUMS(CV7_PLUS_RANDOM_PARAM, 8),
-        ENUMS(CV8_PLUS_RANDOM_PARAM, 8),
-        ENUMS(CV1_MINUS_RANDOM_PARAM, 8),
-        ENUMS(CV2_MINUS_RANDOM_PARAM, 8),
-        ENUMS(CV3_MINUS_RANDOM_PARAM, 8),
-        ENUMS(CV4_MINUS_RANDOM_PARAM, 8),
-        ENUMS(CV5_MINUS_RANDOM_PARAM, 8),
-        ENUMS(CV6_MINUS_RANDOM_PARAM, 8),
-        ENUMS(CV7_MINUS_RANDOM_PARAM, 8),
-        ENUMS(CV8_MINUS_RANDOM_PARAM, 8),
-        ENUMS(CV_RANDOM_OFFSET_PARAM, 8),
-        ENUMS(CV_POLARITY_PARAM, 8),
-        ENUMS(PT1_PLUS_RANDOM_PARAM, 8),
-        ENUMS(PT2_PLUS_RANDOM_PARAM, 8),
-        ENUMS(PT1_MINUS_RANDOM_PARAM, 8),
-        ENUMS(PT2_MINUS_RANDOM_PARAM, 8),
+        ENUMS(CV0_PARAM, CHANNELS),
+        ENUMS(CV1_PARAM, CHANNELS),
+        ENUMS(CV2_PARAM, CHANNELS),
+        ENUMS(CV3_PARAM, CHANNELS),
+        ENUMS(CV4_PARAM, CHANNELS),
+        ENUMS(CV5_PARAM, CHANNELS),
+        ENUMS(CV6_PARAM, CHANNELS),
+        ENUMS(CV7_PARAM, CHANNELS),
+        ENUMS(GATE_LENGTH_PARAM, CHANNELS),
+        ENUMS(CV0_PLUS_RANDOM_PARAM, CHANNELS),
+        ENUMS(CV1_PLUS_RANDOM_PARAM, CHANNELS),
+        ENUMS(CV2_PLUS_RANDOM_PARAM, CHANNELS),
+        ENUMS(CV3_PLUS_RANDOM_PARAM, CHANNELS),
+        ENUMS(CV4_PLUS_RANDOM_PARAM, CHANNELS),
+        ENUMS(CV5_PLUS_RANDOM_PARAM, CHANNELS),
+        ENUMS(CV6_PLUS_RANDOM_PARAM, CHANNELS),
+        ENUMS(CV7_PLUS_RANDOM_PARAM, CHANNELS),
+        ENUMS(CV0_MINUS_RANDOM_PARAM, CHANNELS),
+        ENUMS(CV1_MINUS_RANDOM_PARAM, CHANNELS),
+        ENUMS(CV2_MINUS_RANDOM_PARAM, CHANNELS),
+        ENUMS(CV3_MINUS_RANDOM_PARAM, CHANNELS),
+        ENUMS(CV4_MINUS_RANDOM_PARAM, CHANNELS),
+        ENUMS(CV5_MINUS_RANDOM_PARAM, CHANNELS),
+        ENUMS(CV6_MINUS_RANDOM_PARAM, CHANNELS),
+        ENUMS(CV7_MINUS_RANDOM_PARAM, CHANNELS),
+        ENUMS(CV_RANDOM_OFFSET_PARAM, CHANNELS),
+        ENUMS(CV_POLARITY_PARAM, CHANNELS),
+        ENUMS(PT1_PLUS_RANDOM_PARAM, CHANNELS),
+        ENUMS(PT2_PLUS_RANDOM_PARAM, CHANNELS),
+        ENUMS(PT1_MINUS_RANDOM_PARAM, CHANNELS),
+        ENUMS(PT2_MINUS_RANDOM_PARAM, CHANNELS),
         PT1_RANDOM_OFFSET_PARAM,
         PT2_RANDOM_OFFSET_PARAM,
-        ENUMS(PITCH_PLUS_RANDOM_PARAM, 8),
-        ENUMS(PITCH_MINUS_RANDOM_PARAM, 8),
+        ENUMS(PITCH_PLUS_RANDOM_PARAM, CHANNELS),
+        ENUMS(PITCH_MINUS_RANDOM_PARAM, CHANNELS),
         PITCH_RANDOM_OFFSET_PARAM,
-        ENUMS(CHANNEL_LABEL_PARAM, 8),
-        ENUMS(OUTPUT_LABEL_PARAM, 8),
-        ENUMS(MUTE_PARAM, 8),
-        ENUMS(SOLO_PARAM, 8),
-        ENUMS(OUT1_PARAM, 8),
-        ENUMS(OUT2_PARAM, 8),
-        ENUMS(RANDOMIZE_PARAM, 8),
-        ENUMS(QUANTIZE_PARAM, 8),
+        ENUMS(CHANNEL_LABEL_PARAM, CHANNELS),
+        ENUMS(OUTPUT_LABEL_PARAM, CHANNELS),
+        ENUMS(MUTE_PARAM, CHANNELS),
+        ENUMS(SOLO_PARAM, CHANNELS),
+        ENUMS(OUT1_PARAM, CHANNELS),
+        ENUMS(OUT2_PARAM, CHANNELS),
+        ENUMS(RANDOMIZE_PARAM, CHANNELS),
+        ENUMS(QUANTIZE_PARAM, CHANNELS),
         POLY_MODE_PARAM,
         GATE_DELAY_PARAM,
         NUM_PARAMS
     };
     enum InputIds {
-        ENUMS(GATE_INPUT, 8),
-        ENUMS(PT1_INPUT, 8),
-        ENUMS(PT2_INPUT, 8),
-        ENUMS(PITCH_INPUT, 8),
+        ENUMS(GATE_INPUT, CHANNELS),
+        ENUMS(PT1_INPUT, CHANNELS),
+        ENUMS(PT2_INPUT, CHANNELS),
+        ENUMS(PITCH_INPUT, CHANNELS),
         POLY_EXTERNAL_SCALE_INPUT,
         NUM_INPUTS
     };
     enum OutputIds {
+        CV0_OUTPUT,
         CV1_OUTPUT,
         CV2_OUTPUT,
         CV3_OUTPUT,
@@ -81,7 +116,6 @@ struct Psychopump : Module {
         CV5_OUTPUT,
         CV6_OUTPUT,
         CV7_OUTPUT,
-        CV8_OUTPUT,
         PT1_OUTPUT,
         PT2_OUTPUT,
         GATE1_OUTPUT,
@@ -90,7 +124,7 @@ struct Psychopump : Module {
         NUM_OUTPUTS
     };
     enum LightIds {
-        ENUMS(ROW_LIGHT, 8),
+        ENUMS(ROW_LIGHT, CHANNELS),
         POLY_MODE_MONO_LIGHT,
         POLY_MODE_ECO_LIGHT,
         POLY_MODE_ALL_LIGHT,
@@ -100,38 +134,42 @@ struct Psychopump : Module {
     };
 
     Lcd::LcdStatus lcdStatus;
-    dsp::ClockDivider processDivider;
-    std::array<std::string, 8> rowLabels;
-    std::array<std::string, 8> columnLabels;
+    dsp::Timer processTimer;
+    std::array<std::string, CHANNELS> rowLabels;
+    std::array<std::string, CHANNELS> columnLabels;
+    std::array<OutputChannel, CHANNELS> outputChannels;
+    std::array<size_t, CHANNELS> channelOrder;
     
     Psychopump() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         std::string label;
-        for(size_t i = 0; i < 8; i++) {
+        for(size_t i = 0; i < CHANNELS; i++) {
+            channelOrder[i] = i;
+
             label = "Knob 1 - Channel ";
             label.append(std::to_string(i + 1));
-            configParam(CV1_PARAM + i, 0.f, 10.f, 5.f, label, "V");
+            configParam(CV0_PARAM + i, 0.f, 10.f, 5.f, label, "V");
             label = "Knob 2 - Channel ";
             label.append(std::to_string(i + 1));
-            configParam(CV2_PARAM + i, 0.f, 10.f, 5.f, label, "V");
+            configParam(CV1_PARAM + i, 0.f, 10.f, 5.f, label, "V");
             label = "Knob 3 - Channel ";
             label.append(std::to_string(i + 1));
-            configParam(CV3_PARAM + i, 0.f, 10.f, 5.f, label, "V");
+            configParam(CV2_PARAM + i, 0.f, 10.f, 5.f, label, "V");
             label = "Knob 4 - Channel ";
             label.append(std::to_string(i + 1));
-            configParam(CV4_PARAM + i, 0.f, 10.f, 5.f, label, "V");
+            configParam(CV3_PARAM + i, 0.f, 10.f, 5.f, label, "V");
             label = "Knob 5 - Channel ";
             label.append(std::to_string(i + 1));
-            configParam(CV5_PARAM + i, 0.f, 10.f, 5.f, label, "V");
+            configParam(CV4_PARAM + i, 0.f, 10.f, 5.f, label, "V");
             label = "Knob 6 - Channel ";
             label.append(std::to_string(i + 1));
-            configParam(CV6_PARAM + i, 0.f, 10.f, 5.f, label, "V");
+            configParam(CV5_PARAM + i, 0.f, 10.f, 5.f, label, "V");
             label = "Knob 7 - Channel ";
             label.append(std::to_string(i + 1));
-            configParam(CV7_PARAM + i, 0.f, 10.f, 5.f, label, "V");
+            configParam(CV6_PARAM + i, 0.f, 10.f, 5.f, label, "V");
             label = "Knob 8 - Channel ";
             label.append(std::to_string(i + 1));
-            configParam(CV8_PARAM + i, 0.f, 10.f, 5.f, label, "V");
+            configParam(CV7_PARAM + i, 0.f, 10.f, 5.f, label, "V");
 
             label = "Gate ";
             label.append(std::to_string(i + 1));
@@ -141,6 +179,7 @@ struct Psychopump : Module {
             label.append(std::to_string(i + 1));
             columnLabels[i] = label;
 
+            configParam(CV0_PLUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Add random offset");
             configParam(CV1_PLUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Add random offset");
             configParam(CV2_PLUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Add random offset");
             configParam(CV3_PLUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Add random offset");
@@ -148,11 +187,11 @@ struct Psychopump : Module {
             configParam(CV5_PLUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Add random offset");
             configParam(CV6_PLUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Add random offset");
             configParam(CV7_PLUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Add random offset");
-            configParam(CV8_PLUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Add random offset");
             configParam(PT1_PLUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Add random offset");
             configParam(PT2_PLUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Add random offset");
             configParam(PITCH_PLUS_RANDOM_PARAM + i, 0.f, 1.f, 0.f, "Add random offset");
 
+            configParam(CV0_MINUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Subtract random offset");
             configParam(CV1_MINUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Subtract random offset");
             configParam(CV2_MINUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Subtract random offset");
             configParam(CV3_MINUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Subtract random offset");
@@ -160,7 +199,6 @@ struct Psychopump : Module {
             configParam(CV5_MINUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Subtract random offset");
             configParam(CV6_MINUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Subtract random offset");
             configParam(CV7_MINUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Subtract random offset");
-            configParam(CV8_MINUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Subtract random offset");
             configParam(PT1_MINUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Subtract random offset");
             configParam(PT2_MINUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Subtract random offset");
             configParam(PITCH_MINUS_RANDOM_PARAM + i, 0.f, 1.f, 0.f, "Subtract random offset");
@@ -190,22 +228,77 @@ struct Psychopump : Module {
         configParam(PT2_RANDOM_OFFSET_PARAM, 0.f, 5.f, 0.f, "Random offset for Pass-through 2");
         configParam(PITCH_RANDOM_OFFSET_PARAM, 0.f, 12.f, 0.f, "Random offset for Pitch", " semitones");
         configParam(POLY_MODE_PARAM, 0.f, 1.f, 0.f, "Polyphony Mode");
-        configParam(GATE_DELAY_PARAM, 0.f, 32.f, 0.f, "Delay", " samples");
+        configParam(GATE_DELAY_PARAM, 0.f, 30.f, 0.f, "Delay", " ms", 0.f);
 
-        processDivider.setDivision(PROCESSDIVIDER);
-
-        processDivider.setDivision(PROCESSDIVIDER);
         lcdStatus.text1 = "Insert Obol";
         lcdStatus.text2 = " To Depart";
         lcdStatus.layout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
     }
+
+    size_t getMaxPolyphonyChannels() {
+        // FIXME: Do it
+        return 1;
+    }
+
+    size_t getMaxInputChannels() {
+        // FIXME: Do it
+        return 8;
+    }  
+
+    void processGateHigh(size_t channel) {
+        outputChannels[channel].setGate(true, 0);
+    }
+
+    void processGateLow(size_t channel) {
+        outputChannels[channel].setGate(false, 0);
+    }
+
+    void processTriggers() {
+        for (size_t i = 0; i < getMaxInputChannels(); i++) {
+            if (inputs[GATE_INPUT + i].getVoltageSum() > 0.1f) {
+                // Gate received on channel
+                processGateHigh(i);
+                // outputChannels[i].setGate(true, 0);
+            } else {
+                // No gate received on channel
+                processGateLow(i);
+                // outputChannels[i].setGate(false, 0);
+            }
+
+        }
+    }
+
+    void sendOutput() {
+        // TODO: Handle polyphony.
+        for (size_t i = 0; i < getMaxPolyphonyChannels(); i++) {
+            outputs[CV0_OUTPUT].setVoltage(  outputChannels[i].cv[0]);
+            outputs[CV1_OUTPUT].setVoltage(  outputChannels[i].cv[1]);
+            outputs[CV2_OUTPUT].setVoltage(  outputChannels[i].cv[2]);
+            outputs[CV3_OUTPUT].setVoltage(  outputChannels[i].cv[3]);
+            outputs[CV4_OUTPUT].setVoltage(  outputChannels[i].cv[4]);
+            outputs[CV5_OUTPUT].setVoltage(  outputChannels[i].cv[5]);
+            outputs[CV6_OUTPUT].setVoltage(  outputChannels[i].cv[6]);
+            outputs[CV7_OUTPUT].setVoltage(  outputChannels[i].cv[7]);
+            outputs[PT1_OUTPUT].setVoltage(  outputChannels[i].pt[0]);
+            outputs[PT2_OUTPUT].setVoltage(  outputChannels[i].pt[1]);
+            outputs[GATE1_OUTPUT].setVoltage(outputChannels[i].gateVoltage(0));
+            outputs[GATE2_OUTPUT].setVoltage(outputChannels[i].gateVoltage(1));
+            outputs[PITCH_OUTPUT].setVoltage(outputChannels[i].pitch);
+        }
+    }
     
     void process(const ProcessArgs& args) override {
-        if (processDivider.process()) {
+        // We want the module to run at 1hz or below, regardless of sample rate, so that gates and
+        // silences are always at least 1ms.
+        // https://community.vcvrack.com/t/what-is-the-shortest-safe-gap-in-between-gates-to-retrigger/11303
+        if (processTimer.process(args.sampleTime) > 0.001f) {
+            processTimer.reset();
             // test
             lights[ROW_LIGHT + 2].setBrightness(1.f);
             lights[POLY_MODE_MONO_LIGHT].setBrightness(1.f);
             lights[GATE1_LIGHT].setBrightness(1.f);
+            processTriggers();
+            sendOutput();
         }
     }
 };
@@ -220,7 +313,7 @@ struct Psychopump : Module {
 
 
 // Thank you https://github.com/stoermelder/vcvrack-packone/blob/v1/src/Glue.cpp 
-// for figuring this one out lol
+// for figuring out how to autofocus a field properly lol 
 struct ChannelLabelField : TextField {
     Psychopump* module;
     size_t row = 0;
@@ -456,14 +549,14 @@ struct PsychopumpWidget : W::ModuleWidget {
 
     void addCVParams(float xOffset, float yOffset, Psychopump* module) {
         for(size_t i = 0; i < 8; i++) {
-            addCVParamElement( 0 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV1_PARAM + i, Psychopump::CV1_PLUS_RANDOM_PARAM + i, Psychopump::CV1_MINUS_RANDOM_PARAM + i);
-            addCVParamElement( 1 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV2_PARAM + i, Psychopump::CV2_PLUS_RANDOM_PARAM + i, Psychopump::CV2_MINUS_RANDOM_PARAM + i);
-            addCVParamElement( 2 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV3_PARAM + i, Psychopump::CV3_PLUS_RANDOM_PARAM + i, Psychopump::CV3_MINUS_RANDOM_PARAM + i);
-            addCVParamElement( 3 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV4_PARAM + i, Psychopump::CV4_PLUS_RANDOM_PARAM + i, Psychopump::CV4_MINUS_RANDOM_PARAM + i);
-            addCVParamElement( 4 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV5_PARAM + i, Psychopump::CV5_PLUS_RANDOM_PARAM + i, Psychopump::CV5_MINUS_RANDOM_PARAM + i);
-            addCVParamElement( 5 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV6_PARAM + i, Psychopump::CV6_PLUS_RANDOM_PARAM + i, Psychopump::CV6_MINUS_RANDOM_PARAM + i);
-            addCVParamElement( 6 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV7_PARAM + i, Psychopump::CV7_PLUS_RANDOM_PARAM + i, Psychopump::CV7_MINUS_RANDOM_PARAM + i);
-            addCVParamElement( 7 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV8_PARAM + i, Psychopump::CV8_PLUS_RANDOM_PARAM + i, Psychopump::CV8_MINUS_RANDOM_PARAM + i);
+            addCVParamElement( 0 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV0_PARAM + i, Psychopump::CV0_PLUS_RANDOM_PARAM + i, Psychopump::CV0_MINUS_RANDOM_PARAM + i);
+            addCVParamElement( 1 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV1_PARAM + i, Psychopump::CV1_PLUS_RANDOM_PARAM + i, Psychopump::CV1_MINUS_RANDOM_PARAM + i);
+            addCVParamElement( 2 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV2_PARAM + i, Psychopump::CV2_PLUS_RANDOM_PARAM + i, Psychopump::CV2_MINUS_RANDOM_PARAM + i);
+            addCVParamElement( 3 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV3_PARAM + i, Psychopump::CV3_PLUS_RANDOM_PARAM + i, Psychopump::CV3_MINUS_RANDOM_PARAM + i);
+            addCVParamElement( 4 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV4_PARAM + i, Psychopump::CV4_PLUS_RANDOM_PARAM + i, Psychopump::CV4_MINUS_RANDOM_PARAM + i);
+            addCVParamElement( 5 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV5_PARAM + i, Psychopump::CV5_PLUS_RANDOM_PARAM + i, Psychopump::CV5_MINUS_RANDOM_PARAM + i);
+            addCVParamElement( 6 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV6_PARAM + i, Psychopump::CV6_PLUS_RANDOM_PARAM + i, Psychopump::CV6_MINUS_RANDOM_PARAM + i);
+            addCVParamElement( 7 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV7_PARAM + i, Psychopump::CV7_PLUS_RANDOM_PARAM + i, Psychopump::CV7_MINUS_RANDOM_PARAM + i);
         }
     }
 
@@ -491,14 +584,14 @@ struct PsychopumpWidget : W::ModuleWidget {
             addParam(outputLabelButton);
         }
 
-        addStaticOutput(mm2px(Vec(xOffset + 0 * 14.f, yOffset)), module, Psychopump::CV1_OUTPUT);
-        addStaticOutput(mm2px(Vec(xOffset + 1 * 14.f, yOffset)), module, Psychopump::CV2_OUTPUT);
-        addStaticOutput(mm2px(Vec(xOffset + 2 * 14.f, yOffset)), module, Psychopump::CV3_OUTPUT);
-        addStaticOutput(mm2px(Vec(xOffset + 3 * 14.f, yOffset)), module, Psychopump::CV4_OUTPUT);
-        addStaticOutput(mm2px(Vec(xOffset + 4 * 14.f, yOffset)), module, Psychopump::CV5_OUTPUT);
-        addStaticOutput(mm2px(Vec(xOffset + 5 * 14.f, yOffset)), module, Psychopump::CV6_OUTPUT);
-        addStaticOutput(mm2px(Vec(xOffset + 6 * 14.f, yOffset)), module, Psychopump::CV7_OUTPUT);
-        addStaticOutput(mm2px(Vec(xOffset + 7 * 14.f, yOffset)), module, Psychopump::CV8_OUTPUT);
+        addStaticOutput(mm2px(Vec(xOffset + 0 * 14.f, yOffset)), module, Psychopump::CV0_OUTPUT);
+        addStaticOutput(mm2px(Vec(xOffset + 1 * 14.f, yOffset)), module, Psychopump::CV1_OUTPUT);
+        addStaticOutput(mm2px(Vec(xOffset + 2 * 14.f, yOffset)), module, Psychopump::CV2_OUTPUT);
+        addStaticOutput(mm2px(Vec(xOffset + 3 * 14.f, yOffset)), module, Psychopump::CV3_OUTPUT);
+        addStaticOutput(mm2px(Vec(xOffset + 4 * 14.f, yOffset)), module, Psychopump::CV4_OUTPUT);
+        addStaticOutput(mm2px(Vec(xOffset + 5 * 14.f, yOffset)), module, Psychopump::CV5_OUTPUT);
+        addStaticOutput(mm2px(Vec(xOffset + 6 * 14.f, yOffset)), module, Psychopump::CV6_OUTPUT);
+        addStaticOutput(mm2px(Vec(xOffset + 7 * 14.f, yOffset)), module, Psychopump::CV7_OUTPUT);
     }
 
     void addCVParamsSection(float xOffset, float yOffset, Psychopump* module) {

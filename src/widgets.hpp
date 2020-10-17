@@ -23,6 +23,13 @@
 //
 // If you want to re-use one of my one-off widgets that is not in this file but in a module, thus
 // covered by the GPL, and wish to receive the code of that widget under the WTFPL, contact me.
+// 
+// Most of the SVG files used in this file are also distributed under the WTFPL,
+// see the individual LICENSE files in folders for exceptions (such as Arcane's CC-BY-NC graphics).
+// If you re-use them, please change my signature color scheme to your own.
+// It's easy to change colors in bulk using search and replace in a text editor. 
+// This request is not legally binding to keep licensing rules simple.
+
 
 
 #pragma once
@@ -31,7 +38,6 @@ extern Plugin* pluginInstance;
 
 
 namespace W { // I don't want to type MyCoolPersonalWidgets:: every damn time, thank you
-
 
 
 /* --------------------------------------------------------------------------------------------- */
