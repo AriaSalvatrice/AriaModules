@@ -98,6 +98,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ env.release-tag }}
           assets: '*.zip'
+          fail-if-no-assets: false
       - name: Upload release assets
         uses: svenstaro/upload-release-action@v2
         with:
