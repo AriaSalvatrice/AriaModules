@@ -4,28 +4,6 @@ on: [push, pull_request]
 env:
   rack-sdk-version: 1.1.6
   release-tag: AzureCI
-  add-gitrev-to-plugin-version: |
-    gitrev=`git rev-parse --short HEAD`
-    version="1.0.${gitrev}"
-    echo "Updating to version=$version"
-    tf=`mktemp`
-    jq --arg VERSION "$version" '.version=$VERSION' plugin.json > $tf
-    mv $tf plugin.json
-# do not change indentation from tab to spaces in patch-makefile variable!
-  patch-makefile: | # extra dist target for CI Windows build, as there is only 7zip available and no zip command
-    cat << 'EOF' >> Makefile
-    ifdef ARCH_WIN
-    ci-win-dist: all
-    	mkdir -p dist/$(SLUG)
-    	@# Strip and copy plugin binary
-    	cp $(TARGET) dist/$(SLUG)/
-    	$(STRIP) -s dist/$(SLUG)/$(TARGET)
-    	@# Copy distributables
-    	cp -R $(DISTRIBUTABLES) dist/$(SLUG)/
-    	@# Create ZIP package
-    	cd dist && 7z a -tzip -mx=9 $(SLUG)-$(VERSION)-$(ARCH).zip -r $(SLUG)
-    endif
-    EOF
 
 jobs:
   build:
@@ -37,20 +15,17 @@ jobs:
         - {
             name: Linux,
             os: ubuntu-latest,
-            prepare-os: sudo apt install -y libglu-dev,
-            dist-target: dist
+            prepare-os: sudo apt install -y libglu-dev
           }
         - {
             name: MacOS,
             os: macos-latest,
-            prepare-os: "",
-            dist-target: dist
+            prepare-os: ""
           }
         - {
             name: Windows,
             os: windows-latest,
-            prepare-os: export CC=gcc,
-            dist-target: ci-win-dist
+            prepare-os: export CC=gcc
           }
     steps:
       - uses: actions/checkout@v2
@@ -62,18 +37,27 @@ jobs:
           pushd $HOME
           curl -o Rack-SDK.zip https://vcvrack.com/downloads/Rack-SDK-${{ env.rack-sdk-version }}.zip
           unzip Rack-SDK.zip
-      - name: Update version in plugin.json
+      - name: Patch plugin.mk, use 7zip on Windows
+        shell: bash
+        if: runner.os == 'Windows'
+        run: |
+          sed -i 's/zip -q -9 -r/7z a -tzip -mx=9/' $HOME/Rack-SDK/plugin.mk
+      - name: Modify version in plugin.json
         shell: bash
         run: |
-          ${{ env.add-gitrev-to-plugin-version }}
-      - name: Build Plugin
+          gitrev=`git rev-parse --short HEAD`
+          version="1.0.${gitrev}"
+          echo "Set plugin to version=$version"
+          tf=`mktemp`
+          jq --arg VERSION "$version" '.version=$VERSION' plugin.json > $tf
+          mv $tf plugin.json
+      - name: Build plugin
         shell: bash
         run: |
-          ${{ env.patch-makefile }}
           ${{ matrix.config.prepare-os }}
           export RACK_DIR=$HOME/Rack-SDK
           make -j dep
-          make -j ${{ matrix.config.dist-target }}
+          make -j dist
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
