@@ -42,15 +42,13 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           sed -i 's/zip -q -9 -r/7z a -tzip -mx=9/' $HOME/Rack-SDK/plugin.mk
-      - name: Modify version in plugin.json
+      - name: Modify plugin version
         shell: bash
         run: |
           gitrev=`git rev-parse --short HEAD`
-          version="1.0.${gitrev}"
-          echo "Set plugin to version=$version"
-          tf=`mktemp`
-          jq --arg VERSION "$version" '.version=$VERSION' plugin.json > $tf
-          mv $tf plugin.json
+          pluginversion=`jq -r '.version' plugin.json`
+          echo "Set plugin version from $pluginversion to $pluginversion-$gitrev"
+          cat <<< `jq --arg VERSION "$pluginversion-$gitrev" '.version=$VERSION' plugin.json` > plugin.json
       - name: Build plugin
         shell: bash
         run: |
