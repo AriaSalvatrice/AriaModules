@@ -16,6 +16,11 @@ The versioning follows this standard: the first number corresponds to the VCV ra
 - [CHANGE] QQQQ: Altered the design of the keyboard button for consistency.
 - [CHANGE] All modules with a LCD: Altered the SVG font to hint at the pixel grid better on HDPI displays. It _is_ supposed to look low-tech and pixelated.
 
+### Fixed
+
+- [FIX] Darius: Fixed slide knob updating slowly.
+
+
 
 
 ## [1.7.1] - 2020-10-11

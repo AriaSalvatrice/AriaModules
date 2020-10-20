@@ -36,7 +36,6 @@ const int STEP9START = 36; // (Panel is rotated 90 degrees counter-clockwise com
 const int STEP_STARTS[9] = {STEP1START, STEP2START, STEP3START, STEP4START, STEP5START, STEP6START, STEP7START, STEP8START, STEP9START};
 
 const int DISPLAYDIVIDER = 512;
-const int KNOBDIVIDER = 512;
 const int PROCESSDIVIDER = 32;
 
 enum LcdModes {
@@ -166,7 +165,6 @@ struct Darius : Module {
             configParam(CV_PARAM + i, 0.f, 10.f, 5.f, "CV");
         for (size_t i = 0; i < STEP8START; i++)
             configParam(ROUTE_PARAM + i, 0.f, 1.f, 0.5f, "Random route");
-        knobDivider.setDivision(KNOBDIVIDER);
         displayDivider.setDivision(DISPLAYDIVIDER);
         processDivider.setDivision(PROCESSDIVIDER);
         lcdStatus.layout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
@@ -992,12 +990,7 @@ struct Darius : Module {
 
             updateRoutes();
 
-            // Refreshing slide knobs often has a performance impact
-            // so the divider will remain quite high unless someone complains
-            // it breaks their art. 
-            if (knobDivider.process()) {
-                setSlide();
-            }
+            setSlide();
 
             if (steppedForward)
                 nodeForward();

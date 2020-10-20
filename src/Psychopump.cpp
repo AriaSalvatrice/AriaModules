@@ -19,9 +19,8 @@ You should have received a copy of the GNU General Public License along with thi
 // Reset (Init)
 // Draw better illustration
 // Make gates shorter than a display frame show up on the LCD
-// Update code to match user-facing terminology better
 // Test MIDI bindings
-// Show value of length knob
+// Copy-paste rows
 // Make presets
 // Manual
 // Record examples
@@ -228,6 +227,7 @@ struct Psychopump : Module {
     std::array<bool, CHANNELS> updateOutputChannelValues;
     std::deque<size_t> recentChannels;
     size_t polyMode = MONO_MODE;
+    size_t lastRotationChannel = 0;
     bool delayEnabled = false;
     bool lastDelayStatus = false;
     
@@ -320,8 +320,8 @@ struct Psychopump : Module {
             configParam(CV_RANDOM_OFFSET_PARAM + i, 0.f, 5.f, 0.f, label, "V");
             configParam(CV_POLARITY_PARAM + i, 0.f, 1.f, 0.f, "Unipolar / Bipolar");
         }
-        configParam(SH0_RANDOM_OFFSET_PARAM, 0.f, 5.f, 0.f, "Random offset for Pass-through 1");
-        configParam(SH1_RANDOM_OFFSET_PARAM, 0.f, 5.f, 0.f, "Random offset for Pass-through 2");
+        configParam(SH0_RANDOM_OFFSET_PARAM, 0.f, 5.f, 0.f, "Random offset for Sample & Hold 1");
+        configParam(SH1_RANDOM_OFFSET_PARAM, 0.f, 5.f, 0.f, "Random offset for Sample & Hold 2");
         configParam(PITCH_RANDOM_OFFSET_PARAM, 0.f, 12.f, 0.f, "Random offset for Pitch", " semitones");
         configParam(POLY_MODE_PARAM, 0.f, 1.f, 0.f, "Polyphony Mode");
         configParam(GATE_DELAY_PARAM, 0.f, 1.f, 0.f, "5ms gate delay for modules that snapshot CV on trigger");
@@ -505,7 +505,20 @@ struct Psychopump : Module {
     }
 
     bool isInFirst3Channels(size_t channel) {
+        if ( channelOrder[0] == channel ) return true;
+        if ( channelOrder[1] == channel ) return true;
+        if ( channelOrder[2] == channel ) return true;
         return false;
+    }
+
+    void pushToRotation(size_t channel) {
+        if (lastRotationChannel == 2) {
+            channelOrder[0] = channel;
+            lastRotationChannel = 0;
+        } else {
+            channelOrder[lastRotationChannel + 1] = channel;
+            lastRotationChannel++;
+        }
     }
 
     void updateChannels() {
@@ -513,7 +526,14 @@ struct Psychopump : Module {
             if (!recentChannels.empty()) channelOrder[0] = recentChannels.front();
         }
         if (polyMode == ROTATE_MODE) {
-            // Fuck it lol
+            for (size_t i = 0; i < 3; i++) {
+                if (!recentChannels.empty()) {
+                    if (! isInFirst3Channels(recentChannels.front()) ) {
+                        pushToRotation(recentChannels.front());
+                    }
+                    recentChannels.pop_front();
+                }
+            }
         }
         if (polyMode == ALL_MODE) { 
             for(size_t i = 0; i < CHANNELS; i++) channelOrder[i] = i;
@@ -661,6 +681,35 @@ struct CvKnob : W::KnobTransparent {
 };
 
 
+struct GateLengthKnob : W::Knob {
+    Psychopump* module;
+    size_t channel = 0;
+
+    void onDragMove(const event::DragMove& e) override {
+        module->lcdStatus.lastInteraction = 0.f;
+        module->lcdStatus.dirty = true;
+        module->lcdStatus.text1 = "Gate Length";
+        float duration = module->params[module->GATE_LENGTH_PARAM + channel].getValue();
+        if (duration > 0.01f) {
+            module->lcdStatus.text2 = "-----------";
+            if (duration < 1.f) {
+                int displayDurationMs = duration * 1000;
+                displayDurationMs = truncf(displayDurationMs);
+                module->lcdStatus.text2 = std::to_string(displayDurationMs);
+                module->lcdStatus.text2.append("ms");
+            } else {
+                module->lcdStatus.text2 = std::to_string(duration);
+                module->lcdStatus.text2.resize(4);
+                module->lcdStatus.text2.append("s");
+            }
+        } else {
+            module->lcdStatus.text2 = "No Change";
+        }
+        W::Knob::onDragMove(e);
+    }
+};
+
+
 // Thank you https://github.com/stoermelder/vcvrack-packone/blob/v1/src/Glue.cpp 
 // for figuring out how to autofocus a field properly lol 
 struct ChannelLabelField : TextField {
@@ -774,7 +823,6 @@ struct QuantizeButton : W::LitSvgSwitchUnshadowed {
     QuantizeButton() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/quantize-off.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/quantize-on.svg")));
-        // addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/quantize-pink.svg")));
     }
 };
 
@@ -811,16 +859,16 @@ struct SoloButton : W::LitSvgSwitchUnshadowed {
 };
 
 
-struct OUT0Button : W::LitSvgSwitchUnshadowed {
-    OUT0Button() {
+struct Out0Button : W::LitSvgSwitchUnshadowed {
+    Out0Button() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/psychopump-OUT1-off.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/psychopump-OUT1-on.svg")));
     }
 };
 
 
-struct OUT1Button : W::LitSvgSwitchUnshadowed {
-    OUT1Button() {
+struct Out1Button : W::LitSvgSwitchUnshadowed {
+    Out1Button() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/psychopump-OUT2-off.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/psychopump-OUT2-on.svg")));
     }
@@ -863,13 +911,23 @@ struct PsychopumpWidget : W::ModuleWidget {
         for(size_t i = 0; i < 8; i++) {
             addParam(createParam<MuteButton>(mm2px(Vec(xOffset +  0.f, yOffset +  0.f + i * 10.f)), module, Psychopump::MUTE_PARAM + i));
             addParam(createParam<SoloButton>(mm2px(Vec(xOffset +  0.f, yOffset + 4.1f + i * 10.f)), module, Psychopump::SOLO_PARAM + i));
-            addParam(createParam<OUT0Button>(mm2px(Vec(xOffset + 5.2f, yOffset +  0.f + i * 10.f)), module, Psychopump::OUT0_PARAM + i));
-            addParam(createParam<OUT1Button>(mm2px(Vec(xOffset + 5.2f, yOffset + 4.1f + i * 10.f)), module, Psychopump::OUT1_PARAM + i));
+            addParam(createParam<Out0Button>(mm2px(Vec(xOffset + 5.2f, yOffset +  0.f + i * 10.f)), module, Psychopump::OUT0_PARAM + i));
+            addParam(createParam<Out1Button>(mm2px(Vec(xOffset + 5.2f, yOffset + 4.1f + i * 10.f)), module, Psychopump::OUT1_PARAM + i));
         }
     }
 
-    // FIXME: SH terminology
-    void addPassThroughInputs(float xOffset, float yOffset, Psychopump* module) {
+    void addGateLengthControls(float xOffset, float yOffset, Psychopump* module) {
+        for(size_t i = 0; i < 8; i++) {
+            GateLengthKnob* gateLengthKnob = new GateLengthKnob;
+            gateLengthKnob->module = module;
+            gateLengthKnob->box.pos = mm2px(Vec(xOffset, yOffset + i * 10.f));
+            gateLengthKnob->channel = i;
+            if (module) gateLengthKnob->paramQuantity = module->paramQuantities[Psychopump::GATE_LENGTH_PARAM + i];
+            addParam(gateLengthKnob);
+        }
+    }
+
+    void addShInputs(float xOffset, float yOffset, Psychopump* module) {
         for(size_t i = 0; i < 8; i++) {
             addParam(createParam<PlusButton>(mm2px(Vec(xOffset + 4.1f, i * 10.f + yOffset)), module, Psychopump::SH0_PLUS_RANDOM_PARAM + i));
             addParam(createParam<MinusButton>(mm2px(Vec(xOffset + 4.1f, i * 10.f + yOffset + 3.95f)), module, Psychopump::SH0_MINUS_RANDOM_PARAM + i));
@@ -881,22 +939,22 @@ struct PsychopumpWidget : W::ModuleWidget {
     }
 
 
-    void addPassThroughRandomOffsetKnobs(float xOffset, float yOffset, Psychopump* module) {
+    void addShRandomOffsetKnobs(float xOffset, float yOffset, Psychopump* module) {
         addParam(createParam<W::Knob>(mm2px(Vec(xOffset,        yOffset)), module, Psychopump::SH0_RANDOM_OFFSET_PARAM));
         addParam(createParam<W::Knob>(mm2px(Vec(xOffset + 14.f, yOffset)), module, Psychopump::SH1_RANDOM_OFFSET_PARAM));
     }
 
 
-    void addPassThroughOutputs(float xOffset, float yOffset, Psychopump* module) {
+    void addShOutputs(float xOffset, float yOffset, Psychopump* module) {
         addStaticOutput(mm2px(Vec(xOffset, yOffset)), module, Psychopump::SH0_OUTPUT);
         addStaticOutput(mm2px(Vec(xOffset + 14.f, yOffset)), module, Psychopump::SH1_OUTPUT);
     }
 
 
-    void addPassThroughSection(float xOffset, float yOffset, Psychopump* module) {
-        addPassThroughInputs(xOffset, yOffset, module);
-        addPassThroughRandomOffsetKnobs(xOffset + 2.9f, yOffset + 80.f, module);
-        addPassThroughOutputs(xOffset + 2.9f, yOffset + 90.f, module);
+    void addShSection(float xOffset, float yOffset, Psychopump* module) {
+        addShInputs(xOffset, yOffset, module);
+        addShRandomOffsetKnobs(xOffset + 2.9f, yOffset + 80.f, module);
+        addShOutputs(xOffset + 2.9f, yOffset + 90.f, module);
     }
 
 
@@ -1003,13 +1061,6 @@ struct PsychopumpWidget : W::ModuleWidget {
     }
 
 
-    void addGateLengthControls(float xOffset, float yOffset, Psychopump* module) {
-        for(size_t i = 0; i < 8; i++) {
-            addParam(createParam<W::Knob>(mm2px(Vec(xOffset, yOffset + i * 10.f)), module, Psychopump::GATE_LENGTH_PARAM + i));
-        }
-    }
-
-
     PsychopumpWidget(Psychopump* module) {
         setModule(module);
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/faceplates/Psychopump.svg")));
@@ -1019,6 +1070,10 @@ struct PsychopumpWidget : W::ModuleWidget {
         addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<W::Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH * 14, 0)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH * 14, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH * 37, 0)));
+        addChild(createWidget<W::Screw>(Vec(RACK_GRID_WIDTH * 37, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
         // Signature
         addChild(createWidget<W::Signature>(mm2px(Vec(237.0f, 114.5f))));
@@ -1027,7 +1082,7 @@ struct PsychopumpWidget : W::ModuleWidget {
         addGateInputs(5.f, 24.f, module); // ~14mm
         addChannelControls(19.f, 24.f, module);  // ~10mm
         addGateLengthControls(31.f, 24.f, module); // 10mm
-        addPassThroughSection(40.f, 24.f, module); // 28mm
+        addShSection(40.f, 24.f, module); // 28mm
         addRandomizeButtons(68.1f, 24.f, module); // ~7mm
         addCVParamsSection(75.f, 24.f, module); // 112mm
         addQuantizeButtons(187.1f, 24.f, module); // ~7mm

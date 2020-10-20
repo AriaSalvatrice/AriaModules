@@ -1,7 +1,7 @@
 Design language of the modules
 ==============================
 
-This documents what I've done so far, mostly for my own reference. It's not a set of strict rules I plan to follow closely, it's just meant to improve consistency across the collection.
+This documents what I've done for my own reference. It's not a set of strict rules I plan to follow closely, and it doesn't define anything formally. It's just meant to improve consistency across the collection.
 
 ## Tools
 
@@ -39,12 +39,12 @@ Additional gradients, from light to dark (the second color being the main). Use 
 - Red (Mute button):                #ff1c6eff ~ #974151ff
 - Green (Solo button):              #a0ff2dff ~ #269d2cff
 
-These shades of yellow and pink are almost indistinguishable to people with tritanopia (about 1% of the population), so they should never be the only design cue provided to convey information. When a widget can be lit both pink and yellow, the pink version should have a Dark notch in the center. 
+These shades of yellow and pink are almost indistinguishable to people with tritanopia (about 1% of the population), and the Red gradient is hard to tell apart from the bues for people with protanopia (about 1% of males), so they should never be the only design cue provided to convey information. When a widget can be lit both pink and yellow, the pink version should have a Dark notch or circle prevalent in the design. 
 
 
 ## Alignment
 
-Things are aligned to a 0.5mm grid when possible. Don't sweat precision too much. Go for something that looks good rather than mathematical accuracy.
+Keep things aligned across collections, but don't sweat precision. Go for something that looks good rather than mathematical accuracy.
 
 
 ## Jacks
@@ -52,14 +52,19 @@ Things are aligned to a 0.5mm grid when possible. Don't sweat precision too much
 Jacks are spaced by at least 8mm. 10mm for a small logical separation. They are preferably aligned to integer values. Inputs have a yellow rim, outputs a pink one. Outputs are framed in a dark roundrect iff it improves readability (3mm rounding radius).
 
 
-## Hand painting
+## Illustrations
 
-Labels are never hand painted. Arrows showing the signal path are hand painted. Illustrations should be simple line art or silhouettes. The background patterns should be subtle and not look too busy when zoomed out.  
+Vector illustrations should be simple cartoonesque line art or silhouettes, otherwise they break. Bitmaps might be an option for more complex illustrations. The background patterns should be subtle and not look too busy when zoomed out.
+
+
+## Strokes
+
+0.3mm and 0.5mm are frequently used.
 
 
 ## Bitmap tracing
 
-Auto-tracing paths in inkscape with default settings on "Trace Bitmap" never looks right in NanoVG - lots of broken shapes.
+Auto-tracing paths in inkscape with default settings on "Trace Bitmap" never looks right in VCV - lots of broken shapes.
 
 For the tarot cards, I set the settings as follows, and barely edited them at all: 
 
