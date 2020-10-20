@@ -10,18 +10,14 @@ You should have received a copy of the GNU General Public License along with thi
 #include "lcd.hpp"
 
 // TODO:
-// Randomize buttons
-// Randomize module in right-click
-// Implement 3ch. Rotation mode
-// Normalize to output below
-// Clamp outputs
 // Save data across reloads in JSON
-// Reset (Init)
 // Draw better illustration
 // Make gates shorter than a display frame show up on the LCD
 // Test MIDI bindings
 // Copy-paste rows
+// Lights in poly modes
 // Make presets
+// Manifest metadata
 // Manual
 // Record examples
 
@@ -69,6 +65,13 @@ struct OutputChannel {
         for (size_t i = 0; i < 2; i++) gateSustain[i] = 0;
         for (size_t i = 0; i < 2; i++) gateSustaining[i] = false;
         for (size_t i = 0; i < 2; i++) retriggered[i] = false;
+    }
+
+
+    void clampValues() {
+        for (size_t i = 0; i < 8; i++) clamp(cv[i], -10.f, 10.f);
+        for (size_t i = 0; i < 2; i++) clamp(sh[i], -10.f, 10.f);
+        clamp(pitch, -10.f, 10.f);
     }
 
 
@@ -218,6 +221,7 @@ struct Psychopump : Module {
     Lcd::LcdStatus lcdStatus;
     dsp::Timer processTimer;
     dsp::SchmittTrigger polyButtonTrigger;
+    dsp::SchmittTrigger randomizeCvTrigger[8];
     std::array<std::string, CHANNELS> rowLabels;
     std::array<std::string, CHANNELS> columnLabels;
     std::array<OutputChannel, CHANNELS> outputChannels;
@@ -236,12 +240,6 @@ struct Psychopump : Module {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         std::string label;
         for(size_t i = 0; i < CHANNELS; i++) {
-            channelOrder[i] = i;
-            gates[0][i] = false;
-            gates[1][i] = false;
-            lastGateInputStatus[i] = false;
-            updateOutputChannelValues[i] = false;
-
             label = "Knob 1 - Channel ";
             label.append(std::to_string(i + 1));
             configParam(CV0_PARAM + i, 0.f, 10.f, 5.f, label, "V");
@@ -266,14 +264,6 @@ struct Psychopump : Module {
             label = "Knob 8 - Channel ";
             label.append(std::to_string(i + 1));
             configParam(CV7_PARAM + i, 0.f, 10.f, 5.f, label, "V");
-
-            label = "Gate ";
-            label.append(std::to_string(i + 1));
-            rowLabels[i] = label;
-
-            label = "Knob ";
-            label.append(std::to_string(i + 1));
-            columnLabels[i] = label;
 
             configParam(CV0_PLUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Add random offset");
             configParam(CV1_PLUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Add random offset");
@@ -326,9 +316,133 @@ struct Psychopump : Module {
         configParam(POLY_MODE_PARAM, 0.f, 1.f, 0.f, "Polyphony Mode");
         configParam(GATE_DELAY_PARAM, 0.f, 1.f, 0.f, "5ms gate delay for modules that snapshot CV on trigger");
 
+        onReset();
+    }
+
+
+    void onReset() override {
+        std::string label;
+
         lcdStatus.text1 = "Insert Obol";
         lcdStatus.text2 = " To Depart";
         lcdStatus.layout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
+        lcdStatus.lastInteraction = 0.f;
+        lcdStatus.dirty = true;
+        recentChannels.clear();
+        polyMode = MONO_MODE;
+        lastRotationChannel = 0;
+        delayEnabled = false;
+        lastDelayStatus = false;
+
+        for(size_t i = 0; i < CHANNELS; i++) {
+            channelOrder[i] = i;
+            gates[0][i] = false;
+            gates[1][i] = false;
+            lastGateInputStatus[i] = false;
+            updateOutputChannelValues[i] = false;
+            outputChannels[i].reset();
+
+            label = "Gate ";
+            label.append(std::to_string(i + 1));
+            rowLabels[i] = label;
+
+            label = "Knob ";
+            label.append(std::to_string(i + 1));
+            columnLabels[i] = label;
+        }
+    }
+
+
+    // Randomizing the whole device instead of channels already makes no sense, but 
+    // we definitely never want to randomize the Mute/Solo status.
+    void onRandomize() override {
+        for(size_t i = 0; i < CHANNELS; i++) {
+            params[MUTE_PARAM + i].setValue(0.f);
+            params[SOLO_PARAM + i].setValue(0.f);
+        }
+    }
+
+
+    struct RandomizeAction : history::ModuleAction {
+        std::array<float, 8> oldValues;
+        std::array<float, 8> newValues;
+        size_t channel;
+
+        RandomizeAction(int _moduleId, std::string _name, size_t _channel, std::array<float, 8> _oldValues, std::array<float, 8> _newValues) {
+            moduleId = _moduleId;
+            name = _name;
+            channel = _channel;
+            oldValues = _oldValues;
+            newValues = _newValues;
+        }
+
+        void undo() override {
+            Psychopump *module = dynamic_cast<Psychopump*>(APP->engine->getModule(this->moduleId));
+            assert(module);
+            module->params[CV0_PARAM + channel].setValue(oldValues[0]);
+            module->params[CV1_PARAM + channel].setValue(oldValues[1]);
+            module->params[CV2_PARAM + channel].setValue(oldValues[2]);
+            module->params[CV3_PARAM + channel].setValue(oldValues[3]);
+            module->params[CV4_PARAM + channel].setValue(oldValues[4]);
+            module->params[CV5_PARAM + channel].setValue(oldValues[5]);
+            module->params[CV6_PARAM + channel].setValue(oldValues[6]);
+            module->params[CV7_PARAM + channel].setValue(oldValues[7]);
+        }
+
+        void redo() override {
+            Psychopump *module = dynamic_cast<Psychopump*>(APP->engine->getModule(this->moduleId));
+            assert(module);
+            module->params[CV0_PARAM + channel].setValue(this->newValues[0]);
+            module->params[CV1_PARAM + channel].setValue(this->newValues[1]);
+            module->params[CV2_PARAM + channel].setValue(this->newValues[2]);
+            module->params[CV3_PARAM + channel].setValue(this->newValues[3]);
+            module->params[CV4_PARAM + channel].setValue(this->newValues[4]);
+            module->params[CV5_PARAM + channel].setValue(this->newValues[5]);
+            module->params[CV6_PARAM + channel].setValue(this->newValues[6]);
+            module->params[CV7_PARAM + channel].setValue(this->newValues[7]);
+        }
+    };
+
+
+    void randomizeCv(size_t channel){
+        std::array<float, 8> oldValues;
+        std::array<float, 8> newValues;
+
+        oldValues[0] = params[CV0_PARAM + channel].getValue();
+        oldValues[1] = params[CV1_PARAM + channel].getValue();
+        oldValues[2] = params[CV2_PARAM + channel].getValue();
+        oldValues[3] = params[CV3_PARAM + channel].getValue();
+        oldValues[4] = params[CV4_PARAM + channel].getValue();
+        oldValues[5] = params[CV5_PARAM + channel].getValue();
+        oldValues[6] = params[CV6_PARAM + channel].getValue();
+        oldValues[7] = params[CV7_PARAM + channel].getValue();
+
+        params[CV0_PARAM + channel].setValue(random::uniform() * 10.f);
+        params[CV1_PARAM + channel].setValue(random::uniform() * 10.f);
+        params[CV2_PARAM + channel].setValue(random::uniform() * 10.f);
+        params[CV3_PARAM + channel].setValue(random::uniform() * 10.f);
+        params[CV4_PARAM + channel].setValue(random::uniform() * 10.f);
+        params[CV5_PARAM + channel].setValue(random::uniform() * 10.f);
+        params[CV6_PARAM + channel].setValue(random::uniform() * 10.f);
+        params[CV7_PARAM + channel].setValue(random::uniform() * 10.f);
+
+        newValues[0] = params[CV0_PARAM + channel].getValue();
+        newValues[1] = params[CV1_PARAM + channel].getValue();
+        newValues[2] = params[CV2_PARAM + channel].getValue();
+        newValues[3] = params[CV3_PARAM + channel].getValue();
+        newValues[4] = params[CV4_PARAM + channel].getValue();
+        newValues[5] = params[CV5_PARAM + channel].getValue();
+        newValues[6] = params[CV6_PARAM + channel].getValue();
+        newValues[7] = params[CV7_PARAM + channel].getValue();
+
+        APP->history->push(new RandomizeAction(this->id, "randomize Psychopump channel CV", channel, oldValues, newValues));
+    }
+
+
+    void updateRandomizeButtons() {
+        for (size_t i = 0; i < CHANNELS; i++) {
+            if (randomizeCvTrigger[i].process(params[RANDOMIZE_PARAM + i].getValue())) randomizeCv(i);
+        }
     }
 
 
@@ -447,7 +561,15 @@ struct Psychopump : Module {
     }
 
 
-    // TODO: Normalize from input above - best done once priority works
+    // If nothing in the input, tries the ones above until it finds one, or uses the first if nothing found.
+    float getForwardedVoltage(size_t input, size_t channel) {
+        for (size_t i = channel; i > 0; i--) {
+            if (inputs[input + i].isConnected()) return inputs[input + i].getVoltage(0);
+        }
+        return inputs[input].getVoltage(0);
+    }
+
+
     // Called by updateValues() when necessary, as part of process(), and when turning knobs manually.
     void setOutputValues(size_t channel, bool randomOffsets) {
         outputChannels[channel].cv[0] = applyVoltageOffset(params[CV0_PARAM + channel].getValue(), params[CV_RANDOM_OFFSET_PARAM + 0].getValue(), params[CV0_MINUS_RANDOM_PARAM].getValue(), params[CV0_PLUS_RANDOM_PARAM].getValue(), params[CV_POLARITY_PARAM + 0].getValue());
@@ -458,11 +580,11 @@ struct Psychopump : Module {
         outputChannels[channel].cv[5] = applyVoltageOffset(params[CV5_PARAM + channel].getValue(), params[CV_RANDOM_OFFSET_PARAM + 5].getValue(), params[CV5_MINUS_RANDOM_PARAM].getValue(), params[CV5_PLUS_RANDOM_PARAM].getValue(), params[CV_POLARITY_PARAM + 5].getValue());
         outputChannels[channel].cv[6] = applyVoltageOffset(params[CV6_PARAM + channel].getValue(), params[CV_RANDOM_OFFSET_PARAM + 6].getValue(), params[CV6_MINUS_RANDOM_PARAM].getValue(), params[CV6_PLUS_RANDOM_PARAM].getValue(), params[CV_POLARITY_PARAM + 6].getValue());
         outputChannels[channel].cv[7] = applyVoltageOffset(params[CV7_PARAM + channel].getValue(), params[CV_RANDOM_OFFSET_PARAM + 7].getValue(), params[CV7_MINUS_RANDOM_PARAM].getValue(), params[CV7_PLUS_RANDOM_PARAM].getValue(), params[CV_POLARITY_PARAM + 7].getValue());
-        outputChannels[channel].sh[0] = applyVoltageOffset(inputs[SH0_INPUT + channel].getVoltage(0), params[SH0_RANDOM_OFFSET_PARAM].getValue(), params[SH0_MINUS_RANDOM_PARAM].getValue(), params[SH0_PLUS_RANDOM_PARAM].getValue());
-        outputChannels[channel].sh[1] = applyVoltageOffset(inputs[SH1_INPUT + channel].getVoltage(0), params[SH1_RANDOM_OFFSET_PARAM].getValue(), params[SH1_MINUS_RANDOM_PARAM].getValue(), params[SH1_PLUS_RANDOM_PARAM].getValue());
+        outputChannels[channel].sh[0] = applyVoltageOffset(getForwardedVoltage(SH0_INPUT, channel), params[SH0_RANDOM_OFFSET_PARAM].getValue(), params[SH0_MINUS_RANDOM_PARAM].getValue(), params[SH0_PLUS_RANDOM_PARAM].getValue());
+        outputChannels[channel].sh[1] = applyVoltageOffset(getForwardedVoltage(SH1_INPUT, channel), params[SH1_RANDOM_OFFSET_PARAM].getValue(), params[SH1_MINUS_RANDOM_PARAM].getValue(), params[SH1_PLUS_RANDOM_PARAM].getValue());
 
         // Pitch. That one's a pain.
-        float pitch = inputs[PITCH_INPUT + channel].getVoltage(0);
+        float pitch = getForwardedVoltage(PITCH_INPUT, channel);
         // Calculate offset
         bool minusMode = (params[PITCH_MINUS_RANDOM_PARAM].getValue() == 1.f);
         bool plusMode = (params[PITCH_PLUS_RANDOM_PARAM].getValue() == 1.f);
@@ -495,6 +617,9 @@ struct Psychopump : Module {
             pitch = Quantizer::quantize(pitch, scale);
         }
         outputChannels[channel].pitch = pitch;
+
+        // Keep them all to -10.f ~ 10.f
+        outputChannels[channel].clampValues();
     }
 
     void updateValues() {
@@ -598,6 +723,7 @@ struct Psychopump : Module {
         // https://community.vcvrack.com/t/what-is-the-shortest-safe-gap-in-between-gates-to-retrigger/11303
         if (processTimer.process(args.sampleTime) > 0.001f) {
             processTimer.reset();
+            updateRandomizeButtons();
             updatePolyphonyMode();
             updateDelayStatus();
             updateGates();
