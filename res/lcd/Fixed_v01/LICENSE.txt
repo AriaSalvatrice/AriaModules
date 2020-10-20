@@ -3,10 +3,13 @@ available from http://www.orgdot.com/aliasfonts/index.htm
 
 The exporter used was Pixels to Svg https://codepen.io/shshaw/pen/XbxvNj
 
-The line-height was lowered to cause a scanline effect.
+Various customizations were applied:
 
-The | (pipe) character was moved 1 pixel to the right, to align better
+- The line-height was lowered to cause a scanline effect.
+- The | (pipe) character was moved 1 pixel to the right, to align better
 with the piano on the Modulus Salomonis Regis module.
+- The _ (underscore) was made 1 pixel less wide.
+- The = (equal) character was replaced with a full block.
 
 The font is distributed under a custom license, reproduced verbatim below.
 

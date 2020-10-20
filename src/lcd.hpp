@@ -17,13 +17,12 @@
 using namespace rack;
 extern Plugin* pluginInstance;
 
-// This LCD widget displays data, provided by the module or by widgets.
+// This LCD widget displays text, provided by the module or by widgets.
 // Its size is currently fixed to 36*10mm - 2 lines of 11 characters.
+// Only basic ASCII without accents is suppported.
 //
-// The LCD LAYOUT is the layout, e.g., two lines of text, or a piano and a line of text.
-//
-// Modulus Salomonis Regis is the only module to implement the LCD somewhat as intended.
-// Arcane, Darius and QQQQ do things in deprecated (and downright stupid) ways:
+// Modulus Salomonis Regis & Psychopump are the only modules to implement the LCD somewhat
+// as intended. Arcane, Darius and QQQQ do things in deprecated (and downright stupid) ways:
 // too much logic lives within the module, rather than the widget.
 // 
 // On Arcane and Darius, the SVG of the LCD is a little bit too small to display
@@ -71,6 +70,7 @@ struct LcdStatus {
     int layout = TEXT1_AND_TEXT2_LAYOUT;
 
     // For any info on a timer in the module. This widget has no knowledge what it means.
+    // When reset to 0, processLcd() counts up until the notificationTimeout, then sets it to -1.f.
     float lastInteraction = 0.f;
 
     // How long before going back to the main display.
@@ -198,7 +198,7 @@ struct LcdDrawWidget : LightWidget {
             text1.append(11, ' '); // Ensure the string is long enough
             for (size_t i = 0; i < 11; i++) {
                 char c = text1.at(i);
-                svgDraw(args.vg, asciiSvg[ c - 32 ]->handle);
+                if (c >= 32 && c <= 126) svgDraw(args.vg, asciiSvg[ c - 32 ]->handle);
                 nvgTranslate(args.vg, 6, 0);
             }
             nvgRestore(args.vg);
@@ -212,7 +212,7 @@ struct LcdDrawWidget : LightWidget {
             text2.append(11, ' '); // Ensure the string is long enough
             for (size_t i = 0; i < 11; i++) {
                 char c = text2.at(i);
-                svgDraw(args.vg, asciiSvg[ c - 32 ]->handle);
+                if (c >= 32 && c <= 126) svgDraw(args.vg, asciiSvg[ c - 32 ]->handle);
                 nvgTranslate(args.vg, 6, 0);
             }
             nvgRestore(args.vg);
@@ -241,7 +241,7 @@ struct LcdFramebufferWidget : FramebufferWidget{
     }
 };
 
-// The actual LCD widget.
+// The actual LCD widget. Copy it into the module and edit it as needed.
 template <typename TModule>
 struct LcdWidget : TransparentWidget {
     TModule *module;
@@ -256,9 +256,10 @@ struct LcdWidget : TransparentWidget {
         lfb->addChild(ldw);
     }
 
-    // Override this to process timeouts and default modes
+    // Use this to process timeouts and default modes
     void processDefaultMode() {
-
+        if (!module) return;
+        if (module->lcdStatus.lastInteraction != -1.f) return;
     }
 
     void draw(const DrawArgs& args) override {

@@ -380,7 +380,7 @@ struct KnobLight : ModuleLightWidget {
             float targetX = mm2px(4.f + 3.2f * cos(value));
             float targetY = mm2px(4.f + 3.2f * sin(value));
             nvgLineTo(args.vg, targetX, targetY);
-            nvgStrokeColor(args.vg, nvgRGB(0x33, 0x00, 0x00));
+            nvgStrokeColor(args.vg, nvgRGB(0x00, 0x00, 0x00));
             nvgStrokeWidth(args.vg, 2.f);
             nvgStroke(args.vg);
         }        

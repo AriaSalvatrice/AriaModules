@@ -3,26 +3,42 @@ This program is free software: you can redistribute it and/or modify it under th
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
+#include <deque>
 #include <queue>
 #include "plugin.hpp"
 #include "quantizer.hpp"
 #include "lcd.hpp"
 
+// TODO:
+// Randomize buttons
+// Randomize module in right-click
+// Implement 3ch. Rotation mode
+// Normalize to output below
+// Clamp outputs
+// Save data across reloads in JSON
+// Reset (Init)
+// Draw better illustration
+// Make gates shorter than a display frame show up on the LCD
+// Update code to match user-facing terminology better
+// Test MIDI bindings
+// Show value of length knob
+// Make presets
+// Manual
+// Record examples
+
+
 namespace Psychopump {
 
 // Lots of values are hardcoded in this module, but amount of channels is the most common magic number.
-// I might make a smaller version of this module if it's popular, but for now only one version.
+//It will help if I want to make a smaller version of this module one day. But it will only happen if it's popular.
 const size_t CHANNELS = 8;
-
-// TODO: CV
-// TODO: Pitch
 
 // Contains everything that can be handled polyphonically.
 // Also handles delay and retriggering. Only gates are delayed.
 // Each matches directly a gate input: which one(s) to actually output is the module's choice.
 struct OutputChannel {
     std::array<float, 8> cv;
-    std::array<float, 2> pt;
+    std::array<float, 2> sh;
     float pitch = 0.f;
     std::array<std::queue<bool>, 2> gateQueue;
     std::array<bool, 2> gateStatus;
@@ -40,7 +56,7 @@ struct OutputChannel {
 
     void reset() {
         for (size_t i = 0; i < 8; i++) cv[i] = 0.f;
-        for (size_t i = 0; i < 2; i++) pt[i] = 0.f;
+        for (size_t i = 0; i < 2; i++) sh[i] = 0.f;
         pitch = 0.f;
         for (size_t i = 0; i < 2; i++) gateStatus[i] = false;
         emptyQueue();
@@ -138,12 +154,12 @@ struct Psychopump : Module {
         ENUMS(CV7_MINUS_RANDOM_PARAM, CHANNELS),
         ENUMS(CV_RANDOM_OFFSET_PARAM, CHANNELS),
         ENUMS(CV_POLARITY_PARAM, CHANNELS),
-        ENUMS(PT0_PLUS_RANDOM_PARAM, CHANNELS),
-        ENUMS(PT1_PLUS_RANDOM_PARAM, CHANNELS),
-        ENUMS(PT0_MINUS_RANDOM_PARAM, CHANNELS),
-        ENUMS(PT1_MINUS_RANDOM_PARAM, CHANNELS),
-        PT0_RANDOM_OFFSET_PARAM,
-        PT1_RANDOM_OFFSET_PARAM,
+        ENUMS(SH0_PLUS_RANDOM_PARAM, CHANNELS),
+        ENUMS(SH1_PLUS_RANDOM_PARAM, CHANNELS),
+        ENUMS(SH0_MINUS_RANDOM_PARAM, CHANNELS),
+        ENUMS(SH1_MINUS_RANDOM_PARAM, CHANNELS),
+        SH0_RANDOM_OFFSET_PARAM,
+        SH1_RANDOM_OFFSET_PARAM,
         ENUMS(PITCH_PLUS_RANDOM_PARAM, CHANNELS),
         ENUMS(PITCH_MINUS_RANDOM_PARAM, CHANNELS),
         PITCH_RANDOM_OFFSET_PARAM,
@@ -151,8 +167,8 @@ struct Psychopump : Module {
         ENUMS(OUTPUT_LABEL_PARAM, CHANNELS),
         ENUMS(MUTE_PARAM, CHANNELS),
         ENUMS(SOLO_PARAM, CHANNELS),
+        ENUMS(OUT0_PARAM, CHANNELS),
         ENUMS(OUT1_PARAM, CHANNELS),
-        ENUMS(OUT2_PARAM, CHANNELS),
         ENUMS(RANDOMIZE_PARAM, CHANNELS),
         ENUMS(QUANTIZE_PARAM, CHANNELS),
         POLY_MODE_PARAM,
@@ -161,8 +177,8 @@ struct Psychopump : Module {
     };
     enum InputIds {
         ENUMS(GATE_INPUT, CHANNELS),
-        ENUMS(PT0_INPUT, CHANNELS),
-        ENUMS(PT1_INPUT, CHANNELS),
+        ENUMS(SH0_INPUT, CHANNELS),
+        ENUMS(SH1_INPUT, CHANNELS),
         ENUMS(PITCH_INPUT, CHANNELS),
         POLY_EXTERNAL_SCALE_INPUT,
         NUM_INPUTS
@@ -176,10 +192,10 @@ struct Psychopump : Module {
         CV5_OUTPUT,
         CV6_OUTPUT,
         CV7_OUTPUT,
-        PT0_OUTPUT,
-        PT1_OUTPUT,
+        SH0_OUTPUT,
+        SH1_OUTPUT,
+        GATE0_OUTPUT,
         GATE1_OUTPUT,
-        GATE2_OUTPUT,
         PITCH_OUTPUT,
         NUM_OUTPUTS
     };
@@ -188,8 +204,8 @@ struct Psychopump : Module {
         POLY_MODE_MONO_LIGHT,
         POLY_MODE_ROTATE_LIGHT,
         POLY_MODE_ALL_LIGHT,
+        GATE0_LIGHT,
         GATE1_LIGHT,
-        GATE2_LIGHT,
         NUM_LIGHTS
     };
     enum PolyModes {
@@ -210,6 +226,7 @@ struct Psychopump : Module {
     std::array<std::array<bool, CHANNELS>, 2> gates;
     std::array<bool, CHANNELS> lastGateInputStatus;
     std::array<bool, CHANNELS> updateOutputChannelValues;
+    std::deque<size_t> recentChannels;
     size_t polyMode = MONO_MODE;
     bool delayEnabled = false;
     bool lastDelayStatus = false;
@@ -266,8 +283,8 @@ struct Psychopump : Module {
             configParam(CV5_PLUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Add random offset");
             configParam(CV6_PLUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Add random offset");
             configParam(CV7_PLUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Add random offset");
-            configParam(PT0_PLUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Add random offset");
-            configParam(PT1_PLUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Add random offset");
+            configParam(SH0_PLUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Add random offset");
+            configParam(SH1_PLUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Add random offset");
             configParam(PITCH_PLUS_RANDOM_PARAM + i, 0.f, 1.f, 0.f, "Add random offset");
 
             configParam(CV0_MINUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Subtract random offset");
@@ -278,22 +295,22 @@ struct Psychopump : Module {
             configParam(CV5_MINUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Subtract random offset");
             configParam(CV6_MINUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Subtract random offset");
             configParam(CV7_MINUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Subtract random offset");
-            configParam(PT0_MINUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Subtract random offset");
-            configParam(PT1_MINUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Subtract random offset");
+            configParam(SH0_MINUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Subtract random offset");
+            configParam(SH1_MINUS_RANDOM_PARAM   + i, 0.f, 1.f, 0.f, "Subtract random offset");
             configParam(PITCH_MINUS_RANDOM_PARAM + i, 0.f, 1.f, 0.f, "Subtract random offset");
             
             configParam(GATE_LENGTH_PARAM + i, 0.f, 10.f, 0.f, "Change Gate length");
 
             configParam(MUTE_PARAM + i, 0.f, 1.f, 0.f, "Mute");
             configParam(SOLO_PARAM + i, 0.f, 1.f, 0.f, "Solo");
-            configParam(OUT1_PARAM + i, 0.f, 1.f, 1.f, "Gate to Output 1");
-            configParam(OUT2_PARAM + i, 0.f, 1.f, 0.f, "Gate to Output 2");
+            configParam(OUT0_PARAM + i, 0.f, 1.f, 1.f, "Gate to Output 1");
+            configParam(OUT1_PARAM + i, 0.f, 1.f, 0.f, "Gate to Output 2");
 
             label = "Randomize knobs on Channel ";
             label.append(std::to_string(i + 1));
             configParam(RANDOMIZE_PARAM + i, 0.f, 1.f, 0.f, label);
 
-            configParam(QUANTIZE_PARAM + i, 0.f, 2.f, 0.f, "Quantize");
+            configParam(QUANTIZE_PARAM + i, 0.f, 1.f, 0.f, "Quantize");
 
             configParam(CHANNEL_LABEL_PARAM + i, 0.f, 1.f, 0.f, "Add Channel label on LCD");
             configParam(OUTPUT_LABEL_PARAM + i, 0.f, 1.f, 0.f, "Add Output label on LCD");
@@ -303,8 +320,8 @@ struct Psychopump : Module {
             configParam(CV_RANDOM_OFFSET_PARAM + i, 0.f, 5.f, 0.f, label, "V");
             configParam(CV_POLARITY_PARAM + i, 0.f, 1.f, 0.f, "Unipolar / Bipolar");
         }
-        configParam(PT0_RANDOM_OFFSET_PARAM, 0.f, 5.f, 0.f, "Random offset for Pass-through 1");
-        configParam(PT1_RANDOM_OFFSET_PARAM, 0.f, 5.f, 0.f, "Random offset for Pass-through 2");
+        configParam(SH0_RANDOM_OFFSET_PARAM, 0.f, 5.f, 0.f, "Random offset for Pass-through 1");
+        configParam(SH1_RANDOM_OFFSET_PARAM, 0.f, 5.f, 0.f, "Random offset for Pass-through 2");
         configParam(PITCH_RANDOM_OFFSET_PARAM, 0.f, 12.f, 0.f, "Random offset for Pitch", " semitones");
         configParam(POLY_MODE_PARAM, 0.f, 1.f, 0.f, "Polyphony Mode");
         configParam(GATE_DELAY_PARAM, 0.f, 1.f, 0.f, "5ms gate delay for modules that snapshot CV on trigger");
@@ -347,9 +364,32 @@ struct Psychopump : Module {
     }
    
 
+    // True if not muted or excluded by a solo
+    bool channelEnabled(size_t channel) {
+        // Is there a solo?
+        bool soloEnabled = false;
+        for (size_t i = 0; i < CHANNELS; i++) {
+            if (params[SOLO_PARAM + i].getValue() == 1.f) soloEnabled = true;
+        }
+        if (soloEnabled) {
+            if (params[SOLO_PARAM + channel].getValue() == 1.f && params[MUTE_PARAM + channel].getValue() == 0.f) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        // There's no solo, so is there a mute?
+        if (params[MUTE_PARAM + channel].getValue() == 0.f) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
     void updateGates() {
         for (size_t i = 0; i < CHANNELS; i++) {
-            bool gateStatus = (inputs[GATE_INPUT + i].getVoltageSum() > 0.1f);
+            bool gateStatus = (inputs[GATE_INPUT + i].getVoltageSum() > 0.1f && channelEnabled(i));
             float gateDuration = params[GATE_LENGTH_PARAM + i].getValue();
 
             if (gateDuration > 0.00001f ) {
@@ -366,15 +406,19 @@ struct Psychopump : Module {
                     outputChannels[i].updateGate(false, 0, delayEnabled, 0);
                     outputChannels[i].updateGate(false, 0, delayEnabled, 1);
                 } else {
-                    outputChannels[i].updateGate(gateStatus, (size_t) gateDuration, delayEnabled, 0);
-                    outputChannels[i].updateGate(gateStatus, (size_t) gateDuration, delayEnabled, 1);
+                    outputChannels[i].updateGate((gateStatus && params[OUT0_PARAM + i].getValue() == 1.f), (size_t) gateDuration, delayEnabled, 0);
+                    outputChannels[i].updateGate((gateStatus && params[OUT1_PARAM + i].getValue() == 1.f), (size_t) gateDuration, delayEnabled, 1);
                     updateOutputChannelValues[i] = gateStatus;
+                    if (gateStatus) recentChannels.push_front(i);
                 }
             } else {
                 // When the gate length is 0, pass input as-is as a gate, but update values only once.
-                outputChannels[i].updateGate(gateStatus, 0, delayEnabled, 0);
-                outputChannels[i].updateGate(gateStatus, 0, delayEnabled, 1);
-                if (!lastGateInputStatus[i]) updateOutputChannelValues[i] = gateStatus;
+                outputChannels[i].updateGate((gateStatus && params[OUT0_PARAM + i].getValue() == 1.f), 0, delayEnabled, 0);
+                outputChannels[i].updateGate((gateStatus && params[OUT1_PARAM + i].getValue() == 1.f), 0, delayEnabled, 1);
+                if (!lastGateInputStatus[i]) {
+                    updateOutputChannelValues[i] = gateStatus;
+                    if (gateStatus) recentChannels.push_front(i);
+                }
             }
 
             lastGateInputStatus[i] = gateStatus;
@@ -385,7 +429,7 @@ struct Psychopump : Module {
     }
 
 
-    float applyVoltageOffset(const float& value, const float& offset, const float& minus, const float& plus) {
+    float applyVoltageOffset(const float& value, const float& offset, const float& minus, const float& plus, const float& polarity = 0.f) {
         bool minusMode = (minus == 1.f);
         bool plusMode = (plus == 1.f);
         if (minusMode && plusMode) {
@@ -396,38 +440,29 @@ struct Psychopump : Module {
             }
         }
         float v = value;
+        if (polarity == 1.f) v -= 5.f;
         if (minusMode) v -= offset * random::uniform();
         if (plusMode)  v += offset * random::uniform();
         return v;
     }
 
 
-    // TODO: Call when changing params
-    // TODO: Randomization of pitch. Trickier than it looks.
+    // TODO: Normalize from input above - best done once priority works
     // Called by updateValues() when necessary, as part of process(), and when turning knobs manually.
     void setOutputValues(size_t channel, bool randomOffsets) {
-        outputChannels[channel].cv[0] = applyVoltageOffset(params[CV0_PARAM + channel].getValue(), params[CV_RANDOM_OFFSET_PARAM + 0].getValue(), params[CV0_MINUS_RANDOM_PARAM].getValue(), params[CV0_PLUS_RANDOM_PARAM].getValue());
-        outputChannels[channel].cv[1] = applyVoltageOffset(params[CV1_PARAM + channel].getValue(), params[CV_RANDOM_OFFSET_PARAM + 1].getValue(), params[CV1_MINUS_RANDOM_PARAM].getValue(), params[CV1_PLUS_RANDOM_PARAM].getValue());
-        outputChannels[channel].cv[2] = applyVoltageOffset(params[CV2_PARAM + channel].getValue(), params[CV_RANDOM_OFFSET_PARAM + 2].getValue(), params[CV2_MINUS_RANDOM_PARAM].getValue(), params[CV2_PLUS_RANDOM_PARAM].getValue());
-        outputChannels[channel].cv[3] = applyVoltageOffset(params[CV3_PARAM + channel].getValue(), params[CV_RANDOM_OFFSET_PARAM + 3].getValue(), params[CV3_MINUS_RANDOM_PARAM].getValue(), params[CV3_PLUS_RANDOM_PARAM].getValue());
-        outputChannels[channel].cv[4] = applyVoltageOffset(params[CV4_PARAM + channel].getValue(), params[CV_RANDOM_OFFSET_PARAM + 4].getValue(), params[CV4_MINUS_RANDOM_PARAM].getValue(), params[CV4_PLUS_RANDOM_PARAM].getValue());
-        outputChannels[channel].cv[5] = applyVoltageOffset(params[CV5_PARAM + channel].getValue(), params[CV_RANDOM_OFFSET_PARAM + 5].getValue(), params[CV5_MINUS_RANDOM_PARAM].getValue(), params[CV5_PLUS_RANDOM_PARAM].getValue());
-        outputChannels[channel].cv[6] = applyVoltageOffset(params[CV6_PARAM + channel].getValue(), params[CV_RANDOM_OFFSET_PARAM + 6].getValue(), params[CV6_MINUS_RANDOM_PARAM].getValue(), params[CV6_PLUS_RANDOM_PARAM].getValue());
-        outputChannels[channel].cv[7] = applyVoltageOffset(params[CV7_PARAM + channel].getValue(), params[CV_RANDOM_OFFSET_PARAM + 7].getValue(), params[CV7_MINUS_RANDOM_PARAM].getValue(), params[CV7_PLUS_RANDOM_PARAM].getValue());
-        outputChannels[channel].pt[0] = applyVoltageOffset(inputs[PT0_INPUT + channel].getVoltage(0), params[PT0_RANDOM_OFFSET_PARAM].getValue(), params[PT0_MINUS_RANDOM_PARAM].getValue(), params[PT0_PLUS_RANDOM_PARAM].getValue());
-        outputChannels[channel].pt[1] = applyVoltageOffset(inputs[PT1_INPUT + channel].getVoltage(0), params[PT1_RANDOM_OFFSET_PARAM].getValue(), params[PT1_MINUS_RANDOM_PARAM].getValue(), params[PT1_PLUS_RANDOM_PARAM].getValue());
+        outputChannels[channel].cv[0] = applyVoltageOffset(params[CV0_PARAM + channel].getValue(), params[CV_RANDOM_OFFSET_PARAM + 0].getValue(), params[CV0_MINUS_RANDOM_PARAM].getValue(), params[CV0_PLUS_RANDOM_PARAM].getValue(), params[CV_POLARITY_PARAM + 0].getValue());
+        outputChannels[channel].cv[1] = applyVoltageOffset(params[CV1_PARAM + channel].getValue(), params[CV_RANDOM_OFFSET_PARAM + 1].getValue(), params[CV1_MINUS_RANDOM_PARAM].getValue(), params[CV1_PLUS_RANDOM_PARAM].getValue(), params[CV_POLARITY_PARAM + 1].getValue());
+        outputChannels[channel].cv[2] = applyVoltageOffset(params[CV2_PARAM + channel].getValue(), params[CV_RANDOM_OFFSET_PARAM + 2].getValue(), params[CV2_MINUS_RANDOM_PARAM].getValue(), params[CV2_PLUS_RANDOM_PARAM].getValue(), params[CV_POLARITY_PARAM + 2].getValue());
+        outputChannels[channel].cv[3] = applyVoltageOffset(params[CV3_PARAM + channel].getValue(), params[CV_RANDOM_OFFSET_PARAM + 3].getValue(), params[CV3_MINUS_RANDOM_PARAM].getValue(), params[CV3_PLUS_RANDOM_PARAM].getValue(), params[CV_POLARITY_PARAM + 3].getValue());
+        outputChannels[channel].cv[4] = applyVoltageOffset(params[CV4_PARAM + channel].getValue(), params[CV_RANDOM_OFFSET_PARAM + 4].getValue(), params[CV4_MINUS_RANDOM_PARAM].getValue(), params[CV4_PLUS_RANDOM_PARAM].getValue(), params[CV_POLARITY_PARAM + 4].getValue());
+        outputChannels[channel].cv[5] = applyVoltageOffset(params[CV5_PARAM + channel].getValue(), params[CV_RANDOM_OFFSET_PARAM + 5].getValue(), params[CV5_MINUS_RANDOM_PARAM].getValue(), params[CV5_PLUS_RANDOM_PARAM].getValue(), params[CV_POLARITY_PARAM + 5].getValue());
+        outputChannels[channel].cv[6] = applyVoltageOffset(params[CV6_PARAM + channel].getValue(), params[CV_RANDOM_OFFSET_PARAM + 6].getValue(), params[CV6_MINUS_RANDOM_PARAM].getValue(), params[CV6_PLUS_RANDOM_PARAM].getValue(), params[CV_POLARITY_PARAM + 6].getValue());
+        outputChannels[channel].cv[7] = applyVoltageOffset(params[CV7_PARAM + channel].getValue(), params[CV_RANDOM_OFFSET_PARAM + 7].getValue(), params[CV7_MINUS_RANDOM_PARAM].getValue(), params[CV7_PLUS_RANDOM_PARAM].getValue(), params[CV_POLARITY_PARAM + 7].getValue());
+        outputChannels[channel].sh[0] = applyVoltageOffset(inputs[SH0_INPUT + channel].getVoltage(0), params[SH0_RANDOM_OFFSET_PARAM].getValue(), params[SH0_MINUS_RANDOM_PARAM].getValue(), params[SH0_PLUS_RANDOM_PARAM].getValue());
+        outputChannels[channel].sh[1] = applyVoltageOffset(inputs[SH1_INPUT + channel].getVoltage(0), params[SH1_RANDOM_OFFSET_PARAM].getValue(), params[SH1_MINUS_RANDOM_PARAM].getValue(), params[SH1_PLUS_RANDOM_PARAM].getValue());
 
         // Pitch. That one's a pain.
         float pitch = inputs[PITCH_INPUT + channel].getVoltage(0);
-        // What scale to use
-        std::array<bool, 12> scale;
-        if (inputs[POLY_EXTERNAL_SCALE_INPUT].isConnected()) {
-            for (size_t i = 0; i < 12; i++) {
-                scale[i] = (inputs[POLY_EXTERNAL_SCALE_INPUT].getVoltage(i) > 0.1);
-            }
-        } else {
-            scale = Quantizer::validNotesInScale(Quantizer::CHROMATIC);
-        }
         // Calculate offset
         bool minusMode = (params[PITCH_MINUS_RANDOM_PARAM].getValue() == 1.f);
         bool plusMode = (params[PITCH_PLUS_RANDOM_PARAM].getValue() == 1.f);
@@ -438,32 +473,52 @@ struct Psychopump : Module {
                 plusMode = false;
             }
         }
-        int offset = params[PITCH_RANDOM_OFFSET_PARAM].getValue();
-        if (minusMode || plusMode) offset = random::u32() % ( offset + 1 );
-        if (minusMode) offset = offset * -1;
+        int offset = 0;
+        if (plusMode)  offset =  random::u32() % ( (int) params[PITCH_RANDOM_OFFSET_PARAM].getValue() + 1 );
+        if (minusMode) offset = (random::u32() % ( (int) params[PITCH_RANDOM_OFFSET_PARAM].getValue() + 1 )) * -1;
         // Calculate pitch depending on mode
         if (params[QUANTIZE_PARAM + channel].getValue() == 0.f) {
             // No quantization
             pitch = pitch + ((float) offset * (1.f / 12.f));
-        }
-        if (params[QUANTIZE_PARAM + channel].getValue() == 1.f) {
-            // Semitones mode
+        } else {
+            // What scale to use
+            std::array<bool, 12> scale;
+            if (inputs[POLY_EXTERNAL_SCALE_INPUT].isConnected()) {
+                for (size_t i = 0; i < 12; i++) {
+                    scale[i] = (inputs[POLY_EXTERNAL_SCALE_INPUT].getVoltage(i) > 0.1);
+                }
+            } else {
+                scale = Quantizer::validNotesInScale(Quantizer::CHROMATIC);
+            }
+            // Quantize
             pitch = pitch + ((float) offset * (1.f / 12.f));
             pitch = Quantizer::quantize(pitch, scale);
         }
-        if (params[QUANTIZE_PARAM + channel].getValue() == 2.f) {
-            // Scale degrees mode
-            pitch = Quantizer::quantize(pitch, scale, offset);
-        }
         outputChannels[channel].pitch = pitch;
     }
-
 
     void updateValues() {
         for (size_t i = 0; i < CHANNELS; i++) {
             if (updateOutputChannelValues[i]) setOutputValues(i, true);
             updateOutputChannelValues[i] = false;
         }
+    }
+
+    bool isInFirst3Channels(size_t channel) {
+        return false;
+    }
+
+    void updateChannels() {
+        if (polyMode == MONO_MODE) { 
+            if (!recentChannels.empty()) channelOrder[0] = recentChannels.front();
+        }
+        if (polyMode == ROTATE_MODE) {
+            // Fuck it lol
+        }
+        if (polyMode == ALL_MODE) { 
+            for(size_t i = 0; i < CHANNELS; i++) channelOrder[i] = i;
+        }
+        recentChannels.clear();
     }
 
 
@@ -479,11 +534,11 @@ struct Psychopump : Module {
             outputs[CV5_OUTPUT].setVoltage(outputChannels[ channelOrder[i] ].cv[5], i);
             outputs[CV6_OUTPUT].setVoltage(outputChannels[ channelOrder[i] ].cv[6], i);
             outputs[CV7_OUTPUT].setVoltage(outputChannels[ channelOrder[i] ].cv[7], i);
-            outputs[PT0_OUTPUT].setVoltage(outputChannels[ channelOrder[i] ].pt[0], i);
-            outputs[PT1_OUTPUT].setVoltage(outputChannels[ channelOrder[i] ].pt[1], i);
+            outputs[SH0_OUTPUT].setVoltage(outputChannels[ channelOrder[i] ].sh[0], i);
+            outputs[SH1_OUTPUT].setVoltage(outputChannels[ channelOrder[i] ].sh[1], i);
             outputs[PITCH_OUTPUT].setVoltage(outputChannels[ channelOrder[i] ].pitch, i);
-            outputs[GATE1_OUTPUT].setVoltage((gates[0][ channelOrder[i] ] ? 10.f : 0.f), i);
-            outputs[GATE2_OUTPUT].setVoltage((gates[1][ channelOrder[i] ] ? 10.f : 0.f), i);
+            outputs[GATE0_OUTPUT].setVoltage((gates[0][ channelOrder[i] ] ? 10.f : 0.f), i);
+            outputs[GATE1_OUTPUT].setVoltage((gates[1][ channelOrder[i] ] ? 10.f : 0.f), i);
         }
         outputs[CV0_OUTPUT].setChannels(max);
         outputs[CV1_OUTPUT].setChannels(max);
@@ -493,18 +548,21 @@ struct Psychopump : Module {
         outputs[CV5_OUTPUT].setChannels(max);
         outputs[CV6_OUTPUT].setChannels(max);
         outputs[CV7_OUTPUT].setChannels(max);
-        outputs[PT0_OUTPUT].setChannels(max);
-        outputs[PT1_OUTPUT].setChannels(max);
+        outputs[SH0_OUTPUT].setChannels(max);
+        outputs[SH1_OUTPUT].setChannels(max);
         outputs[PITCH_OUTPUT].setChannels(max);
+        outputs[GATE0_OUTPUT].setChannels(max);
         outputs[GATE1_OUTPUT].setChannels(max);
-        outputs[GATE2_OUTPUT].setChannels(max);
     }
 
 
     void updateLights() {
+        // Decaying lights are 4x slower than the suggested rate
         for (size_t i = 0; i < CHANNELS; i++) {
-            lights[ROW_LIGHT + i].setBrightness(( channelOrder[0] == i ) ? 1.f : 0.f);
+            lights[ROW_LIGHT + i].setSmoothBrightness(( channelOrder[0] == i ) ? 1.f : 0.f, 0.00025f);
         }
+        lights[GATE0_LIGHT].setSmoothBrightness( (outputs[GATE0_OUTPUT].getVoltage(0) == 10.f) ? 1.f : 0.f, 0.00025f);
+        lights[GATE1_LIGHT].setSmoothBrightness( (outputs[GATE1_OUTPUT].getVoltage(0) == 10.f) ? 1.f : 0.f, 0.00025f);
         lights[POLY_MODE_MONO_LIGHT].setBrightness((polyMode == MONO_MODE) ? 1.f : 0.f);
         lights[POLY_MODE_ROTATE_LIGHT].setBrightness((polyMode == ROTATE_MODE) ? 1.f : 0.f);
         lights[POLY_MODE_ALL_LIGHT].setBrightness((polyMode == ALL_MODE) ? 1.f : 0.f);
@@ -512,6 +570,9 @@ struct Psychopump : Module {
     
 
     void process(const ProcessArgs& args) override {
+
+        lcdStatus.processLcd(args.sampleTime);
+
         // We want the module to run at 1hz or below, regardless of sample rate, so that gates and
         // silences are always at least 1ms.
         // https://community.vcvrack.com/t/what-is-the-shortest-safe-gap-in-between-gates-to-retrigger/11303
@@ -521,9 +582,9 @@ struct Psychopump : Module {
             updateDelayStatus();
             updateGates();
             updateValues();
+            updateChannels();
             sendOutput();
             updateLights();
-            // TODO: Channel order
         }
     }
 };
@@ -535,6 +596,69 @@ struct Psychopump : Module {
 // --------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------
 
+
+
+struct PsychopumpLcdWidget : TransparentWidget {
+    Psychopump *module;
+    Lcd::LcdFramebufferWidget<Psychopump> *lfb;
+    Lcd::LcdDrawWidget<Psychopump> *ldw;
+    std::array<bool, 8> gate0Status;
+    std::array<bool, 8> gate1Status;
+    std::array<bool, 8> lastGate0Status;
+    std::array<bool, 8> lastGate1Status;
+    std::string s;
+
+    PsychopumpLcdWidget(Psychopump *_module){
+        module = _module;
+        lfb = new Lcd::LcdFramebufferWidget<Psychopump>(module); 
+        ldw = new Lcd::LcdDrawWidget<Psychopump>(module, "Insert Obol", " To Depart");
+        addChild(lfb);
+        lfb->addChild(ldw);
+        for (size_t i = 0; i < 8; i++) gate0Status[i] = false;
+        for (size_t i = 0; i < 8; i++) gate1Status[i] = false;
+        for (size_t i = 0; i < 8; i++) lastGate0Status[i] = false;
+        for (size_t i = 0; i < 8; i++) lastGate1Status[i] = false;
+        s = "";
+    }
+
+    void processDefaultMode() {
+        if (!module) return;
+        if (module->lcdStatus.lastInteraction != -1.f) return;
+        for (size_t i = 0; i < 8; i++) gate0Status[i] = module->outputChannels[i].gateStatus[0];
+        for (size_t i = 0; i < 8; i++) gate1Status[i] = module->outputChannels[i].gateStatus[1];
+        if (gate0Status != lastGate0Status || gate1Status != lastGate1Status) {
+            s = "1:";
+            for (size_t i = 0; i < 8; i++) s.append( (module->outputChannels[i].gateStatus[0] && module->params[module->OUT0_PARAM + i].getValue() == 1.f) ? "=" : "_" );
+            module->lcdStatus.text1 = s;
+            s = "2:";
+            for (size_t i = 0; i < 8; i++) s.append( (module->outputChannels[i].gateStatus[1] && module->params[module->OUT1_PARAM + i].getValue() == 1.f) ? "=" : "_" );
+            module->lcdStatus.text2 = s;
+            module->lcdStatus.dirty = true;
+        }
+        lastGate0Status = gate0Status;
+        lastGate1Status = gate1Status;
+    }
+
+    void draw(const DrawArgs& args) override {
+        processDefaultMode();
+        TransparentWidget::draw(args);
+    }
+};
+
+
+struct CvKnob : W::KnobTransparent {
+    Psychopump* module;
+    size_t row = 0;
+    size_t column = 0;
+
+    void onDragMove(const event::DragMove& e) override {
+        module->lcdStatus.lastInteraction = 0.f;
+        module->lcdStatus.dirty = true;
+        module->lcdStatus.text1 = module->rowLabels[row];
+        module->lcdStatus.text2 = module->columnLabels[column];
+        W::Knob::onDragMove(e);
+    }
+};
 
 
 // Thank you https://github.com/stoermelder/vcvrack-packone/blob/v1/src/Glue.cpp 
@@ -563,6 +687,7 @@ struct ChannelLabelField : TextField {
     }
 };
 
+
 struct OutputLabelField : TextField {
     Psychopump* module;
     size_t column = 0;
@@ -584,6 +709,7 @@ struct OutputLabelField : TextField {
         TextField::step();
     }
 };
+
 
 struct GateLabelButton : W::LitSvgSwitchUnshadowed {
     Psychopump* module;
@@ -608,6 +734,7 @@ struct GateLabelButton : W::LitSvgSwitchUnshadowed {
         e.consume(this);
     }
 };
+
 
 struct OutputLabelButton : W::LitSvgSwitchUnshadowed {
     Psychopump* module;
@@ -642,13 +769,15 @@ struct FortuneButton : W::LitSvgSwitchUnshadowed {
     }
 };
 
+
 struct QuantizeButton : W::LitSvgSwitchUnshadowed {
     QuantizeButton() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/quantize-off.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/quantize-on.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/quantize-pink.svg")));
+        // addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/quantize-pink.svg")));
     }
 };
+
 
 struct PlusButton : W::LitSvgSwitchUnshadowed {
     PlusButton() {
@@ -657,12 +786,14 @@ struct PlusButton : W::LitSvgSwitchUnshadowed {
     }
 };
 
+
 struct MinusButton : W::LitSvgSwitchUnshadowed {
     MinusButton() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pmbutton-minus-off.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/pmbutton-minus-on.svg")));
     }
 };
+
 
 struct MuteButton : W::LitSvgSwitchUnshadowed {
     MuteButton() {
@@ -671,6 +802,7 @@ struct MuteButton : W::LitSvgSwitchUnshadowed {
     }
 };
 
+
 struct SoloButton : W::LitSvgSwitchUnshadowed {
     SoloButton() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/psychopump-solo-off.svg")));
@@ -678,19 +810,22 @@ struct SoloButton : W::LitSvgSwitchUnshadowed {
     }
 };
 
-struct Out1Button : W::LitSvgSwitchUnshadowed {
-    Out1Button() {
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/psychopump-out1-off.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/psychopump-out1-on.svg")));
+
+struct OUT0Button : W::LitSvgSwitchUnshadowed {
+    OUT0Button() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/psychopump-OUT1-off.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/psychopump-OUT1-on.svg")));
     }
 };
 
-struct Out2Button : W::LitSvgSwitchUnshadowed {
-    Out2Button() {
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/psychopump-out2-off.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/psychopump-out2-on.svg")));
+
+struct OUT1Button : W::LitSvgSwitchUnshadowed {
+    OUT1Button() {
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/psychopump-OUT2-off.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/psychopump-OUT2-on.svg")));
     }
 };
+
 
 struct RockerSwitchUB : W::SvgSwitchUnshadowed {
     RockerSwitchUB() {
@@ -728,33 +863,33 @@ struct PsychopumpWidget : W::ModuleWidget {
         for(size_t i = 0; i < 8; i++) {
             addParam(createParam<MuteButton>(mm2px(Vec(xOffset +  0.f, yOffset +  0.f + i * 10.f)), module, Psychopump::MUTE_PARAM + i));
             addParam(createParam<SoloButton>(mm2px(Vec(xOffset +  0.f, yOffset + 4.1f + i * 10.f)), module, Psychopump::SOLO_PARAM + i));
-            addParam(createParam<Out1Button>(mm2px(Vec(xOffset + 5.2f, yOffset +  0.f + i * 10.f)), module, Psychopump::OUT1_PARAM + i));
-            addParam(createParam<Out2Button>(mm2px(Vec(xOffset + 5.2f, yOffset + 4.1f + i * 10.f)), module, Psychopump::OUT2_PARAM + i));
+            addParam(createParam<OUT0Button>(mm2px(Vec(xOffset + 5.2f, yOffset +  0.f + i * 10.f)), module, Psychopump::OUT0_PARAM + i));
+            addParam(createParam<OUT1Button>(mm2px(Vec(xOffset + 5.2f, yOffset + 4.1f + i * 10.f)), module, Psychopump::OUT1_PARAM + i));
         }
     }
 
-
+    // FIXME: SH terminology
     void addPassThroughInputs(float xOffset, float yOffset, Psychopump* module) {
         for(size_t i = 0; i < 8; i++) {
-            addParam(createParam<PlusButton>(mm2px(Vec(xOffset + 4.1f, i * 10.f + yOffset)), module, Psychopump::PT0_PLUS_RANDOM_PARAM + i));
-            addParam(createParam<MinusButton>(mm2px(Vec(xOffset + 4.1f, i * 10.f + yOffset + 3.95f)), module, Psychopump::PT0_MINUS_RANDOM_PARAM + i));
-            addParam(createParam<PlusButton>(mm2px(Vec(xOffset + 4.1f + 14.f, i * 10.f + yOffset)), module, Psychopump::PT1_PLUS_RANDOM_PARAM + i));
-            addParam(createParam<MinusButton>(mm2px(Vec(xOffset + 4.1f + 14.f, i * 10.f + yOffset + 3.95f)), module, Psychopump::PT1_MINUS_RANDOM_PARAM + i));
-            addStaticInput(mm2px(Vec( 0.f + xOffset,  i * 10.f + yOffset)), module, Psychopump::PT0_INPUT + i);
-            addStaticInput(mm2px(Vec(14.f + xOffset,  i * 10.f + yOffset)), module, Psychopump::PT1_INPUT + i);
+            addParam(createParam<PlusButton>(mm2px(Vec(xOffset + 4.1f, i * 10.f + yOffset)), module, Psychopump::SH0_PLUS_RANDOM_PARAM + i));
+            addParam(createParam<MinusButton>(mm2px(Vec(xOffset + 4.1f, i * 10.f + yOffset + 3.95f)), module, Psychopump::SH0_MINUS_RANDOM_PARAM + i));
+            addParam(createParam<PlusButton>(mm2px(Vec(xOffset + 4.1f + 14.f, i * 10.f + yOffset)), module, Psychopump::SH1_PLUS_RANDOM_PARAM + i));
+            addParam(createParam<MinusButton>(mm2px(Vec(xOffset + 4.1f + 14.f, i * 10.f + yOffset + 3.95f)), module, Psychopump::SH1_MINUS_RANDOM_PARAM + i));
+            addStaticInput(mm2px(Vec( 0.f + xOffset,  i * 10.f + yOffset)), module, Psychopump::SH0_INPUT + i);
+            addStaticInput(mm2px(Vec(14.f + xOffset,  i * 10.f + yOffset)), module, Psychopump::SH1_INPUT + i);
         }
     }
 
 
     void addPassThroughRandomOffsetKnobs(float xOffset, float yOffset, Psychopump* module) {
-        addParam(createParam<W::Knob>(mm2px(Vec(xOffset,        yOffset)), module, Psychopump::PT0_RANDOM_OFFSET_PARAM));
-        addParam(createParam<W::Knob>(mm2px(Vec(xOffset + 14.f, yOffset)), module, Psychopump::PT1_RANDOM_OFFSET_PARAM));
+        addParam(createParam<W::Knob>(mm2px(Vec(xOffset,        yOffset)), module, Psychopump::SH0_RANDOM_OFFSET_PARAM));
+        addParam(createParam<W::Knob>(mm2px(Vec(xOffset + 14.f, yOffset)), module, Psychopump::SH1_RANDOM_OFFSET_PARAM));
     }
 
 
     void addPassThroughOutputs(float xOffset, float yOffset, Psychopump* module) {
-        addStaticOutput(mm2px(Vec(xOffset, yOffset)), module, Psychopump::PT0_OUTPUT);
-        addStaticOutput(mm2px(Vec(xOffset + 14.f, yOffset)), module, Psychopump::PT1_OUTPUT);
+        addStaticOutput(mm2px(Vec(xOffset, yOffset)), module, Psychopump::SH0_OUTPUT);
+        addStaticOutput(mm2px(Vec(xOffset + 14.f, yOffset)), module, Psychopump::SH1_OUTPUT);
     }
 
 
@@ -772,24 +907,30 @@ struct PsychopumpWidget : W::ModuleWidget {
     }
 
 
-    void addCVParamElement(float xOffset, float yOffset, Psychopump* module, int light, int cvParam, int plusRandomParam, int minusRandomParam) {
+    void addCVParamElement(float xOffset, float yOffset, Psychopump* module, int light, int cvParam, int plusRandomParam, int minusRandomParam, size_t row, size_t column) {
         addParam(createParam<PlusButton>(mm2px(Vec(xOffset + 4.1f, yOffset)), module, plusRandomParam));
         addParam(createParam<MinusButton>(mm2px(Vec(xOffset + 4.1f, yOffset + 3.95f)), module, minusRandomParam));
         addChild(W::createKnobLight<W::KnobLightYellow>(mm2px(Vec(xOffset, yOffset)), module, light, cvParam, 0.f, 10.f));
-        addParam(createParam<W::KnobTransparent>(mm2px(Vec(xOffset, yOffset)), module, cvParam));
+        CvKnob* cvKnob = new CvKnob;
+        cvKnob->module = module;
+        cvKnob->box.pos = mm2px(Vec(xOffset, yOffset));
+        if (module) cvKnob->paramQuantity = module->paramQuantities[cvParam];
+        cvKnob->row = row;
+        cvKnob->column = column;
+        addParam(cvKnob);
     }
 
 
     void addCVParams(float xOffset, float yOffset, Psychopump* module) {
         for(size_t i = 0; i < 8; i++) {
-            addCVParamElement( 0 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV0_PARAM + i, Psychopump::CV0_PLUS_RANDOM_PARAM + i, Psychopump::CV0_MINUS_RANDOM_PARAM + i);
-            addCVParamElement( 1 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV1_PARAM + i, Psychopump::CV1_PLUS_RANDOM_PARAM + i, Psychopump::CV1_MINUS_RANDOM_PARAM + i);
-            addCVParamElement( 2 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV2_PARAM + i, Psychopump::CV2_PLUS_RANDOM_PARAM + i, Psychopump::CV2_MINUS_RANDOM_PARAM + i);
-            addCVParamElement( 3 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV3_PARAM + i, Psychopump::CV3_PLUS_RANDOM_PARAM + i, Psychopump::CV3_MINUS_RANDOM_PARAM + i);
-            addCVParamElement( 4 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV4_PARAM + i, Psychopump::CV4_PLUS_RANDOM_PARAM + i, Psychopump::CV4_MINUS_RANDOM_PARAM + i);
-            addCVParamElement( 5 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV5_PARAM + i, Psychopump::CV5_PLUS_RANDOM_PARAM + i, Psychopump::CV5_MINUS_RANDOM_PARAM + i);
-            addCVParamElement( 6 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV6_PARAM + i, Psychopump::CV6_PLUS_RANDOM_PARAM + i, Psychopump::CV6_MINUS_RANDOM_PARAM + i);
-            addCVParamElement( 7 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV7_PARAM + i, Psychopump::CV7_PLUS_RANDOM_PARAM + i, Psychopump::CV7_MINUS_RANDOM_PARAM + i);
+            addCVParamElement( 0 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV0_PARAM + i, Psychopump::CV0_PLUS_RANDOM_PARAM + i, Psychopump::CV0_MINUS_RANDOM_PARAM + i, i, 0);
+            addCVParamElement( 1 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV1_PARAM + i, Psychopump::CV1_PLUS_RANDOM_PARAM + i, Psychopump::CV1_MINUS_RANDOM_PARAM + i, i, 1);
+            addCVParamElement( 2 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV2_PARAM + i, Psychopump::CV2_PLUS_RANDOM_PARAM + i, Psychopump::CV2_MINUS_RANDOM_PARAM + i, i, 2);
+            addCVParamElement( 3 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV3_PARAM + i, Psychopump::CV3_PLUS_RANDOM_PARAM + i, Psychopump::CV3_MINUS_RANDOM_PARAM + i, i, 3);
+            addCVParamElement( 4 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV4_PARAM + i, Psychopump::CV4_PLUS_RANDOM_PARAM + i, Psychopump::CV4_MINUS_RANDOM_PARAM + i, i, 4);
+            addCVParamElement( 5 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV5_PARAM + i, Psychopump::CV5_PLUS_RANDOM_PARAM + i, Psychopump::CV5_MINUS_RANDOM_PARAM + i, i, 5);
+            addCVParamElement( 6 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV6_PARAM + i, Psychopump::CV6_PLUS_RANDOM_PARAM + i, Psychopump::CV6_MINUS_RANDOM_PARAM + i, i, 6);
+            addCVParamElement( 7 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV7_PARAM + i, Psychopump::CV7_PLUS_RANDOM_PARAM + i, Psychopump::CV7_MINUS_RANDOM_PARAM + i, i, 7);
         }
     }
 
@@ -893,11 +1034,11 @@ struct PsychopumpWidget : W::ModuleWidget {
         addPitchSection(194.f, 24.f, module); // 14mm
 
         // Gate outputs
-        addDynamicOutput(mm2px(Vec(13.2f, 114.f)), module, Psychopump::GATE1_OUTPUT, Psychopump::GATE1_LIGHT);
-        addDynamicOutput(mm2px(Vec(27.2f, 114.f)), module, Psychopump::GATE2_OUTPUT, Psychopump::GATE2_LIGHT);
+        addDynamicOutput(mm2px(Vec(13.2f, 114.f)), module, Psychopump::GATE0_OUTPUT, Psychopump::GATE0_LIGHT);
+        addDynamicOutput(mm2px(Vec(27.2f, 114.f)), module, Psychopump::GATE1_OUTPUT, Psychopump::GATE1_LIGHT);
 
         // LCD
-        Lcd::LcdWidget<Psychopump> *lcd = new Lcd::LcdWidget<Psychopump>(module, "Insert Obol", " To Depart");
+        PsychopumpLcdWidget *lcd = new PsychopumpLcdWidget(module);
         lcd->box.pos = mm2px(Vec(214.6f, 28.1f));
         addChild(lcd);
 
