@@ -9,18 +9,6 @@ You should have received a copy of the GNU General Public License along with thi
 #include "quantizer.hpp"
 #include "lcd.hpp"
 
-// TODO:
-// Save data across reloads in JSON
-// Draw better illustration
-// Make gates shorter than a display frame show up on the LCD
-// Test MIDI bindings
-// Copy-paste rows
-// Lights in poly modes
-// Make presets
-// Manifest metadata
-// Manual
-// Record examples
-
 
 namespace Psychopump {
 
@@ -42,6 +30,8 @@ struct OutputChannel {
     // true only once it's started
     std::array<bool, 2> gateSustaining;
     std::array<bool, 2> retriggered;
+    // Reset by the lcd
+    std::array<bool, 2> gateDisplay;
 
 
     OutputChannel() {
@@ -65,6 +55,7 @@ struct OutputChannel {
         for (size_t i = 0; i < 2; i++) gateSustain[i] = 0;
         for (size_t i = 0; i < 2; i++) gateSustaining[i] = false;
         for (size_t i = 0; i < 2; i++) retriggered[i] = false;
+        for (size_t i = 0; i < 2; i++) gateDisplay[i] = false;
     }
 
 
@@ -109,6 +100,9 @@ struct OutputChannel {
             if (gateStatus[outputNumber] && gateSustain[outputNumber] > 0) gateSustaining[outputNumber] = true;
             retriggered[outputNumber] = false;
         }
+
+        // Set by false by the LCD once displayed. Ensure trigs are seen for at least a frame.
+        if (gateStatus[outputNumber]) gateDisplay[outputNumber] = true;
 
         // Keep the queue the length we found it in
         gateQueue[outputNumber].pop();
@@ -202,7 +196,7 @@ struct Psychopump : Module {
         NUM_OUTPUTS
     };
     enum LightIds {
-        ENUMS(ROW_LIGHT, CHANNELS),
+        ENUMS(CHANNEL_LIGHT, CHANNELS),
         POLY_MODE_MONO_LIGHT,
         POLY_MODE_ROTATE_LIGHT,
         POLY_MODE_ALL_LIGHT,
@@ -222,8 +216,8 @@ struct Psychopump : Module {
     dsp::Timer processTimer;
     dsp::SchmittTrigger polyButtonTrigger;
     dsp::SchmittTrigger randomizeCvTrigger[8];
-    std::array<std::string, CHANNELS> rowLabels;
-    std::array<std::string, CHANNELS> columnLabels;
+    std::array<std::string, CHANNELS> channelLabels;
+    std::array<std::string, CHANNELS> outputLabels;
     std::array<OutputChannel, CHANNELS> outputChannels;
     std::array<size_t, CHANNELS> channelOrder;
     std::array<std::array<bool, CHANNELS>, 2> gates;
@@ -344,12 +338,63 @@ struct Psychopump : Module {
 
             label = "Gate ";
             label.append(std::to_string(i + 1));
-            rowLabels[i] = label;
+            channelLabels[i] = label;
 
             label = "Knob ";
             label.append(std::to_string(i + 1));
-            columnLabels[i] = label;
+            outputLabels[i] = label;
         }
+    }
+
+
+    json_t* dataToJson() override {
+        json_t *rootJ = json_object();
+
+        json_t *channelLabelsJ = json_array();
+        for (size_t i = 0; i < CHANNELS; i++) {
+            json_array_insert_new(channelLabelsJ, i, json_string(channelLabels[i].c_str()) );
+        }
+        json_object_set_new(rootJ, "channelLabels", channelLabelsJ);
+
+        json_t *outputLabelsJ = json_array();
+        for (size_t i = 0; i < CHANNELS; i++) {
+            json_array_insert_new(outputLabelsJ, i, json_string(outputLabels[i].c_str()) );
+        }
+        json_object_set_new(rootJ, "outputLabels", outputLabelsJ);
+
+        json_object_set_new(rootJ, "delayEnabled", json_boolean(delayEnabled));
+        json_object_set_new(rootJ, "polyMode", json_integer(polyMode));
+
+        return rootJ;
+    }
+
+
+    void dataFromJson(json_t* rootJ) override {
+        json_t *channelLabelsJ = json_object_get(rootJ, "channelLabels");
+        if (channelLabelsJ) {
+            for (size_t i = 0; i < CHANNELS; i++) {
+                json_t *channelLabelJ = json_array_get(channelLabelsJ, i);
+                if (channelLabelJ) {
+                    channelLabels[i] = json_string_value(channelLabelJ);
+                }
+            }
+        }
+
+        json_t *outputLabelsJ = json_object_get(rootJ, "outputLabels");
+        if (outputLabelsJ) {
+            for (size_t i = 0; i < CHANNELS; i++) {
+                json_t *outputLabelJ = json_array_get(outputLabelsJ, i);
+                if (outputLabelJ) {
+                    outputLabels[i] = json_string_value(outputLabelJ);
+                }
+            }
+        }
+
+        json_t* delayEnabledJ = json_object_get(rootJ, "delayEnabled");
+        if (delayEnabledJ) delayEnabled = json_boolean_value(delayEnabledJ);
+
+        json_t* polyModeJ = json_object_get(rootJ, "polyMode");
+        if (polyModeJ) polyMode = json_integer_value(polyModeJ);
     }
 
 
@@ -703,8 +748,22 @@ struct Psychopump : Module {
 
     void updateLights() {
         // Decaying lights are 4x slower than the suggested rate
-        for (size_t i = 0; i < CHANNELS; i++) {
-            lights[ROW_LIGHT + i].setSmoothBrightness(( channelOrder[0] == i ) ? 1.f : 0.f, 0.00025f);
+        if (polyMode == MONO_MODE) {
+            for (size_t i = 0; i < CHANNELS; i++) {
+                lights[CHANNEL_LIGHT + i].setSmoothBrightness(( channelOrder[0] == i ) ? 1.f : 0.f, 0.00025f);
+            }
+        }
+        if (polyMode == ROTATE_MODE) {
+            for (size_t i = 0; i < CHANNELS; i++) {
+                lights[CHANNEL_LIGHT + i].setSmoothBrightness(( channelOrder[0] == i ) ? 1.f : 0.f, 0.00025f);
+                lights[CHANNEL_LIGHT + i].setSmoothBrightness(( channelOrder[1] == i ) ? 1.f : 0.f, 0.00025f);
+                lights[CHANNEL_LIGHT + i].setSmoothBrightness(( channelOrder[2] == i ) ? 1.f : 0.f, 0.00025f);
+            }
+        }
+        if (polyMode == ALL_MODE) {
+            for (size_t i = 0; i < CHANNELS; i++) {
+                lights[CHANNEL_LIGHT + i].setSmoothBrightness(( i < getMaxPolyphonyChannels() ) ? 1.f : 0.f, 0.00025f);
+            }
         }
         lights[GATE0_LIGHT].setSmoothBrightness( (outputs[GATE0_OUTPUT].getVoltage(0) == 10.f) ? 1.f : 0.f, 0.00025f);
         lights[GATE1_LIGHT].setSmoothBrightness( (outputs[GATE1_OUTPUT].getVoltage(0) == 10.f) ? 1.f : 0.f, 0.00025f);
@@ -753,6 +812,7 @@ struct PsychopumpLcdWidget : TransparentWidget {
     std::array<bool, 8> lastGate0Status;
     std::array<bool, 8> lastGate1Status;
     std::string s;
+    bool timeoutDirty = false;
 
     PsychopumpLcdWidget(Psychopump *_module){
         module = _module;
@@ -769,20 +829,28 @@ struct PsychopumpLcdWidget : TransparentWidget {
 
     void processDefaultMode() {
         if (!module) return;
-        if (module->lcdStatus.lastInteraction != -1.f) return;
-        for (size_t i = 0; i < 8; i++) gate0Status[i] = module->outputChannels[i].gateStatus[0];
-        for (size_t i = 0; i < 8; i++) gate1Status[i] = module->outputChannels[i].gateStatus[1];
-        if (gate0Status != lastGate0Status || gate1Status != lastGate1Status) {
+        if (module->lcdStatus.lastInteraction != -1.f) {
+            timeoutDirty = true;
+            return;
+        }
+        for (size_t i = 0; i < 8; i++) gate0Status[i] = module->outputChannels[i].gateStatus[0] || module->outputChannels[i].gateDisplay[0];
+        for (size_t i = 0; i < 8; i++) gate1Status[i] = module->outputChannels[i].gateStatus[1] || module->outputChannels[i].gateDisplay[1];
+        if (gate0Status != lastGate0Status || gate1Status != lastGate1Status || timeoutDirty) {
             s = "1:";
-            for (size_t i = 0; i < 8; i++) s.append( (module->outputChannels[i].gateStatus[0] && module->params[module->OUT0_PARAM + i].getValue() == 1.f) ? "=" : "_" );
+            for (size_t i = 0; i < 8; i++) s.append( ( gate0Status[i] && module->params[module->OUT0_PARAM + i].getValue() == 1.f) ? "=" : "_" );
             module->lcdStatus.text1 = s;
             s = "2:";
-            for (size_t i = 0; i < 8; i++) s.append( (module->outputChannels[i].gateStatus[1] && module->params[module->OUT1_PARAM + i].getValue() == 1.f) ? "=" : "_" );
+            for (size_t i = 0; i < 8; i++) s.append( (gate1Status[i] && module->params[module->OUT1_PARAM + i].getValue() == 1.f) ? "=" : "_" );
             module->lcdStatus.text2 = s;
             module->lcdStatus.dirty = true;
         }
         lastGate0Status = gate0Status;
         lastGate1Status = gate1Status;
+        for (size_t i = 0; i < 8; i++) {
+            module->outputChannels[i].gateDisplay[0] = false;
+            module->outputChannels[i].gateDisplay[1] = false;
+        }
+        timeoutDirty = false;
     }
 
     void draw(const DrawArgs& args) override {
@@ -794,14 +862,14 @@ struct PsychopumpLcdWidget : TransparentWidget {
 
 struct CvKnob : W::KnobTransparent {
     Psychopump* module;
-    size_t row = 0;
-    size_t column = 0;
+    size_t channel = 0;
+    size_t output = 0;
 
     void onDragMove(const event::DragMove& e) override {
         module->lcdStatus.lastInteraction = 0.f;
         module->lcdStatus.dirty = true;
-        module->lcdStatus.text1 = module->rowLabels[row];
-        module->lcdStatus.text2 = module->columnLabels[column];
+        module->lcdStatus.text1 = module->channelLabels[channel];
+        module->lcdStatus.text2 = module->outputLabels[output];
         W::Knob::onDragMove(e);
     }
 };
@@ -840,12 +908,12 @@ struct GateLengthKnob : W::Knob {
 // for figuring out how to autofocus a field properly lol 
 struct ChannelLabelField : TextField {
     Psychopump* module;
-    size_t row = 0;
+    size_t channel = 0;
 
     // Force close on Enter
     void onSelectKey(const event::SelectKey& e) override {
         if (e.action == GLFW_PRESS && e.key == GLFW_KEY_ENTER) {
-            module->rowLabels[row] = text;
+            module->channelLabels[channel] = text;
             getAncestorOfType<ui::MenuOverlay>()->requestDelete();
             e.consume(this);
         }
@@ -857,7 +925,7 @@ struct ChannelLabelField : TextField {
     // Auto-focus and auto-save
     void step() override {
         APP->event->setSelected(this);
-        module->rowLabels[row] = text;
+        module->channelLabels[channel] = text;
         TextField::step();
     }
 };
@@ -865,11 +933,11 @@ struct ChannelLabelField : TextField {
 
 struct OutputLabelField : TextField {
     Psychopump* module;
-    size_t column = 0;
+    size_t output = 0;
 
     void onSelectKey(const event::SelectKey& e) override {
         if (e.action == GLFW_PRESS && e.key == GLFW_KEY_ENTER) {
-            module->columnLabels[column] = text;
+            module->outputLabels[output] = text;
             getAncestorOfType<ui::MenuOverlay>()->requestDelete();
             e.consume(this);
         }
@@ -880,7 +948,7 @@ struct OutputLabelField : TextField {
 
     void step() override {
         APP->event->setSelected(this);
-        module->columnLabels[column] = text;
+        module->outputLabels[output] = text;
         TextField::step();
     }
 };
@@ -888,7 +956,7 @@ struct OutputLabelField : TextField {
 
 struct GateLabelButton : W::LitSvgSwitchUnshadowed {
     Psychopump* module;
-    size_t row = 0;
+    size_t channel = 0;
     GateLabelButton() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/label-button-right-off.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/label-button-right-on.svg")));
@@ -900,10 +968,10 @@ struct GateLabelButton : W::LitSvgSwitchUnshadowed {
         menu->addChild(createMenuLabel("Channel label on LCD:"));
         ChannelLabelField* channelLabelField = new ChannelLabelField;
         channelLabelField->module = module;
-        channelLabelField->row = row;
+        channelLabelField->channel = channel;
         channelLabelField->box.size.x = 80.f;
         channelLabelField->placeholder = "Label";
-        channelLabelField->setText(module->rowLabels[row]);
+        channelLabelField->setText(module->channelLabels[channel]);
         channelLabelField->selectAll();
         menu->addChild(channelLabelField);
         e.consume(this);
@@ -913,7 +981,7 @@ struct GateLabelButton : W::LitSvgSwitchUnshadowed {
 
 struct OutputLabelButton : W::LitSvgSwitchUnshadowed {
     Psychopump* module;
-    size_t column = 0;
+    size_t output = 0;
     OutputLabelButton() {
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/label-button-bottom-off.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/label-button-bottom-on.svg")));
@@ -925,10 +993,10 @@ struct OutputLabelButton : W::LitSvgSwitchUnshadowed {
         menu->addChild(createMenuLabel("Output label on LCD:"));
         OutputLabelField* outputLabelField = new OutputLabelField;
         outputLabelField->module = module;
-        outputLabelField->column = column;
+        outputLabelField->output = output;
         outputLabelField->box.size.x = 80.f;
         outputLabelField->placeholder = "Label";
-        outputLabelField->setText(module->columnLabels[column]);
+        outputLabelField->setText(module->outputLabels[output]);
         outputLabelField->selectAll();
         menu->addChild(outputLabelField);
         e.consume(this);
@@ -1022,7 +1090,7 @@ struct PsychopumpWidget : W::ModuleWidget {
         for(size_t i = 0; i < 8; i++) {
             GateLabelButton* gateLabelButton = new GateLabelButton;
             gateLabelButton->box.pos = mm2px(Vec(xOffset + 4.1f, yOffset + i * 10.f));
-            gateLabelButton->row = i;
+            gateLabelButton->channel = i;
             if (module) {
                 gateLabelButton->module = module;
                 gateLabelButton->paramQuantity = module->paramQuantities[Psychopump::CHANNEL_LABEL_PARAM + i];
@@ -1091,7 +1159,7 @@ struct PsychopumpWidget : W::ModuleWidget {
     }
 
 
-    void addCVParamElement(float xOffset, float yOffset, Psychopump* module, int light, int cvParam, int plusRandomParam, int minusRandomParam, size_t row, size_t column) {
+    void addCVParamElement(float xOffset, float yOffset, Psychopump* module, int light, int cvParam, int plusRandomParam, int minusRandomParam, size_t channel, size_t output) {
         addParam(createParam<PlusButton>(mm2px(Vec(xOffset + 4.1f, yOffset)), module, plusRandomParam));
         addParam(createParam<MinusButton>(mm2px(Vec(xOffset + 4.1f, yOffset + 3.95f)), module, minusRandomParam));
         addChild(W::createKnobLight<W::KnobLightYellow>(mm2px(Vec(xOffset, yOffset)), module, light, cvParam, 0.f, 10.f));
@@ -1099,22 +1167,22 @@ struct PsychopumpWidget : W::ModuleWidget {
         cvKnob->module = module;
         cvKnob->box.pos = mm2px(Vec(xOffset, yOffset));
         if (module) cvKnob->paramQuantity = module->paramQuantities[cvParam];
-        cvKnob->row = row;
-        cvKnob->column = column;
+        cvKnob->channel = channel;
+        cvKnob->output = output;
         addParam(cvKnob);
     }
 
 
     void addCVParams(float xOffset, float yOffset, Psychopump* module) {
         for(size_t i = 0; i < 8; i++) {
-            addCVParamElement( 0 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV0_PARAM + i, Psychopump::CV0_PLUS_RANDOM_PARAM + i, Psychopump::CV0_MINUS_RANDOM_PARAM + i, i, 0);
-            addCVParamElement( 1 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV1_PARAM + i, Psychopump::CV1_PLUS_RANDOM_PARAM + i, Psychopump::CV1_MINUS_RANDOM_PARAM + i, i, 1);
-            addCVParamElement( 2 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV2_PARAM + i, Psychopump::CV2_PLUS_RANDOM_PARAM + i, Psychopump::CV2_MINUS_RANDOM_PARAM + i, i, 2);
-            addCVParamElement( 3 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV3_PARAM + i, Psychopump::CV3_PLUS_RANDOM_PARAM + i, Psychopump::CV3_MINUS_RANDOM_PARAM + i, i, 3);
-            addCVParamElement( 4 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV4_PARAM + i, Psychopump::CV4_PLUS_RANDOM_PARAM + i, Psychopump::CV4_MINUS_RANDOM_PARAM + i, i, 4);
-            addCVParamElement( 5 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV5_PARAM + i, Psychopump::CV5_PLUS_RANDOM_PARAM + i, Psychopump::CV5_MINUS_RANDOM_PARAM + i, i, 5);
-            addCVParamElement( 6 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV6_PARAM + i, Psychopump::CV6_PLUS_RANDOM_PARAM + i, Psychopump::CV6_MINUS_RANDOM_PARAM + i, i, 6);
-            addCVParamElement( 7 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::ROW_LIGHT + i, Psychopump::CV7_PARAM + i, Psychopump::CV7_PLUS_RANDOM_PARAM + i, Psychopump::CV7_MINUS_RANDOM_PARAM + i, i, 7);
+            addCVParamElement( 0 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::CHANNEL_LIGHT + i, Psychopump::CV0_PARAM + i, Psychopump::CV0_PLUS_RANDOM_PARAM + i, Psychopump::CV0_MINUS_RANDOM_PARAM + i, i, 0);
+            addCVParamElement( 1 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::CHANNEL_LIGHT + i, Psychopump::CV1_PARAM + i, Psychopump::CV1_PLUS_RANDOM_PARAM + i, Psychopump::CV1_MINUS_RANDOM_PARAM + i, i, 1);
+            addCVParamElement( 2 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::CHANNEL_LIGHT + i, Psychopump::CV2_PARAM + i, Psychopump::CV2_PLUS_RANDOM_PARAM + i, Psychopump::CV2_MINUS_RANDOM_PARAM + i, i, 2);
+            addCVParamElement( 3 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::CHANNEL_LIGHT + i, Psychopump::CV3_PARAM + i, Psychopump::CV3_PLUS_RANDOM_PARAM + i, Psychopump::CV3_MINUS_RANDOM_PARAM + i, i, 3);
+            addCVParamElement( 4 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::CHANNEL_LIGHT + i, Psychopump::CV4_PARAM + i, Psychopump::CV4_PLUS_RANDOM_PARAM + i, Psychopump::CV4_MINUS_RANDOM_PARAM + i, i, 4);
+            addCVParamElement( 5 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::CHANNEL_LIGHT + i, Psychopump::CV5_PARAM + i, Psychopump::CV5_PLUS_RANDOM_PARAM + i, Psychopump::CV5_MINUS_RANDOM_PARAM + i, i, 5);
+            addCVParamElement( 6 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::CHANNEL_LIGHT + i, Psychopump::CV6_PARAM + i, Psychopump::CV6_PLUS_RANDOM_PARAM + i, Psychopump::CV6_MINUS_RANDOM_PARAM + i, i, 6);
+            addCVParamElement( 7 * 14.f + xOffset, i * 10.f + yOffset, module, Psychopump::CHANNEL_LIGHT + i, Psychopump::CV7_PARAM + i, Psychopump::CV7_PLUS_RANDOM_PARAM + i, Psychopump::CV7_MINUS_RANDOM_PARAM + i, i, 7);
         }
     }
 
@@ -1137,7 +1205,7 @@ struct PsychopumpWidget : W::ModuleWidget {
         for(size_t i = 0; i < 8; i++) {
             OutputLabelButton* outputLabelButton = new OutputLabelButton;
             outputLabelButton->box.pos = mm2px(Vec(xOffset + i * 14.f, yOffset + 4.1f));
-            outputLabelButton->column = i;
+            outputLabelButton->output = i;
             if (module) {
                 outputLabelButton->module = module;
                 outputLabelButton->paramQuantity = module->paramQuantities[Psychopump::OUTPUT_LABEL_PARAM + i];
