@@ -1055,16 +1055,16 @@ struct SoloButton : W::LitSvgSwitchUnshadowed {
 
 struct Out0Button : W::LitSvgSwitchUnshadowed {
     Out0Button() {
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/psychopump-OUT1-off.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/psychopump-OUT1-on.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/psychopump-out1-off.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/psychopump-out1-on.svg")));
     }
 };
 
 
 struct Out1Button : W::LitSvgSwitchUnshadowed {
     Out1Button() {
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/psychopump-OUT2-off.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/psychopump-OUT2-on.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/psychopump-out2-off.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/psychopump-out2-on.svg")));
     }
 };
 
