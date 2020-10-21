@@ -20,7 +20,6 @@ The documentation of the modules is only available [from my website](https://ari
 
 
 
-
 Compatibility, Download & Installation
 --------------------------------------
 
@@ -72,6 +71,8 @@ Thanks to everyone who created open-source modules I could learn from and make s
 Thanks to [Andrew Belt](https://vcvrack.com/) for creating VCV Rack and providing code suggestions.
 
 Thanks to [Jerry Sievert](https://legitimatesounding.com/) and [cschol](https://github.com/cschol) for their help with [QuickJS](https://bellard.org/quickjs/) integration.
+
+Thanks to [Silvio Kunaschk](https://github.com/qno/) for their help with [Azure Pipelines](https://azure.microsoft.com/en-us/services/devops/pipelines/) continuous integration.
 
 Thanks to [Squinky Labs](https://github.com/squinkylabs/SquinkyVCV), [Stoermelder](https://github.com/stoermelder/vcvrack-packone), [David O'Rourke](https://github.com/david-c14/SubmarineFree), and [Anthony Lexander Matos](https://github.com/anlexmatos) for technical advice.
 
@@ -145,7 +146,6 @@ The easiest way to remove my signature from every module is by blanking or repla
 
 The **Arcane** module uses Tarot cards altered from [Yoav Ben-Dov's CBD Tarot](https://www.cbdtarot.com/). Its graphics are distributed under the [CC-BY-NC-SA](https://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_US), to comply with the license of the graphics used. That includes the faceplate, as it uses a pattern taken from that tarot deck.
 
-
 ### Fonts used
 
 - The LCD Font is a SVG export of the [Fixed_v01 font by Orgdot](http://www.orgdot.com/aliasfonts/index.htm), released under [a custom MIT-style license](res/components/lcd/Fixed_v01/LICENSE.txt).
@@ -158,7 +158,6 @@ The **Arcane** module uses Tarot cards altered from [Yoav Ben-Dov's CBD Tarot](h
 
 - [QuickJS](https://bellard.org/quickjs/) by [Fabrice Bellard](https://bellard.org/) is used in some modules under the terms of the [MIT license](https://github.com/AriaSalvatrice/AriaVCVModules/tree/master/doc/LICENSE_QuickJS.txt)
 - [TonalJS](https://github.com/tonaljs/tonal) by [danigb](https://github.com/danigb) is used in some modules under the terms of the [MIT license](https://github.com/AriaSalvatrice/AriaVCVModules/tree/master/doc/LICENSE_TonalJs.txt)
-
 
 
 ### Copyright assignment

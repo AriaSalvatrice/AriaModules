@@ -13,10 +13,22 @@
   0. You just DO WHAT THE FUCK YOU WANT TO.
 */
 
-// For now, this only contains the Struct I use to share across expanders.
+// For now, this mostly contains the Struct I use to share across expanders.
+
+#pragma once
+#include "plugin.hpp"
 
 namespace PolyExternalScale {
 
+struct PES {
+    std::array<bool, 12> booleans;
+
+    PES() {
+        for (size_t i = 0; i < 8; i++) booleans[i] = false;
+    }
+};
+
+// TODO: Pass a real PES?
 struct PESExpanderMessage {
     std::array<bool, 12> scale;
     bool hasRootNote = false;

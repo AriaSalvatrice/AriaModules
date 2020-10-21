@@ -23,6 +23,13 @@
 //
 // If you want to re-use one of my one-off widgets that is not in this file but in a module, thus
 // covered by the GPL, and wish to receive the code of that widget under the WTFPL, contact me.
+// 
+// Most of the SVG files used in this file are also distributed under the WTFPL,
+// see the individual LICENSE files in folders for exceptions (such as Arcane's CC-BY-NC graphics).
+// If you re-use them, please change my signature color scheme to your own.
+// It's easy to change colors in bulk using search and replace in a text editor. 
+// This request is not legally binding to keep licensing rules simple.
+
 
 
 #pragma once
@@ -31,7 +38,6 @@ extern Plugin* pluginInstance;
 
 
 namespace W { // I don't want to type MyCoolPersonalWidgets:: every damn time, thank you
-
 
 
 /* --------------------------------------------------------------------------------------------- */
@@ -374,7 +380,7 @@ struct KnobLight : ModuleLightWidget {
             float targetX = mm2px(4.f + 3.2f * cos(value));
             float targetY = mm2px(4.f + 3.2f * sin(value));
             nvgLineTo(args.vg, targetX, targetY);
-            nvgStrokeColor(args.vg, nvgRGB(0x33, 0x00, 0x00));
+            nvgStrokeColor(args.vg, nvgRGB(0x00, 0x00, 0x00));
             nvgStrokeWidth(args.vg, 2.f);
             nvgStroke(args.vg);
         }        
@@ -616,7 +622,7 @@ struct Screw : SvgScrew {
 };
 
 
-// My personal brand, featuring the Cool S. Standard vertical position is 114.5mm.
+// My personal brand, featuring the Cool S. Standard vertical position is 114.5mm. It's 13.6mm wide.
 // Using a SvgScrew for the handy built-in framebuffer.
 // If you reuse these components, change the corresponding SVG file. Do not reuse my signature in your own works.
 // See the README for full legal details. 

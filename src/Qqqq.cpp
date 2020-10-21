@@ -141,8 +141,8 @@ struct Qqqq : Module {
         lcdDivider.setDivision(LCDDIVIDER);
         lcdMode = INIT_MODE;
         lcdLastInteraction = 0.f;
-        lcdStatus.lcdText1 = " Q- ...";
-        lcdStatus.lcdLayout = Lcd::TEXT1_LAYOUT;
+        lcdStatus.text1 = " Q- ...";
+        lcdStatus.layout = Lcd::TEXT1_LAYOUT;
         // Initialize
         for (size_t i = 0; i < 16; i++) { for (int j = 0; j < 12; j++) { scale[i][j] = false; }}
         // C Minor in first scene
@@ -207,10 +207,10 @@ struct Qqqq : Module {
         scale[0][0] = true; scale[0][2] = true; scale[0][3] = true; scale[0][5] = true; scale[0][7] = true; scale[0][8] = true; scale[0][10] = true;
         scene = 0;
         scaleToPiano();
-        lcdStatus.lcdText1 = " Q- ???";
+        lcdStatus.text1 = " Q- ???";
         lcdLastInteraction = 0.f;
         lcdMode = INIT_MODE;
-        lcdStatus.lcdDirty = true;
+        lcdStatus.dirty = true;
         initialized = false;
         initCounter = 0;
     }
@@ -225,10 +225,10 @@ struct Qqqq : Module {
         }
         scene = 0;
         params[SCENE_BUTTON_PARAM + 0].setValue(1.f);
-        lcdStatus.lcdText1 = " Q- !!!";
+        lcdStatus.text1 = " Q- !!!";
         lcdLastInteraction = 0.f;
         lcdMode = INIT_MODE;
-        lcdStatus.lcdDirty = true;
+        lcdStatus.dirty = true;
     }
 
     // Chords, not portable sequences. Format is like:
@@ -237,10 +237,10 @@ struct Qqqq : Module {
         json_error_t error;
         json_t* rootJ = json_loads(jsonC, 0, &error);
         if (!rootJ) {
-            lcdStatus.lcdText1 = "!! ERROR !!";
+            lcdStatus.text1 = "!! ERROR !!";
             lcdLastInteraction = 0.f;
             lcdMode = INIT_MODE;
-            lcdStatus.lcdDirty = true;
+            lcdStatus.dirty = true;
         } else {
             for (size_t i = 0; i < 16; i++) {
                 for (int j = 0; j < 12; j++) {
@@ -259,10 +259,10 @@ struct Qqqq : Module {
                 }
             }
             scaleToPiano();
-            lcdStatus.lcdText1 = " Imported!";
+            lcdStatus.text1 = " Imported!";
             lcdLastInteraction = 0.f;
             lcdMode = INIT_MODE;
-            lcdStatus.lcdDirty = true;
+            lcdStatus.dirty = true;
             for (size_t i = 1; i < 16; i++) {
                 params[SCENE_BUTTON_PARAM + i].setValue(0.f);
             }
@@ -325,10 +325,10 @@ struct Qqqq : Module {
             }
         }
         sequence.toClipboard();
-        lcdStatus.lcdText1 = "  Copied!";
+        lcdStatus.text1 = "  Copied!";
         lcdLastInteraction = 0.f;
         lcdMode = INIT_MODE;
-        lcdStatus.lcdDirty = true;
+        lcdStatus.dirty = true;
     }
 
     // Widget calls this directly
@@ -363,10 +363,10 @@ struct Qqqq : Module {
         scene = 0;
         params[SCENE_BUTTON_PARAM + 0].setValue(1.f);
         scaleToPiano();
-        lcdStatus.lcdText1 = "  Pasted!";
+        lcdStatus.text1 = "  Pasted!";
         lcdLastInteraction = 0.f;
         lcdMode = INIT_MODE;
-        lcdStatus.lcdDirty = true;
+        lcdStatus.dirty = true;
     }
 
     void copyScenePortableSequence(int slot){
@@ -383,10 +383,10 @@ struct Qqqq : Module {
             }
         }
         sequence.toClipboard();
-        lcdStatus.lcdText1 = "  Copied!";
+        lcdStatus.text1 = "  Copied!";
         lcdLastInteraction = 0.f;
         lcdMode = INIT_MODE;
-        lcdStatus.lcdDirty = true;
+        lcdStatus.dirty = true;
     }
 
     void pasteScenePortableSequence(int slot){
@@ -400,10 +400,10 @@ struct Qqqq : Module {
             scale[slot][note] = true;
         }
         scaleToPiano();
-        lcdStatus.lcdText1 = "  Pasted!";
+        lcdStatus.text1 = "  Pasted!";
         lcdLastInteraction = 0.f;
         lcdMode = INIT_MODE;
-        lcdStatus.lcdDirty = true;
+        lcdStatus.dirty = true;
     }
 
     void updateExpander(){
@@ -672,16 +672,16 @@ struct Qqqq : Module {
                 } else {
                     lcdMode = READY_MODE;
                 }
-                lcdStatus.lcdDirty = true;
+                lcdStatus.dirty = true;
             }
         }
 
         if (lcdMode == LOAD_MODE) {
-            lcdStatus.lcdText1 = " Q< Quack!";
+            lcdStatus.text1 = " Q< Quack!";
         }
 
         if (lcdMode == READY_MODE) {
-            lcdStatus.lcdText1 = " Q<";
+            lcdStatus.text1 = " Q<";
         }
 
         if (lcdMode == SCALE_MODE) {
@@ -692,20 +692,20 @@ struct Qqqq : Module {
                 text.append(" ");
                 text.append(Quantizer::scaleLcdName((int)params[SCALE_PARAM].getValue()));
             }
-            lcdStatus.lcdText1 = text;
+            lcdStatus.text1 = text;
         }
 
         if (lcdMode == SCALING_MODE) {
             text = std::to_string((int) params[lastScalingKnobTouchedId].getValue());
             text.append("%");
-            lcdStatus.lcdText1 = text;
+            lcdStatus.text1 = text;
         }
 
         if (lcdMode == OFFSET_MODE) {
             text = std::to_string(params[lastOffsetKnobTouchedId].getValue());
             text.resize(5);
             text.append("V");
-            lcdStatus.lcdText1 = text;
+            lcdStatus.text1 = text;
         }
 
         if (lcdMode == TRANSPOSE_MODE) {
@@ -714,7 +714,7 @@ struct Qqqq : Module {
             if (params[lastTransposeKnobTouchedId + 4].getValue() == 0.f) text.append(" Oct.");
             if (params[lastTransposeKnobTouchedId + 4].getValue() == 1.f) text.append(" St.");
             if (params[lastTransposeKnobTouchedId + 4].getValue() == 2.f) text.append(" S.D.");
-            lcdStatus.lcdText1 = text;
+            lcdStatus.text1 = text;
         }
 
         // Button operated are set to dirty while the mode shows, for simplicity of processing.
@@ -723,18 +723,18 @@ struct Qqqq : Module {
             if (params[lastTransposeModeTouchedId].getValue() == 0.f) text = ("Octaves");
             if (params[lastTransposeModeTouchedId].getValue() == 1.f) text = ("Semitones");
             if (params[lastTransposeModeTouchedId].getValue() == 2.f) text = ("Scale Deg.");
-            lcdStatus.lcdText1 = text;
-            lcdStatus.lcdDirty = true;
+            lcdStatus.text1 = text;
+            lcdStatus.dirty = true;
         }
 
         if (lcdMode == SH_MODE) {
-            lcdStatus.lcdText1 = (params[lastShTouchedId].getValue() == 0.f) ? "Sample & H." : "Track  & H.";
-            lcdStatus.lcdDirty = true;
+            lcdStatus.text1 = (params[lastShTouchedId].getValue() == 0.f) ? "Sample & H." : "Track  & H.";
+            lcdStatus.dirty = true;
         }
 
         if (lcdMode == VISUALIZE_MODE) {
-            lcdStatus.lcdText1 = "<-Visualize";
-            lcdStatus.lcdDirty = true;
+            lcdStatus.text1 = "<-Visualize";
+            lcdStatus.dirty = true;
         }
 
     }
@@ -773,7 +773,7 @@ namespace QqqqWidgets {
 struct LcdKnob : W::Knob {
     void onDragMove(const event::DragMove& e) override {
          dynamic_cast<Qqqq*>(paramQuantity->module)->lcdLastInteraction = 0.f;
-         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdStatus.lcdDirty = true;
+         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdStatus.dirty = true;
         W::Knob::onDragMove(e);
     }
 };
@@ -971,8 +971,8 @@ struct PastePortableSequenceItem : MenuItem {
 
 struct PushButtonKeyboard : W::SvgSwitchUnshadowed {
     PushButtonKeyboard() {
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/button-keyboard.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/button-keyboard-pressed.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/keyboard-off.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/keyboard-on.svg")));
         momentary = true;
         W::SvgSwitchUnshadowed();
     }
@@ -1224,9 +1224,8 @@ struct QqqqWidget : W::ModuleWidget {
         drawScrews();
         drawPianoKeys(4.7f, 102.8f, module);
 
-        // The LCD
-        // addChild(Lcd::createLcd<Qqqq>(mm2px(Vec(27.6f, 21.2f)), module));
-        Lcd::LcdWidget<Qqqq> *lcd = new Lcd::LcdWidget<Qqqq>(module);
+        // LCD
+        Lcd::LcdWidget<Qqqq> *lcd = new Lcd::LcdWidget<Qqqq>(module, " Q< Quack!");
         lcd->box.pos = mm2px(Vec(27.6f, 21.2f));
         addChild(lcd);
 

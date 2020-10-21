@@ -4,6 +4,25 @@ Changelog
 The versioning follows this standard: the first number corresponds to the VCV rack version used. The second number is increased any time a new module family is added. The third number is increased when something is added or fixed without adding a new module family.
 
 
+## [1.8.0] - 2020-10-21
+
+### New Modules
+
+- [NEW] Psychopump: 8 triggered channels of CV presets and S&H with randomization. Pairs great with percussive sound sources to send your beats straight to Hades.
+
+### Changed
+
+- [CHANGE] Modulus Salomonis Regis, Modulellus Salomonis Regis, Modulissimus Salomonis Regis: Removed the visual link between Load and Reset on the faceplate, as this default behavior can be disabled by the user.
+- [CHANGE] QQQQ: Altered the design of the keyboard button for consistency.
+- [CHANGE] All modules with a LCD: Altered the SVG font to hint at the pixel grid better on HDPI displays. It _is_ supposed to look low-tech and pixelated.
+
+### Fixed
+
+- [FIX] Darius: Fixed slide knob updating slowly.
+
+
+
+
 ## [1.7.1] - 2020-10-11
 
 ### Added

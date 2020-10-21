@@ -1,7 +1,7 @@
 Design language of the modules
 ==============================
 
-This documents what I've done so far, mostly for my own reference. It's not a set of strict rules I plan to follow closely, it's just meant to improve consistency across the collection.
+This documents what I've done for my own reference. It's not a set of strict rules I plan to follow closely, and it doesn't define anything formally. It's just meant to improve consistency across the collection.
 
 ## Tools
 
@@ -33,14 +33,18 @@ When labels call for a stroke to make them easier to distinguish from the backgr
   - Dark (text and arrows):     #0e6977ff
   - Darkest (jacks):            #083d45ff
 
-These shades of yellow and pink are almost indistinguishable to people with tritanopia (about 1% of the population), so they should never be the only design cue provided to convey information. When a widget can be lit both pink and yellow, the pink version should have a Dark notch in the center. 
+Additional gradients, from light to dark (the second color being the main). Use sparingly.
+
+- Orange (Psychopump +/- buttons):  #ffcc03ff ~ #f28a40ff
+- Red (Mute button):                #ff1c6eff ~ #974151ff
+- Green (Solo button):              #a0ff2dff ~ #269d2cff
+
+These shades of yellow and pink are almost indistinguishable to people with tritanopia (about 1% of the population), and the Red gradient is hard to tell apart from the bues for people with protanopia (about 1% of males), so they should never be the only design cue provided to convey information. When a widget can be lit both pink and yellow, the pink version should have a Dark notch or circle prevalent in the design. 
 
 
 ## Alignment
 
-Things are aligned to a 0.5mm grid when possible. Don't sweat precision too much. Go for something that looks good rather than mathematical accuracy.
-
-My signature SVG is 13.60mm wide.
+Keep things aligned across collections, but don't sweat precision. Go for something that looks good rather than mathematical accuracy.
 
 
 ## Jacks
@@ -48,14 +52,19 @@ My signature SVG is 13.60mm wide.
 Jacks are spaced by at least 8mm. 10mm for a small logical separation. They are preferably aligned to integer values. Inputs have a yellow rim, outputs a pink one. Outputs are framed in a dark roundrect iff it improves readability (3mm rounding radius).
 
 
-## Hand painting
+## Illustrations
 
-Labels are never hand painted. Arrows showing the signal path are hand painted. Illustrations should be simple line art or silhouettes. The background patterns should be subtle and not look too busy when zoomed out.  
+Vector illustrations should be simple cartoonesque line art or silhouettes, otherwise they break. Bitmaps might be an option for more complex illustrations. The background patterns should be subtle and not look too busy when zoomed out.
+
+
+## Strokes
+
+0.3mm and 0.5mm are frequently used.
 
 
 ## Bitmap tracing
 
-Auto-tracing paths in inkscape with default settings on "Trace Bitmap" never looks right in NanoVG - lots of broken shapes.
+Auto-tracing paths in inkscape with default settings on "Trace Bitmap" never looks right in VCV - lots of broken shapes.
 
 For the tarot cards, I set the settings as follows, and barely edited them at all: 
 
@@ -64,18 +73,3 @@ For the tarot cards, I set the settings as follows, and barely edited them at al
 
 Optimize paths to a low settings is the important one here. It's what tends to break things once imported in VCV.
 
-
-## Design process in 12 easy steps
-
-1. Rough design and component placement on paper. 
-2. Just do the background and title in Inkscape.
-3. Do all the widget placement in code. Frankly, having to write in values by hand and recompile things is much less of a pain than having to deal with Inkscape more than necessary.
-4. Inkscape will crash because stop complaining and being entitled it's open-source.
-5. Once the widget placement is finalized, take a screencap and overlay it in Inkscape as a guide.
-6. Place the labels and roundrects in Inkscape.
-7. Inkscape will crash (this is normal).
-8. Hand paint the background and arrows in Krita. Place a cropping mark in the top-left and bottom-right to simplify placement in Inkscape. Export layers separately as PNG.
-9. Import the layers in Inkscape and trace them at default settings. Remove the cropping marks.
-10. Don't forget to remove the bitmap layers to avoid bloating the file size.
-11. Inkscape will crash (this is normal).
-12. Try <https://jakearchibald.github.io/svgomg/> if things break for no apparent reason. Sometimes it fixes them. Sometimes it makes them worse. 

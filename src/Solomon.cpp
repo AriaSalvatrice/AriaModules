@@ -27,14 +27,6 @@ enum StepTypes {
     STEP_FORWARD
 };
 
-enum LcdModes {
-    INIT_MODE,
-    SCALE_MODE,
-    MINMAX_MODE,
-    TOTAL_NODES_MODE,
-    SLIDE_MODE
-};
-
 template <size_t NODES>
 struct Solomon : Module {
     enum ParamIds {
@@ -167,11 +159,10 @@ struct Solomon : Module {
 
         outputDivider.setDivision(OUTPUTDIVIDER);
 
-        lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
-        lcdStatus.lcdMode = INIT_MODE;
-        lcdStatus.lcdText1 = "LEARNING...";
-        lcdStatus.lcdText2 = "SUMMONING..";
-        lcdStatus.lcdLastInteraction = 0.f;
+        lcdStatus.layout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
+        lcdStatus.text1 = "LEARNING...";
+        lcdStatus.text2 = "SUMMONING..";
+        lcdStatus.lastInteraction = 0.f;
 
         prng.init(random::uniform(), random::uniform());
     }
@@ -735,7 +726,7 @@ struct Solomon : Module {
 
     void process(const ProcessArgs& args) override {
 
-        lcdStatus.notificationStep(args.sampleTime);
+        lcdStatus.processLcd(args.sampleTime);
 
         if (copyPortableSequence)      exportPortableSequence();
         if (pastePortableSequence)     importPortableSequence();
@@ -798,10 +789,11 @@ struct TotalNodesKnob : W::KnobSnap {
     void onDragMove(const event::DragMove& e) override {
         TModule* module = dynamic_cast<TModule*>(paramQuantity->module);
 
-        module->lcdStatus.lcdLastInteraction = 0.f;
-        module->lcdStatus.lcdDirty = true;
-        module->lcdStatus.lcdLayout = Lcd::TEXT2_LAYOUT;
-        module->lcdStatus.lcdText2 = "Nodes: " + std::to_string( (int) module->params[module->TOTAL_NODES_PARAM].getValue());
+        module->lcdStatus.lastInteraction = 0.f;
+        module->lcdStatus.dirty = true;
+        module->lcdStatus.layout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
+        module->lcdStatus.text1 = "";
+        module->lcdStatus.text2 = "Nodes: " + std::to_string( (int) module->params[module->TOTAL_NODES_PARAM].getValue());
 
         W::Knob::onDragMove(e);
     }
@@ -809,18 +801,13 @@ struct TotalNodesKnob : W::KnobSnap {
 
 // Scale/key knobs
 template <typename TModule>
-struct ScaleKnob : W::Knob {
-    ScaleKnob() {
-        snap = true;
-        W::Knob();
-    }
-
+struct ScaleKnob : W::KnobSnap {
     void onDragMove(const event::DragMove& e) override {
         TModule* module = dynamic_cast<TModule*>(paramQuantity->module);
 
-        module->lcdStatus.lcdLastInteraction = 0.f;
-        module->lcdStatus.lcdDirty = true;
-        module->lcdStatus.lcdLayout = Lcd::PIANO_AND_TEXT2_LAYOUT;
+        module->lcdStatus.lastInteraction = 0.f;
+        module->lcdStatus.dirty = true;
+        module->lcdStatus.layout = Lcd::PIANO_AND_TEXT2_LAYOUT;
 
         std::string text = "";
         if (module->params[module->SCALE_PARAM].getValue() == 0.f) {
@@ -833,7 +820,7 @@ struct ScaleKnob : W::Knob {
         if ( module->inputs[module->EXT_SCALE_INPUT].isConnected()) {
             text = "EXTERNAL";
         }
-        module->lcdStatus.lcdText2 = text;
+        module->lcdStatus.text2 = text;
         module->lcdStatus.pianoDisplay = module->scale;
 
         W::Knob::onDragMove(e);
@@ -846,11 +833,11 @@ struct MinMaxKnob : W::Knob {
     void onDragMove(const event::DragMove& e) override {
         TModule* module = dynamic_cast<TModule*>(paramQuantity->module);
 
-        module->lcdStatus.lcdLastInteraction = 0.f;
-        module->lcdStatus.lcdDirty = true;
-        module->lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
-        module->lcdStatus.lcdText1 = "Min: " + Quantizer::noteOctaveLcdName(module->params[module->MIN_PARAM].getValue() - 4.f);
-        module->lcdStatus.lcdText2 = "Max: " + Quantizer::noteOctaveLcdName(module->params[module->MAX_PARAM].getValue() - 4.f);
+        module->lcdStatus.lastInteraction = 0.f;
+        module->lcdStatus.dirty = true;
+        module->lcdStatus.layout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
+        module->lcdStatus.text1 = "Min: " + Quantizer::noteOctaveLcdName(module->params[module->MIN_PARAM].getValue() - 4.f);
+        module->lcdStatus.text2 = "Max: " + Quantizer::noteOctaveLcdName(module->params[module->MAX_PARAM].getValue() - 4.f);
 
         W::Knob::onDragMove(e);
     }
@@ -862,24 +849,24 @@ struct SlideKnob : W::Knob {
     void onDragMove(const event::DragMove& e) override {
         TModule* module = dynamic_cast<TModule*>(paramQuantity->module);
 
-        module->lcdStatus.lcdLastInteraction = 0.f;
-        module->lcdStatus.lcdDirty = true;
-        module->lcdStatus.lcdLayout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
-        module->lcdStatus.lcdText1 = "Slide:";
+        module->lcdStatus.lastInteraction = 0.f;
+        module->lcdStatus.dirty = true;
+        module->lcdStatus.layout = Lcd::TEXT1_AND_TEXT2_LAYOUT;
+        module->lcdStatus.text1 = "Slide:";
 
         float displayDuration = module->slideDuration;
         if (displayDuration == 0.f)
-            module->lcdStatus.lcdText2 = "DISABLED";
+            module->lcdStatus.text2 = "DISABLED";
         if (displayDuration > 0.f && displayDuration < 1.f) {
             int displayDurationMs = displayDuration * 1000;
             displayDurationMs = truncf(displayDurationMs);
-            module->lcdStatus.lcdText2 = std::to_string(displayDurationMs);
-            module->lcdStatus.lcdText2.append("ms");
+            module->lcdStatus.text2 = std::to_string(displayDurationMs);
+            module->lcdStatus.text2.append("ms");
         } 
         if (displayDuration >= 1.f) {
-            module->lcdStatus.lcdText2 = std::to_string(displayDuration);
-            module->lcdStatus.lcdText2.resize(4);
-            module->lcdStatus.lcdText2.append("s");
+            module->lcdStatus.text2 = std::to_string(displayDuration);
+            module->lcdStatus.text2.resize(4);
+            module->lcdStatus.text2.append("s");
         }
         W::Knob::onDragMove(e);
     }
@@ -928,20 +915,20 @@ struct SolomonLcdWidget : TransparentWidget {
     SolomonLcdWidget(TModule *_module){
         module = _module;
         lfb = new Lcd::LcdFramebufferWidget<TModule>(module);
-        ldw = new Lcd::LcdDrawWidget<TModule>(module);
+        ldw = new Lcd::LcdDrawWidget<TModule>(module, "LEARNING...", "SUMMONING..");
         addChild(lfb);
         lfb->addChild(ldw);
     }
 
     void processDefaultMode() {
         if (!module) return;
-        if (module->lcdStatus.lcdLastInteraction != -1.f) return;
-        module->lcdStatus.lcdDirty = true;
-        module->lcdStatus.lcdLayout = Lcd::PIANO_AND_TEXT2_LAYOUT;
+        if (module->lcdStatus.lastInteraction != -1.f) return;
+        module->lcdStatus.dirty = true;
+        module->lcdStatus.layout = Lcd::PIANO_AND_TEXT2_LAYOUT;
         module->lcdStatus.pianoDisplay = Quantizer::pianoDisplay(module->outputs[module->GLOBAL_CV_OUTPUT].getVoltage());
         std::string text = Quantizer::noteOctaveLcdName(module->outputs[module->GLOBAL_CV_OUTPUT].getVoltage());
         text = text + " | " + std::to_string(module->currentNode + 1);
-        module->lcdStatus.lcdText2 = text;
+        module->lcdStatus.text2 = text;
     }
 
     void draw(const DrawArgs& args) override {
