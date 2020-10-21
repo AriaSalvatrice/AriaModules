@@ -1,0 +1,91 @@
+name: Build VCV Rack Plugin
+on: [push, pull_request]
+
+env:
+  rack-sdk-version: 1.1.6
+  release-tag: AzureCI
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      matrix:
+        config:
+        - {
+            name: Linux,
+            os: ubuntu-latest,
+            prepare-os: sudo apt install -y libglu-dev
+          }
+        - {
+            name: MacOS,
+            os: macos-latest,
+            prepare-os: ""
+          }
+        - {
+            name: Windows,
+            os: windows-latest,
+            prepare-os: export CC=gcc
+          }
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Get Rack-SDK
+        shell: bash
+        run: |
+          pushd $HOME
+          curl -o Rack-SDK.zip https://vcvrack.com/downloads/Rack-SDK-${{ env.rack-sdk-version }}.zip
+          unzip Rack-SDK.zip
+      - name: Patch plugin.mk, use 7zip on Windows
+        shell: bash
+        if: runner.os == 'Windows'
+        run: |
+          sed -i 's/zip -q -9 -r/7z a -tzip -mx=9/' $HOME/Rack-SDK/plugin.mk
+      - name: Modify plugin version
+        shell: bash
+        run: |
+          gitrev=`git rev-parse --short HEAD`
+          pluginversion=`jq -r '.version' plugin.json`
+          echo "Set plugin version from $pluginversion to $pluginversion-$gitrev"
+          cat <<< `jq --arg VERSION "$pluginversion-$gitrev" '.version=$VERSION' plugin.json` > plugin.json
+      - name: Build plugin
+        shell: bash
+        run: |
+          ${{ matrix.config.prepare-os }}
+          export RACK_DIR=$HOME/Rack-SDK
+          make -j dep
+          make -j dist
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          path: dist
+          name: ${{ matrix.config.name }}
+
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/development'
+    steps:
+      - uses: actions/download-artifact@v2
+      - name: Tag asset names with date
+        run: |
+          mv **/*.zip .
+          export EXTEND_TAG=`date "+%Y%m%d"`
+          for file in ./*.zip; do mv "$file" "${file/.zip/-${EXTEND_TAG}.zip}"; done
+      - name: Delete existing release assets
+        uses: mknejp/delete-release-assets@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ env.release-tag }}
+          assets: '*.zip'
+          fail-if-no-assets: false
+      - name: Upload release assets
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: "*.zip"
+          tag: ${{ env.release-tag }}
+          overwrite: true
+          file_glob: true
