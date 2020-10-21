@@ -72,7 +72,7 @@ Thanks to [Andrew Belt](https://vcvrack.com/) for creating VCV Rack and providin
 
 Thanks to [Jerry Sievert](https://legitimatesounding.com/) and [cschol](https://github.com/cschol) for their help with [QuickJS](https://bellard.org/quickjs/) integration.
 
-Thanks to [Silvio Kunaschk](https://github.com/qno/) for their help with [Azure Pipelines](https://azure.microsoft.com/en-us/services/devops/pipelines/) continuous integration.
+Thanks to [Silvio Kunaschk](https://github.com/qno/) for their help with continuous integration.
 
 Thanks to [Squinky Labs](https://github.com/squinkylabs/SquinkyVCV), [Stoermelder](https://github.com/stoermelder/vcvrack-packone), [David O'Rourke](https://github.com/david-c14/SubmarineFree), and [Anthony Lexander Matos](https://github.com/anlexmatos) for technical advice.
 
@@ -142,14 +142,27 @@ If you are faithfully porting my code to a fork of VCV Rack, are compiling binar
 The easiest way to remove my signature from every module is by blanking or replacing the graphic in the [`res/components/signature.svg`](res/components/signature.svg) file, and removing it from the blank plate: [`res/faceplates/Blank.svg`](res/faceplates/Blank.svg).
 
 
+### Project name
+
+**Aria Salvatrice** is the name I go by as a person. Distribted forks of my code should not make it part of their title. The VCV project, and software libraries that distribute my code, should not distribute a fork maintained by a different person under the name "Aria Salvatrice", unless it done with my explicit permission. To do so would impersonate me.
+
+Distributed forks of my code may refer to me freely as the original author, they just shouldn't do it in a way that implies my authorship of their fork, or that implies my endorsement of their fork. 
+
+**While the VCV project's policy [allows taking over inactive plugins in its library, including those that are named after their author](https://community.vcvrack.com/t/open-source-modules-not-in-the-library/11357), I am requesting that its [ethics guidelines](https://vcvrack.com/manual/PluginLicensing#vcv-plugin-ethics-guidelines) protecting the brand names of companies to be extended to my own name as a human.** I am also requesting the same out of any other project distributing my software: it is a long-standing tradition of free open-source software that forks should go by a different name, if only to avoid user confusion.
+
+The name of the individual modules does not have to be changed. Whether to keep them the same, change them, or name them a variation of the original name, is left to the forker's discrection.
+
+Git forks of my module on sites such as github, created to send me contributions or experiment with my code, that are not directly distributed to end users but only seen by an audience of developers, are obviously not considered distributed forks, and are thus exempt from this request, as it is obvious to the intended audience that no impersonation is intended. 
+
+
 ### Graphics for the **Arcane** module 
 
 The **Arcane** module uses Tarot cards altered from [Yoav Ben-Dov's CBD Tarot](https://www.cbdtarot.com/). Its graphics are distributed under the [CC-BY-NC-SA](https://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_US), to comply with the license of the graphics used. That includes the faceplate, as it uses a pattern taken from that tarot deck.
 
 ### Fonts used
 
-- The LCD Font is a SVG export of the [Fixed_v01 font by Orgdot](http://www.orgdot.com/aliasfonts/index.htm), released under [a custom MIT-style license](res/components/lcd/Fixed_v01/LICENSE.txt).
-- The segment display font is [DSEG](https://www.keshikan.net/fonts-e.html) by [Keshikan](https://www.keshikan.net/), released under the [OFL 1.1](res/dseg/LICENSE.txt). The TTF file is distributed with the modules.
+- The LCD Font is an edited SVG export of the [Fixed_v01 font by Orgdot](http://www.orgdot.com/aliasfonts/index.htm), released under [a custom MIT-style license](res/components/lcd/Fixed_v01/LICENSE.txt).
+- The segment display font is [DSEG](https://www.keshikan.net/fonts-e.html) by [Keshikan](https://www.keshikan.net/), released under the [OFL 1.1](res/dseg/LICENSE.txt). A TTF file from that family is distributed with the modules.
 - Titles are typeset in [Francois One](https://fonts.google.com/specimen/Francois+One) by [Vernon Adams](http://sansoxygen.com/). This font is not redistributed with the modules. 
 - Labels are typeset in [Nova](https://fontlibrary.org/en/font/nova) by [Wojciech Kalinowski](https://fontlibrary.org/en/member/wmk69). This font family is not redistributed with the modules. 
 
