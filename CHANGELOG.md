@@ -4,11 +4,11 @@ Changelog
 The versioning follows this standard: the first number corresponds to the VCV rack version used. The second number is increased any time a new module family is added. The third number is increased when something is added or fixed without adding a new module family.
 
 
-## [1.8.0] - UNRELEASED
+## [1.8.0] - 2020-10-21
 
 ### New Modules
 
-- [NEW] Psychopump: Matches 8 channels of incoming triggers to CV presets. Perfect to get more percussive voices out of a single module. 
+- [NEW] Psychopump: 8 triggered channels of CV presets and S&H with randomization. Pairs great with percussive sound sources to send your beats straight to Hades.
 
 ### Changed
 
