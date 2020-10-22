@@ -25,18 +25,13 @@ Compatibility, Download & Installation
 
 Those modules will work with any 1.x version of VCV Rack, on Linux, Windows, and OS X. 
 
-They are part of VCV's online library: by [subscribing to my plugin](https://library.vcvrack.com/AriaSalvatrice/), you will receive every stable update a few days after it's released, including every new module. Installing my modules from the VCV library is the recommended way.
+They are currently part of VCV's online library: by [subscribing to my plugin](https://library.vcvrack.com/AriaSalvatrice/), you will receive every stable update a few days after it's released, including every new module. You can also [build this plugin yourself](https://vcvrack.com/manual/Building#building-rack-plugins). If you build my plugin locally, you have to `make dep` before you `make dist`. 
 
 The only downloads you will find on Github are [automatic development builds](https://github.com/AriaSalvatrice/AriaVCVModules/releases/tag/AzureCI), which are never guaranteed to work properly.
 
-These modules will be made compatible with VCV Rack 2.0 and VCV for DAWs once they are available.
-
-Compatibility with forks and ports of VCV Rack to other platforms will be attempted on a best effort basis.    
 The [Sonaremin](https://github.com/hexdump0815/sonaremin) project for Raspberry Pi bundles my modules in its distribution.    
-[miRack](https://mirack.app/modules/) support will probably never happen, as its API is not compatible with VCV 1.x's.
 
-You can do things the hard way and [build this plugin yourself](https://vcvrack.com/manual/Building#building-rack-plugins) if you have a good reason to do so, for example, if you hate yourself, or if you enjoy building random C++ projects off github as a hobby.    
-If you build my plugin locally, you have to `make dep` before you `make dist`. 
+
 
 
 
@@ -144,15 +139,17 @@ The easiest way to remove my signature from every module is by blanking or repla
 
 ### Project name
 
-**Aria Salvatrice** is the name I go by as a person. Distribted forks of my code should not make it part of their title. The VCV project, and software libraries that distribute my code, should not distribute a fork maintained by a different person under the name "Aria Salvatrice", unless it done with my explicit permission. To do so would impersonate me.
+**Aria Salvatrice** is the name I go by as a person. Distribted forks of my code should not make my name part of their title. The VCV project, and software libraries that distribute my code, should not distribute a fork maintained by a different person under my name withouut my explicit permission. To do so would impersonate me.
 
-Distributed forks of my code may refer to me freely as the original author, they just shouldn't do it in a way that implies my authorship of their fork, or that implies my endorsement of their fork. 
+Distributed forks of my code should mention I'm the original author, but shouldn't use my name in a way that can be construed as implying my authorship of their fork, or my endorsement of their fork. 
 
-**While the VCV project's policy [allows taking over inactive plugins in its library, including those that are named after their author](https://community.vcvrack.com/t/open-source-modules-not-in-the-library/11357), I am requesting that its [ethics guidelines](https://vcvrack.com/manual/PluginLicensing#vcv-plugin-ethics-guidelines) protecting the brand names of companies to be extended to my own name as a human.** I am also requesting the same out of any other project distributing my software: it is a long-standing tradition of free open-source software that forks should go by a different name, if only to avoid user confusion.
+**While the VCV project's policy [allows taking over inactive plugins in its library, including those that are named after their author](https://community.vcvrack.com/t/open-source-modules-not-in-the-library/11357), I am requesting for its [ethics guidelines](https://vcvrack.com/manual/PluginLicensing#vcv-plugin-ethics-guidelines) protecting the brand names of companies to be extended to my own name as a human.** I am also requesting the same out of any other project distributing my software: it is a long-standing tradition of free open-source software that forks should go by a different name, if only to avoid user confusion.
 
-The name of the individual modules does not have to be changed. Whether to keep them the same, change them, or name them a variation of the original name, is left to the forker's discrection.
+If you are faithfully porting my code to a fork of VCV Rack, are compiling binaries for another platform, or are otherwise distributing my modules as I designed them, but need to apply trivial compatibility patches to make my software work on your platform, you should keep the name, and the signature. The deciding factor is whether you are distributing my software _as I designed it_. If you alter it, you should rebrand it.
 
-Git forks of my module on sites such as github, created to send me contributions or experiment with my code, that are not directly distributed to end users but only seen by an audience of developers, are obviously not considered distributed forks, and are thus exempt from this request, as it is obvious to the intended audience that no impersonation is intended. 
+The name of the individual modules in my collection does not have to be changed. Whether to keep the name of the modules the same, change them, or name them a variation of the original name, is left to the forker's discrection.
+
+Git forks of my code on sites such as github, created for example to experiment with my code, forks that are not directly distributed to end users but only seen by an audience of developers, are obviously not considered distributed forks, and are thus exempt from this request, as it is obvious to the intended audience that this is a fork, and no impersonation is intended. 
 
 
 ### Graphics for the **Arcane** module 
