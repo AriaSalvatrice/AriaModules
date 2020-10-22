@@ -1,6 +1,8 @@
 Aria Salvatrice Signature Series Synthesizer Modules
 ====================================================
 
+_This collection is no longer maintained: <https://rentry.org/awrgi>_
+
 ![](https://img.shields.io/badge/Works%20on%20my%20computer-Yes-success?style=plastic)
 
 Hiya hello hey hi what’s hip love, I’m Aria Salvatrice. I’m a French expat living on the Worldwide Web with my dog.
@@ -27,8 +29,6 @@ Those modules will work with any 1.x version of VCV Rack, on Linux, Windows, and
 
 They are currently part of VCV's online library: by [subscribing to my plugin](https://library.vcvrack.com/AriaSalvatrice/), you will receive every stable update a few days after it's released, including every new module. You can also [build this plugin yourself](https://vcvrack.com/manual/Building#building-rack-plugins). If you build my plugin locally, you have to `make dep` before you `make dist`. 
 
-The only downloads you will find on Github are [automatic development builds](https://github.com/AriaSalvatrice/AriaVCVModules/releases/tag/AzureCI), which are never guaranteed to work properly.
-
 The [Sonaremin](https://github.com/hexdump0815/sonaremin) project for Raspberry Pi bundles my modules in its distribution.    
 
 
@@ -52,7 +52,6 @@ Other thingies
 - [Changelog](CHANGELOG.md)
 - [Design language of the modules](doc/design.md)
 - [Future plans for the collection](https://aria.dog/modules/plans/)
-- [How to contribute](CONTRIBUTING.md)
 - [Beta / pre-release thread on VCV forums](https://community.vcvrack.com/t/arias-cool-and-nice-thread-of-barely-working-betas-and-bug-squashing/8208)
 
 
