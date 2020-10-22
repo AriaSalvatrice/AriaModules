@@ -139,7 +139,7 @@ The easiest way to remove my signature from every module is by blanking or repla
 
 ### Project name
 
-**Aria Salvatrice** is the name I go by as a person. Distribted forks of my code should not make my name part of their title. The VCV project, and software libraries that distribute my code, should not distribute a fork maintained by a different person under my name withouut my explicit permission. To do so would impersonate me.
+**Aria Salvatrice** is the name I go by as a person. Distributed forks of my code should not make my name part of their title. The VCV project, and software libraries that distribute my code, should not distribute a fork maintained by a different person under my name withouut my explicit permission. To do so would impersonate me.
 
 Distributed forks of my code should mention I'm the original author, but shouldn't use my name in a way that can be construed as implying my authorship of their fork, or my endorsement of their fork. 
 
