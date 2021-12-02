@@ -1,14 +1,14 @@
 Aria Salvatrice Signature Series Synthesizer Modules
 ====================================================
 
-_This collection is no longer maintained: <https://rentry.org/awrgi>_
-
 ![](https://img.shields.io/badge/Works%20on%20my%20computer-Yes-success?style=plastic)
 
 Hiya hello hey hi what’s hip love, I’m Aria Salvatrice. I’m a French expat living on the Worldwide Web with my dog.
 
 I make [Gay Baroque Technopop](https://soundcloud.com/ariasalvatrice) and [Pastoral Industrial](https://ariasalvatrice.bandcamp.com/) music happen, and made a buncha synth modules compatible with VCV Rack for my own use.    
 They are the Aria Salvatrice Signature Series. They’re growing into an integrated system for performing aleatoric techno. Lotsa artists found them inspiring for many genres of music. You can grab them for free!
+
+You should soon be able to use them in [Cardinal](https://github.com/DISTRHO/Cardinal). They are not supported in VCV Rack 2, due to [their behavior towards third-party contributors, and inclusion of women](https://aria.dog/barks/why-i-will-never-create-modules-for-vcv-rack-anymore/). Bug reports you cannot reproduce in a supported fork, such as Cardinal, will not be accepted. 
 
 ![Modules](/doc/collection.jpg)
 
@@ -25,9 +25,9 @@ The documentation of the modules is only available [from my website](https://ari
 Compatibility, Download & Installation
 --------------------------------------
 
-Those modules will work with any 1.x version of VCV Rack, on Linux, Windows, and OS X. 
+Those modules currently work with any 1.x version of VCV Rack, on Linux, Windows, and OS X. Please contact VCV to obtain them
 
-They are currently part of VCV's online library: by [subscribing to my plugin](https://library.vcvrack.com/AriaSalvatrice/), you will receive every stable update a few days after it's released, including every new module. You can also [build this plugin yourself](https://vcvrack.com/manual/Building#building-rack-plugins). If you build my plugin locally, you have to `make dep` before you `make dist`. 
+You can [build this plugin yourself](https://vcvrack.com/manual/Building#building-rack-plugins). If you build my plugin locally, you have to `make dep` before you `make dist`. 
 
 The [Sonaremin](https://github.com/hexdump0815/sonaremin) project for Raspberry Pi bundles my modules in its distribution.    
 
@@ -36,12 +36,12 @@ The [Sonaremin](https://github.com/hexdump0815/sonaremin) project for Raspberry 
 
 
 
-Donations
+<!-- Donations: currently not requested as the collection isn't actively developed
 ---------
 
 If you wish to send me a tip for my modules, at this time, donations can only be accepted in the form of [pay-what-you-want album purchases](https://ariasalvatrice.bandcamp.com/releases). Feel free to send me a message along with the donation: <woof@aria.dog>!
 
-I am looking into providing more convenient donation options in the future, since bandcamp takes their cut and requires you to make a purchase you might not be interested in. It is unfortunately difficult to find a payment processor that operates legally in France but respects the choice of individuals to go by a chosen name. Thank you for your understanding.
+I am looking into providing more convenient donation options in the future, since bandcamp takes their cut and requires you to make a purchase you might not be interested in. It is unfortunately difficult to find a payment processor that operates legally in France but respects the choice of individuals to go by a chosen name. Thank you for your understanding. -->
 
 
 
@@ -51,8 +51,6 @@ Other thingies
 
 - [Changelog](CHANGELOG.md)
 - [Design language of the modules](doc/design.md)
-- [Future plans for the collection](https://aria.dog/modules/plans/)
-- [Beta / pre-release thread on VCV forums](https://community.vcvrack.com/t/arias-cool-and-nice-thread-of-barely-working-betas-and-bug-squashing/8208)
 
 
 
@@ -92,7 +90,7 @@ Thanks to my music-making LGBBQT internet shitposting gang for introducing me to
 Lawyer's corner
 ---------------
 
-Yeah, the licensing rules are a bit complicated. But the big idea is pretty simple: my modules are GPL3, my logo is copyrighted, the rest is less restrictive. If there's licensing incompatibilities (besides the intended virality of the GPL) lemme know and we'll figure out something.
+Yeah, the licensing rules are a bit complicated. But the big idea is pretty simple: my modules are GPL3-or-later, my logo is copyrighted, the rest is less restrictive. If there's licensing incompatibilities (besides the intended virality of the GPL) lemme know and we'll figure out something.
 
 Here goes the detailed breakdown:
 
@@ -105,12 +103,12 @@ Since courtooms are rarely sane, **I explicitly relinquish any claim of intellec
 
 ### Source code of individual modules
 
-The code of the Aria Salvatrice Signature Series Synthesizer Modules is distributed under the [GNU General Public License v3.0 only](https://spdx.org/licenses/GPL-3.0-only.html). The modules come without any warranty and might recklessly endanger life and limb, the usual.
+The code of the Aria Salvatrice Signature Series Synthesizer Modules is distributed under the [GNU General Public License v3.0 or later](https://spdx.org/licenses/GPL-3.0-or-later.html). The modules come without any warranty and might recklessly endanger life and limb, the usual.
 
 
 ### Re-usable libraries
 
-Not that the code is very good, but some libraries I created for my own use are available under the less restrictive terms of the [Do What The Fuck You Want To Public License](https://spdx.org/licenses/WTFPL.html), to allow every VCV creator to do what the fuck they want. The files in question are [`src/javascript.hpp`](src/javascript.hpp), [`src/lcd.hpp`](src/lcd.hpp), [`src/polyexternalscale.hpp`](src/polyexternalscale.hpp), [`src/portablesequence.hpp`](src/portablesequence.hpp), [`src/prng.hpp`](src/prng.hpp), [`src/quantizer.hpp`](src/quantizer.hpp), and [`src/widgets.hpp`](src/widgets.hpp).
+Not that the code is very good, but some libraries I created for my own use are available under the less restrictive terms of the [Do What The Fuck You Want To Public License](https://spdx.org/licenses/WTFPL.html), to allow every creator to do what the fuck they want. The files in question are [`src/javascript.hpp`](src/javascript.hpp), [`src/lcd.hpp`](src/lcd.hpp), [`src/polyexternalscale.hpp`](src/polyexternalscale.hpp), [`src/portablesequence.hpp`](src/portablesequence.hpp), [`src/prng.hpp`](src/prng.hpp), [`src/quantizer.hpp`](src/quantizer.hpp), and [`src/widgets.hpp`](src/widgets.hpp).
 
 
 ### Faceplates 
@@ -138,8 +136,7 @@ The easiest way to remove my signature from every module is by blanking or repla
 
 ### Project name
 
-**Aria Salvatrice** is the name I go by as a person. Distributed forks of my code should not make my name part of their title. The VCV project, and software libraries that distribute my code, should not distribute a fork maintained by a different person under my name withouut my explicit permission. To do so would impersonate me.
-
+**Aria Salvatrice** is the name I go by as a person. Distributed forks of my code should not make my name part of their title. The VCV project, and software libraries that distribute my code, should not distribute a fork maintained by a different person under my name without my explicit permission. To do so would impersonate me.    
 Distributed forks of my code should mention I'm the original author, but shouldn't use my name in a way that can be construed as implying my authorship of their fork, or my endorsement of their fork. 
 
 **While the VCV project's policy [allows taking over inactive plugins in its library, including those that are named after their author](https://community.vcvrack.com/t/open-source-modules-not-in-the-library/11357), I am requesting for its [ethics guidelines](https://vcvrack.com/manual/PluginLicensing#vcv-plugin-ethics-guidelines) protecting the brand names of companies to be extended to my own name as a human.** I am also requesting the same out of any other project distributing my software: it is a long-standing tradition of free open-source software that forks should go by a different name, if only to avoid user confusion.
@@ -172,7 +169,7 @@ The **Arcane** module uses Tarot cards altered from [Yoav Ben-Dov's CBD Tarot](h
 ### Copyright assignment
 
 **By sending me pull requests, you assign their copyright to me, allowing me, in perpetuity, to license your contributions however I see fit**.    
-Right now, that means a mix of GPL-3.0-only and WTFPL, but I reserve the right to relicense it or re-use code in proprietary projects in the future.     
+Right now, that means a mix of GPL-3.0-or-later and WTFPL, but I reserve the right to relicense it or re-use code in proprietary projects in the future.     
 This is a personal project where I don't expect external contributions to be any more complex than small-scale bugfixes and feature additions, so I think that's reasonable. If you think that's unreasonable, don't contribute. You will be asked to acknowledge this policy the first time you send me a non-trivial pull request. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for more information.
 
 

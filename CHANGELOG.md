@@ -3,6 +3,12 @@ Changelog
 
 The versioning follows this standard: the first number corresponds to the VCV rack version used. The second number is increased any time a new module family is added. The third number is increased when something is added or fixed without adding a new module family.
 
+## [1.8.1b] - 2021-12-02
+
+### Licensing
+
+- [CHANGE] This collection is relicensed from GPL3-only to GPL3-or-later, to allow inclusion in [Cardinal](https://github.com/DISTRHO/Cardinal).
+
 
 ## [1.8.1] - 2020-10-21
 
