@@ -1,17 +1,17 @@
 {
   "slug": "AriaSalvatrice",
   "name": "Aria Salvatrice",
-  "version": "1.8.1",
-  "license": "GPL-3.0-only",
+  "version": "1.8.1b",
+  "license": "GPL-3.0-or-later",
   "brand": "Aria Salvatrice",
   "author": "Aria Salvatrice",
   "authorEmail": "woof@aria.dog",
   "authorUrl": "https://aria.dog/",
   "pluginUrl": "https://aria.dog/modules/",
   "manualUrl": "https://aria.dog/modules/",
-  "sourceUrl": "https://github.com/AriaSalvatrice/AriaVCVModules",
+  "sourceUrl": "https://github.com/AriaSalvatrice/AriaModules",
   "donateUrl": "https://aria.dog/modules/donations",
-  "changelogUrl": "https://github.com/AriaSalvatrice/AriaVCVModules/blob/master/CHANGELOG.md",
+  "changelogUrl": "https://github.com/AriaSalvatrice/AriaModules/blob/master/CHANGELOG.md",
   "modules": [
     {
       "slug": "Splort",
