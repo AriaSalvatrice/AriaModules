@@ -15,7 +15,7 @@
 #pragma once
 
 // Deterministic seedable PRNG
-// Using xoroshiro128+ like VCV does - gives me a better distribution than mersenne twister.
+// Using xoroshiro128+ like VCV Rack did in 1.x - gives me a better distribution than mersenne twister.
 // http://prng.di.unimi.it/
 // https://community.vcvrack.com/t/controlling-the-random-seed/8005
 // 

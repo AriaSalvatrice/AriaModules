@@ -64,12 +64,12 @@ Vector illustrations should be simple cartoonesque line art or silhouettes, othe
 
 ## Bitmap tracing
 
-Auto-tracing paths in inkscape with default settings on "Trace Bitmap" never looks right in VCV - lots of broken shapes.
+Auto-tracing paths in inkscape with default settings on "Trace Bitmap" never looks right - lots of broken shapes.
 
 For the tarot cards, I set the settings as follows, and barely edited them at all: 
 
 - Mode: Multiple scans: Brightness steps, 2 scans, smooth, Stack scans, Remove background
 - Options: Suppress speckles 5, smooth corners 0.2, optimize paths 0.05
 
-Optimize paths to a low settings is the important one here. It's what tends to break things once imported in VCV.
+Optimize paths to a low settings is the important one here. It's what tends to break things once imported.
 

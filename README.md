@@ -5,7 +5,7 @@ Aria Salvatrice Signature Series Synthesizer Modules
 
 Hiya hello hey hi what’s hip love, I’m Aria Salvatrice. I’m a French expat living on the Worldwide Web with my dog.
 
-I make [Gay Baroque Technopop](https://soundcloud.com/ariasalvatrice) and [Pastoral Industrial](https://ariasalvatrice.bandcamp.com/) music happen, and made a buncha synth modules compatible with VCV Rack for my own use.    
+I make [Gay Baroque Technopop](https://soundcloud.com/ariasalvatrice) and [Pastoral Industrial](https://ariasalvatrice.bandcamp.com/) music happen, and made a buncha virtual synth modules for my own use.    
 They are the Aria Salvatrice Signature Series. They’re growing into an integrated system for performing aleatoric techno. Lotsa artists found them inspiring for many genres of music. You can grab them for free!
 
 They are part of [Cardinal](https://github.com/DISTRHO/Cardinal), which is currently the only supportedh ost.

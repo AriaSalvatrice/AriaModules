@@ -219,7 +219,7 @@ struct Darius : Module {
 
     // Undo/Redo for Randomize buttons and Reset right click options.
     // Thanks to David O'Rourke for the example implementation!
-    // https://github.com/AriaSalvatrice/AriaVCVModules/issues/14
+    // https://github.com/AriaSalvatrice/AriaModules/issues/14
     struct BulkCvAction : history::ModuleAction {
         std::array<float, 36> oldValues;
         std::array<float, 36> newValues;

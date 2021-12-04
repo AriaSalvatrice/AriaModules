@@ -628,6 +628,7 @@ struct Aleister : ArcaneBase {
 
         // setChannels(16) throws warnings, but works normally.
         // https://github.com/VCVRack/Rack/issues/1524 - compiler bug
+        // [Note: VCV deleted its entire bug tracker. Most issues weren't archived.]
         if (polyBRequested) {
             for (size_t i = 0; i < 16; i++) outputs[PATTERN_B_OUTPUT].setVoltage(patternB[i] ? 10.f : 0.f, i);
             outputs[PATTERN_B_OUTPUT].setChannels(16);

@@ -8,7 +8,7 @@
 
 namespace JavascriptLibraries {
 
-// Snippets from https://github.com/AriaSalvatrice/js-snippets-for-vcv
+// Snippets from https://github.com/AriaSalvatrice/js-snippets-for-modules
 // WTFPL
 static const std::string& TOKENIZE = R"END(
 function tokenize(input) {

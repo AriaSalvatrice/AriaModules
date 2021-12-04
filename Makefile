@@ -23,7 +23,7 @@ DISTRIBUTABLES += $(wildcard doc/LICENSE*)
 include $(RACK_DIR)/arch.mk
 
 # QuickJS integration. Thanks to Jerry Sievert & Cschol for their help with this.
-# To use QuickJS in VCV, use this repository, or it won't build properly in the VCV library.
+# This repository is known to work well in legacy versions of the plugin in VCV's library.
 quickjs := dep/lib/quickjs/libquickjs.a
 DEPS += $(quickjs)
 OBJECTS += $(quickjs)
