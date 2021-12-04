@@ -8,7 +8,9 @@ Hiya hello hey hi what’s hip love, I’m Aria Salvatrice. I’m a French expat
 I make [Gay Baroque Technopop](https://soundcloud.com/ariasalvatrice) and [Pastoral Industrial](https://ariasalvatrice.bandcamp.com/) music happen, and made a buncha synth modules compatible with VCV Rack for my own use.    
 They are the Aria Salvatrice Signature Series. They’re growing into an integrated system for performing aleatoric techno. Lotsa artists found them inspiring for many genres of music. You can grab them for free!
 
-You should soon be able to use them in [Cardinal](https://github.com/DISTRHO/Cardinal). They are not supported in VCV Rack 2, due to [their behavior towards third-party contributors, and inclusion of women](https://aria.dog/barks/why-i-will-never-create-modules-for-vcv-rack-anymore/). Bug reports you cannot reproduce in a supported fork, such as Cardinal, will not be accepted. 
+They are part of [Cardinal](https://github.com/DISTRHO/Cardinal), which is currently the only supportedh ost.
+
+They are not supported in VCV Rack 2, due to [their behavior towards third-party contributors, and inclusion of women](https://aria.dog/barks/why-i-will-never-create-modules-for-vcv-rack-anymore/). Bug reports you cannot reproduce in a supported host will not be accepted. 
 
 ![Modules](/doc/collection.jpg)
 
@@ -25,13 +27,11 @@ The documentation of the modules is only available [from my website](https://ari
 Compatibility, Download & Installation
 --------------------------------------
 
-Those modules currently work with any 1.x version of VCV Rack, on Linux, Windows, and OS X. Please contact VCV to obtain them
+Those modules currently work with any 1.x version of VCV Rack, on Linux, Windows, and OS X. Please contact VCV to obtain them via their library. However, older versions are no longer supported. 
 
-You can [build this plugin yourself](https://vcvrack.com/manual/Building#building-rack-plugins). If you build my plugin locally, you have to `make dep` before you `make dist`. 
+If you build my plugin manually, you have to `make dep` before you `make dist`. 
 
 The [Sonaremin](https://github.com/hexdump0815/sonaremin) project for Raspberry Pi bundles my modules in its distribution.    
-
-
 
 
 
@@ -60,8 +60,6 @@ Acknowledgements & Namedrops
 
 Thanks to everyone who created open-source modules I could learn from and make songs with.
 
-Thanks to [Andrew Belt](https://vcvrack.com/) for creating VCV Rack and providing code suggestions.
-
 Thanks to [Jerry Sievert](https://legitimatesounding.com/) and [cschol](https://github.com/cschol) for their help with [QuickJS](https://bellard.org/quickjs/) integration.
 
 Thanks to [Silvio Kunaschk](https://github.com/qno/) for their help with continuous integration.
@@ -80,7 +78,7 @@ Thanks to [Mog](https://github.com/JustMog/Mog-VCV) for Mog.
 
 Thanks to [my dog Ornstein](https://ornstein.neocities.org/) for being a good dog.
 
-Thanks to my music-making LGBBQT internet shitposting gang for introducing me to VCV and modular synthesis as something that's not just for old guys with more disposable income than impetus to write fresh songs.
+Thanks to my music-making LGBBQT internet shitposting gang for introducing me to virtual modular synthesis as something that's not just for old guys with more disposable income than impetus to write fresh songs.
 
 <big>**But most of all, thanks to YOU for using my art.**</big>
 
@@ -129,7 +127,7 @@ Copyrighted. It's mine.
 
 **If you edit my code to use my modules as a base for your own altered modules, remove my signature from your faceplates**, even if you think your changes are trivial: I don't want to endorse and take credit for something I didn't vet or personally participate in.
 
-If you are faithfully porting my code to a fork of VCV Rack, are compiling binaries for another platform, or are otherwise distributing my modules as I designed them, keep the signature. If unsure, just ask.
+If you are faithfully porting my code to a new environment, are compiling binaries for another platform, or are otherwise distributing my modules as I designed them, keep the signature. If unsure, just ask.
 
 The easiest way to remove my signature from every module is by blanking or replacing the graphic in the [`res/components/signature.svg`](res/components/signature.svg) file, and removing it from the blank plate: [`res/faceplates/Blank.svg`](res/faceplates/Blank.svg).
 
@@ -162,8 +160,8 @@ The **Arcane** module uses Tarot cards altered from [Yoav Ben-Dov's CBD Tarot](h
 
 ### Libraries used
 
-- [QuickJS](https://bellard.org/quickjs/) by [Fabrice Bellard](https://bellard.org/) is used in some modules under the terms of the [MIT license](https://github.com/AriaSalvatrice/AriaVCVModules/tree/master/doc/LICENSE_QuickJS.txt)
-- [TonalJS](https://github.com/tonaljs/tonal) by [danigb](https://github.com/danigb) is used in some modules under the terms of the [MIT license](https://github.com/AriaSalvatrice/AriaVCVModules/tree/master/doc/LICENSE_TonalJs.txt)
+- [QuickJS](https://bellard.org/quickjs/) by [Fabrice Bellard](https://bellard.org/) is used in some modules under the terms of the [MIT license](https://github.com/AriaSalvatrice/AriaModules/tree/master/doc/LICENSE_QuickJS.txt)
+- [TonalJS](https://github.com/tonaljs/tonal) by [danigb](https://github.com/danigb) is used in some modules under the terms of the [MIT license](https://github.com/AriaSalvatrice/AriaModules/tree/master/doc/LICENSE_TonalJs.txt)
 
 
 ### Copyright assignment
@@ -178,9 +176,8 @@ This is a personal project where I don't expect external contributions to be any
 Contact
 -------
 
-You can send me comments on the [VCV Rack community forums](https://community.vcvrack.com/).    
-You can send me bug reports and feature requests on [my GitHub project page](https://github.com/AriaSalvatrice/AriaVCVModules/issues).    
-You can send me tips by [purchasing my albums](https://ariasalvatrice.bandcamp.com/).    
+You can send me bug reports on [my GitHub project page](https://github.com/AriaSalvatrice/AriaModules/issues).    
+<!-- You can send me tips by [purchasing my albums](https://ariasalvatrice.bandcamp.com/).     -->
 You can send me dog gifs to <woof@aria.dog>.
 
 ttyl,
