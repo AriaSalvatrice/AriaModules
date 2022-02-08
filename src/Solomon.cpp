@@ -134,6 +134,35 @@ struct Solomon : Module {
     Solomon() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
+        configInput(EXT_SCALE_INPUT, "External scale");
+        configInput(STEP_QUEUE_INPUT, "Step: Queue");
+        configInput(STEP_TELEPORT_INPUT, "Step: Teleport");
+        configInput(STEP_WALK_INPUT, "Step: Walk");
+        configInput(STEP_BACK_INPUT, "Step: Back");
+        configInput(STEP_FORWARD_INPUT, "Step: Forward");
+        configInput(RESET_INPUT, "Reset");
+
+        configOutput(GLOBAL_TRIG_OUTPUT, "Trigger");
+        configOutput(GLOBAL_CV_OUTPUT, "1V/Octave pitch");
+
+        for (unsigned i=0; i<NODES; i++) {
+            configInput(NODE_SUB_1_SD_INPUT + i, string::f("Step %d: Sub 1", i + 1));
+            configInput(NODE_SUB_2_SD_INPUT + i, string::f("Step %d: Sub 2", i + 1));
+            configInput(NODE_SUB_3_SD_INPUT + i, string::f("Step %d: Sub 3", i + 1));
+            configInput(NODE_SUB_1_OCT_INPUT + i, string::f("Step %d: Sub Oct", i + 1));
+            configInput(NODE_ADD_1_SD_INPUT + i, string::f("Step %d: Add 1", i + 1));
+            configInput(NODE_ADD_2_SD_INPUT + i, string::f("Step %d: Add 2", i + 1));
+            configInput(NODE_ADD_3_SD_INPUT + i, string::f("Step %d: Add 3", i + 1));
+            configInput(NODE_ADD_1_OCT_INPUT + i, string::f("Step %d: Add Oct", i + 1));
+            configInput(NODE_QUEUE_INPUT + i, string::f("Step %d: Queue", i + 1));
+
+            configOutput(NODE_GATE_OUTPUT + i, string::f("Step %d: Gate", i + 1));
+            configOutput(NODE_RANDOM_OUTPUT + i, string::f("Step %d: Random", i + 1));
+            configOutput(NODE_LATCH_OUTPUT + i, string::f("Step %d: Latch", i + 1));
+            configOutput(NODE_DELAY_OUTPUT + i, string::f("Step %d: Delay", i + 1));
+            configOutput(NODE_CV_OUTPUT + i, string::f("Step %d: CV", i + 1));
+        }
+
         configParam(MIN_PARAM, 1.f, 9.f, 3.f, "Minimum Note");
         configParam(MAX_PARAM, 1.f, 9.f, 5.f, "Maximum Note");
         configParam(SLIDE_PARAM, 0.f, 10.f, 0.f, "Slide");
@@ -787,7 +816,7 @@ struct Solomon : Module {
 template <typename TModule>
 struct TotalNodesKnob : W::KnobSnap {
     void onDragMove(const event::DragMove& e) override {
-        TModule* module = dynamic_cast<TModule*>(paramQuantity->module);
+        TModule* module = dynamic_cast<TModule*>(getParamQuantity()->module);
 
         module->lcdStatus.lastInteraction = 0.f;
         module->lcdStatus.dirty = true;
@@ -803,7 +832,7 @@ struct TotalNodesKnob : W::KnobSnap {
 template <typename TModule>
 struct ScaleKnob : W::KnobSnap {
     void onDragMove(const event::DragMove& e) override {
-        TModule* module = dynamic_cast<TModule*>(paramQuantity->module);
+        TModule* module = dynamic_cast<TModule*>(getParamQuantity()->module);
 
         module->lcdStatus.lastInteraction = 0.f;
         module->lcdStatus.dirty = true;
@@ -831,7 +860,7 @@ struct ScaleKnob : W::KnobSnap {
 template <typename TModule>
 struct MinMaxKnob : W::Knob {
     void onDragMove(const event::DragMove& e) override {
-        TModule* module = dynamic_cast<TModule*>(paramQuantity->module);
+        TModule* module = dynamic_cast<TModule*>(getParamQuantity()->module);
 
         module->lcdStatus.lastInteraction = 0.f;
         module->lcdStatus.dirty = true;
@@ -847,7 +876,7 @@ struct MinMaxKnob : W::Knob {
 template <typename TModule>
 struct SlideKnob : W::Knob {
     void onDragMove(const event::DragMove& e) override {
-        TModule* module = dynamic_cast<TModule*>(paramQuantity->module);
+        TModule* module = dynamic_cast<TModule*>(getParamQuantity()->module);
 
         module->lcdStatus.lastInteraction = 0.f;
         module->lcdStatus.dirty = true;
@@ -885,7 +914,10 @@ struct SegmentDisplay : LightWidget {
 		font = APP->window->loadFont(asset::plugin(pluginInstance, "res/dseg/DSEG14ClassicMini-Italic.ttf"));
 	}
 
-	void draw(const DrawArgs& args) override {
+	void drawLayer(const DrawArgs& args, int layer) override {
+		if (layer != 1)
+			return;
+
 		nvgFontSize(args.vg, 20);
 		nvgFontFaceId(args.vg, font->handle);
 		nvgTextLetterSpacing(args.vg, 2.0);

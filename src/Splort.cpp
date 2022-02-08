@@ -41,6 +41,11 @@ struct Splort : Module {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         ledDivider.setDivision(256);
         configParam(SORT_PARAM, 0.f, 1.f, 0.f, "Sort voltages");
+        configInput(POLY_INPUT, "Poly");
+        configInput(LINK_INPUT, "Link");
+        for (int i = 0; i < 16; i++)
+            configOutput(SPLIT_OUTPUT + i, string::f("Channel %d", i + 1));
+        configOutput(LINK_OUTPUT, "Link");
     }
     
     // Split without sorting, faster

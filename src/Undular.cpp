@@ -207,7 +207,7 @@ struct Undular : Module {
         zActivated = (inputs[Z_INPUT].isConnected() and initialized) ? true : false;
                 
         if (positionChanged and initialized) APP->scene->rackScroll->offset = position;
-        if (zoomChanged and initialized) settings::zoom = newZoom;
+        if (zoomChanged and initialized) APP->scene->rackScroll->setZoom(std::pow(2.f, newZoom));
     }
 
     void processCableInputs() {		

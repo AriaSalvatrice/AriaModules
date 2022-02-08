@@ -135,6 +135,7 @@ struct LitSvgSwitch : Switch {
     }
 
 	void onChange(const event::Change& e) override {
+        ParamQuantity* const paramQuantity = getParamQuantity();
         if (!frames.empty() && paramQuantity) {
             int index = (int) std::round(paramQuantity->getValue() - paramQuantity->getMinValue());
             index = math::clamp(index, 0, (int) frames.size() - 1);
@@ -185,6 +186,7 @@ struct LitSvgSwitchUnshadowed : Switch {
     }
 
 	void onChange(const event::Change& e) override {
+        ParamQuantity* const paramQuantity = getParamQuantity();
         if (!frames.empty() && paramQuantity) {
             int index = (int) std::round(paramQuantity->getValue() - paramQuantity->getMinValue());
             index = math::clamp(index, 0, (int) frames.size() - 1);
@@ -215,13 +217,16 @@ struct LitSvgSwitchUnshadowed : Switch {
 // They are cut off in the middle for Lights Off compatibility.
 struct JackLight : app::ModuleLightWidget {
     JackLight() {
-        this->box.size = app::mm2px(math::Vec(8.0, 8.0));
+        this->box.size = mm2px(math::Vec(8.0, 8.0));
         this->bgColor = nvgRGB(0x0e, 0x69, 0x77);
     }
     
-    void draw(const widget::Widget::DrawArgs& args) override {
+    void drawLayer(const DrawArgs& args, int layer) override {
+        if (layer != 1)
+            return;
+
         float radius = std::min(this->box.size.x, this->box.size.y) / 2.0 - 0.5f;
-        float holeRadius = app::mm2px(3.f);
+        float holeRadius = mm2px(3.f);
 
         nvgBeginPath(args.vg);
         nvgCircle(args.vg, radius + 1.f, radius + 1.f, radius);
@@ -263,12 +268,15 @@ struct JackDynamicLightOutput : JackLight {
 // They are cut off in the middle for Lights Off compatibility.
 struct JackStaticLight : app::LightWidget {
     JackStaticLight() {
-        this->box.size = app::mm2px(math::Vec(8.0, 8.0));
+        this->box.size = mm2px(math::Vec(8.0, 8.0));
     }
     
-    void draw(const widget::Widget::DrawArgs& args) override {
+    void drawLayer(const DrawArgs& args, int layer) override {
+        if (layer != 1)
+            return;
+
         float radius = std::min(this->box.size.x, this->box.size.y) / 2.0 - 0.5f;
-        float holeRadius = app::mm2px(3.f);
+        float holeRadius = mm2px(3.f);
 
         nvgBeginPath(args.vg);
         nvgCircle(args.vg, radius + 1.f, radius + 1.f, radius);
@@ -349,11 +357,14 @@ struct KnobLight : ModuleLightWidget {
     float max = 10.f;
 
     KnobLight() {
-        this->box.size = app::mm2px(math::Vec(8.0f, 8.0f));
+        this->box.size = mm2px(math::Vec(8.0f, 8.0f));
         this->bgColor = nvgRGB(0x0e, 0x69, 0x77);
     }
     
-    void draw(const widget::Widget::DrawArgs& args) override {
+    void drawLayer(const DrawArgs& args, int layer) override {
+        if (layer != 1)
+            return;
+
         float radius = std::min(this->box.size.x, this->box.size.y) / 2.0 - 2.6f;
 
         nvgBeginPath(args.vg);
@@ -419,12 +430,15 @@ struct KnobLightYellow : KnobLight {
 // Tiny little status lights. 2.17mm
 struct StatusLight : ModuleLightWidget {
     StatusLight() {
-        this->box.size = app::mm2px(math::Vec(2.176f, 2.176f));
+        this->box.size = mm2px(math::Vec(2.176f, 2.176f));
         this->bgColor = nvgRGB(0x0e, 0x69, 0x77);
         this->borderColor = nvgRGB(0x08, 0x3d, 0x45);
     }
     
-    void draw(const widget::Widget::DrawArgs& args) override {
+    void drawLayer(const DrawArgs& args, int layer) override {
+        if (layer != 1)
+            return;
+
         float radius = std::min(this->box.size.x, this->box.size.y) / 2.0 - 0.5f;
 
         nvgBeginPath(args.vg);
@@ -444,7 +458,7 @@ struct StatusLight : ModuleLightWidget {
 
         // Border
         if (this->borderColor.a > 0.0) {
-            nvgStrokeWidth(args.vg, app::mm2px(0.2));
+            nvgStrokeWidth(args.vg, mm2px(0.2));
             nvgStrokeColor(args.vg, this->borderColor);
             nvgStroke(args.vg);
         }
@@ -480,7 +494,6 @@ struct StatusLightInput : StatusLight {
 struct JackTransparent : SVGPort {
     JackTransparent() {
         setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/jack-transparent.svg")));
-        SVGPort();
     }
 };
 
@@ -594,7 +607,6 @@ struct Knob : app::SvgKnob {
 struct KnobSnap : Knob {
     KnobSnap() {
         snap = true;
-        Knob();
     }
 };
 
