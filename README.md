@@ -8,7 +8,7 @@ Hiya hello hey hi what’s hip love, I’m Aria Salvatrice. I’m a French expat
 I make [Gay Baroque Technopop](https://soundcloud.com/ariasalvatrice) and [Pastoral Industrial](https://ariasalvatrice.bandcamp.com/) music happen, and made a buncha virtual synth modules for my own use.    
 They are the Aria Salvatrice Signature Series. They’re growing into an integrated system for performing aleatoric techno. Lotsa artists found them inspiring for many genres of music. You can grab them for free!
 
-They are part of [Cardinal](https://github.com/DISTRHO/Cardinal), which is currently the only supportedh ost.
+They are part of [Cardinal](https://github.com/DISTRHO/Cardinal), which is currently the only supported host.
 
 They are not supported in VCV Rack 2, due to [their behavior towards third-party contributors, and inclusion of women](https://aria.dog/barks/why-i-will-never-create-modules-for-vcv-rack-anymore/). Bug reports you cannot reproduce in a supported host will not be accepted. 
 
