@@ -772,8 +772,9 @@ namespace QqqqWidgets {
 // The LCD knobs
 struct LcdKnob : W::Knob {
     void onDragMove(const event::DragMove& e) override {
-         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdLastInteraction = 0.f;
-         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdStatus.dirty = true;
+        ParamQuantity* const paramQuantity = getParamQuantity();
+        dynamic_cast<Qqqq*>(paramQuantity->module)->lcdLastInteraction = 0.f;
+        dynamic_cast<Qqqq*>(paramQuantity->module)->lcdStatus.dirty = true;
         W::Knob::onDragMove(e);
     }
 };
@@ -783,12 +784,14 @@ struct ScaleKnob : LcdKnob {
         LcdKnob();
     }
     void onDragMove(const event::DragMove& e) override {
+        ParamQuantity* const paramQuantity = getParamQuantity();
         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdMode = SCALE_MODE;
         LcdKnob::onDragMove(e);
     }
 };
 struct ScalingKnob : LcdKnob {
     void onDragMove(const event::DragMove& e) override {
+        ParamQuantity* const paramQuantity = getParamQuantity();
         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdMode = SCALING_MODE;
         dynamic_cast<Qqqq*>(paramQuantity->module)->lastScalingKnobTouchedId = paramQuantity->paramId;
         LcdKnob::onDragMove(e);
@@ -796,6 +799,7 @@ struct ScalingKnob : LcdKnob {
 };
 struct OffsetKnob : LcdKnob {
     void onDragMove(const event::DragMove& e) override {
+        ParamQuantity* const paramQuantity = getParamQuantity();
         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdMode = OFFSET_MODE;
         dynamic_cast<Qqqq*>(paramQuantity->module)->lastOffsetKnobTouchedId = paramQuantity->paramId;
         LcdKnob::onDragMove(e);
@@ -807,6 +811,7 @@ struct TransposeKnob : LcdKnob {
         LcdKnob();
     }
     void onDragMove(const event::DragMove& e) override {
+        ParamQuantity* const paramQuantity = getParamQuantity();
         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdMode = TRANSPOSE_MODE;
         dynamic_cast<Qqqq*>(paramQuantity->module)->lastTransposeKnobTouchedId = paramQuantity->paramId;
         LcdKnob::onDragMove(e);
@@ -815,6 +820,7 @@ struct TransposeKnob : LcdKnob {
 // The LCD buttons. They're not sending ongoing events so no point setting Lcd dirty from here.
 struct TransposeButton : W::SmallButton {
     void onDragStart(const event::DragStart& e) override {
+        ParamQuantity* const paramQuantity = getParamQuantity();
         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdLastInteraction = 0.f;
         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdMode = TRANSPOSE_TYPE_MODE;
         dynamic_cast<Qqqq*>(paramQuantity->module)->lastTransposeModeTouchedId = paramQuantity->paramId;
@@ -823,6 +829,7 @@ struct TransposeButton : W::SmallButton {
 };
 struct ShButton : W::SmallButton {
     void onDragStart(const event::DragStart& e) override {
+        ParamQuantity* const paramQuantity = getParamQuantity();
         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdLastInteraction = 0.f;
         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdMode = SH_MODE;
         dynamic_cast<Qqqq*>(paramQuantity->module)->lastShTouchedId = paramQuantity->paramId;
@@ -831,6 +838,7 @@ struct ShButton : W::SmallButton {
 };
 struct VisualizeButton : W::ButtonPink {
     void onDragStart(const event::DragStart& e) override {
+        ParamQuantity* const paramQuantity = getParamQuantity();
         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdLastInteraction = 0.f;
         dynamic_cast<Qqqq*>(paramQuantity->module)->lcdMode = VISUALIZE_MODE;
         W::ButtonPink::onDragStart(e);
@@ -845,7 +853,7 @@ struct PianoKey : W::LitSvgSwitchUnshadowed {
     int note = 0;
 
     void step() override {
-        if (paramQuantity){
+        if (ParamQuantity* const paramQuantity = getParamQuantity()){
             currentPianoDisplay = dynamic_cast<Qqqq*>(paramQuantity->module)->litKeys[note];
             if (currentPianoDisplay == true && currentPianoDisplay != lastPianoDisplay) {
                 lsw->setSvg(frames[2]);
@@ -982,6 +990,8 @@ struct PushButtonKeyboard : W::SvgSwitchUnshadowed {
 
         ui::Menu* menu = createMenu();
 
+        ParamQuantity* const paramQuantity = getParamQuantity();
+
         LeadSheetField* lsf = new LeadSheetField();
         lsf->module = dynamic_cast<Qqqq*>(paramQuantity->module);
         menu->addChild(createMenuLabel("Import chords (lead sheet notation):"));
@@ -1027,6 +1037,8 @@ struct SceneButton : W::LitSvgSwitchUnshadowed {
     void onButton(const event::Button& e) override {
         if (e.button == GLFW_MOUSE_BUTTON_RIGHT) {
             ui::Menu* menu = createMenu();
+
+            ParamQuantity* const paramQuantity = getParamQuantity();
 
             CopyScenePortableSequenceItem *copyScenePortableSequenceItem = new CopyScenePortableSequenceItem();
             copyScenePortableSequenceItem->text = "Copy Scene";

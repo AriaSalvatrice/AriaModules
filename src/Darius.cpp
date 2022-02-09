@@ -161,9 +161,9 @@ struct Darius : Module {
         configParam(KEY_PARAM, 0.f, 11.f, 0.f, "Key");
         configParam(SCALE_PARAM, 0.f, (float) Quantizer::NUM_SCALES - 1, 2.f, "Scale");
         configParam(SLIDE_PARAM, 0.f, 10.f, 0.f, "Slide");
-        for (size_t i = 0; i < STEP9START; i++)
+        for (size_t i = 0; i < 36; i++)
             configParam(CV_PARAM + i, 0.f, 10.f, 5.f, "CV");
-        for (size_t i = 0; i < STEP8START; i++)
+        for (size_t i = 0; i < 36; i++)
             configParam(ROUTE_PARAM + i, 0.f, 1.f, 0.5f, "Random route");
         displayDivider.setDivision(DISPLAYDIVIDER);
         processDivider.setDivision(PROCESSDIVIDER);
@@ -1024,8 +1024,9 @@ struct Darius : Module {
 
 struct KnobLcd : W::Knob {
     void onDragMove(const event::DragMove& e) override {
-         dynamic_cast<Darius*>(paramQuantity->module)->lcdLastInteraction = 0.f;
-         dynamic_cast<Darius*>(paramQuantity->module)->lcdStatus.dirty = true;
+        ParamQuantity* const paramQuantity = getParamQuantity();
+        dynamic_cast<Darius*>(paramQuantity->module)->lcdLastInteraction = 0.f;
+        dynamic_cast<Darius*>(paramQuantity->module)->lcdStatus.dirty = true;
         W::Knob::onDragMove(e);
     }
 };
@@ -1033,7 +1034,8 @@ struct KnobLcd : W::Knob {
 
 struct KnobMinMax : KnobLcd {
     void onDragMove(const event::DragMove& e) override {
-         dynamic_cast<Darius*>(paramQuantity->module)->lcdMode = MINMAX_MODE;
+        ParamQuantity* const paramQuantity = getParamQuantity();
+        dynamic_cast<Darius*>(paramQuantity->module)->lcdMode = MINMAX_MODE;
         KnobLcd::onDragMove(e);
     }
 };
@@ -1041,16 +1043,17 @@ struct KnobMinMax : KnobLcd {
 struct KnobScale : KnobLcd {
     KnobScale() {
         snap = true;
-        KnobLcd();
     }
     void onDragMove(const event::DragMove& e) override {
-       dynamic_cast<Darius*>(paramQuantity->module)->lcdMode = SCALE_MODE;
+        ParamQuantity* const paramQuantity = getParamQuantity();
+        dynamic_cast<Darius*>(paramQuantity->module)->lcdMode = SCALE_MODE;
         KnobLcd::onDragMove(e);
     }
 };
 
 struct KnobSlide : KnobLcd {
     void onDragMove(const event::DragMove& e) override {
+        ParamQuantity* const paramQuantity = getParamQuantity();
         dynamic_cast<Darius*>(paramQuantity->module)->lcdMode = SLIDE_MODE;
         KnobLcd::onDragMove(e);
     }
@@ -1058,6 +1061,7 @@ struct KnobSlide : KnobLcd {
 
 struct RockerSwitchHorizontalModeReset : W::RockerSwitchHorizontal {
     void onDragStart(const event::DragStart& e) override {
+        ParamQuantity* const paramQuantity = getParamQuantity();
         dynamic_cast<Darius*>(paramQuantity->module)->lcdMode = DEFAULT_MODE;
         dynamic_cast<Darius*>(paramQuantity->module)->lcdLastInteraction = 0.f;
         dynamic_cast<Darius*>(paramQuantity->module)->lcdStatus.dirty = true;
@@ -1078,9 +1082,9 @@ template <class TParamWidget>
 TParamWidget* createMainParam(math::Vec pos, Darius* module, int paramId, int lastChanged) {
     TParamWidget* o = new TParamWidget(module, lastChanged);
     o->box.pos = pos;
-    if (module) {
-        o->paramQuantity = module->paramQuantities[paramId];
-    }
+    o->app::ParamWidget::module = module;
+    o->app::ParamWidget::paramId = paramId;
+    o->initParamQuantity();
     return o;
 }
 
